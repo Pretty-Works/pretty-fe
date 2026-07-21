@@ -1,0 +1,79 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plus {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.filled {
+  background: var(--primary);
+  color: var(--white);
+  border-color: var(--primary);
+}
+
+.filled:hover {
+  background: var(--primary-light);
+  border-color: var(--primary-light);
+}
+
+.gray {
+  background: var(--white);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+.gray:hover {
+  background: var(--surface);
+  border-color: var(--text-placeholder);
+}
+
+.red {
+  background: var(--white);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.red:hover {
+  background: #fff5f5;
+}
+
+.agent {
+  width: 38px;
+  height: 38px;
+  padding: 0px;
+}
+
+.agent img {
+  width: 20px;
+  height: 20px;
+}

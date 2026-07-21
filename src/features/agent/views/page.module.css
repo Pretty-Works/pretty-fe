@@ -1,0 +1,225 @@
+.agent {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-left: 1px solid #e5e5e5;
+  background: var(--white);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerLogo {
+  width: 30px;
+  height: 30px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.headerIcon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.headerIcon:hover {
+  background: var(--primary-bright);
+}
+
+.menuList {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 2px;
+  border-bottom: 1px solid var(--border);
+  max-height: 228px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.menuList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menuList::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.menuItem {
+  border-radius: 11px;
+  cursor: pointer;
+  padding: 9px 12px;
+}
+
+.menuItem:hover {
+  background: var(--primary-bright);
+}
+
+.chat {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.empty {
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  gap: 6px;
+}
+
+.emptyIcon {
+  width: 60px;
+  height: 60px;
+}
+
+.emptyTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.emptyDescription {
+  color: var(--text-sub);
+}
+
+.chatContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.inputArea {
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--white);
+}
+
+.attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-bottom: 8px;
+  padding: 6px 8px 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--text);
+}
+
+.attachmentIcon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: var(--primary);
+}
+
+.attachmentName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 240px;
+  font-size: 12px;
+}
+
+.attachmentRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.attachmentRemove:hover {
+  background: #e8e8e8;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--white);
+}
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-size: 14px;
+  line-height: 1.5;
+  font-family: "Noto Sans KR", sans-serif;
+  min-height: 24px;
+  max-height: 160px;
+  overflow-y: auto;
+  padding: 0;
+  align-self: center;
+  transform: translateY(2px);
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.iconButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: #f5f5f5;
+}
