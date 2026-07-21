@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import Gnb from "@/components/gnb/Gnb";
+import AgentLayout from "@/layouts/AgentLayout";
 
 import "@/styles/globals.css";
 
@@ -17,8 +17,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <Gnb />
-        {children}
+        <AgentLayout>
+          {children}
+        </AgentLayout>
       </body>
     </html>
   );
