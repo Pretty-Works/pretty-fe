@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchMeetings } from "../../api/meetings";
+import { fetchMeetings } from "../../api/meetingApi";
 
 interface FetchMeetingsParams {
   title?: string;

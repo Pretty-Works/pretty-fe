@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { API_BASE_URL } from "@/lib/config";
+import { api } from "@/lib/api/client";
 
 export interface Meeting {
   id: string;
@@ -21,10 +21,10 @@ interface FetchMeetingsParams {
 export const fetchMeetings = async (
   projectId: string,
   token: string,
-  params?: FetchMeetingsParams,
+  params?: FetchMeetingsParams
 ) => {
   const response = await axios.get(
-    `${API_BASE_URL}/api/v1/projects/${projectId}/meetings`,
+    `${api}/projects/${projectId}/meetings`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -35,3 +35,5 @@ export const fetchMeetings = async (
 
   return response.data;
 };
+
+// 회의록 작성

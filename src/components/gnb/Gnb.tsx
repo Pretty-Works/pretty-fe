@@ -2,6 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
+
+import { LuBell } from "react-icons/lu";
+
 import { usePathname } from "next/navigation";
 
 import { useAgentStore } from "@/stores/useAgentStore";
@@ -75,8 +78,8 @@ export default function Gnb() {
         <div className={styles.right}>
           {/* 알림/에이전트 */}
           <div className={styles.actions}>
-            <AlarmIcon
-              className={styles.icon}
+            <LuBell
+              className={styles.bell}
               aria-label="alarm-icon"
             />
 

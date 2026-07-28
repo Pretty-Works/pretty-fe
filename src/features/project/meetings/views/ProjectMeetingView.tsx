@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
@@ -12,7 +14,6 @@ import { useMeetingQuery } from "@/features/project/meetings/hooks/queries/useMe
 
 import styles from "./ProjectMeetingView.module.css";
 
-// TODO: 인증 붙으면 실제 토큰으로 교체
 const TOKEN = "";
 
 interface ProjectMeetingViewProps {
@@ -22,6 +23,8 @@ interface ProjectMeetingViewProps {
 export default function ProjectMeetingView({
   projectId,
 }: ProjectMeetingViewProps) {
+  const router = useRouter();
+
   const [keyword, setKeyword] = useState(""); // 검색창
   const [page, setPage] = useState(1); // 페이지네이션
 
@@ -56,7 +59,11 @@ export default function ProjectMeetingView({
       <section className={styles.panel}>
         <div className={styles.panelHead}>
           <h2 className={styles.panelTitle}>회의록</h2>
-          <Button name="작성하기" size="xs" />
+          <Button
+            name="작성하기"
+            size="xs"
+            onClick={() => router.push(`/projects/${projectId}/meetings/write`)}
+          />
         </div>
 
         <div className={styles.filterbar}>
