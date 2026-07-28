@@ -9,11 +9,14 @@ export type ButtonStatus =
 
 export type ButtonUI = "filled" | "gray" | "red";
 
+export type ButtonSize = "xs" | "sm" | "md";
+
 export interface ButtonProps
     extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "name"> {
     name?: string;
     status?: ButtonStatus;
     ui?: ButtonUI;
+    size?: ButtonSize;
     hasPlus?: boolean;
     icon?: React.ReactNode;
 }
@@ -37,6 +40,7 @@ export default function Button({
     name,
     status = "primary",
     ui,
+    size = "md",
     hasPlus = false,
     icon,
     className,
@@ -48,6 +52,7 @@ export default function Button({
     const classes = [
         styles.button,
         styles[variant],
+        size !== "md" && styles[size],
         isAgent && styles.agent,
         className,
     ]

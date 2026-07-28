@@ -51,20 +51,33 @@ body {
 } */
 
 .layout {
-  display: flex;
-  height: 100%;
+  --agent-w: 420px;
+  --content-min: 800px;
+  min-height: 100vh;
 }
 
 .main {
-  flex: 1;
   min-width: 0;
+  margin-right: clamp(0px, calc(100% - var(--content-min)), var(--agent-w));
+  transition: margin-right 0.25s ease;
 }
 
 .agent {
-  width: 420px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--agent-w);
+  height: 100vh;
   overflow: hidden;
+  z-index: 50;
+  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+  transition: transform 0.25s ease;
 }
 
-.folded {
-  width: 0;
+.layout.folded .main {
+  margin-right: 0;
+}
+
+.layout.folded .agent {
+  transform: translateX(100%);
 }

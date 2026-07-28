@@ -1,0 +1,41 @@
+.table {
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid var(--line);
+}
+
+.col {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+}
+
+.colTitle {
+  flex: 1;
+  min-width: 0;
+}
+
+.colName {
+  width: 110px;
+  flex-shrink: 0;
+}
+
+.colAttend {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.colDate {
+  width: 150px;
+  flex-shrink: 0;
+}

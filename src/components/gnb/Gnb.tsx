@@ -24,8 +24,8 @@ export default function Gnb() {
     },
     {
       label: "프로젝트",
-      path: "/project",
-      paths: ["/project"],
+      path: "/projects",
+      paths: ["/projects"],
     },
     {
       label: "캘린더",
@@ -52,11 +52,17 @@ export default function Gnb() {
           {/* 메뉴 */}
           <nav className={styles.menu}>
             {menuItems.map((menu) => {
+              const isActive = menu.paths.some((path) =>
+                path === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(path)
+              );
+
               return (
                 <Link
                   key={menu.path}
                   href={menu.path}
-                  className={`${styles.menuItem} ${pathname === menu.path ? styles.active : ""}`}
+                  className={`${styles.menuItem} ${isActive ? styles.active : ""}`}
                 >
                   {menu.label}
                 </Link>

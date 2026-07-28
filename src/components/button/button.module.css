@@ -77,3 +77,18 @@
   width: 20px;
   height: 20px;
 }
+
+/* sizes (기본 md = .button 그대로) */
+.sm {
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.xs {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}

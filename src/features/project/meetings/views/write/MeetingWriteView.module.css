@@ -1,0 +1,118 @@
+.pageHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pageSub {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #9678dc;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.uploadBtn {
+  display: inline-flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid #cebef6;
+  border-radius: 9px;
+  background: #f4f2fe;
+  color: var(--primary);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.row {
+  display: flex;
+  gap: 24px;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+}
+
+.authorField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.authorLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.authorChip {
+  align-self: flex-start;
+  padding: 7px 14px 7px 10px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.attendeeField {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.attendeeChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px 5px 10px;
+  border-radius: 999px;
+  background: #f2effe;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.chipX {
+  font-size: 11px;
+  color: #998cbf;
+  cursor: pointer;
+}
