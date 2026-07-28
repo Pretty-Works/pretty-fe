@@ -5,6 +5,10 @@
   gap: 16px;
 }
 
+.pageHeadText {
+  min-width: 0;
+}
+
 .pageTitle {
   font-size: 17px;
   font-weight: 700;
@@ -24,19 +28,68 @@
   flex-shrink: 0;
 }
 
-.uploadBtn {
+/* 녹취록 업로드 완료 확인 카드 */
+.uploadedCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  align-self: flex-start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #effaf4;
+  border: 1px solid #bfe9d4;
+}
+
+.uploadedIcon {
   display: inline-flex;
   align-items: center;
-  height: 36px;
-  padding: 0 16px;
-  border: 1px solid #cebef6;
-  border-radius: 9px;
-  background: #f4f2fe;
-  color: var(--primary);
-  font-size: 13px;
-  font-weight: 500;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--success);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.uploadedText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.uploadedTitle {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0f9d63;
+}
+
+.uploadedName {
+  font-size: 12px;
+  color: var(--text-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 360px;
+}
+
+.uploadedRemove {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--text-sub);
   cursor: pointer;
+  transition: background 0.15s ease;
+  
+}
+
+.uploadedRemove:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .card {
@@ -65,26 +118,16 @@
   min-width: 0;
 }
 
-.authorField {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.authorLabel {
+.fieldLabel {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-sub);
 }
 
-.authorChip {
-  align-self: flex-start;
-  padding: 7px 14px 7px 10px;
-  border-radius: 999px;
-  background: var(--surface);
-  font-size: 12.5px;
-  font-weight: 500;
-  color: var(--text-sub);
+.authorField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .attendeeField {
@@ -93,26 +136,53 @@
   gap: 12px;
 }
 
+/* 참석자 검색 + 결과 드롭다운 */
+.attendeeSearch {
+  position: relative;
+}
+
+.suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  list-style: none;
+}
+
+.suggestItem {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.suggestItem:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.suggestEmpty {
+  padding: 12px 10px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-placeholder);
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.attendeeChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 8px 5px 10px;
-  border-radius: 999px;
-  background: #f2effe;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary);
-}
-
-.chipX {
-  font-size: 11px;
-  color: #998cbf;
-  cursor: pointer;
 }

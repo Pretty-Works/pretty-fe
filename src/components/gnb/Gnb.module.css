@@ -79,8 +79,17 @@
   cursor: pointer;
 }
 
+.bell {
+  cursor: pointer;
+  color: var(--icon);
+  width: 21px;
+  height: 21px;
+}
+
 .icon {
   cursor: pointer;
+  width: 38px;
+  height: 38px;
 }
 
 .divider {
