@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import AgentLayout from "@/layouts/AgentLayout";
+import Providers from "./providers";
 
 import "@/styles/globals.css";
 
@@ -17,9 +18,9 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body>
-        <AgentLayout>
-          {children}
-        </AgentLayout>
+        <Providers>
+          <AgentLayout>{children}</AgentLayout>
+        </Providers>
       </body>
     </html>
   );

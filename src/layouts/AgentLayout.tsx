@@ -2,7 +2,7 @@
 
 import { useAgentStore } from "@/stores/useAgentStore";
 
-import Gnb from "@/components/gnb/Gnb";
+import Gnb from "@/components/Gnb/Gnb";
 import AgentView from "@/features/agent/views/AgentView";
 
 export default function AgentLayout({
@@ -13,13 +13,13 @@ export default function AgentLayout({
   const folded = useAgentStore((state) => state.folded);
 
   return (
-    <div className="layout">
+    <div className={`layout ${folded ? "folded" : ""}`}>
       <main className="main">
         <Gnb />
         {children}
       </main>
 
-      <aside className={`agent ${folded ? "folded" : ""}`}>
+      <aside className="agent">
         <AgentView />
       </aside>
     </div>

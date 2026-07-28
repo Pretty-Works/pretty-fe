@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pretty Works Frontend
 
-## Getting Started
+Pretty Works Frontend 프로젝트입니다.
 
-First, run the development server:
+## Tech Stack
+
+- Next.js 16
+- React 19
+- TypeScript
+- React Query (TanStack Query)
+- Axios
+- Zustand
+
+## Installation
+
+프로젝트를 실행하기 전에 의존성을 설치합니다.
+
+```bash
+npm install
+```
+
+## Run
+
+개발 서버를 실행합니다.
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+브라우저에서 아래 주소로 접속합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project Structure
 
-## Learn More
+```
+src
+├── app
+├── api
+├── components
+├── features
+├── layouts
+├── lib
+├── styles
+└── ...
+```
 
-To learn more about Next.js, take a look at the following resources:
+## 주요 라이브러리
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Axios
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+HTTP 통신
 
-## Deploy on Vercel
+```bash
+npm install axios
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### React Query
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+서버 상태 관리
+
+```bash
+npm install @tanstack/react-query
+```
+
+### Zustand
+
+전역 상태 관리
+
+```bash
+npm install zustand
+```
+
+### Lucide React
+
+아이콘
+
+```bash
+npm install lucide-react
+```
+
+## Scripts
+
+```bash
+npm run dev      # 개발 서버 실행
+npm run build    # 프로덕션 빌드
+npm run start    # 프로덕션 실행
+npm run lint     # ESLint 실행
+```

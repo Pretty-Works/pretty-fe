@@ -15,7 +15,7 @@ import CloseIcon from "@/assets/icons/agent/close.png";
 import FileIcon from "@/assets/icons/agent/file.png";
 
 import styles from "./page.module.css";
-import Button from "@/components/button/Button";
+import Button from "@/components/Button/Button";
 import MessageBubble, {
   TypingBubble,
 } from "@/features/agent/components/MessageBubble";
