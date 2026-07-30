@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
+
 import Link from "next/link";
 import Image from "next/image";
 
@@ -8,6 +10,7 @@ import { LuBell } from "react-icons/lu";
 import { usePathname } from "next/navigation";
 
 import { useAgentStore } from "@/stores/useAgentStore";
+import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
 
 import Logo from "@/assets/brand/logo.png";
 import AgentIcon from "@/assets/icons/menu/agent.svg";
@@ -18,6 +21,31 @@ import styles from "./Gnb.module.css";
 export default function Gnb() {
   const pathname = usePathname();
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
+
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { mutate: logout } = useLogoutMutation();
+
+  // 프로필 메뉴: 바깥 클릭·ESC로 닫기
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onPointerDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const menuItems = [
     {
@@ -92,8 +120,33 @@ export default function Gnb() {
 
           <hr className={styles.divider} />
 
-          <div className={styles.profile}>
-            김
+          <div className={styles.profileWrap} ref={menuRef}>
+            <button
+              type="button"
+              className={styles.profile}
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label="프로필 메뉴"
+            >
+              김
+            </button>
+
+            {menuOpen && (
+              <div className={styles.dropdown} role="menu">
+                <button
+                  type="button"
+                  className={styles.dropdownItem}
+                  role="menuitem"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    logout();
+                  }}
+                >
+                  로그아웃
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
