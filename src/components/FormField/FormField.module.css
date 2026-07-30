@@ -1,0 +1,64 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.required {
+  color: var(--danger);
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  transition: border-color 0.15s ease;
+}
+
+.control:focus-within {
+  border-color: var(--primary);
+}
+
+/* 에러 상태 — 빨간 테두리(포커스 시에도 유지) */
+.controlError,
+.controlError:focus-within {
+  border-color: var(--danger);
+}
+
+.errorText {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.right {
+  flex-shrink: 0;
+  margin-left: 8px;
+  font-size: 11.5px;
+  color: var(--text-placeholder);
+}

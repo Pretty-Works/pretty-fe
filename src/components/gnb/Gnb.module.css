@@ -79,8 +79,17 @@
   cursor: pointer;
 }
 
+.bell {
+  cursor: pointer;
+  color: var(--icon);
+  width: 21px;
+  height: 21px;
+}
+
 .icon {
   cursor: pointer;
+  width: 38px;
+  height: 38px;
 }
 
 .divider {
@@ -90,14 +99,55 @@
   border: 0;
 }
 
+.profileWrap {
+  position: relative;
+}
+
 .profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 34px;
   height: 34px;
+  border: 0;
+  padding: 0;
   border-radius: 50%;
   background-color: var(--primary);
   color: var(--white);
-  text-align: center;
-  line-height: 32px;
+  font-family: inherit;
   font-weight: bold;
   cursor: pointer;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  min-width: 140px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: var(--surface);
 }

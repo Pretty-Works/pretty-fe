@@ -1,0 +1,86 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e3d7fd;
+  border-radius: 12px;
+  background: var(--primary-bright);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  padding: 3px 8px;
+  border-radius: 7px;
+  background: var(--primary);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.badgeMark {
+  font-size: 10px;
+  line-height: 14px;
+}
+
+.headline {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+}
+
+.line {
+  font-size: 12.5px;
+  line-height: 20px;
+  color: var(--text-sub);
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border: 1px solid #e9e2fb;
+  border-radius: 999px;
+  background: var(--white);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.statLabel {
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+.statValue {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.warning {
+  color: var(--warning);
+}
+
+.danger {
+  color: var(--danger);
+}
