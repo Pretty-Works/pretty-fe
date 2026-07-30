@@ -29,6 +29,17 @@
   border-color: var(--primary);
 }
 
+/* 에러 상태 — 빨간 테두리(포커스 시에도 유지) */
+.controlError,
+.controlError:focus-within {
+  border-color: var(--danger);
+}
+
+.errorText {
+  font-size: 12px;
+  color: var(--danger);
+}
+
 .input {
   flex: 1;
   min-width: 0;
