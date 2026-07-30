@@ -1,0 +1,42 @@
+.wrap {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.option {
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--surface);
+}
+
+.directRow {
+  display: block;
+}
+
+.directInput {
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font-size: 13.5px;
+  text-align: left;
+  outline: none;
+}
+
+.directInput::placeholder {
+  color: var(--text-placeholder);
+}
