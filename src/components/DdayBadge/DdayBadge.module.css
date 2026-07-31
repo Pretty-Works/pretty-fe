@@ -1,4 +1,7 @@
+/* 폭은 글자에 맞춘다 */
 .badge {
+  display: inline-flex;
+  align-items: center;
   flex-shrink: 0;
   padding: 2px 7px;
   border-radius: 5px;
@@ -6,7 +9,7 @@
   font-weight: 700;
 }
 
-/* D-DAY · D-1 */
+/* 밀림(D+N) · D-DAY · D-1 */
 .urgent {
   background: var(--dday-urgent-bg);
   color: var(--dday-urgent-text);
@@ -18,7 +21,7 @@
   color: var(--dday-soon-text);
 }
 
-/* 지남(D+N) 또는 일주일 이상 남음(D-8 이상) */
+/* 완료, 또는 일주일 이상 남음(D-8 이상) */
 .idle {
   background: var(--dday-idle-bg);
   color: var(--dday-idle-text);

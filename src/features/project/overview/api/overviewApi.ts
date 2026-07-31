@@ -1,5 +1,7 @@
 // 프로젝트 상세 조회 — GET /api/v1/projects/{projectId}
-// 응답 모양은 BE ProjectDetailResponse와 1:1로 맞춘다. 현재는 mock.
+// 응답 모양은 BE ProjectDetailResponse와 1:1로 맞춘다.
+
+import { api } from "@/lib/api/client";
 
 import type { ProjectStatus } from "@/features/home/api/homeApi";
 import type { Milestone } from "./milestoneApi";
@@ -27,7 +29,8 @@ export interface ProjectDetail {
   // 원 단위 정수. 0은 '예산 제한 없음'
   budget: number;
   description: string;
-  status: Exclude<ProjectStatus, "ARCHIVED">;
+  // 상세 조회는 목록과 달리 보관(ARCHIVED) 프로젝트도 내려올 수 있다
+  status: ProjectStatus;
   progress: number;
   owner: ProjectOwner;
   members: ProjectMember[];
@@ -41,42 +44,35 @@ export interface ProjectDetailResponse {
   result: ProjectDetail;
 }
 
-const MOCK_DETAIL: ProjectDetail = {
-  projectId: 1,
-  version: 7,
-  name: "그룹웨어 AI 고도화",
-  startDate: "2026-02-01",
-  endDate: "2026-06-30",
-  budget: 120000000,
-  description: "사내 그룹웨어에 AI 기능을 고도화하는 프로젝트",
-  status: "ONGOING",
-  progress: 42,
-  owner: { userId: 12, name: "김서준", ownerRole: "PM" },
-  members: [
-    { userId: 27, name: "정우진", role: "TL" },
-    { userId: 34, name: "이하늘", role: "BE" },
-    { userId: 41, name: "최유나", role: "FE" },
-    { userId: 52, name: "한도윤", role: null },
-  ],
-  milestones: [
-    { milestoneId: 101, targetDate: "2026-01-20", goal: "요구 정의 · 설계 확정", done: true },
-    { milestoneId: 102, targetDate: "2026-02-05", goal: "LLM 아키텍처 PoC", done: true },
-    { milestoneId: 103, targetDate: "2026-03-10", goal: "API · 임베딩 파이프라인 구축", done: false },
-    { milestoneId: 104, targetDate: "2026-04-05", goal: "통합 · UI 구현", done: false },
-    { milestoneId: 105, targetDate: "2026-04-30", goal: "부하 테스트 · 데모 릴리즈", done: false },
-  ],
+// --- 프로젝트 상태 변경 (PATCH /api/v1/projects/{projectId}/status) ---
+// 오너 또는 역할이 PM인 참여자만 (PROJECT_005).
+// COMPLETED·ARCHIVED는 종료 상태라 진입 후 되돌릴 수 없다 (PROJECT_019).
+export interface ChangeStatusResponse {
+  errorCode: string | null;
+  message: string;
+  result: { projectId: number; status: ProjectStatus };
+}
+
+export const changeProjectStatus = async (
+  projectId: string,
+  status: ProjectStatus,
+): Promise<ChangeStatusResponse> => {
+  const response = await api.patch<ChangeStatusResponse>(
+    `/projects/${projectId}/status`,
+    { status },
+  );
+
+  return response.data;
 };
 
+// 기본 정보 · 참여자 · 마일스톤 · 진행률을 한 번에 조회한다.
+// version은 수정(PUT) 시 X-Resource-Version으로 되돌려보내야 하는 낙관적 락 값이다.
 export const fetchProjectDetail = async (
   projectId: string,
 ): Promise<ProjectDetailResponse> => {
-  // TODO: const response = await api.get(`/projects/${projectId}`);
-  //       return response.data;
-  await new Promise((resolve) => setTimeout(resolve, 400));
+  const response = await api.get<ProjectDetailResponse>(
+    `/projects/${projectId}`,
+  );
 
-  return {
-    errorCode: null,
-    message: "SUCCESS",
-    result: { ...MOCK_DETAIL, projectId: Number(projectId) || MOCK_DETAIL.projectId },
-  };
+  return response.data;
 };

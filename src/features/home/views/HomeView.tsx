@@ -11,7 +11,9 @@ import ConfirmRequestCard from "@/features/home/components/ConfirmRequestCard/Co
 import MyTaskList from "@/features/home/components/MyTaskList/MyTaskList";
 import ProjectStatusSelect from "@/features/home/components/ProjectStatusSelect/ProjectStatusSelect";
 import ProjectProgressList from "@/features/home/components/ProjectProgressList/ProjectProgressList";
-import TaskCreateModal from "@/features/home/components/TaskCreateModal/TaskCreateModal";
+import TaskCreateModal, {
+  type EditingTask,
+} from "@/features/home/components/TaskCreateModal/TaskCreateModal";
 
 import { useAgentStore } from "@/stores/useAgentStore";
 
@@ -19,7 +21,8 @@ import { useDebounce } from "@/hooks/useDebounce";
 import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
 import { useRequestsQuery } from "@/features/home/hooks/queries/useRequestsQuery";
 import { useTasksQuery } from "@/features/home/hooks/queries/useTasksQuery";
-import type { StatusFilter } from "@/features/home/api/homeApi";
+import { useToggleTaskMutation } from "@/features/home/hooks/mutations/useToggleTaskMutation";
+import type { MyTask, StatusFilter } from "@/features/home/api/homeApi";
 
 import styles from "./HomeView.module.css";
 
@@ -38,8 +41,8 @@ export default function HomeView() {
   const [page, setPage] = useState(1); // 페이지네이션
 
   const [stoppedIds, setStoppedIds] = useState<string[]>([]); // 중단한 요청
-  const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가 팝업
-  const [doneIds, setDoneIds] = useState<string[]>([]); // 체크 토글한 할 일
+  const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
+  const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
   // 입력이 멈춘 뒤에만 조회 (타이핑마다 요청 방지)
   const debouncedKeyword = useDebounce(keyword);
@@ -65,18 +68,18 @@ export default function HomeView() {
   } = useRequestsQuery();
 
   const {
-    data: tasks = [],
+    data: taskGroups = [],
     isLoading: isTasksLoading,
     isError: isTasksError,
   } = useTasksQuery();
 
-  // 로컬 토글 상태를 서버 데이터에 얹기 (API 연결 시 mutation으로 대체)
+  const { mutate: toggleTask } = useToggleTaskMutation(["home", "tasks"]);
+
+  // 확인이 필요한 요청은 아직 mock이라 중단 상태만 로컬로 걸러낸다
   const visibleRequests = requests.filter(
     (request) => !stoppedIds.includes(request.id),
   );
-  const visibleTasks = tasks.map((task) =>
-    doneIds.includes(task.id) ? { ...task, done: !task.done } : task,
-  );
+  const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
 
   // Event Handler
   const handleStatusChange = (next: StatusFilter) => {
@@ -105,19 +108,32 @@ export default function HomeView() {
     // TODO: 에이전트 작업 중단 요청 전송 (requestId)
   };
 
-  const handleToggleTask = (taskId: string) => {
-    setDoneIds((prev) =>
-      prev.includes(taskId)
-        ? prev.filter((id) => id !== taskId)
-        : [...prev, taskId],
-    );
-    // TODO: 완료 상태 전송 (mutation)
+  const handleToggleTask = (taskId: string, done: boolean) => {
+    toggleTask({ taskId, done });
+  };
+
+  // 행 클릭 → 수정 모드로 팝업 열기
+  const handleSelectTask = (task: MyTask, projectId: number | null) => {
+    setEditingTask({
+      id: task.id,
+      content: task.title,
+      projectId,
+      dueDate: task.dueDate,
+    });
+    setTaskModalOpen(true);
+  };
+
+  const handleCloseTaskModal = () => {
+    setTaskModalOpen(false);
+    setEditingTask(undefined);
   };
 
   return (
     <main className={styles.container}>
       {/* 인사말 */}
-      <h1 className={styles.greeting}>안녕하세요. {USER_NAME}님</h1>
+      <h1 className={styles.greeting}>
+        안녕하세요. <span className="mock-value">{USER_NAME}</span>님
+      </h1>
 
       {/* 확인이 필요한 요청 */}
       <section className={styles.panel}>
@@ -128,7 +144,6 @@ export default function HomeView() {
               <span className={styles.countBadge}>{visibleRequests.length}</span>
             )}
           </div>
-          <span className={styles.headNote}>에이전트가 답변을 기다리고 있어요</span>
         </div>
 
         {isRequestsLoading ? (
@@ -220,10 +235,14 @@ export default function HomeView() {
             <p className={`${styles.stateText} ${styles.stateError}`}>
               할 일을 불러오지 못했어요.
             </p>
-          ) : visibleTasks.length === 0 ? (
+          ) : !hasTasks ? (
             <p className={styles.stateText}>등록된 할 일이 없어요.</p>
           ) : (
-            <MyTaskList tasks={visibleTasks} onToggle={handleToggleTask} />
+            <MyTaskList
+              groups={taskGroups}
+              onToggle={handleToggleTask}
+              onSelect={handleSelectTask}
+            />
           )}
         </section>
       </div>
@@ -231,8 +250,9 @@ export default function HomeView() {
       {/* 할 일 추가 팝업 */}
       <TaskCreateModal
         open={taskModalOpen}
-        onClose={() => setTaskModalOpen(false)}
+        onClose={handleCloseTaskModal}
         projects={projects}
+        task={editingTask}
       />
     </main>
   );

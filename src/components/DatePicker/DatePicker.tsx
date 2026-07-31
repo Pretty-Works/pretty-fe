@@ -14,6 +14,8 @@ interface DatePickerProps {
   minDate?: string;
   maxDate?: string;
   label?: string;
+  // 라벨 오른쪽에 붙는 보조 문구 (선택 범위 안내 등)
+  labelSlot?: React.ReactNode;
   required?: boolean;
   placeholder?: string;
   disabled?: boolean;
@@ -39,6 +41,7 @@ export default function DatePicker({
   minDate,
   maxDate,
   label,
+  labelSlot,
   required = false,
   placeholder = "날짜를 선택하세요",
   disabled = false,
@@ -142,9 +145,12 @@ export default function DatePicker({
   return (
     <div className={styles.field}>
       {label && (
-        <span className={styles.fieldLabel}>
-          {label}
-          {required && <span className={styles.required}> *</span>}
+        <span className={styles.fieldLabelRow}>
+          <span className={styles.fieldLabel}>
+            {label}
+            {required && <span className={styles.required}> *</span>}
+          </span>
+          {labelSlot && <span className={styles.labelSlot}>{labelSlot}</span>}
         </span>
       )}
 

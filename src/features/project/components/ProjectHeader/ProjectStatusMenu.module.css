@@ -1,0 +1,100 @@
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 200px;
+  padding: 8px;
+  border: 1px solid #e5e8ed;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(26, 26, 38, 0.14);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.item:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.item:disabled {
+  cursor: default;
+}
+
+/* 현재 상태 */
+.itemOn {
+  background: var(--primary-bright);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.itemOn:disabled {
+  cursor: default;
+}
+
+.itemLabel {
+  flex: 1;
+}
+
+.check {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.green {
+  background: var(--success);
+}
+
+.orange {
+  background: var(--warning);
+}
+
+.purple {
+  background: var(--primary);
+}
+
+.gray {
+  background: var(--text-placeholder);
+}
+
+.divider {
+  height: 1px;
+  margin: 6px 0;
+  background: var(--line);
+}
+
+/* 되돌릴 수 없는 종료 처리 */
+.complete {
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.archive {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.item:disabled .itemLabel {
+  color: var(--text-placeholder);
+}

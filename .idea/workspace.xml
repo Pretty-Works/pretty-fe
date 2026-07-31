@@ -1,12 +1,46 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="">
+    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="feat : 충돌 통합(#9)">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/layout.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/layout.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/meetings/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/meetings/write/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/overview/page.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.module.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DdayBadge/DdayBadge.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DdayBadge/DdayBadge.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DdayBadge/DdayBadge.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DdayBadge/DdayBadge.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/ConfirmRequestCard/ConfirmRequestCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/ConfirmRequestCard/ConfirmRequestCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/hooks/mutations/useCreateTaskMutation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/hooks/mutations/useCreateTaskMutation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/home/views/page.module.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/stores/useAgentStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/useAgentStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTabBar/ProjectTabBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectTabBar/ProjectTabBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/create/api/projectApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/api/projectApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/milestoneApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/milestoneApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/overviewApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/overviewApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/hooks/queries/useProjectDetailQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/hooks/queries/useProjectDetailQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/styles/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -70,9 +104,31 @@
       <option name="presentableId" value="Default" />
       <updated>1785200877142</updated>
     </task>
+    <task id="LOCAL-00001" summary="feat : 대시보드/프로젝트 생성/프로젝트 개요/할 일 추가 화면 구현(#9)">
+      <option name="closed" value="true" />
+      <created>1785461516671</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1785461516671</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat : 충돌 통합(#9)">
+      <option name="closed" value="true" />
+      <created>1785461836290</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1785461836290</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat : 대시보드/프로젝트 생성/프로젝트 개요/할 일 추가 화면 구현(#9)" />
+    <MESSAGE value="feat : 충돌 통합(#9)" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat : 충돌 통합(#9)" />
   </component>
 </project>

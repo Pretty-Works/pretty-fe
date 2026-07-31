@@ -10,31 +10,35 @@
   background: var(--surface);
 }
 
-.check {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
+/* 제목을 눌러 수정 화면을 열 수 있을 때 */
+.titleClickable {
   cursor: pointer;
 }
 
-/* 토글 권한 없음 — 호버·커서 없음, 글씨 회색 */
-.rowDisabled .check {
-  cursor: default;
+.titleClickable:hover {
+  text-decoration: underline;
 }
 
+/* 토글 권한 없음 — 글씨 회색 */
 .rowDisabled .title {
   color: var(--text-placeholder);
 }
 
+/* 제목 — 내용 폭만 차지하고, 길면 줄어들며 말줄임 처리된다 */
 .title {
   min-width: 0;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
   font-size: 13.5px;
+  line-height: 1.4;
   color: var(--text);
+}
+
+/* 제목·배지와 담당자 사이를 벌린다 (담당자가 없으면 그냥 빈 공간) */
+.spacer {
+  flex: 1;
+  min-width: 0;
 }
 
 .title.done {

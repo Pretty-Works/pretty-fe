@@ -1,0 +1,278 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 22px 24px;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headLeft {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 예산을 넘겼을 때만 뜬다 — 제목 옆이라 카드를 열자마자 눈에 들어온다 */
+.overBadge {
+  display: inline-flex;
+  align-items: center;
+  height: 21px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--danger-bg, rgba(229, 72, 77, 0.12));
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+/* 항목별 / 부서별 토글 */
+.tabs {
+  display: flex;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.tab {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tabOn {
+  background: var(--white);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+/* 좁아져도 좌우 배치를 유지하고, 양쪽이 같이 줄어든다 */
+.body {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2.4vw, 28px);
+}
+
+/* 왼쪽 — 막대 + 금액 */
+.amounts {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.bar {
+  display: flex;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.barExecuted {
+  background: var(--primary);
+}
+
+/* 사용 예정은 아직 안 나간 돈이라 다른 톤으로 구분 */
+.barPlanned {
+  background: #d19a00;
+}
+
+/* 초과하면 막대 전체가 빨간색이 된다. 두 구간 구분은 톤 차이로 남긴다. */
+.barOver .barExecuted {
+  background: var(--danger);
+}
+
+.barOver .barPlanned {
+  background: #f08a8d;
+}
+
+.amountGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.amountBox {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.amountLabel {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.amountValue {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 금액이 아니라 상태 — 숫자와 같은 무게로 읽히지 않게 톤을 낮춘다 */
+.noLimit {
+  font-size: 15px;
+  color: var(--text-sub);
+}
+
+.executed {
+  color: var(--primary);
+}
+
+.planned {
+  color: #d19a00;
+}
+
+/* 잔여가 음수 — 서버가 초과를 막지 않으므로 화면이 경고한다 */
+.over {
+  color: var(--danger);
+}
+
+/* 오른쪽 — 비중 */
+.shareArea {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.8vw, 22px);
+  flex: 0 1 auto;
+  min-width: 0;
+  min-height: 150px;
+  padding-left: clamp(16px, 2.4vw, 28px);
+  border-left: 1px solid var(--line);
+}
+
+/* 도넛은 SVG viewBox 비율을 지키며 폭에 맞춰 줄어든다 */
+.donut {
+  position: relative;
+  flex: 0 1 150px;
+  min-width: 92px;
+}
+
+.donut svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.donutTrack {
+  fill: none;
+  stroke: var(--line);
+}
+
+.donutSlice {
+  fill: none;
+  transition: stroke-dasharray 0.3s ease;
+}
+
+/*
+ * 범례
+ * 폭을 고정하지 않으면 컨테이너가 가장 긴 라벨(부서명)에 맞춰 늘어나서
+ * 항목별 ↔ 부서별을 오갈 때 도넛 크기와 위치가 흔들린다.
+ * 부서명이 들어가는 폭으로 고정하고, 넘치는 라벨은 말줄임에 맡긴다.
+ */
+.legend {
+  display: flex;
+  flex: 0 1 auto;
+  width: 158px;
+  min-width: 108px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+  list-style: none;
+}
+
+.legendRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legendDot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.legendLabel {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+
+.legendRatio {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* 비중 색 — 도넛 조각과 범례가 같은 클래스를 쓴다 */
+.tone1 {
+  stroke: var(--primary);
+  background: var(--primary);
+}
+
+.tone2 {
+  stroke: #8b5cf6;
+  background: #8b5cf6;
+}
+
+.tone3 {
+  stroke: #22a3e0;
+  background: #22a3e0;
+}
+
+.tone4 {
+  stroke: #b8bec9;
+  background: #b8bec9;
+}
+
+.toneEtc {
+  stroke: var(--text-placeholder);
+  background: var(--text-placeholder);
+}
+
+.emptyText {
+  padding: 40px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-placeholder);
+}

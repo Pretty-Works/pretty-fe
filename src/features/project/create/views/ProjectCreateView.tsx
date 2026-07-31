@@ -12,6 +12,8 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 import { useAgentStore } from "@/stores/useAgentStore";
 
 import { useCreateProjectMutation } from "@/features/project/create/hooks/mutations/useCreateProjectMutation";
+import { useUpdateProjectMutation } from "@/features/project/create/hooks/mutations/useUpdateProjectMutation";
+import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import {
   fetchCompanyUsers,
   type CompanyUser,
@@ -38,6 +40,7 @@ interface MemberRow extends CompanyUser {
 }
 
 interface MilestoneRow extends MilestoneInput {
+  // 화면에서 행을 구분하는 값. 서버로는 보내지 않는다.
   key: string;
 }
 
@@ -84,7 +87,16 @@ function koreanMoney(value: number) {
 const withComma = (value: string) =>
   value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-export default function ProjectCreateView() {
+interface ProjectCreateViewProps {
+  // 값이 있으면 수정 모드 (없으면 생성)
+  projectId?: string;
+}
+
+export default function ProjectCreateView({
+  projectId,
+}: ProjectCreateViewProps) {
+  const isEdit = !!projectId;
+
   const router = useRouter();
 
   const openAgent = useAgentStore((state) => state.openAgent);
@@ -110,7 +122,46 @@ export default function ProjectCreateView() {
   const [overIndex, setOverIndex] = useState<number | null>(null);
 
   // Query
-  const { mutate: createProject, isPending } = useCreateProjectMutation();
+  const { mutate: createProject, isPending: isCreating } =
+    useCreateProjectMutation();
+  const { mutate: updateProject, isPending: isUpdating } =
+    useUpdateProjectMutation(projectId ?? "");
+
+  // 수정 모드에서만 기존 값을 불러온다
+  const { data: detail } = useProjectDetailQuery(projectId ?? "");
+
+  const isPending = isCreating || isUpdating;
+
+  // Effect — 수정 모드: 불러온 값으로 폼을 채운다
+  useEffect(() => {
+    if (!isEdit || !detail) return;
+
+    setName(detail.name);
+    setDescription(detail.description ?? "");
+    setStartDate(detail.startDate);
+    setEndDate(detail.endDate);
+    setBudget(detail.budget === 0 ? "" : String(detail.budget));
+    setNoBudgetLimit(detail.budget === 0);
+    setOwnerRole(detail.owner.ownerRole ?? "");
+    setMembers(
+      detail.members.map((member) => ({
+        userId: member.userId,
+        name: member.name,
+        // 목록 응답에 팀 정보가 없다
+        team: "",
+        role: member.role ?? "",
+      })),
+    );
+    // milestoneId를 그대로 들고 있어야 완료 상태가 보존된다
+    setMilestones(
+      detail.milestones.map((ms) => ({
+        key: `ms-${ms.milestoneId}`,
+        milestoneId: ms.milestoneId,
+        targetDate: ms.targetDate,
+        goal: ms.goal,
+      })),
+    );
+  }, [isEdit, detail]);
 
   // Effect — 참여자 검색
   useEffect(() => {
@@ -133,6 +184,13 @@ export default function ProjectCreateView() {
   );
 
   // Event Handler
+  // 목표일에는 minDate로 시작일 이전을 막아두지만, 시작일을 나중에 목표일 뒤로 옮기면
+  // 이미 고른 목표일이 그대로 남아 뒤집힌 기간이 서버로 나간다 (PROJECT_003). 그래서 비운다.
+  const handleStartDateChange = (next: string) => {
+    setStartDate(next);
+    if (endDate && next > endDate) setEndDate("");
+  };
+
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setBudget(e.target.value.replace(/[^\d]/g, ""));
   };
@@ -194,36 +252,56 @@ export default function ProjectCreateView() {
   };
 
   const handleSubmit = () => {
-    createProject(
-      {
-        name,
-        startDate,
-        endDate,
-        // 0 = 예산 제한 없음. 미입력(null)도 서버가 0으로 저장한다.
-        budget: noBudgetLimit ? 0 : budget ? Number(budget) : null,
-        description,
-        ownerRole: ownerRole || null,
-        members: members.map((m) => ({ userId: m.userId, role: m.role || null })),
-        milestones: milestones
-          .filter((ms) => ms.targetDate && ms.goal)
-          .map(({ targetDate, goal }) => ({ targetDate, goal })),
-      },
-      {
-        onSuccess: (data) => {
-          router.push(`/projects/${data.result.projectId}/overview`);
-        },
-      },
-    );
+    const body = {
+      name,
+      startDate,
+      endDate,
+      // 0 = 예산 제한 없음. 미입력(null)도 서버가 0으로 저장한다.
+      budget: noBudgetLimit ? 0 : budget ? Number(budget) : null,
+      description,
+      ownerRole: ownerRole || null,
+      members: members.map((m) => ({ userId: m.userId, role: m.role || null })),
+      // 수정 시 milestoneId를 함께 보내야 완료 상태가 보존된다.
+      // 여기서 빠진 기존 마일스톤은 서버에서 삭제된다.
+      milestones: milestones
+        .filter((ms) => ms.targetDate && ms.goal)
+        .map(({ milestoneId, targetDate, goal }) => ({
+          milestoneId: milestoneId ?? null,
+          targetDate,
+          goal,
+        })),
+    };
+
+    if (isEdit && detail) {
+      updateProject(
+        { version: detail.version, body },
+        { onSuccess: () => router.push(`/projects/${projectId}/overview`) },
+      );
+      return;
+    }
+
+    createProject(body, {
+      onSuccess: (data) =>
+        router.push(`/projects/${data.result.projectId}/overview`),
+    });
   };
 
-  const canSubmit = !!name.trim() && !!startDate && !!endDate && !isPending;
+  // 수정 모드는 기존 값을 불러온 뒤에야 저장할 수 있다 (version이 필요)
+  const canSubmit =
+    !!name.trim() &&
+    !!startDate &&
+    !!endDate &&
+    !isPending &&
+    (!isEdit || !!detail);
 
   return (
     <main className={styles.container}>
       {/* 페이지 헤더 */}
       <div className={styles.pageHead}>
         <div className={styles.pageHeadText}>
-          <h2 className={styles.pageTitle}>프로젝트 생성</h2>
+          <h2 className={styles.pageTitle}>
+            {isEdit ? "프로젝트 수정" : "프로젝트 생성"}
+          </h2>
           <button
             type="button"
             className={styles.pageSub}
@@ -242,7 +320,15 @@ export default function ProjectCreateView() {
           <Button
             status="primary"
             size="sm"
-            name={isPending ? "생성 중…" : "생성하기"}
+            name={
+              isPending
+                ? isEdit
+                  ? "저장 중…"
+                  : "생성 중…"
+                : isEdit
+                  ? "수정하기"
+                  : "생성하기"
+            }
             disabled={!canSubmit}
             onClick={handleSubmit}
           />
@@ -290,7 +376,7 @@ export default function ProjectCreateView() {
               label="시작일"
               required
               value={startDate}
-              onChange={setStartDate}
+              onChange={handleStartDateChange}
               placeholder="날짜를 선택하세요"
             />
           </div>
@@ -386,9 +472,18 @@ export default function ProjectCreateView() {
 
         <div className={styles.memberGrid}>
           {/* 오너(생성자) — 제거 불가 */}
-          <div className={styles.memberCard}>
-            <span className={styles.memberName}>{OWNER.name}</span>
-            <span className={styles.memberTeam}>· {OWNER.team}</span>
+          {/* 책임자는 별도 배지 대신 테두리를 강조해 구분한다 */}
+          <div className={`${styles.memberCard} ${styles.memberCardOwner}`}>
+            {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다.
+                상세 응답에 부서가 없어 수정 모드에서는 이름만 보인다. */}
+            <span
+              className={`${styles.memberName} ${isEdit ? "" : "mock-value"}`}
+            >
+              {detail?.owner.name ?? OWNER.name}
+            </span>
+            <span className={`${styles.memberTeam} ${isEdit ? "" : "mock-value"}`}>
+              {isEdit ? "" : `· ${OWNER.team}`}
+            </span>
             <input
               className={styles.roleInput}
               placeholder="역할"
@@ -397,13 +492,15 @@ export default function ProjectCreateView() {
               onChange={(e) => setOwnerRole(e.target.value)}
               aria-label={`${OWNER.name} 역할`}
             />
-            <span className={styles.ownerBadge}>책임자</span>
           </div>
 
           {members.map((member) => (
             <div key={member.userId} className={styles.memberCard}>
               <span className={styles.memberName}>{member.name}</span>
-              <span className={styles.memberTeam}>· {member.team}</span>
+              {/* 부서를 모르면 구분자만 남으므로 아예 그리지 않는다 */}
+              <span className={styles.memberTeam}>
+                {member.team ? `· ${member.team}` : ""}
+              </span>
               <input
                 className={styles.roleInput}
                 placeholder="역할"

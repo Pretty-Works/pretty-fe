@@ -1,7 +1,11 @@
 // 홈 대시보드 API
-// 회의록(meetingApi.ts)과 동일한 구조. 현재는 mock, API 연결 시 각 함수 본문만 교체.
+// 회의록(meetingApi.ts)과 동일한 구조.
+//   연동 완료: 프로젝트 목록 · 내 할 일 · 할 일 생성/토글 · 프로젝트 기간
+//   mock 유지: 확인이 필요한 요청
 
-// 서버 지연 흉내 (로딩 상태 확인용)
+import { api } from "@/lib/api/client";
+
+// 서버 지연 흉내 (아직 mock인 함수용)
 const mockDelay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /* =========================================================================
@@ -57,67 +61,22 @@ export interface ProjectsResponse {
   };
 }
 
-const MOCK_PROJECTS: ServerProject[] = [
-  { projectId: 1, name: "그룹웨어 AI 고도화", progress: 33, status: "ONGOING", targetDate: "2026-09-30" },
-  { projectId: 2, name: "검색 품질 개선", progress: 25, status: "ONGOING", targetDate: "2026-10-15" },
-  { projectId: 3, name: "데이터 파이프라인 구축", progress: 40, status: "ONGOING", targetDate: "2026-08-28" },
-  { projectId: 4, name: "보안 점검 대응", progress: 55, status: "ONGOING", targetDate: "2026-08-14" },
-  { projectId: 5, name: "알림 시스템 개편", progress: 48, status: "ONGOING", targetDate: "2026-11-06" },
-  { projectId: 6, name: "결제 모듈 리팩터링", progress: 62, status: "ONGOING", targetDate: "2026-09-11" },
-  { projectId: 7, name: "온보딩 플로우 개선", progress: 18, status: "ONGOING", targetDate: "2026-12-04" },
-  { projectId: 8, name: "검색 서버 증설", progress: 72, status: "ONGOING", targetDate: "2026-08-21" },
-  { projectId: 9, name: "사내 메신저 통합", progress: 44, status: "ONGOING", targetDate: "2026-10-30" },
-  { projectId: 10, name: "대시보드 리디자인", progress: 29, status: "ONGOING", targetDate: "2026-11-20" },
-  { projectId: 11, name: "API 게이트웨이 도입", progress: 51, status: "ONGOING", targetDate: "2026-09-25" },
-  { projectId: 12, name: "로그 수집 파이프라인", progress: 66, status: "ONGOING", targetDate: "2026-08-07" },
-  { projectId: 13, name: "모바일 푸시 개편", progress: 37, status: "ONGOING", targetDate: "2026-12-18" },
-  { projectId: 14, name: "권한 관리 체계 정비", progress: 22, status: "ONGOING", targetDate: "2027-01-15" },
-  { projectId: 15, name: "이미지 CDN 전환", progress: 80, status: "ONGOING", targetDate: "2026-08-01" },
-  { projectId: 16, name: "레거시 배치 정리", progress: 10, status: "HOLDING", targetDate: "2026-10-09" },
-  { projectId: 17, name: "문서화 자동화", progress: 5, status: "HOLDING", targetDate: "2026-11-27" },
-  { projectId: 18, name: "회원 탈퇴 플로우", progress: 100, status: "COMPLETED", targetDate: "2026-07-10" },
-  { projectId: 19, name: "2FA 도입", progress: 100, status: "COMPLETED", targetDate: "2026-06-26" },
-  { projectId: 20, name: "구형 관리자 페이지", progress: 15, status: "DROPPED", targetDate: "2026-05-29" },
-];
-
 // 프로젝트 목록 조회
+// 필터·검색·정렬·페이징은 전부 서버가 처리한다. 화면에서 거르지 않는다.
 export const fetchProjects = async (
   params?: FetchProjectsParams,
 ): Promise<ProjectsResponse> => {
-  // TODO: API 연결 시 아래 mock 블록을 실제 호출로 교체
-  //   const response = await api.get("/projects", { params });
-  //   return response.data;
-
-  const page = params?.page ?? 0;
-  const size = params?.size ?? 7;
-  const keyword = params?.keyword?.trim() ?? "";
-  const status = params?.status ?? "ALL";
-
-  // 서버가 필터·검색·정렬·페이징을 모두 처리한다 (명세). mock도 동일하게 흉내.
-  const filtered = MOCK_PROJECTS.filter((project) => {
-    const byKeyword = project.name.includes(keyword);
-    const byStatus = status === "ALL" || project.status === status;
-    return byKeyword && byStatus;
+  const response = await api.get<ProjectsResponse>("/projects", {
+    params: {
+      status: params?.status,
+      // 빈 검색어는 아예 보내지 않는다 (미지정과 같게 동작)
+      keyword: params?.keyword?.trim() || undefined,
+      page: params?.page,
+      size: params?.size,
+    },
   });
 
-  const start = page * size;
-  const content = filtered.slice(start, start + size);
-  const totalPages = Math.max(1, Math.ceil(filtered.length / size));
-
-  await mockDelay();
-
-  return {
-    errorCode: null,
-    message: "SUCCESS",
-    result: {
-      content,
-      page,
-      size,
-      totalElements: filtered.length,
-      totalPages,
-      last: page >= totalPages - 1,
-    },
-  };
+  return response.data;
 };
 
 /* =========================================================================
@@ -220,33 +179,31 @@ export interface CreateTaskResponse {
 export const createTask = async (
   body: CreateTaskBody,
 ): Promise<CreateTaskResponse> => {
-  // TODO: const response = await api.post("/tasks", body); return response.data;
-  await mockDelay();
+  const response = await api.post<CreateTaskResponse>("/tasks", body);
 
-  return { errorCode: null, message: "SUCCESS", result: { taskId: 21 } };
+  return response.data;
 };
 
-// 마감일 선택 범위용 프로젝트 기간 (GET /api/v1/projects/{projectId})
-// 목록 응답에는 startDate가 없어 상세 조회로 받아온다.
-export interface ProjectPeriod {
-  startDate: string;
-  targetDate: string;
-}
+// --- 할 일 수정 (PUT /api/v1/tasks/{taskId}) -----------------------
+// ⚠️ 전체 교체다. 바꾸지 않는 필드도 반드시 함께 보내야 한다.
+//    특히 projectId를 빼면 개인 할 일로 바뀐다 (생략과 null을 구분하지 않음).
+export const updateTask = async (
+  taskId: string,
+  body: CreateTaskBody,
+): Promise<CreateTaskResponse> => {
+  const response = await api.put<CreateTaskResponse>(`/tasks/${taskId}`, body);
 
-export const fetchProjectPeriod = async (
-  projectId: string,
-): Promise<ProjectPeriod | null> => {
-  // TODO: const response = await api.get(`/projects/${projectId}`);
-  //       const { startDate, endDate } = response.data.result;
-  //       return { startDate, targetDate: endDate };
-  if (!projectId) return null;
+  return response.data;
+};
 
-  await mockDelay(200);
+// --- 할 일 삭제 (DELETE /api/v1/tasks/{taskId}) --------------------
+// 작성자 본인만, hard delete.
+export const deleteTask = async (
+  taskId: string,
+): Promise<CreateTaskResponse> => {
+  const response = await api.delete<CreateTaskResponse>(`/tasks/${taskId}`);
 
-  const found = MOCK_PROJECTS.find((p) => String(p.projectId) === projectId);
-  if (!found) return null;
-
-  return { startDate: "2026-02-01", targetDate: found.targetDate };
+  return response.data;
 };
 
 // 확인이 필요한 요청 조회
@@ -260,39 +217,68 @@ export const fetchRequests = async (): Promise<RequestsResponse> => {
  * 내 할 일
  * ========================================================================= */
 
+// 서버가 프로젝트별로 그룹핑해서 내려준다. 화면에서 다시 묶지 않는다.
 export interface MyTask {
   id: string;
-  projectName: string; // 그룹 기준
   title: string;
   dday: number; // >0: D-N(남음), 0: D-DAY, <0: D+N(지남)
   done: boolean;
+  // 수정 폼을 채우는 데 쓴다
+  dueDate: string;
+}
+
+export interface MyTaskGroup {
+  // 개인 할 일(어느 프로젝트에도 속하지 않음)이면 null
+  projectId: number | null;
+  projectName: string | null;
+  tasks: MyTask[];
 }
 
 interface ServerTask {
   taskId: number;
-  projectName: string;
-  title: string;
-  dday: number;
+  content: string;
   done: boolean;
+  dueDate: string;
+  dDay: number;
+}
+
+interface ServerTaskGroup {
+  projectId: number | null;
+  projectName: string | null;
+  tasks: ServerTask[];
 }
 
 export interface TasksResponse {
-  result: { content: ServerTask[] };
+  errorCode: string | null;
+  message: string;
+  result: { groups: ServerTaskGroup[] };
 }
 
-const MOCK_TASKS: ServerTask[] = [
-  { taskId: 1, projectName: "그룹웨어 AI 고도화", title: "요구사항 정의서 확정", dday: -8, done: true },
-  { taskId: 2, projectName: "그룹웨어 AI 고도화", title: "스프린트 리뷰 안건 취합", dday: 0, done: false },
-  { taskId: 3, projectName: "검색 품질 개선", title: "JWT 리프레시 PR 리뷰", dday: 1, done: false },
-  { taskId: 4, projectName: "결제 모듈 리팩터링", title: "결제 실패 케이스 정리", dday: 3, done: false },
-  { taskId: 5, projectName: "데이터 파이프라인 구축", title: "스키마 설계 검토", dday: 2, done: false },
-  { taskId: 6, projectName: "보안 점검 대응", title: "취약점 스캔 결과 확인", dday: 4, done: false },
-  { taskId: 7, projectName: "모바일 앱 리뉴얼", title: "스토어 배포 준비", dday: 6, done: true },
-];
+// 완료 토글 — PATCH /api/v1/tasks/{taskId}/status
+// done 값을 그대로 반영하는 멱등 API. 완료 시각은 서버가 기록한다.
+// 권한은 '작성자 본인'만 (TASK_004).
+export interface ToggleTaskResponse {
+  errorCode: string | null;
+  message: string;
+  result: null;
+}
 
-// 내 할 일 조회
+export const toggleTask = async (
+  taskId: string,
+  done: boolean,
+): Promise<ToggleTaskResponse> => {
+  const response = await api.patch<ToggleTaskResponse>(
+    `/tasks/${taskId}/status`,
+    { done },
+  );
+
+  return response.data;
+};
+
+// 내 할 일 조회 — 미완료 전부 + 완료 후 3일 이내. 페이지네이션 없음.
+// 담당자·노출 범위는 서버가 토큰의 userId로 고정하므로 파라미터가 없다.
 export const fetchTasks = async (): Promise<TasksResponse> => {
-  // TODO: const response = await api.get("/home/tasks"); return response.data;
-  await mockDelay();
-  return { result: { content: MOCK_TASKS } };
+  const response = await api.get<TasksResponse>("/tasks");
+
+  return response.data;
 };

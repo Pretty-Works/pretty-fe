@@ -8,11 +8,14 @@ import styles from "./MilestoneProgressCard.module.css";
 
 interface MilestoneProgressCardProps {
   board: MilestoneBoard;
+  // 완료·보관 프로젝트면 false — 원을 눌러도 서버가 막는다 (PROJECT_020)
+  editable?: boolean;
   onToggle?: (milestoneId: number, done: boolean) => void;
 }
 
 export default function MilestoneProgressCard({
   board,
+  editable = true,
   onToggle,
 }: MilestoneProgressCardProps) {
   const { totalCount, completedCount, pendingCount, completionRate } = board;
@@ -74,8 +77,10 @@ export default function MilestoneProgressCard({
       {totalCount > 0 && (
         <ol className={styles.timeline}>
           {board.milestones.map((ms, index) => {
-            const editable =
-              index === lastDoneIndex || index === firstPendingIndex;
+            // 파이프라인 순서상 건드릴 수 있고, 프로젝트도 열려 있어야 한다
+            const canToggle =
+              editable &&
+              (index === lastDoneIndex || index === firstPendingIndex);
 
             return (
             <li
@@ -86,7 +91,7 @@ export default function MilestoneProgressCard({
                 type="button"
                 className={styles.stepMark}
                 onClick={() => onToggle?.(ms.milestoneId, !ms.done)}
-                disabled={!editable}
+                disabled={!canToggle}
                 aria-pressed={ms.done}
                 aria-label={`${ms.goal} ${ms.done ? "완료 취소" : "완료"}`}
               />

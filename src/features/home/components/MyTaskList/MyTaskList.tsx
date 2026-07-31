@@ -2,48 +2,46 @@
 
 import TaskRow from "@/components/TaskRow/TaskRow";
 
-import type { MyTask } from "@/features/home/api/homeApi";
+import type { MyTask, MyTaskGroup } from "@/features/home/api/homeApi";
 
 import styles from "./MyTaskList.module.css";
 
 interface MyTaskListProps {
-  tasks: MyTask[];
-  onToggle?: (taskId: string) => void;
+  groups: MyTaskGroup[];
+  // done은 토글 후의 값 (서버에 그대로 보낸다)
+  onToggle?: (taskId: string, done: boolean) => void;
+  // 행 클릭 — 수정 화면을 연다. 소속 프로젝트는 그룹에서 가져온다.
+  onSelect?: (task: MyTask, projectId: number | null) => void;
 }
 
-// 프로젝트명 기준 그룹 (등장 순서 유지)
-function groupByProject(tasks: MyTask[]) {
-  const groups = new Map<string, MyTask[]>();
-
-  tasks.forEach((task) => {
-    const list = groups.get(task.projectName);
-    if (list) {
-      list.push(task);
-    } else {
-      groups.set(task.projectName, [task]);
-    }
-  });
-
-  return Array.from(groups, ([projectName, items]) => ({ projectName, items }));
-}
-
-export default function MyTaskList({ tasks, onToggle }: MyTaskListProps) {
-  const groups = groupByProject(tasks);
-
+export default function MyTaskList({
+  groups,
+  onToggle,
+  onSelect,
+}: MyTaskListProps) {
   return (
     <div className={styles.list}>
       {groups.map((group) => (
-        <div key={group.projectName} className={styles.group}>
-          <div className={styles.groupHead}>{group.projectName}</div>
+        <div
+          key={group.projectId ?? "personal"}
+          className={styles.group}
+        >
+          {/* projectId가 없으면 개인 할 일 그룹 */}
+          <div className={styles.groupHead}>
+            {group.projectName ?? "개인 할 일"}
+          </div>
 
           <ul className={styles.items}>
-            {group.items.map((task) => (
+            {group.tasks.map((task) => (
               <li key={task.id}>
                 <TaskRow
                   title={task.title}
                   dday={task.dday}
                   done={task.done}
-                  onToggle={() => onToggle?.(task.id)}
+                  onToggle={() => onToggle?.(task.id, !task.done)}
+                  onSelect={
+                    onSelect ? () => onSelect(task, group.projectId) : undefined
+                  }
                 />
               </li>
             ))}
