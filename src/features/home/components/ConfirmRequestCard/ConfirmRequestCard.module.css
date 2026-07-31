@@ -1,0 +1,86 @@
+/* 한 박스 안의 한 행. 항목 사이는 가로선으로만 구분한다. */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.card:last-child {
+  border-bottom: none;
+}
+
+.label {
+  flex-shrink: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.option {
+  padding: 5px 11px;
+  border: 1px solid var(--primary);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--primary);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease;
+}
+
+.option:hover {
+  background: var(--primary-bright);
+}
+
+/* 마지막 옵션(직접 지정 등)은 보조 톤 */
+.option:last-child {
+  border-color: var(--border);
+  color: var(--text-sub);
+}
+
+.option:last-child:hover {
+  background: var(--surface);
+}
+
+/* 선택지 묶음과 중단 버튼을 시각적으로 분리 */
+.divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+}
+
+/* 중단 = 진행 중인 에이전트 작업 멈춤.
+   옵션 칩보다 한 단계 약하게 둬서 시선이 선택지로 먼저 가게 한다. */
+.stop {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-placeholder);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.stop:hover {
+  background: #fff5f5;
+  color: var(--danger);
+}

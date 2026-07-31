@@ -1,0 +1,32 @@
+.track {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--line);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+/* 상태 색 — ProjectStatusSelect의 점 색과 동일 토큰 */
+.green {
+  background: var(--success);
+}
+
+.orange {
+  background: var(--warning);
+}
+
+.purple {
+  background: var(--primary);
+}
+
+.gray {
+  background: var(--text-placeholder);
+}
