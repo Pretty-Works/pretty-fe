@@ -6,9 +6,12 @@ import { FiCalendar } from "react-icons/fi";
 
 import styles from "./DatePicker.module.css";
 
-interface DatePickerProps {
-  value?: string;
-  onChange?: (date: string) => void;
+export interface DateRange {
+  start: string;
+  end: string;
+}
+
+interface CommonProps {
   allowFuture?: boolean;
   // 선택 가능 범위 (YYYY-MM-DD). 미지정이면 제한 없음.
   minDate?: string;
@@ -19,6 +22,21 @@ interface DatePickerProps {
   disabled?: boolean;
 }
 
+interface SingleProps extends CommonProps {
+  mode?: "single";
+  value?: string;
+  onChange?: (date: string) => void;
+}
+
+// 기간 선택 — 시작일·종료일을 고른 뒤 확인을 눌러야 확정된다
+interface RangeProps extends CommonProps {
+  mode: "range";
+  value?: DateRange | null;
+  onChange?: (range: DateRange) => void;
+}
+
+type DatePickerProps = SingleProps | RangeProps;
+
 const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 function toISO(d: Date) {
@@ -28,33 +46,49 @@ function toISO(d: Date) {
   return `${y}-${m}-${day}`;
 }
 
+function fromISO(iso: string) {
+  return new Date(`${iso}T00:00:00`);
+}
+
 function startOfDay(d: Date) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-export default function DatePicker({
-  value,
-  onChange,
-  allowFuture = true,
-  minDate,
-  maxDate,
-  label,
-  required = false,
-  placeholder = "날짜를 선택하세요",
-  disabled = false,
-}: DatePickerProps) {
+export default function DatePicker(props: DatePickerProps) {
+  const {
+    allowFuture = true,
+    minDate,
+    maxDate,
+    label,
+    required = false,
+    disabled = false,
+  } = props;
+
+  const isRange = props.mode === "range";
+  const placeholder =
+    props.placeholder ?? (isRange ? "기간을 선택하세요" : "날짜를 선택하세요");
+
+  const singleValue = props.mode === "range" ? undefined : props.value;
+  const rangeValue = props.mode === "range" ? props.value ?? null : null;
+
+  const committedStart = isRange ? rangeValue?.start ?? null : singleValue ?? null;
+  const committedEnd = isRange ? rangeValue?.end ?? null : singleValue ?? null;
+
   const today = useMemo(() => startOfDay(new Date()), []);
-  const selected = value ? new Date(`${value}T00:00:00`) : null;
 
   const [open, setOpen] = useState(false);
+  // 달력에서 고르는 동안의 임시 선택. 확인을 눌러야 폼에 반영된다.
+  const [pendingStart, setPendingStart] = useState<string | null>(committedStart);
+  const [pendingEnd, setPendingEnd] = useState<string | null>(committedEnd);
+
   const [view, setView] = useState(() => {
-    const base = selected ?? today;
+    const base = committedStart ? fromISO(committedStart) : today;
     return { year: base.getFullYear(), month: base.getMonth() };
   });
 
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // 바깥 클릭 시 닫기
+  // 바깥 클릭 시 닫기 (임시 선택은 버린다)
   useEffect(() => {
     if (!open) return;
     const onDown = (e: MouseEvent) => {
@@ -66,10 +100,25 @@ export default function DatePicker({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
+  // 달력이 열려 있을 때 ESC는 달력만 닫는다.
+  // 모달 안에서 쓰일 때 ESC가 모달까지 올라가 닫히는 걸 막는다.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape" && open) {
+      e.stopPropagation();
+      setOpen(false);
+    }
+  };
+
   const toggle = () => {
     if (disabled) return;
-    const base = selected ?? today;
-    setView({ year: base.getFullYear(), month: base.getMonth() });
+
+    if (!open) {
+      // 열 때마다 현재 확정값에서 다시 시작한다
+      setPendingStart(committedStart);
+      setPendingEnd(committedEnd);
+      const base = committedStart ? fromISO(committedStart) : today;
+      setView({ year: base.getFullYear(), month: base.getMonth() });
+    }
     setOpen((v) => !v);
   };
 
@@ -90,11 +139,11 @@ export default function DatePicker({
   const isFuture = (d: Date) => startOfDay(d).getTime() > today.getTime();
 
   const min = useMemo(
-    () => (minDate ? startOfDay(new Date(`${minDate}T00:00:00`)) : null),
+    () => (minDate ? startOfDay(fromISO(minDate)) : null),
     [minDate],
   );
   const max = useMemo(
-    () => (maxDate ? startOfDay(new Date(`${maxDate}T00:00:00`)) : null),
+    () => (maxDate ? startOfDay(fromISO(maxDate)) : null),
     [maxDate],
   );
 
@@ -133,11 +182,65 @@ export default function DatePicker({
     );
   };
 
+  // 날짜를 눌러도 닫지 않는다. 임시 선택만 갱신.
   const pick = (d: Date) => {
     if (isBlocked(d)) return;
-    onChange?.(toISO(d));
+    const iso = toISO(d);
+
+    if (!isRange) {
+      setPendingStart(iso);
+      setPendingEnd(iso);
+      return;
+    }
+
+    // 시작만 있는 상태에서만 종료를 잡고, 그 외엔 새 시작으로 다시 시작
+    if (pendingStart && !pendingEnd) {
+      const [start, end] =
+        pendingStart <= iso ? [pendingStart, iso] : [iso, pendingStart];
+      setPendingStart(start);
+      setPendingEnd(end);
+      return;
+    }
+
+    setPendingStart(iso);
+    setPendingEnd(null);
+  };
+
+  const todayBlocked = isBlocked(today);
+
+  const pickToday = () => {
+    if (todayBlocked) return;
+    const iso = toISO(today);
+    setView({ year: today.getFullYear(), month: today.getMonth() });
+    setPendingStart(iso);
+    setPendingEnd(isRange ? null : iso);
+  };
+
+  const canConfirm = isRange ? !!pendingStart && !!pendingEnd : !!pendingStart;
+
+  const confirm = () => {
+    if (!canConfirm) return;
+    if (props.mode === "range") {
+      props.onChange?.({ start: pendingStart!, end: pendingEnd! });
+    } else {
+      props.onChange?.(pendingStart!);
+    }
     setOpen(false);
   };
+
+  const displayValue = isRange
+    ? rangeValue
+      ? `${rangeValue.start} ~ ${rangeValue.end}`
+      : ""
+    : singleValue ?? "";
+
+  const summary = isRange
+    ? pendingStart && pendingEnd
+      ? `${pendingStart} ~ ${pendingEnd}`
+      : pendingStart
+        ? `${pendingStart} ~ 종료일을 선택하세요`
+        : "시작일을 선택하세요"
+    : pendingStart || "날짜를 선택하세요";
 
   return (
     <div className={styles.field}>
@@ -148,7 +251,7 @@ export default function DatePicker({
         </span>
       )}
 
-      <div className={styles.root} ref={rootRef}>
+      <div className={styles.root} ref={rootRef} onKeyDown={handleKeyDown}>
         <button
           type="button"
           className={styles.control}
@@ -157,8 +260,8 @@ export default function DatePicker({
           aria-haspopup="dialog"
           aria-expanded={open}
         >
-          <span className={value ? styles.value : styles.placeholder}>
-            {value || placeholder}
+          <span className={displayValue ? styles.value : styles.placeholder}>
+            {displayValue || placeholder}
           </span>
           <span className={styles.caret} aria-hidden="true">
             <FiCalendar />
@@ -212,7 +315,12 @@ export default function DatePicker({
               {cells.map(({ date, inMonth }, idx) => {
                 const iso = toISO(date);
                 const isToday = startOfDay(date).getTime() === today.getTime();
-                const isSelected = !!selected && iso === toISO(selected);
+                const isEdge = iso === pendingStart || iso === pendingEnd;
+                const inRangeSpan =
+                  !!pendingStart &&
+                  !!pendingEnd &&
+                  iso > pendingStart &&
+                  iso < pendingEnd;
                 const cellDisabled = isBlocked(date);
                 const wd = date.getDay();
                 return (
@@ -222,11 +330,12 @@ export default function DatePicker({
                     className={[
                       styles.day,
                       !inMonth ? styles.outside : "",
-                      isSelected ? styles.selected : "",
-                      isToday && !isSelected ? styles.today : "",
+                      isEdge ? styles.selected : "",
+                      inRangeSpan ? styles.inRange : "",
+                      isToday && !isEdge ? styles.today : "",
                       cellDisabled ? styles.dayDisabled : "",
-                      !isSelected && wd === 0 ? styles.sun : "",
-                      !isSelected && wd === 6 ? styles.sat : "",
+                      !isEdge && wd === 0 ? styles.sun : "",
+                      !isEdge && wd === 6 ? styles.sat : "",
                     ]
                       .filter(Boolean)
                       .join(" ")}
@@ -239,15 +348,35 @@ export default function DatePicker({
               })}
             </div>
 
+            <p className={styles.summary}>{summary}</p>
+
             <div className={styles.foot}>
               <button
                 type="button"
                 className={styles.todayBtn}
-                onClick={() => pick(today)}
-                disabled={isBlocked(today)}
+                onClick={pickToday}
+                disabled={todayBlocked}
               >
                 오늘
               </button>
+
+              <div className={styles.footActions}>
+                <button
+                  type="button"
+                  className={styles.cancelBtn}
+                  onClick={() => setOpen(false)}
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  className={styles.confirmBtn}
+                  onClick={confirm}
+                  disabled={!canConfirm}
+                >
+                  확인
+                </button>
+              </div>
             </div>
           </div>
         )}

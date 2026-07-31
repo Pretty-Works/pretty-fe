@@ -1,0 +1,116 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.required {
+  color: var(--danger);
+}
+
+.root {
+  position: relative;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.control:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.control:disabled {
+  background: var(--surface);
+  cursor: default;
+}
+
+.value {
+  color: var(--text);
+}
+
+.placeholder {
+  color: var(--text-placeholder);
+}
+
+.caret {
+  display: flex;
+  flex-shrink: 0;
+  font-size: 13px;
+  color: var(--text-placeholder);
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.option:hover:not(:disabled) {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.selected {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.optionDisabled {
+  color: var(--text-placeholder);
+  opacity: 0.5;
+  cursor: default;
+}
+
+.check {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+}

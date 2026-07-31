@@ -1,0 +1,107 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 21px 19px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 4px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.count {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.addButton {
+  font-size: 13px;
+}
+
+.empty {
+  padding: 24px 4px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 44px;
+  padding: 0 4px;
+  border-radius: 10px;
+}
+
+.row:hover {
+  background: var(--surface);
+}
+
+.bar {
+  flex-shrink: 0;
+  width: 4px;
+  height: 28px;
+  border-radius: 2px;
+}
+
+.time {
+  flex-shrink: 0;
+  width: 44px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #383d47;
+}
+
+.eventTitle {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.eventTitle:hover {
+  text-decoration: underline;
+}
+
+.owner {
+  flex-shrink: 0;
+  max-width: 160px;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
