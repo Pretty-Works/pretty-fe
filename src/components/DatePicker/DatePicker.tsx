@@ -10,6 +10,9 @@ interface DatePickerProps {
   value?: string;
   onChange?: (date: string) => void;
   allowFuture?: boolean;
+  // 선택 가능 범위 (YYYY-MM-DD). 미지정이면 제한 없음.
+  minDate?: string;
+  maxDate?: string;
   label?: string;
   required?: boolean;
   placeholder?: string;
@@ -33,6 +36,8 @@ export default function DatePicker({
   value,
   onChange,
   allowFuture = true,
+  minDate,
+  maxDate,
   label,
   required = false,
   placeholder = "날짜를 선택하세요",
@@ -83,14 +88,44 @@ export default function DatePicker({
   }, [view]);
 
   const isFuture = (d: Date) => startOfDay(d).getTime() > today.getTime();
+
+  const min = useMemo(
+    () => (minDate ? startOfDay(new Date(`${minDate}T00:00:00`)) : null),
+    [minDate],
+  );
+  const max = useMemo(
+    () => (maxDate ? startOfDay(new Date(`${maxDate}T00:00:00`)) : null),
+    [maxDate],
+  );
+
+  // 선택 불가 판정: 미래 차단(allowFuture) + 범위(minDate·maxDate)
+  const isBlocked = (d: Date) => {
+    if (!allowFuture && isFuture(d)) return true;
+
+    const time = startOfDay(d).getTime();
+    if (min && time < min.getTime()) return true;
+    if (max && time > max.getTime()) return true;
+
+    return false;
+  };
+
   const atCurrentMonth =
     view.year === today.getFullYear() && view.month === today.getMonth();
-  const nextDisabled = !allowFuture && atCurrentMonth;
 
-  const goPrev = () =>
+  // 이전 달 전체가 min 이전이면 이동 불가
+  const prevDisabled =
+    !!min && new Date(view.year, view.month, 0).getTime() < min.getTime();
+  // 다음 달 전체가 max 이후이면 이동 불가
+  const nextDisabled =
+    (!allowFuture && atCurrentMonth) ||
+    (!!max && new Date(view.year, view.month + 1, 1).getTime() > max.getTime());
+
+  const goPrev = () => {
+    if (prevDisabled) return;
     setView(({ year, month }) =>
       month === 0 ? { year: year - 1, month: 11 } : { year, month: month - 1 },
     );
+  };
   const goNext = () => {
     if (nextDisabled) return;
     setView(({ year, month }) =>
@@ -99,7 +134,7 @@ export default function DatePicker({
   };
 
   const pick = (d: Date) => {
-    if (!allowFuture && isFuture(d)) return;
+    if (isBlocked(d)) return;
     onChange?.(toISO(d));
     setOpen(false);
   };
@@ -137,6 +172,7 @@ export default function DatePicker({
                 type="button"
                 className={styles.nav}
                 onClick={goPrev}
+                disabled={prevDisabled}
                 aria-label="이전 달"
               >
                 ‹
@@ -177,7 +213,7 @@ export default function DatePicker({
                 const iso = toISO(date);
                 const isToday = startOfDay(date).getTime() === today.getTime();
                 const isSelected = !!selected && iso === toISO(selected);
-                const cellDisabled = !allowFuture && isFuture(date);
+                const cellDisabled = isBlocked(date);
                 const wd = date.getDay();
                 return (
                   <button
@@ -208,6 +244,7 @@ export default function DatePicker({
                 type="button"
                 className={styles.todayBtn}
                 onClick={() => pick(today)}
+                disabled={isBlocked(today)}
               >
                 오늘
               </button>

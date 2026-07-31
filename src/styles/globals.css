@@ -1,4 +1,4 @@
-@import url('https://googleapis.com');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
 
 :root {
   /* Brand */
@@ -24,6 +24,14 @@
   --success: #00c471;
   --warning: #ff9800;
   --danger: #ff4d4f;
+
+  /* D-day 배지 (배경 / 글자) */
+  --dday-urgent-bg: #fdebeb;
+  --dday-urgent-text: #c93a3a;
+  --dday-soon-bg: #fff7e0;
+  --dday-soon-text: #b0780a;
+  --dday-idle-bg: #f1f3f5;
+  --dday-idle-text: #969da7;
 
   /* Category */
   --c-approval: #8b5cf6;

@@ -1,0 +1,49 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.row:not(.rowDisabled):hover {
+  background: var(--surface);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+/* 토글 권한 없음 — 호버·커서 없음, 글씨 회색 */
+.rowDisabled .check {
+  cursor: default;
+}
+
+.rowDisabled .title {
+  color: var(--text-placeholder);
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13.5px;
+  color: var(--text);
+}
+
+.title.done {
+  color: var(--text-placeholder);
+  text-decoration: line-through;
+}
+
+.meta {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-placeholder);
+}
