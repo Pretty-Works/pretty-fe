@@ -1,26 +1,20 @@
+/* '프로젝트 수정' 버튼은 완료·보관 프로젝트에서 사라진다.
+   최소 높이를 버튼 높이(36px)로 고정해, 버튼 유무와 상관없이
+   상태 점·프로젝트명·아래 탭바 위치가 흔들리지 않게 한다. */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
 }
 
+/* 점 · 이름 · 화살표 묶음. 드롭다운의 기준점이 된다. */
 .selector {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
-  padding: 0;
-  border: none;
-  background: none;
-  border-radius: 10px;
-  cursor: pointer;
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: var(--success);
-  flex-shrink: 0;
+  gap: 8px;
 }
 
 .name {
@@ -29,9 +23,93 @@
   color: var(--text);
 }
 
-.chevron {
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1;
-  color: var(--text-sub);
+/* 아직 못 불러왔거나 열 수 없는 프로젝트 */
+.namePlaceholder {
+  color: var(--text-placeholder);
+}
+
+/* 상태 점 — 누르면 상태 변경 메뉴 */
+.dotButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dotButton:hover:not(:disabled) {
+  background: var(--surface);
+}
+
+.dotButton:disabled {
+  cursor: default;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--text-placeholder);
+}
+
+.green {
+  background: var(--success);
+}
+
+.orange {
+  background: var(--warning);
+}
+
+.purple {
+  background: var(--primary);
+}
+
+.gray {
+  background: var(--text-placeholder);
+}
+
+/* 화살표 — 누르면 프로젝트 전환 메뉴 */
+.caretButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.caretButton:hover {
+  background: var(--surface);
+}
+
+/* 아래 방향 갈매기 — 삼각형 두 개를 나란히 겹쳐 만든다.
+   할 일 팝업의 select 화살표와 같은 방식이라 앱 전체에서 모양이 일치한다. */
+.caret {
+  width: 10px;
+  height: 5px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-sub) 50%),
+    linear-gradient(135deg, var(--text-sub) 50%, transparent 50%);
+  background-position: 0 0, 5px 0;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* 드롭다운 */
+.popupLeft,
+.popupRight {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
 }

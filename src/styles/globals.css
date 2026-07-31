@@ -10,7 +10,7 @@
 
   /* Text */
   --text: #191f28;
-  --text-sub: #6b7484;
+  --text-sub: #3c3f48;
   --text-placeholder: #8b95a1;
 
   /* Surface & Line */
@@ -48,6 +48,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+/* API 연결 전 하드코딩·목업 값 표시용.
+   연동이 끝나면 이 클래스를 붙인 자리를 찾아 함께 제거한다.
+   (전역 클래스라 module.css 규칙을 이기도록 !important) */
+.mock-value {
+  color: #ff2d9b !important;
 }
 
 html,

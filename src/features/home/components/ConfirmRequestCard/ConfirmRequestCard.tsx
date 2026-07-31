@@ -17,7 +17,8 @@ export default function ConfirmRequestCard({
 }: ConfirmRequestCardProps) {
   return (
     <div className={styles.card}>
-      <span className={styles.label}>{request.label}</span>
+      {/* 이 블록은 아직 전부 mock 데이터다 */}
+      <span className={`${styles.label} mock-value`}>{request.label}</span>
 
       <div className={styles.options}>
         {request.options.map((option) => (

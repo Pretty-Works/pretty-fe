@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 
+import { useRouter } from "next/navigation";
+
+import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
 
-import TaskCreateModal from "@/features/home/components/TaskCreateModal/TaskCreateModal";
+import { getErrorCode } from "@/lib/api/errorCode";
+
+import TaskCreateModal, {
+  type EditingTask,
+} from "@/features/home/components/TaskCreateModal/TaskCreateModal";
 
 import MilestoneProgressCard from "@/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard";
 import WeeklyTaskCard from "@/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard";
@@ -13,6 +20,7 @@ import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries
 import { useProjectTasksQuery } from "@/features/project/overview/hooks/queries/useProjectTasksQuery";
 import { useMilestonesQuery } from "@/features/project/overview/hooks/queries/useMilestonesQuery";
 import { useToggleMilestoneMutation } from "@/features/project/overview/hooks/mutations/useToggleMilestoneMutation";
+import { useToggleTaskMutation } from "@/features/home/hooks/mutations/useToggleTaskMutation";
 
 import styles from "./ProjectOverviewView.module.css";
 
@@ -29,15 +37,19 @@ const formatBudget = (budget: number) =>
 export default function ProjectOverviewView({
   projectId,
 }: ProjectOverviewViewProps) {
+  const router = useRouter();
+
   // State
   const [weekOffset, setWeekOffset] = useState(0); // 0 이번 주, -1 지난 주
-  const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가 팝업
+  const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
+  const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
   // Query
   const {
     data: project,
     isLoading,
     isError,
+    error,
   } = useProjectDetailQuery(projectId ?? "");
 
   const {
@@ -54,17 +66,41 @@ export default function ProjectOverviewView({
 
   const { mutate: toggleMilestone } = useToggleMilestoneMutation(projectId ?? "");
 
+  // 토글하면 그 주 보드를 다시 불러와 완료율까지 갱신한다
+  const { mutate: toggleTask } = useToggleTaskMutation([
+    "project",
+    "tasks",
+    projectId ?? "",
+    weekOffset,
+  ]);
+
   if (isLoading) {
     return <p className={styles.stateText}>프로젝트를 불러오는 중이에요…</p>;
   }
 
   if (isError || !project) {
+    // 서버가 원인을 코드로 주므로 상황에 맞는 문구를 보여준다.
+    //   PROJECT_004 없는 프로젝트 · MEMBER_001 참여자가 아님
+    const code = getErrorCode(error);
+
+    const message =
+      code === "PROJECT_004"
+        ? "프로젝트를 찾을 수 없어요. 삭제되었을 수 있습니다."
+        : code === "MEMBER_001"
+          ? "참여 중인 프로젝트가 아니에요."
+          : "프로젝트를 불러오지 못했어요.";
+
     return (
-      <p className={`${styles.stateText} ${styles.stateError}`}>
-        프로젝트를 불러오지 못했어요.
-      </p>
+      <div className={styles.errorBox}>
+        <p className={`${styles.stateText} ${styles.stateError}`}>{message}</p>
+        <Button status="cancel" size="sm" name="홈으로" onClick={() => router.push("/")} />
+      </div>
     );
   }
+
+  // 완료·보관 프로젝트에는 할 일을 추가할 수 없다 (BE ProjectPolicy.isOpenForContent)
+  const isOpenForContent =
+    project.status !== "COMPLETED" && project.status !== "ARCHIVED";
 
   return (
     <div className={styles.container}>
@@ -127,6 +163,7 @@ export default function ProjectOverviewView({
         ) : (
           <MilestoneProgressCard
             board={milestoneBoard}
+            editable={isOpenForContent}
             onToggle={(milestoneId, done) => toggleMilestone({ milestoneId, done })}
           />
         )}
@@ -142,7 +179,20 @@ export default function ProjectOverviewView({
             board={board}
             weekOffset={weekOffset}
             onWeekChange={setWeekOffset}
-            onAddTask={() => setTaskModalOpen(true)}
+            onAddTask={isOpenForContent ? () => setTaskModalOpen(true) : undefined}
+            onToggleTask={(taskId, done) =>
+              toggleTask({ taskId: String(taskId), done })
+            }
+            onSelectTask={(task) => {
+              // 이 화면의 할 일은 모두 현재 프로젝트 소속이다
+              setEditingTask({
+                id: String(task.taskId),
+                content: task.content,
+                projectId: project.projectId,
+                dueDate: task.dueDate,
+              });
+              setTaskModalOpen(true);
+            }}
           />
         )}
       </div>
@@ -150,12 +200,16 @@ export default function ProjectOverviewView({
       {/* 할 일 추가 — 이 화면은 프로젝트가 정해져 있어 고정으로 연다 */}
       <TaskCreateModal
         open={taskModalOpen}
-        onClose={() => setTaskModalOpen(false)}
+        onClose={() => {
+          setTaskModalOpen(false);
+          setEditingTask(undefined);
+        }}
         projects={[]}
         fixedProject={{
           id: String(project.projectId),
           name: project.name,
         }}
+        task={editingTask}
       />
     </div>
   );

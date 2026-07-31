@@ -9,12 +9,6 @@
   background: var(--white);
 }
 
-.icon {
-  flex-shrink: 0;
-  font-size: 13px;
-  line-height: 1;
-}
-
 .input {
   flex: 1;
   min-width: 0;
@@ -28,4 +22,38 @@
 
 .input::placeholder {
   color: var(--text-placeholder);
+}
+
+/* 돋보기 — 입력칸 오른쪽. 렌즈(::before) + 손잡이(::after) */
+.icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+}
+
+/* 렌즈 */
+.icon::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--text-placeholder);
+  border-radius: 50%;
+}
+
+/* 손잡이 — 렌즈의 오른쪽 아래에서 45도로 뻗는다 */
+.icon::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 9px;
+  width: 6px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: var(--text-placeholder);
+  transform: rotate(45deg);
+  transform-origin: 0 50%;
 }

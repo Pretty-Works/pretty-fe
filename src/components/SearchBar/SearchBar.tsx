@@ -11,15 +11,14 @@ export default function SearchBar({
 }: SearchBarProps) {
   return (
     <div className={styles.search}>
-      <span className={styles.icon} aria-hidden="true">
-        🔍
-      </span>
       <input
         className={styles.input}
         type="text"
         placeholder={placeholder}
         {...rest}
       />
+      {/* 돋보기 — CSS로 그린다 (렌즈 + 손잡이) */}
+      <span className={styles.icon} aria-hidden="true" />
     </div>
   );
 }

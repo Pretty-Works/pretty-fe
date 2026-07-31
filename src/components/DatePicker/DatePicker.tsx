@@ -17,6 +17,8 @@ interface CommonProps {
   minDate?: string;
   maxDate?: string;
   label?: string;
+  // 라벨 오른쪽에 붙는 보조 문구 (선택 범위 안내 등)
+  labelSlot?: React.ReactNode;
   required?: boolean;
   placeholder?: string;
   disabled?: boolean;
@@ -56,10 +58,13 @@ function startOfDay(d: Date) {
 
 export default function DatePicker(props: DatePickerProps) {
   const {
+    value,
+    onChange,
     allowFuture = true,
     minDate,
     maxDate,
     label,
+    labelSlot,
     required = false,
     disabled = false,
   } = props;
@@ -234,20 +239,23 @@ export default function DatePicker(props: DatePickerProps) {
       : ""
     : singleValue ?? "";
 
-  const summary = isRange
-    ? pendingStart && pendingEnd
+  // 기간 모드에서만 쓴다. 하루 선택은 고른 날이 칸에 칠해져 있어 아래에 또 적을 이유가 없다.
+  const summary =
+    pendingStart && pendingEnd
       ? `${pendingStart} ~ ${pendingEnd}`
       : pendingStart
         ? `${pendingStart} ~ 종료일을 선택하세요`
-        : "시작일을 선택하세요"
-    : pendingStart || "날짜를 선택하세요";
+        : "시작일을 선택하세요";
 
   return (
     <div className={styles.field}>
       {label && (
-        <span className={styles.fieldLabel}>
-          {label}
-          {required && <span className={styles.required}> *</span>}
+        <span className={styles.fieldLabelRow}>
+          <span className={styles.fieldLabel}>
+            {label}
+            {required && <span className={styles.required}> *</span>}
+          </span>
+          {labelSlot && <span className={styles.labelSlot}>{labelSlot}</span>}
         </span>
       )}
 
@@ -348,7 +356,7 @@ export default function DatePicker(props: DatePickerProps) {
               })}
             </div>
 
-            <p className={styles.summary}>{summary}</p>
+            {isRange && <p className={styles.summary}>{summary}</p>}
 
             <div className={styles.foot}>
               <button

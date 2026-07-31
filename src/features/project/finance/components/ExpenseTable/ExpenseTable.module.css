@@ -1,0 +1,90 @@
+.table {
+  --col-gap: clamp(8px, 1vw, 12px);
+
+  display: flex;
+  flex-direction: column;
+}
+
+.head {
+  display: flex;
+  gap: var(--col-gap);
+  align-items: center;
+  height: 44px;
+  border-bottom: 1px solid var(--line);
+}
+
+.col {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.row {
+  display: flex;
+  gap: var(--col-gap);
+  align-items: center;
+  height: 48px;
+  border-bottom: 1px solid var(--line);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.row:hover {
+  background: var(--surface);
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  overflow: hidden;
+  font-size: 13px;
+  white-space: nowrap;
+  color: var(--text-sub);
+}
+
+.clip {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/*
+ * 화면이 좁아지면 컬럼이 각자 min-width까지 함께 줄어든다.
+ * 날짜·사용자·금액은 잘리면 뜻이 사라져서 고정폭으로 둔다.
+ */
+.colDate {
+  flex: 0 0 92px;
+}
+
+.colCategory {
+  flex: 0 1 96px;
+  min-width: 62px;
+}
+
+.colMerchant {
+  flex: 0 1 170px;
+  min-width: 84px;
+}
+
+.colPurpose {
+  flex: 1 1 150px;
+  min-width: 90px;
+}
+
+.colSpender {
+  flex: 0 0 72px;
+}
+
+/* 금액은 오른쪽 정렬 — 자릿수 비교가 쉬워진다 */
+.colAmount {
+  flex: 0 0 116px;
+  justify-content: flex-end;
+  font-weight: 600;
+}
