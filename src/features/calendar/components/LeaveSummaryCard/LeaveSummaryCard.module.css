@@ -1,0 +1,95 @@
+.card {
+  display: flex;
+  align-items: center;
+  min-height: 150px;
+  padding: 21px 23px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.progressArea {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  max-width: 500px;
+  gap: 21px;
+  padding-right: 32px;
+  border-right: 1px solid var(--border);
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.track {
+  height: 10px;
+  border-radius: 5px;
+  background: #e8e8f0;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 5px;
+  background: var(--primary);
+}
+
+.caption {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.stats {
+  display: flex;
+  flex: 1;
+  justify-content: space-around;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  gap: 8px;
+  padding: 0 14px;
+  border-left: 1px solid var(--border);
+}
+
+.stat:first-child {
+  border-left: none;
+}
+
+.statLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.statValue {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+}
+
+.statValue strong {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.highlight {
+  color: var(--primary);
+}
+
+.statUnit {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+  white-space: nowrap;
+}
