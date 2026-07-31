@@ -46,6 +46,11 @@
   margin: 0 auto 12px;
 }
 
+.errorText {
+  font-size: 14px;
+  color: var(--text-sub);
+}
+
 .submit {
   width: 100%;
   height: 48px;
