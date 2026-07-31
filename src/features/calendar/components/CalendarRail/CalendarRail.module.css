@@ -1,0 +1,129 @@
+.rail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 19px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+}
+
+.projectRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+/* 체크박스: 네이티브 input은 숨기고 옆의 span으로 표시 */
+.checkboxInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 1.4px solid #dcdce4;
+  border-radius: 5px;
+  background: var(--white);
+  color: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.checkboxInput:checked + .checkbox {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--white);
+}
+
+.checkboxInput:focus-visible + .checkbox {
+  outline: 2px solid var(--primary-light);
+  outline-offset: 2px;
+}
+
+.projectName {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.muted {
+  color: var(--text-sub);
+}
+
+.divider {
+  height: 1px;
+  border: none;
+  background: var(--line);
+}
+
+/* 자동완성 목록의 기준 위치 */
+.search {
+  position: relative;
+}
+
+/* 체크된 프로젝트에서 모인 인원 목록 */
+.members {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.dot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.memberName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove {
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text-placeholder);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.remove:hover {
+  color: var(--text-sub);
+}
