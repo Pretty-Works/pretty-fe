@@ -8,6 +8,7 @@ import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
 
 import { getErrorCode } from "@/lib/api/errorCode";
+import { useToastStore } from "@/stores/useToastStore";
 
 import TaskCreateModal, {
   type EditingTask,
@@ -16,6 +17,7 @@ import TaskCreateModal, {
 import MilestoneProgressCard from "@/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard";
 import WeeklyTaskCard from "@/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard";
 
+import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useProjectTasksQuery } from "@/features/project/overview/hooks/queries/useProjectTasksQuery";
 import { useMilestonesQuery } from "@/features/project/overview/hooks/queries/useMilestonesQuery";
@@ -40,6 +42,8 @@ export default function ProjectOverviewView({
   const router = useRouter();
 
   // State
+  const showToast = useToastStore((state) => state.showToast);
+
   const [weekOffset, setWeekOffset] = useState(0); // 0 이번 주, -1 지난 주
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
@@ -66,6 +70,9 @@ export default function ProjectOverviewView({
 
   const { mutate: toggleMilestone } = useToggleMilestoneMutation(projectId ?? "");
 
+  // 마일스톤 토글도 수정과 같은 권한을 본다 (BE ProjectPolicy.canUpdate → PROJECT_005)
+  const canManage = useCanManageProject(projectId ?? "");
+
   // 토글하면 그 주 보드를 다시 불러와 완료율까지 갱신한다
   const { mutate: toggleTask } = useToggleTaskMutation([
     "project",
@@ -73,6 +80,20 @@ export default function ProjectOverviewView({
     projectId ?? "",
     weekOffset,
   ]);
+
+  // 이전 주차에서 넘어온 할 일은 완료하는 순간 이 주 보드에서 빠진다(서버가 미완료만 이월).
+  // 아무 말 없이 행이 사라지면 잘못 지운 것처럼 보이므로 왜 사라졌는지 알린다.
+  const notifyIfCarriedOver = (taskId: number, done: boolean) => {
+    if (!done || !board) return;
+
+    const task = board.groups
+      .flatMap((group) => group.tasks)
+      .find((item) => item.taskId === taskId);
+
+    if (task && task.dueDate < board.weekStart) {
+      showToast("지난 주차 할 일을 완료해 목록에서 사라집니다");
+    }
+  };
 
   if (isLoading) {
     return <p className={styles.stateText}>프로젝트를 불러오는 중이에요…</p>;
@@ -163,7 +184,7 @@ export default function ProjectOverviewView({
         ) : (
           <MilestoneProgressCard
             board={milestoneBoard}
-            editable={isOpenForContent}
+            editable={isOpenForContent && canManage}
             onToggle={(milestoneId, done) => toggleMilestone({ milestoneId, done })}
           />
         )}
@@ -181,7 +202,10 @@ export default function ProjectOverviewView({
             onWeekChange={setWeekOffset}
             onAddTask={isOpenForContent ? () => setTaskModalOpen(true) : undefined}
             onToggleTask={(taskId, done) =>
-              toggleTask({ taskId: String(taskId), done })
+              toggleTask(
+                { taskId: String(taskId), done },
+                { onSuccess: () => notifyIfCarriedOver(taskId, done) },
+              )
             }
             onSelectTask={(task) => {
               // 이 화면의 할 일은 모두 현재 프로젝트 소속이다

@@ -18,6 +18,7 @@ import TaskCreateModal, {
 import { useAgentStore } from "@/stores/useAgentStore";
 
 import { useDebounce } from "@/hooks/useDebounce";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
 import { useRequestsQuery } from "@/features/home/hooks/queries/useRequestsQuery";
 import { useTasksQuery } from "@/features/home/hooks/queries/useTasksQuery";
@@ -26,14 +27,15 @@ import type { MyTask, StatusFilter } from "@/features/home/api/homeApi";
 
 import styles from "./HomeView.module.css";
 
-const USER_NAME = "김서준"; // TODO: 로그인 사용자 정보 연동
-
 const PAGE_SIZE = 7;
 
 export default function HomeView() {
   const router = useRouter();
 
   const openAgent = useAgentStore((state) => state.openAgent);
+
+  // 인사말·프로젝트 생성 버튼 노출에 쓴다 (앱 진입 시 1회 조회 후 캐시)
+  const { data: me } = useMyProfileQuery();
 
   // State
   const [keyword, setKeyword] = useState(""); // 검색창
@@ -131,9 +133,8 @@ export default function HomeView() {
   return (
     <main className={styles.container}>
       {/* 인사말 */}
-      <h1 className={styles.greeting}>
-        안녕하세요. <span className="mock-value">{USER_NAME}</span>님
-      </h1>
+      {/* 이름을 불러오기 전에는 인사말 뒷부분만 비워 둔다 — 줄 자체가 없어지면 아래가 밀린다 */}
+      <h1 className={styles.greeting}>안녕하세요. {me?.name ?? ""}님</h1>
 
       {/* 확인이 필요한 요청 */}
       <section className={styles.panel}>
@@ -177,12 +178,16 @@ export default function HomeView() {
               <h2 className={styles.panelTitle}>프로젝트</h2>
               <ProjectStatusSelect value={status} onChange={handleStatusChange} />
             </div>
-            <Button
-              name="프로젝트 생성"
-              size="sm"
-              hasPlus
-              onClick={() => router.push("/projects/new")}
-            />
+            {/* 팀장 이상 또는 PM 부서만 만들 수 있다. 판정에 쓰는 직급 서열이
+                서버에만 있어 결과(canCreateProject)를 그대로 따른다. */}
+            {me?.canCreateProject && (
+              <Button
+                name="프로젝트 생성"
+                size="sm"
+                hasPlus
+                onClick={() => router.push("/projects/new")}
+              />
+            )}
           </div>
 
           <div className={styles.filterbar}>

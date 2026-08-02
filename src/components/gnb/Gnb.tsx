@@ -11,6 +11,9 @@ import { usePathname } from "next/navigation";
 
 import { useAgentStore } from "@/stores/useAgentStore";
 import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import { POSITION_LABEL } from "@/features/user/api/userApi";
+import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
 
 import Logo from "@/assets/brand/logo.png";
 import AgentIcon from "@/assets/icons/menu/agent.svg";
@@ -25,6 +28,7 @@ export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { mutate: logout } = useLogoutMutation();
+  const { data: me } = useMyProfileQuery();
 
   // 프로필 메뉴: 바깥 클릭·ESC로 닫기
   useEffect(() => {
@@ -129,11 +133,24 @@ export default function Gnb() {
               aria-expanded={menuOpen}
               aria-label="프로필 메뉴"
             >
-              김
+              {/* 이름 첫 글자를 아바타로 쓴다 */}
+              {me?.name.charAt(0) ?? ""}
             </button>
 
             {menuOpen && (
               <div className={styles.dropdown} role="menu">
+                {/* 내 정보 — 별도 화면이 없어 여기서만 확인한다 */}
+                <div className={styles.profileInfo}>
+                  <p className={styles.profileName}>{me?.name ?? "—"}</p>
+                  <p className={styles.profileMeta}>
+                    {me
+                      ? `${DEPARTMENT_LABEL[me.department]} · ${POSITION_LABEL[me.position]}`
+                      : "불러오는 중…"}
+                  </p>
+                </div>
+
+                <hr className={styles.dropdownDivider} />
+
                 <button
                   type="button"
                   className={styles.dropdownItem}

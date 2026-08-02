@@ -1,6 +1,12 @@
+/*
+ * 완료하면 D-day 배지가 사라지는데, 그 배지가 행에서 가장 높은 요소라
+ * 높이를 내용에만 맡기면 체크한 행만 1~2px 낮아진다.
+ * 배지가 있을 때의 높이로 고정해 어느 행이든 같게 유지한다.
+ */
 .row {
   display: flex;
   align-items: center;
+  min-height: 36px;
   gap: 10px;
   padding: 9px 12px;
   border-radius: 8px;
