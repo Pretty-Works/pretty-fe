@@ -1,0 +1,95 @@
+/* 화면 상단 가운데. 시선이 아래로 잘 안 가서 위에 띄운다.
+   에이전트 패널이 오른쪽에 있어 우측 정렬은 가린다.
+   z-index는 모달(100)·GNB(60)보다 위 — 모달 위에서 난 실패도 보여야 한다. */
+.viewport {
+  position: fixed;
+  left: 50%;
+  top: 28px;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/*
+ * 잘 보이게 만드는 건 색이 아니라 대비와 그림자다.
+ * 밝은 화면 위의 어두운 알약 + 겹친 그림자로 페이지에서 떠 있게 만든다.
+ */
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 90vw;
+  padding: 15px 24px 15px 20px;
+  border-radius: 14px;
+  /* 어두운 영역 위에 떠도 경계가 사라지지 않게 얇은 테두리를 둔다 */
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #16181f;
+  box-shadow:
+    0 14px 34px rgba(16, 18, 24, 0.34),
+    0 3px 8px rgba(16, 18, 24, 0.2);
+  animation: drop 0.28s cubic-bezier(0.2, 1.15, 0.35, 1);
+}
+
+/* 위에서 떨어져 살짝 자리를 잡는 느낌 — 등장 방향이 배치와 맞아야 자연스럽다 */
+@keyframes drop {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none;
+  }
+}
+
+/*
+ * 무슨 일이 일어났는지 색으로만 구분한다. 상태 점(ProjectStatusMenu)과 같은 토큰.
+ * 같은 색 링을 둘러 어두운 배경에서 점이 먼저 눈에 들어오게 한다.
+ */
+.dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.green {
+  background: var(--success);
+  box-shadow: 0 0 0 5px rgba(0, 196, 113, 0.22);
+}
+
+.orange {
+  background: var(--warning);
+  box-shadow: 0 0 0 5px rgba(255, 152, 0, 0.22);
+}
+
+.purple {
+  background: var(--primary-light);
+  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.24);
+}
+
+.gray {
+  background: #9aa3ae;
+  box-shadow: 0 0 0 5px rgba(154, 163, 174, 0.22);
+}
+
+.danger {
+  background: var(--danger);
+  box-shadow: 0 0 0 5px rgba(255, 77, 79, 0.24);
+}
+
+.message {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  color: #f4f5f7;
+}

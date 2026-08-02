@@ -9,8 +9,12 @@ import FormField from "@/components/FormField/FormField";
 import DatePicker from "@/components/DatePicker/DatePicker";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
+import { getErrorCode } from "@/lib/api/errorCode";
 import { useAgentStore } from "@/stores/useAgentStore";
+import { useToastStore } from "@/stores/useToastStore";
 
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
 import { useCreateProjectMutation } from "@/features/project/create/hooks/mutations/useCreateProjectMutation";
 import { useUpdateProjectMutation } from "@/features/project/create/hooks/mutations/useUpdateProjectMutation";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
@@ -22,8 +26,22 @@ import {
 
 import styles from "./ProjectCreateView.module.css";
 
-// 로그인 사용자(오너). TODO: 로그인 사용자 정보 연동
-const OWNER: CompanyUser = { userId: 12, name: "김서준", team: "PM팀" };
+// 수정이 막히는 이유를 그대로 알려준다. 기간 축소 차단·동시 수정처럼
+// 화면이 미리 알 수 없는 실패가 있어서, 서버가 준 원인을 보여주는 것 말고는 방법이 없다.
+const UPDATE_ERROR_MESSAGE: Record<string, string> = {
+  PROJECT_002: "참여자 중 찾을 수 없는 사용자가 있어요",
+  PROJECT_003: "목표일은 시작일 이후여야 해요",
+  PROJECT_004: "프로젝트를 찾을 수 없어요",
+  PROJECT_005: "프로젝트 오너와 PM만 수정할 수 있어요",
+  PROJECT_015: "마일스톤 목표일이 프로젝트 기간을 벗어났어요",
+  PROJECT_016: "마일스톤은 목표일과 내용을 모두 입력해 주세요",
+  PROJECT_020: "완료·삭제된 프로젝트는 수정할 수 없어요",
+  PROJECT_021: "새 기간을 벗어나는 할 일·지출·회의록이 있어 기간을 줄일 수 없어요",
+  PROJECT_022: "이미 삭제된 마일스톤이 있어요. 새로고침 후 다시 시도해 주세요",
+  REQUEST_001: "입력값을 다시 확인해 주세요",
+  REQUEST_029: "다른 사용자가 먼저 수정했어요. 새로고침 후 다시 시도해 주세요",
+  USER_003: "퇴사한 사용자가 포함되어 있어요",
+};
 
 // 서버 검증(ProjectRequest)과 동일한 상한. 넘기기 전에 화면에서 막는다.
 const MAX = {
@@ -100,6 +118,7 @@ export default function ProjectCreateView({
   const router = useRouter();
 
   const openAgent = useAgentStore((state) => state.openAgent);
+  const showToast = useToastStore((state) => state.showToast);
 
   // State
   const [name, setName] = useState("");
@@ -129,6 +148,9 @@ export default function ProjectCreateView({
 
   // 수정 모드에서만 기존 값을 불러온다
   const { data: detail } = useProjectDetailQuery(projectId ?? "");
+
+  // 생성 모드의 오너는 로그인 사용자다 (서버가 토큰으로 정하므로 화면은 보여주기만 한다)
+  const { data: me } = useMyProfileQuery();
 
   const isPending = isCreating || isUpdating;
 
@@ -176,10 +198,18 @@ export default function ProjectCreateView({
     };
   }, [memberKeyword]);
 
-  // 이미 담긴 사람은 검색 결과에서 숨긴다 — 오너(나) + 추가된 참여자
+  // 이미 담긴 사람은 검색 결과에서 숨긴다 — 오너 + 추가된 참여자.
+  // 수정 모드의 오너는 서버가 준 값, 생성 모드는 나다.
+  const ownerUserId = detail?.owner.userId ?? me?.userId;
+  const ownerName = detail?.owner.name ?? me?.name ?? "";
+
+  // 상세 응답에는 부서가 없다 — 생성 모드에서만 내 부서를 보여줄 수 있다.
+  const ownerDepartment =
+    isEdit || !me ? "" : DEPARTMENT_LABEL[me.department];
+
   const selectableSuggestions = suggestions.filter(
     (user) =>
-      user.userId !== OWNER.userId &&
+      user.userId !== ownerUserId &&
       !members.some((member) => member.userId === user.userId),
   );
 
@@ -275,7 +305,23 @@ export default function ProjectCreateView({
     if (isEdit && detail) {
       updateProject(
         { version: detail.version, body },
-        { onSuccess: () => router.push(`/projects/${projectId}/overview`) },
+        {
+          // 개요로 돌아가면 화면만으로는 저장 여부를 알 수 없어 토스트로 알린다
+          onSuccess: () => {
+            showToast("프로젝트가 수정되었습니다");
+            router.push(`/projects/${projectId}/overview`);
+          },
+
+          // 실패하면 이 화면에 남는다. 입력값을 그대로 두어야 고쳐서 다시 낼 수 있다.
+          onError: (error) => {
+            const code = getErrorCode(error);
+            showToast(
+              (code && UPDATE_ERROR_MESSAGE[code]) ||
+                "프로젝트를 수정하지 못했어요",
+              "danger",
+            );
+          },
+        },
       );
       return;
     }
@@ -454,9 +500,11 @@ export default function ProjectCreateView({
               {selectableSuggestions.length > 0 ? (
                 selectableSuggestions.map((user) => (
                   <li key={user.userId}>
+                    {/* 전사 임직원 검색 API(GET /users)가 없어 아직 목업이다.
+                        여기서 고른 userId는 실제 DB에 없어 생성 시 PROJECT_002(404)가 난다. */}
                     <button
                       type="button"
-                      className={styles.suggestItem}
+                      className={`${styles.suggestItem} mock-value`}
                       onClick={() => addMember(user)}
                     >
                       {user.name} · {user.team}
@@ -476,13 +524,9 @@ export default function ProjectCreateView({
           <div className={`${styles.memberCard} ${styles.memberCardOwner}`}>
             {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다.
                 상세 응답에 부서가 없어 수정 모드에서는 이름만 보인다. */}
-            <span
-              className={`${styles.memberName} ${isEdit ? "" : "mock-value"}`}
-            >
-              {detail?.owner.name ?? OWNER.name}
-            </span>
-            <span className={`${styles.memberTeam} ${isEdit ? "" : "mock-value"}`}>
-              {isEdit ? "" : `· ${OWNER.team}`}
+            <span className={styles.memberName}>{ownerName}</span>
+            <span className={styles.memberTeam}>
+              {ownerDepartment ? `· ${ownerDepartment}` : ""}
             </span>
             <input
               className={styles.roleInput}
@@ -490,7 +534,7 @@ export default function ProjectCreateView({
               maxLength={MAX.role}
               value={ownerRole}
               onChange={(e) => setOwnerRole(e.target.value)}
-              aria-label={`${OWNER.name} 역할`}
+              aria-label={`${ownerName} 역할`}
             />
           </div>
 

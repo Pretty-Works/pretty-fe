@@ -8,7 +8,7 @@ import styles from "./MilestoneProgressCard.module.css";
 
 interface MilestoneProgressCardProps {
   board: MilestoneBoard;
-  // 완료·보관 프로젝트면 false — 원을 눌러도 서버가 막는다 (PROJECT_020)
+  // 완료·보관 프로젝트(PROJECT_020)이거나 오너·PM이 아니면(PROJECT_005) false
   editable?: boolean;
   onToggle?: (milestoneId: number, done: boolean) => void;
 }
