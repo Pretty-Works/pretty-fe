@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { API_BASE_URL } from "../config";
+import { clearQueryCache } from "./queryCache";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export const api = axios.create({
@@ -50,8 +51,11 @@ api.interceptors.response.use(
         original.headers.Authorization = `Bearer ${token}`;
         return api(original);
       } catch (refreshError) {
-        // refreshToken도 만료/무효 → 세션 정리 후 로그인 화면으로
+        // refreshToken도 만료/무효 → 세션 정리 후 로그인 화면으로.
+        // 캐시에 남은 응답은 전부 이전 사용자 것이라 토큰과 함께 버린다.
+        // (지금은 아래 전체 리로드로도 지워지지만, 소프트 내비게이션으로 바뀌면 살아남는다)
         useAuthStore.getState().clear();
+        clearQueryCache();
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }
