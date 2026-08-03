@@ -6,11 +6,13 @@ import { useRouter } from "next/navigation";
 
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
-import StateView from "@/components/StateView/StateView";
-import TableSkeleton from "@/components/TableSkeleton/TableSkeleton";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
-import ProjectTable from "@/features/project/components/ProjectTable/ProjectTable";
+import ProjectTable, {
+  type ProjectTableColumn,
+} from "@/features/project/components/ProjectTable/ProjectTable";
 import type { Meeting } from "@/features/project/meetings/api/meetingApi";
+import StateView from "@/features/project/meetings/components/StateView/StateView";
+import TableSkeleton from "@/features/project/meetings/components/TableSkeleton/TableSkeleton";
 
 import styles from "./ProjectMeetingView.module.css";
 
@@ -47,6 +49,30 @@ const MOCK_MEETINGS: Meeting[] = [
 
 // 목록에 표시할 참석자 수 (초과분은 "외 N명")
 const VISIBLE_ATTENDEES = 3;
+
+// 회의록 목록 컬럼 정의 (공용 ProjectTable에 주입)
+const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
+  { key: "title", header: "제목", tone: "title" },
+  { key: "author", header: "작성자", width: 110, tone: "sub" },
+  {
+    key: "attendees",
+    header: "참석자",
+    width: 250,
+    tone: "sub",
+    render: (meeting) => {
+      const shown = meeting.attendees.slice(0, VISIBLE_ATTENDEES).join(", ");
+      const rest = Math.max(0, meeting.attendees.length - VISIBLE_ATTENDEES);
+
+      return (
+        <>
+          <span className={styles.attendeeClip}>{shown}</span>
+          {rest > 0 && <span className={styles.attendeeRest}>외 {rest}명</span>}
+        </>
+      );
+    },
+  },
+  { key: "date", header: "일시", width: 150, tone: "muted" },
+];
 
 type LoadStatus = "loading" | "error" | "ready";
 
@@ -160,8 +186,9 @@ export default function ProjectMeetingView({
           />
         ) : (
           <ProjectTable
-            meetings={filtered}
-            visibleAttendees={VISIBLE_ATTENDEES}
+            columns={MEETING_COLUMNS}
+            rows={filtered}
+            rowKey={(m) => m.id}
             onRowClick={(m) =>
               router.push(`/projects/${projectId}/meetings/${m.id}`)
             }

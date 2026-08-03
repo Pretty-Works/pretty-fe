@@ -1,6 +1,6 @@
 "use client";
 
-import DonutChart from "@/components/DonutChart/DonutChart";
+import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
 
 import type { MilestoneBoard } from "@/features/project/overview/api/milestoneApi";
 

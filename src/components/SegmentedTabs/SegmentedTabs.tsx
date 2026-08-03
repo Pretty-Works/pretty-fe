@@ -5,6 +5,7 @@ import styles from "./SegmentedTabs.module.css";
 export interface SegmentedOption<T extends string> {
   value: T;
   label: string;
+  activeColor?: { bg: string; border: string; text: string };
 }
 
 interface SegmentedTabsProps<T extends string> {
@@ -13,15 +14,16 @@ interface SegmentedTabsProps<T extends string> {
   onChange: (value: T) => void;
   label?: string;
   required?: boolean;
+  size?: "sm" | "md";
 }
 
-// 일정 유형·휴가 유형처럼 하나만 고르는 칩 묶음
 export default function SegmentedTabs<T extends string>({
   options,
   value,
   onChange,
   label,
   required = false,
+  size = "sm",
 }: SegmentedTabsProps<T>) {
   return (
     <div className={styles.field}>
@@ -35,6 +37,14 @@ export default function SegmentedTabs<T extends string>({
       <div className={styles.tabs} role="tablist">
         {options.map((option) => {
           const active = option.value === value;
+          const activeStyle =
+            active && option.activeColor
+              ? {
+                  background: option.activeColor.bg,
+                  borderColor: option.activeColor.border,
+                  color: option.activeColor.text,
+                }
+              : undefined;
 
           return (
             <button
@@ -42,7 +52,10 @@ export default function SegmentedTabs<T extends string>({
               type="button"
               role="tab"
               aria-selected={active}
-              className={`${styles.tab} ${active ? styles.active : ""}`}
+              className={`${styles.tab} ${size === "md" ? styles.md : ""} ${
+                active ? styles.active : ""
+              }`}
+              style={activeStyle}
               onClick={() => onChange(option.value)}
             >
               {option.label}

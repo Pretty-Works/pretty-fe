@@ -8,8 +8,8 @@ import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
 import DatePicker from "@/components/DatePicker/DatePicker";
 import FormField from "@/components/FormField/FormField";
-import FormTextArea from "@/components/FormTextArea/FormTextArea";
 import PeoplePicker from "@/components/PeoplePicker/PeoplePicker";
+import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
 import TranscriptUploadModal from "@/features/project/meetings/components/TranscriptUploadModal/TranscriptUploadModal";
 
 import styles from "./MeetingWriteView.module.css";
@@ -138,6 +138,8 @@ export default function MeetingWriteView() {
           options={PEOPLE}
           value={attendees}
           onChange={setAttendees}
+          placeholder="이름 검색 후 Enter로 추가"
+          hint="Enter ↵"
         />
       </section>
 

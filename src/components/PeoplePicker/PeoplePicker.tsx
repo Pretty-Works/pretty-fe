@@ -32,6 +32,8 @@ interface PeoplePickerProps {
   required?: boolean;
   placeholder?: string;
   emptyText?: string;
+  /** 입력창 오른쪽에 표시되는 보조 안내 (예: "Enter ↵") */
+  hint?: React.ReactNode;
 }
 
 const labelOf = (person: PeopleOption) =>
@@ -48,6 +50,7 @@ export default function PeoplePicker({
   required = false,
   placeholder = "이름을 검색한 뒤 목록에서 선택하세요",
   emptyText = "검색 결과가 없어요",
+  hint,
 }: PeoplePickerProps) {
   const [query, setQuery] = useState("");
 
@@ -85,10 +88,17 @@ export default function PeoplePicker({
 
   // 결과 목록이 열려 있을 때 ESC는 목록만 닫는다.
   // 모달 안에서 쓰일 때 ESC가 모달까지 올라가 입력하던 내용째로 닫히는 걸 막는다.
+  // Enter는 검색 결과 첫 번째 인원을 바로 추가한다.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape" && query.trim()) {
       e.stopPropagation();
       setQuery("");
+      return;
+    }
+
+    if (e.key === "Enter" && query.trim() && suggestions.length > 0) {
+      e.preventDefault();
+      add(labelOf(suggestions[0]));
     }
   };
 
@@ -101,6 +111,7 @@ export default function PeoplePicker({
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          rightSlot={hint}
         />
 
         {query.trim() && (

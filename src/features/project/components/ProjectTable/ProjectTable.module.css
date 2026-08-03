@@ -11,15 +11,6 @@
   border-bottom: 1px solid var(--line);
 }
 
-.col {
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-placeholder);
-  white-space: nowrap;
-}
-
 .row {
   display: flex;
   gap: 12px;
@@ -34,52 +25,36 @@
   background: var(--surface);
 }
 
+.col {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+}
+
 .cell {
   display: flex;
   align-items: center;
+  gap: 4px;
   height: 100%;
   overflow: hidden;
 }
 
-.colTitle {
-  flex: 1;
-  min-width: 0;
-}
-
-.colName {
-  width: 110px;
-  flex-shrink: 0;
-}
-
-.colAttend {
-  width: 250px;
-  flex-shrink: 0;
-  gap: 4px;
-}
-
-.colDate {
-  width: 150px;
-  flex-shrink: 0;
-}
-
-.cell.colTitle {
+.cellTitle {
   font-size: 13.5px;
   font-weight: 500;
   color: var(--text);
 }
 
-.cell.colName {
+.cellSub {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-sub);
 }
 
-.cell.colAttend {
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.cell.colDate {
+.cellMuted {
   font-size: 13px;
   font-weight: 400;
   color: var(--text-placeholder);
@@ -90,13 +65,4 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-}
-
-.colAttend .clip {
-  color: var(--text-sub);
-}
-
-.rest {
-  flex-shrink: 0;
-  color: var(--text-placeholder);
 }

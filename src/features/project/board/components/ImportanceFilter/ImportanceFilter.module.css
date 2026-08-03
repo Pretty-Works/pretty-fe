@@ -1,0 +1,39 @@
+.filter {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #4d5261;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.chip:hover:not(.chipOn) {
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+
+.chipOn {
+  background: #f2f0fe;
+  border-color: #d1c7fa;
+  color: #6b4ad9;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}

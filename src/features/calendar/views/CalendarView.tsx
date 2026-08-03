@@ -2,9 +2,8 @@
 
 import { useMemo, useState } from "react";
 
-import ConfirmModal from "@/components/ConfirmModal/ConfirmModal";
-
 import AiScheduleButton from "@/features/calendar/components/AiScheduleButton/AiScheduleButton";
+import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmModal";
 import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
 import CalendarRail from "@/features/calendar/components/CalendarRail/CalendarRail";
 import DayDetailCard from "@/features/calendar/components/DayDetailCard/DayDetailCard";
