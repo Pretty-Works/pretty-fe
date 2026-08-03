@@ -1,0 +1,35 @@
+/*
+ * 폭은 글자에 맞추고, 높이는 고정한다.
+ * 높이를 줄상자에 맡기면 폰트 메트릭(Noto Sans KR은 한글 탓에 ascent/descent가 크다)에
+ * 따라 글자가 위로 뜨고, 라틴 subset이 늦게 로드되면 그 시점에 위치가 한 번 더 움직인다.
+ */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 18px;
+  padding: 0 7px;
+  border-radius: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 밀림(D+N) · D-DAY · D-1 */
+.urgent {
+  background: var(--dday-urgent-bg);
+  color: var(--dday-urgent-text);
+}
+
+/* 일주일 이내 (D-2 ~ D-7) */
+.soon {
+  background: var(--dday-soon-bg);
+  color: var(--dday-soon-text);
+}
+
+/* 완료, 또는 일주일 이상 남음(D-8 이상) */
+.idle {
+  background: var(--dday-idle-bg);
+  color: var(--dday-idle-text);
+}

@@ -1,0 +1,70 @@
+/* FormField와 같은 골격 — 라벨 톤·간격·높이를 맞춘다 */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.required {
+  color: var(--danger);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 기본 화살표를 끄고 직접 그린다 — 위치를 제어해야 테두리에 붙지 않는다 */
+.select {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  padding: 0 34px 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background-color: var(--white);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+
+  appearance: none;
+  -webkit-appearance: none;
+  /* 삼각형 두 개를 겹쳐 ⌄ 모양을 만든다 */
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-placeholder) 50%),
+    linear-gradient(135deg, var(--text-placeholder) 50%, transparent 50%);
+  background-position: calc(100% - 19px) center, calc(100% - 14px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+/* 아직 고르지 않았을 때는 입력칸 placeholder와 같은 톤 */
+.selectEmpty {
+  color: var(--text-placeholder);
+}
+
+.select option {
+  color: var(--text);
+}
+
+.select option[value=""] {
+  color: var(--text-placeholder);
+}
+
+.select:focus {
+  border-color: var(--primary);
+}
+
+.select:disabled {
+  background: var(--surface);
+  color: var(--text-placeholder);
+  cursor: not-allowed;
+}

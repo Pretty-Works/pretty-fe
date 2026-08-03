@@ -40,6 +40,20 @@
   color: var(--danger);
 }
 
+/* 읽기 전용 — 직접 입력하지 않고 자동으로 계산되어 채워지는 칸 */
+.control:has(.input:read-only) {
+  background: var(--surface);
+}
+
+.control:has(.input:read-only):focus-within {
+  border-color: var(--border);
+}
+
+.input:read-only {
+  color: var(--text-sub);
+  cursor: default;
+}
+
 .input {
   flex: 1;
   min-width: 0;

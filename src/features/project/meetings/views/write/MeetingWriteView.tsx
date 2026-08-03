@@ -9,6 +9,7 @@ import Chip from "@/components/Chip/Chip";
 import DatePicker from "@/components/DatePicker/DatePicker";
 import FormField from "@/components/FormField/FormField";
 import FormTextArea from "@/components/FormTextArea/FormTextArea";
+import PeoplePicker from "@/components/PeoplePicker/PeoplePicker";
 import TranscriptUploadModal from "@/features/project/meetings/components/TranscriptUploadModal/TranscriptUploadModal";
 
 import styles from "./MeetingWriteView.module.css";
@@ -16,14 +17,14 @@ import styles from "./MeetingWriteView.module.css";
 const AUTHOR = "김서준 · 개발팀 팀장";
 
 const PEOPLE = [
-  "김서준 · 개발팀",
-  "이하늘 · 백엔드팀",
-  "정우진 · 기획팀",
-  "한도윤 · 인프라팀",
-  "김민서 · 디자인팀",
-  "이서연 · QA팀",
-  "박지민 · 프론트팀",
-  "최유나 · 데이터팀",
+  { id: "u1", name: "김서준", description: "개발팀" },
+  { id: "u2", name: "이하늘", description: "백엔드팀" },
+  { id: "u3", name: "정우진", description: "기획팀" },
+  { id: "u4", name: "한도윤", description: "인프라팀" },
+  { id: "u5", name: "김민서", description: "디자인팀" },
+  { id: "u6", name: "이서연", description: "QA팀" },
+  { id: "u7", name: "박지민", description: "프론트팀" },
+  { id: "u8", name: "최유나", description: "데이터팀" },
 ];
 
 function todayISO() {
@@ -41,22 +42,8 @@ export default function MeetingWriteView() {
     setDate(todayISO());
   }, []);
 
-  const [attendees, setAttendees] = useState<string[]>([
-    "김서준 · 재무팀",
-    "이하늘 · 백엔드팀",
-  ]);
-  const [query, setQuery] = useState("");
-  const suggestions = PEOPLE.filter(
-    (p) => p.includes(query.trim()) && !attendees.includes(p),
-  );
-
-  const addAttendee = (name: string) => {
-    setAttendees((prev) => (prev.includes(name) ? prev : [...prev, name]));
-    setQuery("");
-  };
-  const removeAttendee = (name: string) => {
-    setAttendees((prev) => prev.filter((a) => a !== name));
-  };
+  // 선택된 참석자 userId
+  const [attendees, setAttendees] = useState<string[]>(["u1", "u2"]);
 
   // 녹취록 업로드
   const [modalOpen, setModalOpen] = useState(false);
@@ -145,49 +132,13 @@ export default function MeetingWriteView() {
           </div>
         </div>
 
-        <div className={styles.attendeeField}>
-          <div className={styles.attendeeSearch}>
-            <FormField
-              label="참석자"
-              placeholder="이름을 검색한 뒤 목록에서 선택하세요"
-              required
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            {query.trim() && (
-              <ul className={styles.suggest}>
-                {suggestions.length > 0 ? (
-                  suggestions.map((p) => (
-                    <li key={p}>
-                      <button
-                        type="button"
-                        className={styles.suggestItem}
-                        onClick={() => addAttendee(p)}
-                      >
-                        {p}
-                      </button>
-                    </li>
-                  ))
-                ) : (
-                  <li className={styles.suggestEmpty}>검색 결과가 없어요</li>
-                )}
-              </ul>
-            )}
-          </div>
-
-          {attendees.length > 0 && (
-            <div className={styles.chips}>
-              {attendees.map((name) => (
-                <Chip
-                  key={name}
-                  label={name}
-                  tone="primary"
-                  onRemove={() => removeAttendee(name)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <PeoplePicker
+          label="참석자"
+          required
+          options={PEOPLE}
+          value={attendees}
+          onChange={setAttendees}
+        />
       </section>
 
       {/* 회의 내용 */}

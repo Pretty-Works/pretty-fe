@@ -1,0 +1,38 @@
+.dateTimeField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+/* 날짜는 남는 폭을 채우고 시간은 고정 */
+.dateTimeRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dateCol {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeCol {
+  flex-shrink: 0;
+  width: 140px;
+}
+
+/* 삭제는 왼쪽 끝으로 밀어 취소·저장과 떨어뜨린다 */
+.deleteButton {
+  margin-right: auto;
+}
+
+.error {
+  font-size: 12px;
+  color: var(--danger);
+}

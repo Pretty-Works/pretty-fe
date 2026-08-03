@@ -3,19 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { PROJECT_TABS } from "@/features/project/constants/projectTabs";
+
 import styles from "./ProjectTabBar.module.css";
-
-interface ProjectTab {
-  segment: string;
-  label: string;
-}
-
-const PROJECT_TABS: ProjectTab[] = [
-  { segment: "overview", label: "개요" },
-  { segment: "board", label: "게시판" },
-  { segment: "meetings", label: "회의록" },
-  { segment: "finance", label: "재무" },
-];
 
 export default function ProjectTabBar() {
   const pathname = usePathname();

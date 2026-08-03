@@ -1,0 +1,392 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 28px 24px 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 페이지 헤더 */
+.pageHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.pageHeadText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pageTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 누르면 에이전트 패널이 열린다 */
+.pageSub {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: #9678dc;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pageSub:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 카드 */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 입력칸 + 경고 문구 묶음 */
+.fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.warn {
+  font-size: 12px;
+  color: var(--danger);
+}
+
+.emptyText {
+  padding: 20px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-placeholder);
+}
+
+/* 참여자 검색 */
+.memberSearch {
+  position: relative;
+}
+
+.suggest {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  list-style: none;
+}
+
+.suggestItem {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.suggestItem:hover {
+  background: var(--primary-bright);
+}
+
+.suggestEmpty {
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--text-placeholder);
+}
+
+/* 참여자 카드 */
+.memberGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  gap: 12px 16px;
+}
+
+.memberCard {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 56px;
+  padding: 0 13px;
+  border: 1px solid #e5e5ed;
+  border-radius: 10px;
+  background: var(--white);
+}
+
+.memberName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.memberTeam {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+/* 역할 — 직접 입력 (예: PM, TL) */
+.roleInput {
+  flex-shrink: 0;
+  width: 116px;
+  height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text);
+  outline: none;
+}
+
+.roleInput::placeholder {
+  color: var(--text-placeholder);
+}
+
+.roleInput:focus {
+  border-color: var(--primary);
+}
+
+/* 책임자 — 배지 대신 테두리를 강조해 구분한다 */
+.memberCardOwner {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.memberRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* 예산 제한 없음 토글 — 목표 예산·한글 표기와 같은 행, 입력칸 높이에 맞춤 */
+.budgetToggle {
+  flex-shrink: 0;
+  align-self: flex-end;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.budgetToggle:hover {
+  border-color: var(--text-placeholder);
+}
+
+.budgetToggleOn {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.memberRemove:hover {
+  background: #fff5f5;
+  color: var(--danger);
+}
+
+/* 마일스톤 */
+.msHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 2px;
+}
+
+/* 드래그 손잡이 자리 (헤더 정렬용) */
+.msHeadHandle {
+  width: 10px;
+  flex-shrink: 0;
+}
+
+.msHeadDate {
+  width: 162px;
+  flex-shrink: 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+.msHeadGoal {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+.msHeadAction {
+  width: 44px;
+  flex-shrink: 0;
+}
+
+.msRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: opacity 0.15s ease;
+}
+
+/* 끌고 있는 행 */
+.msRowDragging {
+  opacity: 0.45;
+}
+
+/* 놓일 자리 표시 — 행 사이에 회색 삽입선 */
+.msRowInsertAbove {
+  box-shadow: 0 -2px 0 0 var(--text-placeholder);
+}
+
+.msRowInsertBelow {
+  box-shadow: 0 2px 0 0 var(--text-placeholder);
+}
+
+/* 드래그 손잡이 — 점 6개(2×3)를 CSS로 그린다 */
+.msHandle {
+  flex-shrink: 0;
+  width: 10px;
+  height: 16px;
+  cursor: grab;
+  background-image: radial-gradient(
+    circle at 1.5px 1.5px,
+    var(--text-placeholder) 1.5px,
+    transparent 0
+  );
+  background-size: 5px 5px;
+}
+
+.msHandle:active {
+  cursor: grabbing;
+}
+
+.msHandle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.msDate {
+  width: 162px;
+  flex-shrink: 0;
+}
+
+.msGoal {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 9px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12.5px;
+  color: var(--text);
+  outline: none;
+}
+
+.msGoal::placeholder {
+  color: var(--text-placeholder);
+}
+
+.msGoal:focus {
+  border-color: var(--primary);
+}
+
+.msRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0 11px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.msRemove:hover {
+  background: #fff5f5;
+  color: var(--danger);
+}

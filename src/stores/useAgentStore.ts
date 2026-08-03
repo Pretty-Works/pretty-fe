@@ -4,16 +4,30 @@ import { create } from "zustand";
 
 interface AgentStore {
   folded: boolean;
-  toggleFolded: () => void;
-
   expanded: boolean;
+
+  toggleFolded: () => void;
   toggleExpanded: () => void;
+  openAgent: () => void;
 }
 
 export const useAgentStore = create<AgentStore>((set) => ({
   folded: false,
-  toggleFolded: () => set((state) => ({ folded: !state.folded })),
-
   expanded: false,
-  toggleExpanded: () => set((state) => ({ expanded: !state.expanded })),
+
+  toggleFolded: () =>
+    set((state) => ({
+      folded: !state.folded,
+    })),
+
+  toggleExpanded: () =>
+    set((state) => ({
+      expanded: !state.expanded,
+    })),
+
+  // 에이전트 열기 전용
+  openAgent: () =>
+    set({
+      folded: false,
+    }),
 }));

@@ -1,0 +1,59 @@
+/*
+ * 완료하면 D-day 배지가 사라지는데, 그 배지가 행에서 가장 높은 요소라
+ * 높이를 내용에만 맡기면 체크한 행만 1~2px 낮아진다.
+ * 배지가 있을 때의 높이로 고정해 어느 행이든 같게 유지한다.
+ */
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.row:not(.rowDisabled):hover {
+  background: var(--surface);
+}
+
+/* 제목을 눌러 수정 화면을 열 수 있을 때 */
+.titleClickable {
+  cursor: pointer;
+}
+
+.titleClickable:hover {
+  text-decoration: underline;
+}
+
+/* 토글 권한 없음 — 글씨 회색 */
+.rowDisabled .title {
+  color: var(--text-placeholder);
+}
+
+/* 제목 — 내용 폭만 차지하고, 길면 줄어들며 말줄임 처리된다 */
+.title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* 제목·배지와 담당자 사이를 벌린다 (담당자가 없으면 그냥 빈 공간) */
+.spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.title.done {
+  color: var(--text-placeholder);
+  text-decoration: line-through;
+}
+
+.meta {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-placeholder);
+}

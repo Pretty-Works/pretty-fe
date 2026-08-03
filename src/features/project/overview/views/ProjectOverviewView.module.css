@@ -1,0 +1,107 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 마일스톤 · 주간 Task 2단 */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+/* 그리드 아이템 기본값(min-width: auto)이면 내용이 칸을 밀어내 가로 스크롤이 생긴다 */
+.columns > * {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px;
+  border-radius: 16px;
+  background: var(--white);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.panelHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panelTitle {
+  font-size: 15.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 기간 · 예산 · 오너 */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px 20px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.infoLabel {
+  font-size: 12px;
+  color: var(--text-placeholder);
+}
+
+.infoValue {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* 참여자 — 공용 Chip 사용 */
+.memberList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 프로젝트를 열 수 없을 때 — 문구 + 빠져나갈 길 */
+.errorBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 56px 0;
+}
+
+.errorBox .stateText {
+  padding: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* 상태 문구 */
+.stateText {
+  padding: 48px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-placeholder);
+}
+
+.stateError {
+  color: var(--danger);
+}
