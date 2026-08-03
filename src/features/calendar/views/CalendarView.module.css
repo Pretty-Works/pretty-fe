@@ -31,3 +31,24 @@
   flex-direction: column;
   gap: 24px;
 }
+
+/* 조회 실패 안내 — "일정이 없다"와 "못 불러왔다"를 구분해 준다 */
+.loadError {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--dday-urgent-bg);
+  font-size: 13px;
+  color: var(--dday-urgent-text);
+}
+
+.retry {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dday-urgent-text);
+  text-decoration: underline;
+  cursor: pointer;
+}

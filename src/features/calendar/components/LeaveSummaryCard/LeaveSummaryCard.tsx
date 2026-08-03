@@ -3,7 +3,8 @@ import type { LeaveSummary } from "@/features/calendar/types";
 import styles from "./LeaveSummaryCard.module.css";
 
 interface LeaveSummaryCardProps {
-  leave: LeaveSummary;
+  /** 아직 못 받아왔으면 비워 둔다 — 0을 그리면 "잔여 0일"이라는 잘못된 정보가 된다 */
+  leave?: LeaveSummary;
 }
 
 /**
@@ -23,16 +24,17 @@ function parseTenure(tenure: string) {
 }
 
 export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
-  const { remainingDays, usedDays, grantedDays, tenureYears } = leave;
   const percent =
-    grantedDays > 0 ? Math.round((usedDays / grantedDays) * 100) : 0;
-  const tenure = parseTenure(tenureYears);
+    leave && leave.grantedDays > 0
+      ? Math.round((leave.usedDays / leave.grantedDays) * 100)
+      : 0;
+  const tenure = leave ? parseTenure(leave.tenureYears) : null;
 
   const stats = [
-    { label: "잔여 연차", value: remainingDays, unit: "d", highlight: true },
-    { label: "사용연차", value: usedDays, unit: "d" },
-    { label: "총 연차", value: grantedDays, unit: "d" },
-    { label: "근속연수", value: tenure.value, unit: tenure.unit },
+    { label: "잔여 연차", value: leave?.remainingDays, unit: "d", highlight: true },
+    { label: "사용연차", value: leave?.usedDays, unit: "d" },
+    { label: "총 연차", value: leave?.grantedDays, unit: "d" },
+    { label: "근속연수", value: tenure?.value, unit: tenure?.unit ?? "" },
   ];
 
   return (
@@ -44,7 +46,11 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
           <div className={styles.fill} style={{ width: `${percent}%` }} />
         </div>
 
-        <p className={styles.caption}>올해 연차의 {percent}%를 사용했어요!</p>
+        <p className={styles.caption}>
+          {leave
+            ? `올해 연차의 ${percent}%를 사용했어요!`
+            : "연차 현황을 불러오는 중이에요"}
+        </p>
       </div>
 
       <div className={styles.stats}>
@@ -53,7 +59,7 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
             <span className={styles.statLabel}>{stat.label}</span>
             <span className={styles.statValue}>
               <strong className={stat.highlight ? styles.highlight : ""}>
-                {stat.value}
+                {stat.value ?? "—"}
               </strong>
               <span className={styles.statUnit}>{stat.unit}</span>
             </span>

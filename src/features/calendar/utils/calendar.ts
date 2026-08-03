@@ -31,6 +31,14 @@ export function formatDayLabel(key: string) {
   })`;
 }
 
+/** "YYYY-MM-DD"에서 며칠 이동한 키 (월·연 경계는 Date가 알아서 넘긴다) */
+export function addDays(key: string, diff: number) {
+  const date = fromDateKey(key);
+  date.setDate(date.getDate() + diff);
+
+  return toDateKey(date);
+}
+
 export function addMonths(month: Date, diff: number) {
   return new Date(month.getFullYear(), month.getMonth() + diff, 1);
 }

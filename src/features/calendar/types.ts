@@ -34,7 +34,7 @@ export interface CalendarEvent {
   time?: string;
   endTime?: string;
   allDay?: boolean;
-  projectId?: string;
+  // 백엔드는 일정을 프로젝트에 연결하지 않는다 (레일의 프로젝트 체크는 '그 인원을 보기' 용도)
   type?: ScheduleType;
   /** 휴가 일정이면 true, 수정·취소는 leaveId로 호출한다 */
   isLeave?: boolean;

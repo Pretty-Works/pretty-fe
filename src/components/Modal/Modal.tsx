@@ -20,6 +20,10 @@ interface ModalProps {
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
+// 열려 있는 모달 수. 모달이 겹칠 수 있어서(일정 수정 위에 삭제 확인 등) 개수로 센다.
+// 각자 "열기 전 값"을 되돌리면, 겹쳐 열렸다가 동시에 닫힐 때 나중 모달이 hidden을 복원해 스크롤이 잠긴 채 남는다.
+let openModalCount = 0;
+
 // 모달 껍데기. 오버레이·닫기·포커스·스크롤만 책임지고 내용은 모른다.
 export default function Modal({
   open,
@@ -67,13 +71,16 @@ export default function Modal({
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // 열려 있는 동안 뒤 화면 스크롤 잠금
+  // 열려 있는 동안 뒤 화면 스크롤 잠금 (마지막 모달이 닫힐 때만 푼다)
   useEffect(() => {
     if (!open) return;
-    const previous = document.body.style.overflow;
+
+    openModalCount += 1;
     document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = previous;
+      openModalCount -= 1;
+      if (openModalCount === 0) document.body.style.overflow = "";
     };
   }, [open]);
 
