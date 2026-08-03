@@ -40,8 +40,8 @@ interface ScheduleEditorModalProps {
   initial: ScheduleDraft;
   /** 참여 인원 검색 후보 */
   people: PeopleOption[];
-  /** 본인 — 서버가 자동으로 참여자에 넣으므로 표시만 한다 */
-  me: PeopleOption;
+  /** 본인 — 서버가 자동으로 참여자에 넣으므로 표시만 한다. 아직 모르면 생략 */
+  me?: PeopleOption;
   onClose: () => void;
   onSubmit: (submit: ScheduleSubmit) => void;
   onDelete?: () => void;
@@ -67,6 +67,17 @@ export default function ScheduleEditorModal({
   };
 
   const isLeave = draft.formType === "LEAVE";
+
+  // 수정할 땐 휴가 ↔ 일반 일정을 서로 바꿀 수 없다 (API가 갈라져 있다 — BE SCHEDULE_007)
+  const typeOptions =
+    mode === "create"
+      ? TYPE_OPTIONS
+      : TYPE_OPTIONS.filter((option) =>
+          initial.formType === "LEAVE"
+            ? option.value === "LEAVE"
+            : option.value !== "LEAVE",
+        );
+
   // 휴가는 항상 날짜 단위라 종일 토글이 없다
   const useRange = isLeave || draft.allDay;
 
@@ -93,7 +104,9 @@ export default function ScheduleEditorModal({
           leaveType: draft.leaveType,
           startDate: draft.startDate,
           endDate: draft.endDate,
-          reason: draft.reason.trim() || undefined,
+          // 수정에서 사유를 비웠다면 빈 문자열을 보내야 지워진다.
+          // (서버는 null=기존 유지라 undefined로 보내면 예전 사유가 그대로 남는다)
+          reason: draft.reason.trim() || (mode === "edit" ? "" : undefined),
         },
       });
       onClose();
@@ -161,7 +174,7 @@ export default function ScheduleEditorModal({
     >
       <SegmentedTabs
         label="일정 유형"
-        options={TYPE_OPTIONS}
+        options={typeOptions}
         value={draft.formType}
         onChange={(formType) => patch({ formType })}
       />
@@ -177,6 +190,8 @@ export default function ScheduleEditorModal({
         <FormField
           label="이름"
           placeholder="예: 고객사 미팅"
+          // 서버 제한과 맞춘다 (초과하면 400)
+          maxLength={200}
           value={draft.title}
           onChange={(e) => patch({ title: e.target.value })}
         />
@@ -244,7 +259,7 @@ export default function ScheduleEditorModal({
         <PeoplePicker
           label="참여 인원"
           options={people}
-          pinned={[{ ...me, description: "나" }]}
+          pinned={me ? [{ ...me, description: "나" }] : []}
           value={draft.participantIds}
           onChange={(participantIds) => patch({ participantIds })}
         />

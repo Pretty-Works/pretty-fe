@@ -7,145 +7,98 @@ import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmMod
 import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
 import CalendarRail from "@/features/calendar/components/CalendarRail/CalendarRail";
 import DayDetailCard from "@/features/calendar/components/DayDetailCard/DayDetailCard";
+import EventDetailModal from "@/features/calendar/components/EventDetailModal/EventDetailModal";
 import LeaveSummaryCard from "@/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard";
 import MonthCalendar from "@/features/calendar/components/MonthCalendar/MonthCalendar";
 
-import {
-  MOCK_CHECKED_PROJECT_IDS,
-  MOCK_EVENTS,
-  MOCK_INITIAL_MONTH,
-  MOCK_INITIAL_SELECTED,
-  MOCK_LEAVE,
-  MOCK_ME,
-  MOCK_MEMBERS,
-  MOCK_PROJECTS,
-  MOCK_TODAY,
-} from "@/features/calendar/mocks/calendarMock";
+import { messageOf } from "@/features/calendar/api/calendarApi";
+import { useRemoveScheduleMutation } from "@/features/calendar/hooks/mutations/useRemoveScheduleMutation";
+import { useSaveScheduleMutation } from "@/features/calendar/hooks/mutations/useSaveScheduleMutation";
+import { useCalendarData } from "@/features/calendar/hooks/useCalendarData";
+import { useCalendarFilters } from "@/features/calendar/hooks/useCalendarFilters";
+import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs";
 import {
   addMonths,
+  buildMonthWeeks,
   coversDate,
-  fromDateKey,
-  isSameMonth,
+  toDateKey,
 } from "@/features/calendar/utils/calendar";
-import type {
-  CalendarEvent,
-  LeaveType,
-  ScheduleDraft,
-  ScheduleSubmit,
-} from "@/features/calendar/types";
-
-const LEAVE_LABELS: Record<LeaveType, string> = {
-  ANNUAL: "연차",
-  EXCUSED: "공가",
-};
-
-const dateOf = (isoDateTime: string) => isoDateTime.slice(0, 10);
-const timeOf = (isoDateTime: string) => isoDateTime.slice(11, 16);
-
-// 모달이 넘긴 API 본문 → 화면에 그릴 일정
-// API 연결 후에는 서버 응답을 다시 받아 그리면 되고 이 변환은 사라진다.
-function submitToEvent(
-  submit: ScheduleSubmit,
-  id: string,
-  memberId: string,
-): CalendarEvent {
-  if (submit.kind === "leave") {
-    const { payload } = submit;
-    return {
-      id,
-      memberId,
-      title: LEAVE_LABELS[payload.leaveType],
-      start: payload.startDate,
-      end: payload.endDate,
-      allDay: true,
-      isLeave: true,
-      leaveId: submit.leaveId ?? id,
-      leaveType: payload.leaveType,
-      reason: payload.reason,
-    };
-  }
-
-  const { payload } = submit;
-  return {
-    id,
-    memberId,
-    title: payload.title,
-    start: dateOf(payload.startAt),
-    end: dateOf(payload.endAt),
-    allDay: payload.allDay,
-    time: payload.allDay ? undefined : timeOf(payload.startAt),
-    endTime: payload.allDay ? undefined : timeOf(payload.endAt),
-    type: payload.type,
-    participantIds: payload.participantUserIds,
-  };
-}
+import type { ScheduleSubmit } from "@/features/calendar/types";
+import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./CalendarView.module.css";
 
+// 삭제·나가기 확인 문구 (휴가는 '취소', 남의 일정은 '나가기')
+const CONFIRM_TEXT = {
+  leave: {
+    title: "이 일정에서 나갈까요?",
+    description: "내 캘린더에서만 사라지고 다른 참가자에겐 그대로 남아요.",
+    confirmLabel: "나가기",
+  },
+  cancelLeave: {
+    title: "휴가를 취소할까요?",
+    description: "취소하면 사용한 연차가 다시 늘어나요.",
+    confirmLabel: "휴가 취소",
+  },
+  delete: {
+    title: "일정을 삭제할까요?",
+    description: "삭제한 일정은 되돌릴 수 없어요.",
+    confirmLabel: "삭제",
+  },
+};
+
 export default function CalendarView() {
-  // API 연결 전이라 목데이터를 화면 상태로 들고 있는다
-  const [events, setEvents] = useState(MOCK_EVENTS);
-
-  const [month, setMonth] = useState(MOCK_INITIAL_MONTH);
-  const [selectedDate, setSelectedDate] = useState(MOCK_INITIAL_SELECTED);
-  const [checkedProjectIds, setCheckedProjectIds] = useState(
-    MOCK_CHECKED_PROJECT_IDS,
+  const [today] = useState(() => toDateKey(new Date()));
+  const [month, setMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
-  const [hiddenMemberIds, setHiddenMemberIds] = useState<string[]>([]);
-  // 프로젝트와 무관하게 이름으로 직접 추가한 인원
-  const [addedMemberIds, setAddedMemberIds] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState(today);
 
-  // 색상·이름을 id로 찾아 쓰기 위한 전체 구성원 맵 (나 포함)
-  const membersById = useMemo(() => {
-    return Object.fromEntries(
-      [MOCK_ME, ...MOCK_MEMBERS].map((member) => [member.id, member]),
-    );
-  }, []);
+  // 달력 격자는 앞뒤 달을 물고 있어서 보이는 칸 전체를 조회 범위로 쓴다
+  const range = useMemo(() => {
+    const weeks = buildMonthWeeks(month);
 
-  // 체크된 프로젝트의 인원을 모아 레일 목록을 만든다 (중복은 한 번만, 뺀 사람은 제외)
-  const railMembers = useMemo(() => {
-    const seen = new Set<string>();
+    return {
+      from: toDateKey(weeks[0][0]),
+      to: toDateKey(weeks[weeks.length - 1][6]),
+    };
+  }, [month]);
 
-    const fromProjects = MOCK_PROJECTS.filter((project) =>
-      checkedProjectIds.includes(project.id),
-    ).flatMap((project) => project.memberIds);
+  const { events, members, leave, loading, failed, retry } =
+    useCalendarData(range);
 
-    return [...fromProjects, ...addedMemberIds]
-      .filter((id) => {
-        if (seen.has(id) || hiddenMemberIds.includes(id)) return false;
-        seen.add(id);
-        return true;
-      })
-      .map((id) => membersById[id])
-      .filter(Boolean);
-  }, [checkedProjectIds, hiddenMemberIds, addedMemberIds, membersById]);
+  const filters = useCalendarFilters({
+    projects: members.projects,
+    knownMembers: members.knownMembers,
+    membersById: members.membersById,
+  });
 
-  // 아직 목록에 없는 사람만 검색으로 추가할 수 있다
-  const railCandidates = useMemo(() => {
-    const shown = new Set(railMembers.map((member) => member.id));
-    return MOCK_MEMBERS.filter((member) => !shown.has(member.id));
-  }, [railMembers]);
+  const dialogs = useScheduleDialogs(members.myId);
+  const saveSchedule = useSaveScheduleMutation();
+  const removeSchedule = useRemoveScheduleMutation();
+
+  // 저장·삭제 실패는 앱 공통 토스트로 알린다 (모달 위에 또 모달을 띄우지 않는다)
+  const showToast = useToastStore((state) => state.showToast);
 
   // 레일에 보이는 사람(+나)의 일정만 캘린더에 그린다
   const visibleMemberIds = useMemo(
-    () => new Set([MOCK_ME.id, ...railMembers.map((member) => member.id)]),
-    [railMembers],
+    () =>
+      new Set([
+        members.myId ?? "",
+        ...filters.railMembers.map((member) => member.id),
+      ]),
+    [filters.railMembers, members.myId],
   );
 
-  // 레일에서 끈 프로젝트·뺀 구성원의 일정은 캘린더에서 감춘다
+  // 레일에서 뺀 사람의 일정은 감춘다.
+  // 작성자가 아니어도 보이는 사람이 참가자면 남긴다 (그 사람 일정에 잡힌 시간이라 보여야 한다).
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
-      // 내 일정은 프로젝트 체크·구성원 필터와 무관하게 항상 보인다
-      if (event.memberId === MOCK_ME.id) return true;
+      if (visibleMemberIds.has(event.memberId)) return true;
 
-      if (!visibleMemberIds.has(event.memberId)) return false;
-      if (event.projectId && !checkedProjectIds.includes(event.projectId)) {
-        return false;
-      }
-
-      return true;
+      return (event.participantIds ?? []).some((id) => visibleMemberIds.has(id));
     });
-  }, [events, checkedProjectIds, visibleMemberIds]);
+  }, [events, visibleMemberIds]);
 
   const selectedEvents = useMemo(() => {
     return visibleEvents
@@ -153,127 +106,55 @@ export default function CalendarView() {
       .sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
   }, [visibleEvents, selectedDate]);
 
-  const handleChangeMonth = (diff: number) => {
-    setMonth((current) => addMonths(current, diff));
-  };
-
-  const handleSelectDate = (date: string) => {
-    setSelectedDate(date);
-  };
-
-  const handleToggleProject = (projectId: string) => {
-    const willCheck = !checkedProjectIds.includes(projectId);
-
-    setCheckedProjectIds((current) =>
-      willCheck
-        ? [...current, projectId]
-        : current.filter((id) => id !== projectId),
-    );
-
-    // 다시 체크하면 그 프로젝트에서 뺐던 인원을 되살린다
-    if (willCheck) {
-      const project = MOCK_PROJECTS.find((item) => item.id === projectId);
-      if (project) {
-        setHiddenMemberIds((current) =>
-          current.filter((id) => !project.memberIds.includes(id)),
-        );
-      }
-    }
-  };
-
-  // 추가·제거는 서로를 되돌린다 (뺐던 사람을 다시 검색해 넣을 수 있도록)
-  const handleAddMember = (memberId: string) => {
-    setHiddenMemberIds((current) => current.filter((id) => id !== memberId));
-    setAddedMemberIds((current) =>
-      current.includes(memberId) ? current : [...current, memberId],
-    );
-  };
-
-  const handleRemoveMember = (memberId: string) => {
-    setAddedMemberIds((current) => current.filter((id) => id !== memberId));
-    setHiddenMemberIds((current) =>
-      current.includes(memberId) ? current : [...current, memberId],
-    );
-  };
-
-  // 일정 등록·수정 모달
-  const [editor, setEditor] = useState<{
-    mode: "create" | "edit";
-    draft: ScheduleDraft;
-  } | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-
   const peopleOptions = useMemo(
-    () => MOCK_MEMBERS.map(({ id, name }) => ({ id, name })),
-    [],
+    () => members.knownMembers.map(({ id, name }) => ({ id, name })),
+    [members.knownMembers],
   );
 
-  const openCreate = () => {
-    setEditor({
-      mode: "create",
-      draft: {
-        formType: "MEETING",
-        title: "",
-        allDay: false,
-        startDate: selectedDate,
-        startTime: "14:00",
-        endDate: selectedDate,
-        endTime: "15:00",
-        participantIds: [],
-        leaveType: "ANNUAL",
-        reason: "",
-      },
-    });
-  };
-
-  const openEdit = (eventId: string) => {
-    const event = visibleEvents.find((item) => item.id === eventId);
-    if (!event) return;
-
-    setEditor({
-      mode: "edit",
-      draft: {
-        id: event.id,
-        leaveId: event.leaveId,
-        formType: event.isLeave ? "LEAVE" : event.type ?? "MEETING",
-        title: event.title,
-        allDay: event.allDay ?? !event.time,
-        startDate: event.start,
-        startTime: event.time ?? "09:00",
-        endDate: event.end,
-        endTime: event.endTime ?? "10:00",
-        participantIds: event.participantIds ?? [],
-        leaveType: event.leaveType ?? "ANNUAL",
-        reason: event.reason ?? "",
-      },
-    });
-  };
-
   const handleSubmit = (submit: ScheduleSubmit) => {
-    const editingId = editor?.draft.id;
+    const idempotencyKey =
+      dialogs.dialog?.kind === "editor"
+        ? dialogs.dialog.idempotencyKey
+        : undefined;
 
-    setEvents((current) => {
-      if (editingId) {
-        return current.map((event) =>
-          event.id === editingId
-            ? submitToEvent(submit, editingId, event.memberId)
-            : event,
-        );
-      }
-      return [
-        ...current,
-        submitToEvent(submit, crypto.randomUUID(), MOCK_ME.id),
-      ];
-    });
+    saveSchedule.mutate(
+      { submit, idempotencyKey },
+      {
+        onError: (error) =>
+          showToast(messageOf(error, "일정을 저장하지 못했어요"), "danger"),
+      },
+    );
   };
 
-  const handleDelete = () => {
-    const id = editor?.draft.id;
-    if (id) setEvents((current) => current.filter((event) => event.id !== id));
+  const handleConfirm = () => {
+    const target = dialogs.confirmation;
+    if (!target) return;
 
-    setConfirmDelete(false);
-    setEditor(null);
+    removeSchedule.mutate(
+      { event: target.event, mode: target.mode },
+      {
+        // 화면에서는 이미 지워졌다가 되살아나므로, 왜 되돌아왔는지 알려 준다
+        onError: (error) =>
+          showToast(messageOf(error, "일정을 지우지 못했어요"), "danger"),
+      },
+    );
+
+    dialogs.closeAll();
   };
+
+  // 렌더에서 좁힌 타입이 콜백 안까지 이어지지 않아 미리 꺼내 둔다
+  const editor = dialogs.dialog?.kind === "editor" ? dialogs.dialog : null;
+  const detail = dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
+
+  const confirmText = dialogs.confirmation
+    ? CONFIRM_TEXT[
+        dialogs.confirmation.mode === "leave"
+          ? "leave"
+          : dialogs.confirmation.event.isLeave
+            ? "cancelLeave"
+            : "delete"
+      ]
+    : CONFIRM_TEXT.delete;
 
   return (
     <div className={styles.container}>
@@ -282,40 +163,58 @@ export default function CalendarView() {
         <AiScheduleButton />
       </div>
 
-      <LeaveSummaryCard leave={MOCK_LEAVE} />
+      {/* 응답 전엔 0이 아니라 빈 값을 보여준다 (0일이 잠깐 보이면 잘못된 정보가 된다) */}
+      <LeaveSummaryCard leave={leave} />
+
+      {failed && (
+        <p className={styles.loadError} role="alert">
+          일정을 불러오지 못했어요.
+          <button
+            type="button"
+            className={styles.retry}
+            onClick={() => retry()}
+          >
+            다시 시도
+          </button>
+        </p>
+      )}
 
       <div className={styles.body}>
         <CalendarRail
-          projects={MOCK_PROJECTS}
-          checkedProjectIds={checkedProjectIds}
-          members={railMembers}
-          candidates={railCandidates}
-          onToggleProject={handleToggleProject}
-          onAddMember={handleAddMember}
-          onRemoveMember={handleRemoveMember}
+          projects={members.projects}
+          checkedProjectIds={filters.checkedProjectIds}
+          members={filters.railMembers}
+          candidates={filters.railCandidates}
+          onToggleProject={filters.toggleProject}
+          onAddMember={filters.addMember}
+          onRemoveMember={filters.removeMember}
         />
 
         <div className={styles.main}>
           <MonthCalendar
             month={month}
             events={visibleEvents}
-            membersById={membersById}
+            membersById={members.membersById}
             selectedDate={selectedDate}
-            todayDate={MOCK_TODAY}
-            onChangeMonth={handleChangeMonth}
-            onSelectDate={handleSelectDate}
+            todayDate={today}
+            onChangeMonth={(diff) =>
+              setMonth((current) => addMonths(current, diff))
+            }
+            onSelectDate={setSelectedDate}
           />
 
-          {/* 선택한 날짜가 보고 있는 달에 있을 때만 상세를 보여준다 */}
-          {isSameMonth(fromDateKey(selectedDate), month) && (
-            <DayDetailCard
-              date={selectedDate}
-              events={selectedEvents}
-              membersById={membersById}
-              onAddEvent={openCreate}
-              onSelectEvent={openEdit}
-            />
-          )}
+          {/* 앞뒤 달 날짜를 눌러도 그 날의 일정을 보여준다 (조회 범위가 격자 전체라 데이터가 있다) */}
+          <DayDetailCard
+            date={selectedDate}
+            events={selectedEvents}
+            membersById={members.membersById}
+            loading={loading}
+            onAddEvent={() => dialogs.openCreate(selectedDate)}
+            onSelectEvent={(eventId) => {
+              const event = visibleEvents.find((item) => item.id === eventId);
+              if (event) dialogs.openEvent(event);
+            }}
+          />
         </div>
       </div>
 
@@ -327,22 +226,37 @@ export default function CalendarView() {
           mode={editor.mode}
           initial={editor.draft}
           people={peopleOptions}
-          me={{ id: MOCK_ME.id, name: MOCK_ME.name }}
-          onClose={() => setEditor(null)}
+          me={members.me ?? undefined}
+          onClose={dialogs.closeDialog}
           onSubmit={handleSubmit}
           onDelete={
-            editor.mode === "edit" ? () => setConfirmDelete(true) : undefined
+            editor.event
+              ? () => dialogs.requestDelete(editor.event!)
+              : undefined
           }
         />
       )}
 
+      {detail && (
+        <EventDetailModal
+          open
+          event={detail}
+          membersById={members.membersById}
+          canLeave={
+            !!members.myId && !!detail.participantIds?.includes(members.myId)
+          }
+          onClose={dialogs.closeDialog}
+          onLeave={() => dialogs.requestLeave(detail)}
+        />
+      )}
+
       <ConfirmModal
-        open={confirmDelete}
-        onClose={() => setConfirmDelete(false)}
-        onConfirm={handleDelete}
-        title="일정을 삭제할까요?"
-        description="삭제한 일정은 되돌릴 수 없어요."
-        confirmLabel="삭제"
+        open={!!dialogs.confirmation}
+        onClose={dialogs.cancelConfirmation}
+        onConfirm={handleConfirm}
+        title={confirmText.title}
+        description={confirmText.description}
+        confirmLabel={confirmText.confirmLabel}
         tone="danger"
       />
     </div>

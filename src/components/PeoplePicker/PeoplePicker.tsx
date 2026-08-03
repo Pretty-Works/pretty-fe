@@ -6,7 +6,7 @@ import Chip from "@/components/Chip/Chip";
 import FormField from "@/components/FormField/FormField";
 import SuggestList from "@/components/SuggestList/SuggestList";
 
-import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./PeoplePicker.module.css";
 
@@ -56,7 +56,7 @@ export default function PeoplePicker({
 
   const searchRef = useRef<HTMLDivElement>(null);
   const closeSuggest = useCallback(() => setQuery(""), []);
-  useOutsideClick(searchRef, closeSuggest, query.trim().length > 0);
+  useClickOutside(searchRef, closeSuggest, query.trim().length > 0);
 
   const pinnedIds = pinned.map((person) => person.id);
 

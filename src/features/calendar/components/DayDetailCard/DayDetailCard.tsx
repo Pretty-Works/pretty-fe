@@ -11,6 +11,8 @@ interface DayDetailCardProps {
   date: string;
   events: CalendarEvent[];
   membersById: Record<string, CalendarMember>;
+  /** 첫 조회 중 — "일정 없음"과 구분해서 보여준다 */
+  loading?: boolean;
   onAddEvent?: () => void;
   onSelectEvent?: (eventId: string) => void;
 }
@@ -19,6 +21,7 @@ export default function DayDetailCard({
   date,
   events,
   membersById,
+  loading = false,
   onAddEvent,
   onSelectEvent,
 }: DayDetailCardProps) {
@@ -26,7 +29,9 @@ export default function DayDetailCard({
     <section className={styles.card} aria-label="선택한 날짜 일정">
       <div className={styles.head}>
         <h2 className={styles.title}>{formatDayLabel(date)}</h2>
-        <span className={styles.count}>일정 {events.length}건</span>
+        <span className={styles.count}>
+          {loading ? "불러오는 중" : `일정 ${events.length}건`}
+        </span>
 
         <Button
           name="일정 추가"
@@ -38,7 +43,9 @@ export default function DayDetailCard({
       </div>
 
       {events.length === 0 ? (
-        <p className={styles.empty}>등록된 일정이 없어요.</p>
+        <p className={styles.empty}>
+          {loading ? "일정을 불러오는 중이에요." : "등록된 일정이 없어요."}
+        </p>
       ) : (
         <ul className={styles.list}>
           {events.map((event) => {

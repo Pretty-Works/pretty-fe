@@ -88,6 +88,15 @@
   background: var(--surface);
 }
 
+/* 앞뒤 달 날짜 — 배경을 깔아 이번 달 칸과 한눈에 갈리게 한다 */
+.outside {
+  background: var(--surface);
+}
+
+.outside:hover {
+  background: var(--surface-ai);
+}
+
 .outside .dayNumber {
   color: var(--text-placeholder);
 }

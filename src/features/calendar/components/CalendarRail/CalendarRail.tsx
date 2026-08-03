@@ -5,7 +5,7 @@ import { useCallback, useRef, useState } from "react";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import SuggestList from "@/components/SuggestList/SuggestList";
 
-import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 import type { CalendarMember, CalendarProject } from "@/features/calendar/types";
 
@@ -38,7 +38,7 @@ export default function CalendarRail({
 
   const searchRef = useRef<HTMLDivElement>(null);
   const closeSuggest = useCallback(() => setQuery(""), []);
-  useOutsideClick(searchRef, closeSuggest, query.trim().length > 0);
+  useClickOutside(searchRef, closeSuggest, query.trim().length > 0);
 
   const suggestions = candidates.filter((member) =>
     member.name.includes(query.trim()),
@@ -52,34 +52,39 @@ export default function CalendarRail({
 
   return (
     <aside className={styles.rail} aria-label="캘린더 필터">
-      <ul className={styles.projects}>
-        {projects.map((project) => {
-          const checked = checkedProjectIds.includes(project.id);
+      {/* 프로젝트를 못 받아왔으면 빈 목록과 구분선만 남아 어색하므로 블록째 감춘다 */}
+      {projects.length > 0 && (
+        <>
+          <ul className={styles.projects}>
+            {projects.map((project) => {
+              const checked = checkedProjectIds.includes(project.id);
 
-          return (
-            <li key={project.id}>
-              <label className={styles.projectRow}>
-                <input
-                  type="checkbox"
-                  className={styles.checkboxInput}
-                  checked={checked}
-                  onChange={() => onToggleProject(project.id)}
-                />
-                <span className={styles.checkbox} aria-hidden="true">
-                  ✓
-                </span>
-                <span
-                  className={`${styles.projectName} ${checked ? "" : styles.muted}`}
-                >
-                  {project.name}
-                </span>
-              </label>
-            </li>
-          );
-        })}
-      </ul>
+              return (
+                <li key={project.id}>
+                  <label className={styles.projectRow}>
+                    <input
+                      type="checkbox"
+                      className={styles.checkboxInput}
+                      checked={checked}
+                      onChange={() => onToggleProject(project.id)}
+                    />
+                    <span className={styles.checkbox} aria-hidden="true">
+                      ✓
+                    </span>
+                    <span
+                      className={`${styles.projectName} ${checked ? "" : styles.muted}`}
+                    >
+                      {project.name}
+                    </span>
+                  </label>
+                </li>
+              );
+            })}
+          </ul>
 
-      <hr className={styles.divider} />
+          <hr className={styles.divider} />
+        </>
+      )}
 
       <div className={styles.search} ref={searchRef}>
         <SearchBar
