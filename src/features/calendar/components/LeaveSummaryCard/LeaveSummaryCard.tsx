@@ -16,10 +16,16 @@ function parseTenure(tenure: string) {
   const matched = tenure.match(/(\d+)\s*년(?:\s*(\d+)\s*개월)?/);
   if (!matched) return { value: tenure, unit: "" };
 
+  const years = Number(matched[1]);
   const months = Number(matched[2] ?? 0);
+
+  if (years < 1) {
+    return { value: String(months), unit: "개월" };
+  }
+
   return {
-    value: matched[1],
-    unit: months > 0 ? `년 ${months}개월` : "년차",
+    value: String(years),
+    unit: "년차",
   };
 }
 
@@ -40,17 +46,20 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
   return (
     <section className={styles.card} aria-label="연차 현황">
       <div className={styles.progressArea}>
-        <h2 className={styles.title}>연차 현황</h2>
+        <div className={styles.progressHead}>
+          <h2 className={styles.title}>연차 현황</h2>
+          <p className={styles.caption}>
+            {leave
+              ? percent === 0
+                ? "올해 사용한 연차가 없습니다"
+                : `올해 연차의 ${percent}%를 사용했습니다`
+              : "연차 현황을 불러오는 중입니다"}
+          </p>
+        </div>
 
         <div className={styles.track}>
           <div className={styles.fill} style={{ width: `${percent}%` }} />
         </div>
-
-        <p className={styles.caption}>
-          {leave
-            ? `올해 연차의 ${percent}%를 사용했어요!`
-            : "연차 현황을 불러오는 중이에요"}
-        </p>
       </div>
 
       <div className={styles.stats}>

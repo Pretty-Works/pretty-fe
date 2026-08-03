@@ -14,33 +14,6 @@
   justify-content: space-between;
 }
 
-.monthNav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.navButton {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--text-placeholder);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.navButton:hover {
-  color: var(--text);
-}
-
-.monthLabel {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-
 .grid {
   display: flex;
   flex-direction: column;
@@ -85,7 +58,7 @@
 }
 
 .cell:hover {
-  background: var(--surface);
+  background: var(--primary-bg);
 }
 
 /* 앞뒤 달 날짜 — 배경을 깔아 이번 달 칸과 한눈에 갈리게 한다 */
@@ -113,14 +86,29 @@
 }
 
 .dayNumber {
-  font-size: 11px;
+  font-size: 13.5px;
   font-weight: 700;
-  line-height: 12px;
+  line-height: 15px;
   color: var(--icon);
 }
 
 .today {
-  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--text);
+}
+
+.sunday .dayNumber {
+  color: var(--danger);
+}
+
+.sunday .today {
+  color: var(--text);
 }
 
 /* 위에 겹쳐 그린 여러 날 막대만큼 칸 안에 자리를 비워 둔다 */
@@ -136,7 +124,7 @@
   padding: 2px 4px;
   border: none;
   border-radius: 4px;
-  color: var(--white);
+  color: inherit;
   font-family: inherit;
   font-size: 9.5px;
   font-weight: 700;

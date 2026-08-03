@@ -22,3 +22,19 @@ export function memberColor(userId: string) {
 
   return PALETTE[hash % PALETTE.length];
 }
+
+const EVENT_COLORS: Record<string, { background: string; color: string }> = {
+  "#3b82eb": { background: "#dceaff", color: "#245da8" },
+  "#219966": { background: "#d9f3e7", color: "#176b4a" },
+  "#e8830c": { background: "#ffedd3", color: "#9a5708" },
+  "#d6336c": { background: "#fbe0ea", color: "#9c2852" },
+  "#0e9aa7": { background: "#d9f2f4", color: "#08717b" },
+  "#8b5cf6": { background: "#e9e0ff", color: "#6040ad" },
+  "#b45309": { background: "#f8e6d5", color: "#7d3b08" },
+  "#7c3aed": { background: "#e8ddff", color: "#5930a7" },
+};
+
+/** 월간 일정 배너 전용 저채도 배경과 읽기 쉬운 전경색 */
+export function calendarEventColors(memberColorValue?: string) {
+  return EVENT_COLORS[memberColorValue ?? ME_COLOR] ?? EVENT_COLORS[ME_COLOR];
+}

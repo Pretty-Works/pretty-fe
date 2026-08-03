@@ -82,12 +82,18 @@ export default function ScheduleEditorModal({
   const useRange = isLeave || draft.allDay;
 
   const handleAllDay = (allDay: boolean) => {
-    patch({ allDay, endDate: allDay ? draft.endDate : draft.startDate });
+    if (mode === "create" && allDay) {
+      patch({ allDay, startDate: "", endDate: "" });
+      return;
+    }
+
+    const date = draft.startDate || initial.startDate;
+    patch({ allDay, startDate: date, endDate: date });
   };
 
   const handleStartDate = (date: string) => {
-    // 시작을 종료보다 뒤로 옮기면 종료를 같이 민다
-    patch({ startDate: date, endDate: draft.endDate < date ? date : draft.endDate });
+    // 비종일 일정은 하루 일정만 허용하므로 서버에 보낼 종료일도 함께 맞춘다.
+    patch({ startDate: date, endDate: date });
   };
 
   const handlePeriod = (range: DateRange) => {
@@ -95,6 +101,11 @@ export default function ScheduleEditorModal({
   };
 
   const handleSubmit = () => {
+    if (!draft.startDate || !draft.endDate) {
+      setError(useRange ? "기간을 선택해 주세요." : "날짜를 선택해 주세요.");
+      return;
+    }
+
     // isLeave 대신 직접 비교해야 이후 draft.formType이 ScheduleType으로 좁혀진다
     if (draft.formType === "LEAVE") {
       onSubmit({
@@ -205,46 +216,45 @@ export default function ScheduleEditorModal({
         <DatePicker
           label="기간"
           mode="range"
-          value={{ start: draft.startDate, end: draft.endDate }}
+          value={
+            draft.startDate && draft.endDate
+              ? { start: draft.startDate, end: draft.endDate }
+              : null
+          }
           onChange={handlePeriod}
         />
       ) : (
-        <>
+        <div className={styles.scheduleDateTime}>
+          <div className={styles.dateCol}>
+            <DatePicker
+              label="날짜"
+              value={draft.startDate}
+              onChange={handleStartDate}
+            />
+          </div>
+
           <div className={styles.dateTimeField}>
-            <span className={styles.label}>시작</span>
-            <div className={styles.dateTimeRow}>
-              <div className={styles.dateCol}>
-                <DatePicker value={draft.startDate} onChange={handleStartDate} />
-              </div>
+            <span className={styles.label}>일시</span>
+            <div className={styles.timeRangeRow}>
               <div className={styles.timeCol}>
                 <TimeSelect
                   value={draft.startTime}
                   onChange={(startTime) => patch({ startTime })}
                 />
               </div>
-            </div>
-          </div>
-
-          <div className={styles.dateTimeField}>
-            <span className={styles.label}>종료</span>
-            <div className={styles.dateTimeRow}>
-              <div className={styles.dateCol}>
-                <DatePicker
-                  value={draft.endDate}
-                  onChange={(endDate) => patch({ endDate })}
-                />
-              </div>
+              <span className={styles.timeSeparator} aria-hidden="true">
+                –
+              </span>
               <div className={styles.timeCol}>
                 <TimeSelect
                   value={draft.endTime}
                   onChange={(endTime) => patch({ endTime })}
-                  // 같은 날일 때만 시작 이전 시각을 막는다
-                  min={draft.startDate === draft.endDate ? draft.startTime : undefined}
+                  min={draft.startTime}
                 />
               </div>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       {isLeave ? (

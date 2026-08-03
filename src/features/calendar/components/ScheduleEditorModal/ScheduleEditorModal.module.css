@@ -10,10 +10,10 @@
   color: var(--text-sub);
 }
 
-/* 날짜는 남는 폭을 채우고 시간은 고정 */
-.dateTimeRow {
+/* 비종일 일정은 날짜 하나와 시작·종료 시각을 한 줄에 둔다 */
+.scheduleDateTime {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 12px;
 }
 
@@ -22,9 +22,20 @@
   min-width: 0;
 }
 
+.timeRangeRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .timeCol {
   flex-shrink: 0;
-  width: 140px;
+  width: 118px;
+}
+
+.timeSeparator {
+  color: var(--text-placeholder);
+  font-size: 13px;
 }
 
 /* 삭제는 왼쪽 끝으로 밀어 취소·저장과 떨어뜨린다 */

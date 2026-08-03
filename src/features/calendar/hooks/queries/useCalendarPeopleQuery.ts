@@ -42,7 +42,7 @@ export const useCalendarPeopleQuery = () => {
       const memberById = new Map<string, CalendarMember>();
       const myNames: string[] = [];
 
-      const projects = details.map((detail, index): CalendarProject => {
+      const projects = details.map((detail, index): CalendarProject | null => {
         const people = [detail?.owner, ...(detail?.members ?? [])].filter(
           (person): person is { userId: number; name: string } =>
             person != null,
@@ -65,12 +65,15 @@ export const useCalendarPeopleQuery = () => {
           }
         });
 
+        // 본인 외 참여자가 없는 개인 프로젝트는 캘린더 필터에 노출하지 않는다.
+        if (detail && memberIds.length === 0) return null;
+
         return {
           id: String(summaries[index].projectId),
           name: summaries[index].name,
           memberIds,
         };
-      });
+      }).filter((project): project is CalendarProject => project !== null);
 
       return {
         projects,

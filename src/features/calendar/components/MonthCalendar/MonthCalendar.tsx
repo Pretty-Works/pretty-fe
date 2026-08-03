@@ -2,7 +2,9 @@
 
 import { useEffect, useRef } from "react";
 
+import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
+import { calendarEventColors } from "@/features/calendar/utils/memberColor";
 import {
   WEEKDAY_LABELS,
   addDays,
@@ -24,6 +26,7 @@ interface MonthCalendarProps {
   selectedDate: string;
   todayDate: string;
   onChangeMonth: (diff: number) => void;
+  onResetMonth: () => void;
   onSelectDate: (date: string) => void;
 }
 
@@ -40,6 +43,7 @@ export default function MonthCalendar({
   selectedDate,
   todayDate,
   onChangeMonth,
+  onResetMonth,
   onSelectDate,
 }: MonthCalendarProps) {
   const weeks = buildMonthWeeks(month);
@@ -89,27 +93,17 @@ export default function MonthCalendar({
   return (
     <section className={styles.card} aria-label="월간 캘린더">
       <div className={styles.head}>
-        <div className={styles.monthNav}>
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => onChangeMonth(-1)}
-            aria-label="이전 달"
-          >
-            ‹
-          </button>
-          <strong className={styles.monthLabel}>
-            {formatMonthLabel(month)}
-          </strong>
-          <button
-            type="button"
-            className={styles.navButton}
-            onClick={() => onChangeMonth(1)}
-            aria-label="다음 달"
-          >
-            ›
-          </button>
-        </div>
+        <PeriodNavigator
+          label={formatMonthLabel(month)}
+          labelSize="md"
+          previousLabel="이전 달"
+          nextLabel="다음 달"
+          resetLabel="오늘"
+          isCurrent={selectedDate === todayDate}
+          onPrevious={() => onChangeMonth(-1)}
+          onNext={() => onChangeMonth(1)}
+          onReset={onResetMonth}
+        />
       </div>
 
       <div
@@ -142,7 +136,7 @@ export default function MonthCalendar({
                     left: columnLeft(startCol),
                     width: columnWidth(endCol - startCol + 1),
                     top: `calc(20px + ${lane} * 20px)`,
-                    background: membersById[event.memberId]?.color,
+                    ...calendarEventColors(membersById[event.memberId]?.color),
                   }}
                   onClick={() => onSelectDate(event.start)}
                 >
@@ -158,6 +152,7 @@ export default function MonthCalendar({
                   styles.cell,
                   !isSameMonth(date, month) && styles.outside,
                   key === selectedDate && styles.selected,
+                  date.getDay() === 0 && styles.sunday,
                 ]
                   .filter(Boolean)
                   .join(" ");
@@ -191,7 +186,7 @@ export default function MonthCalendar({
                       <span
                         key={event.id}
                         className={styles.chip}
-                        style={{ background: membersById[event.memberId]?.color }}
+                        style={calendarEventColors(membersById[event.memberId]?.color)}
                       >
                         {event.title}
                       </span>
