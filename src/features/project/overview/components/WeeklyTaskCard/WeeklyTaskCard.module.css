@@ -31,65 +31,6 @@
   color: var(--text);
 }
 
-/* 주차 이동 — 제목 옆 */
-.weekNav {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.weekArrow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: 6px;
-  background: transparent;
-  font-size: 15px;
-  color: var(--text-sub);
-  cursor: pointer;
-}
-
-.weekArrow:hover {
-  background: var(--surface);
-}
-
-.weekRange {
-  white-space: nowrap;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-sub);
-}
-
-/* 이번 주로 되돌리기 — 화살표 바깥(오른쪽) */
-.thisWeek {
-  margin-left: 4px;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--white);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-sub);
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
-}
-
-.thisWeek:hover:not(:disabled) {
-  border-color: var(--primary);
-  color: var(--primary);
-}
-
-/* 이미 이번 주면 누를 필요가 없다 */
-.thisWeek:disabled {
-  border-color: var(--line);
-  color: var(--text-placeholder);
-  cursor: default;
-}
-
 /* 집계 */
 .summary {
   display: flex;

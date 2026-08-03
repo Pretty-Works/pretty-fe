@@ -130,11 +130,6 @@ export default function EventDetailModal({
         )}
       </dl>
 
-      <p className={styles.notice}>
-        {canLeave
-          ? "다른 사람이 만든 일정이라 수정할 수 없어요. 나가면 내 캘린더에서만 사라져요."
-          : "다른 사람이 만든 일정이라 보기만 할 수 있어요."}
-      </p>
     </Modal>
   );
 }

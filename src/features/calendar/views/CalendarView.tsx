@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import AiScheduleButton from "@/features/calendar/components/AiScheduleButton/AiScheduleButton";
 import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmModal";
@@ -24,6 +24,7 @@ import {
   toDateKey,
 } from "@/features/calendar/utils/calendar";
 import type { ScheduleSubmit } from "@/features/calendar/types";
+import { useAgentStore } from "@/stores/useAgentStore";
 import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./CalendarView.module.css";
@@ -53,6 +54,8 @@ export default function CalendarView() {
     () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
   );
   const [selectedDate, setSelectedDate] = useState(today);
+  const detailRef = useRef<HTMLDivElement>(null);
+  const openAgent = useAgentStore((state) => state.openAgent);
 
   // 달력 격자는 앞뒤 달을 물고 있어서 보이는 칸 전체를 조회 범위로 쓴다
   const range = useMemo(() => {
@@ -142,6 +145,19 @@ export default function CalendarView() {
     dialogs.closeAll();
   };
 
+  const handleSelectDate = (date: string) => {
+    setSelectedDate(date);
+    window.requestAnimationFrame(() => {
+      detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+  const handleResetMonth = () => {
+    const current = new Date();
+    setMonth(new Date(current.getFullYear(), current.getMonth(), 1));
+    handleSelectDate(today);
+  };
+
   // 렌더에서 좁힌 타입이 콜백 안까지 이어지지 않아 미리 꺼내 둔다
   const editor = dialogs.dialog?.kind === "editor" ? dialogs.dialog : null;
   const detail = dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
@@ -159,8 +175,10 @@ export default function CalendarView() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.pageTitle}>캘린더</h1>
-        <AiScheduleButton />
+        <div className={styles.titleGroup}>
+          <h1 className={styles.pageTitle}>캘린더</h1>
+          <AiScheduleButton onClick={openAgent} />
+        </div>
       </div>
 
       {/* 응답 전엔 0이 아니라 빈 값을 보여준다 (0일이 잠깐 보이면 잘못된 정보가 된다) */}
@@ -200,21 +218,24 @@ export default function CalendarView() {
             onChangeMonth={(diff) =>
               setMonth((current) => addMonths(current, diff))
             }
-            onSelectDate={setSelectedDate}
+            onResetMonth={handleResetMonth}
+            onSelectDate={handleSelectDate}
           />
 
           {/* 앞뒤 달 날짜를 눌러도 그 날의 일정을 보여준다 (조회 범위가 격자 전체라 데이터가 있다) */}
-          <DayDetailCard
-            date={selectedDate}
-            events={selectedEvents}
-            membersById={members.membersById}
-            loading={loading}
-            onAddEvent={() => dialogs.openCreate(selectedDate)}
-            onSelectEvent={(eventId) => {
-              const event = visibleEvents.find((item) => item.id === eventId);
-              if (event) dialogs.openEvent(event);
-            }}
-          />
+          <div ref={detailRef} className={styles.detailAnchor}>
+            <DayDetailCard
+              date={selectedDate}
+              events={selectedEvents}
+              membersById={members.membersById}
+              loading={loading}
+              onAddEvent={() => dialogs.openCreate(selectedDate)}
+              onSelectEvent={(eventId) => {
+                const event = visibleEvents.find((item) => item.id === eventId);
+                if (event) dialogs.openEvent(event);
+              }}
+            />
+          </div>
         </div>
       </div>
 

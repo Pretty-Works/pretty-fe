@@ -4,12 +4,12 @@ import type { CalendarMember, CalendarProject } from "@/features/calendar/types"
 
 /**
  * 레일 필터 상태.
- * - `uncheckedProjectIds` : 체크를 **끈** 프로젝트. 목록이 늦게 도착해도 기본이 '전체 체크'가 된다.
+ * - `checkedProjectIds`   : 사용자가 체크한 프로젝트. 첫 진입은 모두 해제 상태다.
  * - `hiddenMemberIds`     : ✕로 뺀 사람 (프로젝트 소속과 무관하게 전역)
  * - `addedMemberIds`      : 검색으로 직접 넣은 사람
  */
 interface FilterState {
-  uncheckedProjectIds: string[];
+  checkedProjectIds: string[];
   hiddenMemberIds: string[];
   addedMemberIds: string[];
 }
@@ -20,7 +20,7 @@ type FilterAction =
   | { type: "removeMember"; memberId: string };
 
 const INITIAL: FilterState = {
-  uncheckedProjectIds: [],
+  checkedProjectIds: [],
   hiddenMemberIds: [],
   addedMemberIds: [],
 };
@@ -36,15 +36,15 @@ function reducer(state: FilterState, action: FilterAction): FilterState {
   switch (action.type) {
     case "toggleProject": {
       const { project } = action;
-      const wasUnchecked = state.uncheckedProjectIds.includes(project.id);
+      const wasChecked = state.checkedProjectIds.includes(project.id);
 
       return {
         ...state,
-        uncheckedProjectIds: wasUnchecked
-          ? without(state.uncheckedProjectIds, project.id)
-          : [...state.uncheckedProjectIds, project.id],
+        checkedProjectIds: wasChecked
+          ? without(state.checkedProjectIds, project.id)
+          : [...state.checkedProjectIds, project.id],
         // 다시 체크하면 그 프로젝트에서 뺐던 인원을 되살린다
-        hiddenMemberIds: wasUnchecked
+        hiddenMemberIds: !wasChecked
           ? state.hiddenMemberIds.filter((id) => !project.memberIds.includes(id))
           : state.hiddenMemberIds,
       };
@@ -84,9 +84,9 @@ export const useCalendarFilters = ({
   const checkedProjectIds = useMemo(
     () =>
       projects
-        .filter((project) => !state.uncheckedProjectIds.includes(project.id))
+        .filter((project) => state.checkedProjectIds.includes(project.id))
         .map((project) => project.id),
-    [projects, state.uncheckedProjectIds],
+    [projects, state.checkedProjectIds],
   );
 
   // 체크된 프로젝트의 인원을 모아 레일 목록을 만든다 (중복은 한 번만, 뺀 사람은 제외).

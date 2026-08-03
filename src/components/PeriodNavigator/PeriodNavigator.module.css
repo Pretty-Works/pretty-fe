@@ -1,0 +1,63 @@
+.navigator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.arrow:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.label {
+  min-width: 76px;
+  white-space: nowrap;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.labelMd {
+  font-size: 13.5px;
+}
+
+.reset {
+  margin-left: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.reset:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.reset:disabled {
+  border-color: var(--line);
+  color: var(--text-placeholder);
+  cursor: default;
+}

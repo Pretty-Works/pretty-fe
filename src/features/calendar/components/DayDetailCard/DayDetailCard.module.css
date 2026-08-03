@@ -3,10 +3,10 @@
   flex-direction: column;
   gap: 10px;
   padding: 21px 19px;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(69, 41, 120, 0.05);
 }
 
 .head {
@@ -104,4 +104,5 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-right: 8px;
 }
