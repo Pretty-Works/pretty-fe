@@ -34,6 +34,11 @@
   transition: all 0.15s ease;
 }
 
+.md {
+  height: 40px;
+  padding: 0 18px;
+}
+
 .tab:hover:not(.active) {
   border-color: var(--primary-light);
   color: var(--primary);

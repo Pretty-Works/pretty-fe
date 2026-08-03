@@ -24,6 +24,19 @@
   padding: 6px 0;
 }
 
+/* 참석자 셀 — 이름은 말줄임, 초과분("외 N명")은 흐리게 */
+.attendeeClip {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.attendeeRest {
+  flex-shrink: 0;
+  color: var(--text-placeholder);
+}
+
 .stateText {
   padding: 32px 0;
   text-align: center;

@@ -80,12 +80,13 @@
   flex-shrink: 0;
   width: 20px;
   height: 20px;
+  border: none;
+  background: none;
   border-radius: 999px;
   font-size: 11px;
   color: var(--text-sub);
   cursor: pointer;
   transition: background 0.15s ease;
-  
 }
 
 .uploadedRemove:hover {

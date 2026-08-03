@@ -8,8 +8,8 @@ import FormField from "@/components/FormField/FormField";
 import Modal from "@/components/Modal/Modal";
 import PeoplePicker, { type PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
 import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
-import TimeSelect from "@/components/TimeSelect/TimeSelect";
-import Toggle from "@/components/Toggle/Toggle";
+import TimeSelect from "@/features/calendar/components/TimeSelect/TimeSelect";
+import Toggle from "@/features/calendar/components/Toggle/Toggle";
 
 import type {
   LeaveType,

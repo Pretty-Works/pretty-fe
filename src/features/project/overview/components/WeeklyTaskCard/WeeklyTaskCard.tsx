@@ -1,9 +1,9 @@
 "use client";
 
 import Button from "@/components/Button/Button";
-import DonutChart from "@/components/DonutChart/DonutChart";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import TaskRow from "@/components/TaskRow/TaskRow";
+import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
 
 import {
   DEPARTMENT_LABEL,
