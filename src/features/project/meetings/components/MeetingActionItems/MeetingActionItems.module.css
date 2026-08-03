@@ -1,0 +1,125 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+}
+
+.cardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.aiBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  background: var(--primary-bg);
+}
+
+.aiText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.aiTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.star {
+  color: var(--primary);
+}
+
+.aiDesc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+.taskTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.taskRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 110px 140px 84px 96px;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 2px;
+  border-bottom: 1px solid var(--line);
+}
+
+.taskHead {
+  padding: 6px 2px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.taskHead span {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.colTask {
+  font-size: 13.5px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.colOwner,
+.colDue {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.pillActive {
+  background: #e8eefc;
+  color: #4361d0;
+}
+
+.pillPlanned {
+  background: var(--surface);
+  color: var(--text-sub);
+}
+
+.pillDone {
+  background: #e6f7ef;
+  color: #0f9d63;
+}
+
+.addTask {
+  justify-self: end;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.addTask:hover {
+  text-decoration: underline;
+}
