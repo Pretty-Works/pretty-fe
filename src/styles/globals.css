@@ -73,7 +73,7 @@ body {
   overflow: hidden;
   z-index: 50;
   box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, width 0.25s ease;
 }
 
 .layout.folded .main {
@@ -82,4 +82,12 @@ body {
 
 .layout.folded .agent {
   transform: translateX(100%);
+}
+
+.layout.expanded .main {
+  margin-right: 0;
+}
+
+.layout.expanded .agent {
+  width: 100vw;
 }

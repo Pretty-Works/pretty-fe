@@ -42,14 +42,23 @@
 .headerIcon {
   width: 30px;
   height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 9px;
   cursor: pointer;
   background: none;
   border: none;
+  color: #8b95a1;
 }
 
 .headerIcon:hover {
   background: var(--primary-bright);
+}
+
+.headerIconActive {
+  background: var(--primary-bg);
+  color: var(--primary);
 }
 
 .menuList {
@@ -73,13 +82,47 @@
 }
 
 .menuItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   border-radius: 11px;
   cursor: pointer;
   padding: 9px 12px;
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
 }
 
 .menuItem:hover {
   background: var(--primary-bright);
+}
+
+.menuItemActive {
+  background: var(--primary-bright);
+}
+
+.menuTitle {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.pendingBadge {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff4e5;
+  color: #b26a00;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .chat {
@@ -87,6 +130,21 @@
   min-height: 0;
   overflow-y: auto;
   padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.chat::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.chat::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .empty {
@@ -113,6 +171,31 @@
 
 .emptyDescription {
   color: var(--text-sub);
+}
+
+.recommendList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 14px;
+}
+
+.recommendItem {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--text);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.recommendItem:hover {
+  background: var(--primary-bright);
+  border-color: var(--primary);
 }
 
 .chatContent {
@@ -187,6 +270,10 @@
   background: var(--white);
 }
 
+.inputWrapperBlocked {
+  opacity: 0.55;
+}
+
 .input {
   flex: 1;
   border: none;
@@ -202,6 +289,17 @@
   padding: 0;
   align-self: center;
   transform: translateY(2px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+.input::-webkit-scrollbar {
+  width: 6px;
+}
+
+.input::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
 }
 
 .input::placeholder {

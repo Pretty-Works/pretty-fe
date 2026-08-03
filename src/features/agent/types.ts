@@ -1,5 +1,22 @@
 export type ChatRole = "user" | "agent";
 
+export type AgentKind =
+  | "general"
+  | "meeting"
+  | "approval"
+  | "reservation"
+  | "leave"
+  | "task";
+
+export const AGENT_LABELS: Record<AgentKind, string> = {
+  general: "일반 도우미",
+  meeting: "회의 에이전트",
+  approval: "결재 에이전트",
+  reservation: "예약 에이전트",
+  leave: "휴가 에이전트",
+  task: "업무 에이전트",
+};
+
 export interface ChatAttachment {
   name: string;
 }
@@ -10,6 +27,32 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   attachment?: ChatAttachment;
+  agent?: AgentKind;
+}
+
+// done 이벤트의 action
+export interface AgentAction {
+  type: string;
+  requiresApproval: boolean;
+  summary?: string;
+  successMessage?: string;
+  targetScreen?: string;
+  params?: Record<string, unknown>;
+  formData?: Record<string, unknown>;
+}
+
+// 선택지 (select + 직접 입력)
+export interface AgentChoice {
+  id: string;
+  question: string;
+  options?: string[];
+  placeholder?: string;
+}
+
+export interface Conversation {
+  id: string;
+  title: string;
+  pending?: boolean;
 }
 
 export const SEED_MESSAGES: ChatMessage[] = [
