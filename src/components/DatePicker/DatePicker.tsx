@@ -58,8 +58,6 @@ function startOfDay(d: Date) {
 
 export default function DatePicker(props: DatePickerProps) {
   const {
-    value,
-    onChange,
     allowFuture = true,
     minDate,
     maxDate,
@@ -187,14 +185,14 @@ export default function DatePicker(props: DatePickerProps) {
     );
   };
 
-  // 날짜를 눌러도 닫지 않는다. 임시 선택만 갱신.
+  // 하루 선택은 즉시 확정하고 닫는다. 기간 선택만 확인 전 임시 상태를 둔다.
   const pick = (d: Date) => {
     if (isBlocked(d)) return;
     const iso = toISO(d);
 
     if (!isRange) {
-      setPendingStart(iso);
-      setPendingEnd(iso);
+      props.onChange?.(iso);
+      setOpen(false);
       return;
     }
 
@@ -217,8 +215,13 @@ export default function DatePicker(props: DatePickerProps) {
     if (todayBlocked) return;
     const iso = toISO(today);
     setView({ year: today.getFullYear(), month: today.getMonth() });
+    if (!isRange) {
+      props.onChange?.(iso);
+      setOpen(false);
+      return;
+    }
     setPendingStart(iso);
-    setPendingEnd(isRange ? null : iso);
+    setPendingEnd(null);
   };
 
   const canConfirm = isRange ? !!pendingStart && !!pendingEnd : !!pendingStart;
@@ -329,7 +332,10 @@ export default function DatePicker(props: DatePickerProps) {
                   !!pendingEnd &&
                   iso > pendingStart &&
                   iso < pendingEnd;
-                const cellDisabled = isBlocked(date);
+                // 기간 종료일을 고르는 단계에서는 시작일 이전 날짜를 선택할 수 없다.
+                const cellDisabled =
+                  isBlocked(date) ||
+                  (isRange && !!pendingStart && !pendingEnd && iso < pendingStart);
                 const wd = date.getDay();
                 return (
                   <button
@@ -358,7 +364,7 @@ export default function DatePicker(props: DatePickerProps) {
 
             {isRange && <p className={styles.summary}>{summary}</p>}
 
-            <div className={styles.foot}>
+            <div className={`${styles.foot} ${!isRange ? styles.singleFoot : ""}`}>
               <button
                 type="button"
                 className={styles.todayBtn}
@@ -368,7 +374,7 @@ export default function DatePicker(props: DatePickerProps) {
                 오늘
               </button>
 
-              <div className={styles.footActions}>
+              {isRange && <div className={styles.footActions}>
                 <button
                   type="button"
                   className={styles.cancelBtn}
@@ -384,7 +390,7 @@ export default function DatePicker(props: DatePickerProps) {
                 >
                   확인
                 </button>
-              </div>
+              </div>}
             </div>
           </div>
         )}

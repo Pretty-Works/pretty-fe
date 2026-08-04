@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import Badge from "@/components/Badge/Badge";
+
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
@@ -142,7 +144,7 @@ export default function HomeView() {
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>확인이 필요한 요청</h2>
             {visibleRequests.length > 0 && (
-              <span className={styles.countBadge}>{visibleRequests.length}</span>
+              <Badge type="purple" badgeStyle="weak">{visibleRequests.length}</Badge>
             )}
           </div>
         </div>
@@ -176,26 +178,29 @@ export default function HomeView() {
           <div className={styles.panelHead}>
             <div className={styles.panelHeadLeft}>
               <h2 className={styles.panelTitle}>프로젝트</h2>
-              <ProjectStatusSelect value={status} onChange={handleStatusChange} />
             </div>
             {/* 팀장 이상 또는 PM 부서만 만들 수 있다. 판정에 쓰는 직급 서열이
                 서버에만 있어 결과(canCreateProject)를 그대로 따른다. */}
             {me?.canCreateProject && (
               <Button
-                name="프로젝트 생성"
-                size="sm"
-                hasPlus
+                size="medium"
+                leftAccessory="+"
                 onClick={() => router.push("/projects/new")}
-              />
+              >
+                프로젝트 생성
+              </Button>
             )}
           </div>
 
+          {/* 검색과 상태 필터는 같은 목록을 좁히는 짝이라 한 줄에 둔다 */}
           <div className={styles.filterbar}>
             <SearchBar
               placeholder="프로젝트 검색"
               value={keyword}
               onChange={handleKeywordChange}
             />
+
+            <ProjectStatusSelect value={status} onChange={handleStatusChange} />
           </div>
 
           {isProjectsLoading ? (
@@ -227,11 +232,12 @@ export default function HomeView() {
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>내 할 일</h2>
             <Button
-              name="할 일"
-              size="sm"
-              hasPlus
+              size="medium"
+              leftAccessory="+"
               onClick={() => setTaskModalOpen(true)}
-            />
+            >
+              할 일
+            </Button>
           </div>
 
           {isTasksLoading ? (

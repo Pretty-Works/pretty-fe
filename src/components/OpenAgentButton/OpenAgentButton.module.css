@@ -1,0 +1,14 @@
+.button {
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: #9678dc;
+  text-align: left;
+  cursor: pointer;
+}
+
+.button:hover {
+  text-decoration: underline;
+}

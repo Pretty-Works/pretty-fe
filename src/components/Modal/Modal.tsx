@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef } from "react";
+import { createPortal } from "react-dom";
 
 import styles from "./Modal.module.css";
 
@@ -91,9 +92,9 @@ export default function Modal({
     (first ?? panelRef.current).focus();
   }, [open]);
 
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
+  return createPortal(
     <div className={styles.overlay} onClick={onClose} role="presentation">
       <div
         ref={panelRef}
@@ -131,6 +132,7 @@ export default function Modal({
 
         {footer && <div className={styles.foot}>{footer}</div>}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

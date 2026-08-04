@@ -48,7 +48,10 @@
 /* 기간 · 예산 · 오너 */
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  /* 좁아져도 기간·예산·책임자를 한 줄에 유지한다.
+     auto-fit + minmax(180px, ·)이면 폭이 540px 아래로 내려갈 때 2단 → 1단으로 접힌다.
+     minmax의 하한이 0이어야 긴 날짜가 자기 칸을 밀어내지 않고 안에서 줄바꿈한다 */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px 20px;
   padding: 16px 0;
   border-top: 1px solid var(--line);
@@ -59,6 +62,7 @@
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
 }
 
 .infoLabel {

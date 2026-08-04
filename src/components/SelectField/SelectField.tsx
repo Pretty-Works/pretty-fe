@@ -15,11 +15,9 @@ interface SelectFieldProps {
   options: SelectOption[];
   value: string;
   onChange: (value: string) => void;
-  // 아직 고르지 않았을 때 보여줄 문구. 목록에는 뜨지 않고 표시용으로만 쓴다.
   placeholder?: string;
   disabled?: boolean;
-  // 셀렉트 오른쪽에 붙는 버튼 등. label을 감싸지 않아 클릭이 섞이지 않는다.
-  rightSlot?: React.ReactNode;
+  right?: React.ReactNode;
 }
 
 export default function SelectField({
@@ -30,7 +28,7 @@ export default function SelectField({
   onChange,
   placeholder,
   disabled = false,
-  rightSlot,
+  right,
 }: SelectFieldProps) {
   const id = useId();
 
@@ -61,7 +59,7 @@ export default function SelectField({
           ))}
         </select>
 
-        {rightSlot}
+        {right}
       </div>
     </div>
   );

@@ -1,15 +1,15 @@
-import { useMemo, useReducer } from "react";
+import { useMemo, useReducer, type Dispatch } from "react";
 
 import type { CalendarMember, CalendarProject } from "@/features/calendar/types";
 
 /**
  * 레일 필터 상태.
- * - `uncheckedProjectIds` : 체크를 **끈** 프로젝트. 목록이 늦게 도착해도 기본이 '전체 체크'가 된다.
+ * - `checkedProjectIds`   : 사용자가 체크한 프로젝트. 첫 진입은 모두 해제 상태다.
  * - `hiddenMemberIds`     : ✕로 뺀 사람 (프로젝트 소속과 무관하게 전역)
  * - `addedMemberIds`      : 검색으로 직접 넣은 사람
  */
 interface FilterState {
-  uncheckedProjectIds: string[];
+  checkedProjectIds: string[];
   hiddenMemberIds: string[];
   addedMemberIds: string[];
 }
@@ -20,7 +20,7 @@ type FilterAction =
   | { type: "removeMember"; memberId: string };
 
 const INITIAL: FilterState = {
-  uncheckedProjectIds: [],
+  checkedProjectIds: [],
   hiddenMemberIds: [],
   addedMemberIds: [],
 };
@@ -36,15 +36,15 @@ function reducer(state: FilterState, action: FilterAction): FilterState {
   switch (action.type) {
     case "toggleProject": {
       const { project } = action;
-      const wasUnchecked = state.uncheckedProjectIds.includes(project.id);
+      const wasChecked = state.checkedProjectIds.includes(project.id);
 
       return {
         ...state,
-        uncheckedProjectIds: wasUnchecked
-          ? without(state.uncheckedProjectIds, project.id)
-          : [...state.uncheckedProjectIds, project.id],
+        checkedProjectIds: wasChecked
+          ? without(state.checkedProjectIds, project.id)
+          : [...state.checkedProjectIds, project.id],
         // 다시 체크하면 그 프로젝트에서 뺐던 인원을 되살린다
-        hiddenMemberIds: wasUnchecked
+        hiddenMemberIds: !wasChecked
           ? state.hiddenMemberIds.filter((id) => !project.memberIds.includes(id))
           : state.hiddenMemberIds,
       };
@@ -67,30 +67,52 @@ function reducer(state: FilterState, action: FilterAction): FilterState {
   }
 }
 
-interface UseCalendarFiltersArgs {
+export interface CalendarFilterState {
+  state: FilterState;
+  dispatch: Dispatch<FilterAction>;
+  /** 검색으로 직접 올린 사람 — 이 사람들 일정까지 함께 조회해야 레일에 이름만 뜨지 않는다 */
+  addedMemberIds: string[];
+}
+
+/**
+ * 레일 상태만 담당한다. 파생값(레일 목록·후보)은 사람 정보가 있어야 만들 수 있어 `useCalendarRail`이 맡는다.
+ *
+ * 굳이 둘로 나눈 이유: 일정을 **조회할 사람**을 정하려면 이 상태가 조회보다 먼저 있어야 한다.
+ *   상태(여기) → 일정 조회(useCalendarData) → 사람 정보 → 레일 파생값(useCalendarRail)
+ * 한 훅에 두면 "조회 결과가 있어야 상태를 만들고, 상태가 있어야 조회한다"가 되어 서로를 기다리게 된다.
+ */
+export const useCalendarFilterState = (): CalendarFilterState => {
+  const [state, dispatch] = useReducer(reducer, INITIAL);
+
+  return { state, dispatch, addedMemberIds: state.addedMemberIds };
+};
+
+interface UseCalendarRailArgs {
+  filters: CalendarFilterState;
   projects: CalendarProject[];
   knownMembers: CalendarMember[];
   membersById: Record<string, CalendarMember>;
 }
 
-// 레일(프로젝트 체크 + 인원 목록)의 상태와 파생값을 담당한다.
-export const useCalendarFilters = ({
+// 레일에 실제로 그릴 목록과 검색 후보. 조작 함수도 여기서 함께 내보내 호출부가 한 곳만 보게 한다.
+export const useCalendarRail = ({
+  filters,
   projects,
   knownMembers,
   membersById,
-}: UseCalendarFiltersArgs) => {
-  const [state, dispatch] = useReducer(reducer, INITIAL);
+}: UseCalendarRailArgs) => {
+  const { state, dispatch } = filters;
 
   const checkedProjectIds = useMemo(
     () =>
       projects
-        .filter((project) => !state.uncheckedProjectIds.includes(project.id))
+        .filter((project) => state.checkedProjectIds.includes(project.id))
         .map((project) => project.id),
-    [projects, state.uncheckedProjectIds],
+    [projects, state.checkedProjectIds],
   );
 
   // 체크된 프로젝트의 인원을 모아 레일 목록을 만든다 (중복은 한 번만, 뺀 사람은 제외).
-  // 프로젝트 정보가 없으면(=API가 막힘) 아는 사람 전부를 올린다.
+  // 프로젝트 정보가 없으면(=프로젝트가 없는 사용자) 아는 사람 전부를 올린다.
   const railMembers = useMemo(() => {
     const seen = new Set<string>();
 

@@ -14,42 +14,19 @@
   justify-content: space-between;
 }
 
-.monthNav {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.navButton {
-  padding: 0;
-  border: none;
-  background: none;
-  color: var(--text-placeholder);
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.navButton:hover {
-  color: var(--text);
-}
-
-.monthLabel {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-}
-
 .grid {
+  /* 칸 사이 간격. 여러 날 일정 막대의 left/width를 JS가 계산할 때도 이 값을 읽으므로
+     (MonthCalendar.tsx의 columnLeft/columnWidth) 숫자를 직접 쓰지 말 것. */
+  --cal-gap: 4px;
+
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--cal-gap);
 }
 
 .weekdays {
   display: flex;
-  gap: 4px;
+  gap: var(--cal-gap);
 }
 
 .weekday {
@@ -64,7 +41,7 @@
 .week {
   position: relative;
   display: flex;
-  gap: 4px;
+  gap: var(--cal-gap);
 }
 
 .cell {
@@ -76,7 +53,7 @@
   gap: 3px;
   height: 88px;
   padding: 5px;
-  border: 1px solid var(--line);
+  border: none;
   border-radius: 9px;
   background: var(--white);
   overflow: hidden;
@@ -85,7 +62,7 @@
 }
 
 .cell:hover {
-  background: var(--surface);
+  background: var(--primary-bg);
 }
 
 /* 앞뒤 달 날짜 — 배경을 깔아 이번 달 칸과 한눈에 갈리게 한다 */
@@ -102,7 +79,6 @@
 }
 
 .selected {
-  border-color: var(--primary);
   background: #f7f4ff;
   /* 1.5px 테두리를 레이아웃 이동 없이 표현 */
   box-shadow: inset 0 0 0 0.5px var(--primary);
@@ -113,14 +89,29 @@
 }
 
 .dayNumber {
-  font-size: 11px;
+  font-size: 13.5px;
   font-weight: 700;
-  line-height: 12px;
+  line-height: 15px;
   color: var(--icon);
 }
 
 .today {
-  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--primary-bg);
+  color: var(--text);
+}
+
+.sunday .dayNumber {
+  color: var(--danger);
+}
+
+.sunday .today {
+  color: var(--text);
 }
 
 /* 위에 겹쳐 그린 여러 날 막대만큼 칸 안에 자리를 비워 둔다 */
@@ -136,7 +127,7 @@
   padding: 2px 4px;
   border: none;
   border-radius: 4px;
-  color: var(--white);
+  color: inherit;
   font-family: inherit;
   font-size: 9.5px;
   font-weight: 700;
@@ -151,4 +142,22 @@
   position: absolute;
   padding: 2px 6px;
   cursor: pointer;
+}
+
+/* 한 칸이 좁아지는 구간 — 높이를 줄여 한 달이 한 화면에 들어오게 한다.
+   칸 안의 세로 간격(gap 3px)과 padding-top(5px)은 건드리지 않는다.
+   일정 막대가 `20px + lane * 20px`(칩 17 + gap 3)로 찍히기 때문에 어긋난다. */
+@media (max-width: 700px) {
+  .card {
+    padding: 16px 12px;
+  }
+
+  .grid {
+    --cal-gap: 3px;
+  }
+
+  .cell {
+    height: 72px;
+    padding: 5px 3px;
+  }
 }

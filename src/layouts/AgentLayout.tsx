@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+import { isPublicPath } from "@/constants/routes";
 import { useAgentStore } from "@/stores/useAgentStore";
 
-import Gnb from "@/components/Gnb/Gnb";
+import Gnb from "@/layouts/Gnb/Gnb";
 import AgentView from "@/features/agent/views/AgentView";
 
 export default function AgentLayout({
@@ -18,7 +19,7 @@ export default function AgentLayout({
   const folded = useAgentStore((state) => state.folded);
   const expanded = useAgentStore((state) => state.expanded);
 
-  const isAuthPage = pathname === "/login" || pathname === "/signup";
+  const isAuthPage = isPublicPath(pathname);
 
   useEffect(() => {
     if (expanded && !folded && !isAuthPage) {

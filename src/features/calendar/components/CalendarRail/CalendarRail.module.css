@@ -2,11 +2,18 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 19px;
-  border: 1px solid var(--border);
+  padding: 31px 29px;
+  border: none;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 10px rgba(69, 41, 120, 0.05);
+}
+
+/* 한 단으로 접히면 레일이 가로로 길어져 여백이 과하게 보인다 */
+@media (max-width: 1000px) {
+  .rail {
+    padding: 22px 20px;
+  }
 }
 
 .projects {
@@ -60,6 +67,11 @@
 }
 
 .projectName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 500;
   color: var(--text);
@@ -69,15 +81,10 @@
   color: var(--text-sub);
 }
 
-.divider {
-  height: 1px;
-  border: none;
-  background: var(--line);
-}
-
 /* 자동완성 목록의 기준 위치 */
 .search {
   position: relative;
+  margin: 0 -8px;
 }
 
 /* 체크된 프로젝트에서 모인 인원 목록 */
@@ -93,6 +100,11 @@
   gap: 10px;
   padding: 9px 0;
   border-bottom: 1px solid var(--line);
+}
+
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.member:last-child {
+  border-bottom: none;
 }
 
 .dot {

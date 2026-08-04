@@ -82,7 +82,6 @@ export default function CalendarRail({
             })}
           </ul>
 
-          <hr className={styles.divider} />
         </>
       )}
 

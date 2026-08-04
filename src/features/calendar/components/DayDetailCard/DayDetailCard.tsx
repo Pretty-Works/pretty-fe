@@ -30,16 +30,17 @@ export default function DayDetailCard({
       <div className={styles.head}>
         <h2 className={styles.title}>{formatDayLabel(date)}</h2>
         <span className={styles.count}>
-          {loading ? "불러오는 중" : `일정 ${events.length}건`}
+          {loading ? "불러오는 중" : events.length > 0 ? `일정 ${events.length}건` : ""}
         </span>
 
         <Button
-          name="일정 추가"
-          size="xs"
-          hasPlus
+          size="tiny"
+          leftAccessory="+"
           className={styles.addButton}
           onClick={onAddEvent}
-        />
+        >
+          일정 추가
+        </Button>
       </div>
 
       {events.length === 0 ? (

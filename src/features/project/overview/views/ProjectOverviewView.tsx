@@ -114,7 +114,14 @@ export default function ProjectOverviewView({
     return (
       <div className={styles.errorBox}>
         <p className={`${styles.stateText} ${styles.stateError}`}>{message}</p>
-        <Button status="cancel" size="sm" name="홈으로" onClick={() => router.push("/")} />
+        <Button
+          type="light"
+          buttonStyle="weak"
+          size="medium"
+          onClick={() => router.push("/")}
+        >
+          홈으로
+        </Button>
       </div>
     );
   }

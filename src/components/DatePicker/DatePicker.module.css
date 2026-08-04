@@ -282,3 +282,7 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+.singleFoot {
+  justify-content: flex-start;
+}

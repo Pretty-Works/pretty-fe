@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/Button/Button";
+import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import TaskRow from "@/components/TaskRow/TaskRow";
 import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
@@ -45,42 +46,28 @@ export default function WeeklyTaskCard({
           <h2 className={styles.title}>주간 달성률</h2>
 
           {/* 주차 이동 */}
-          <div className={styles.weekNav}>
-            <button
-              type="button"
-              className={styles.weekArrow}
-              onClick={() => onWeekChange(weekOffset - 1)}
-              aria-label="지난 주"
-            >
-              ‹
-            </button>
-            <span className={styles.weekRange}>
-              {formatDate(board.weekStart)} – {formatDate(board.weekEnd)}
-            </span>
-            <button
-              type="button"
-              className={styles.weekArrow}
-              onClick={() => onWeekChange(weekOffset + 1)}
-              aria-label="다음 주"
-            >
-              ›
-            </button>
-
-            {/* weekOffset 0 = 이번 주 (BE 기준: 이번 주 월요일 + offset주) */}
-            <button
-              type="button"
-              className={styles.thisWeek}
-              onClick={() => onWeekChange(0)}
-              disabled={weekOffset === 0}
-            >
-              이번 주
-            </button>
-          </div>
+          <PeriodNavigator
+            label={`${formatDate(board.weekStart)} – ${formatDate(board.weekEnd)}`}
+            previousLabel="지난 주"
+            nextLabel="다음 주"
+            resetLabel="이번 주"
+            isCurrent={weekOffset === 0}
+            onPrevious={() => onWeekChange(weekOffset - 1)}
+            onNext={() => onWeekChange(weekOffset + 1)}
+            onReset={() => onWeekChange(0)}
+          />
         </div>
 
         {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
         {onAddTask && (
-          <Button name="할일 추가" size="xs" ui="tonal" hasPlus onClick={onAddTask} />
+          <Button
+            size="tiny"
+            buttonStyle="weak"
+            leftAccessory="+"
+            onClick={onAddTask}
+          >
+            할일 추가
+          </Button>
         )}
       </div>
 

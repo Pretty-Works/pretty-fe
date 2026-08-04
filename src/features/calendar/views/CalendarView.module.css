@@ -26,10 +26,30 @@
   gap: 24px;
 }
 
+/* 레일(260px)과 캘린더를 나란히 두기엔 좁아지는 지점.
+   한 단으로 접으면 레일이 위로 올라간다 — 문서 순서 그대로라 탭 이동도 자연스럽다. */
+@media (max-width: 1000px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 .main {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.detailAnchor {
+  scroll-margin-top: 24px;
 }
 
 /* 조회 실패 안내 — "일정이 없다"와 "못 불러왔다"를 구분해 준다 */

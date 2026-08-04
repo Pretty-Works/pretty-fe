@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { LuBell } from "react-icons/lu";
 
-import { useOutsideClick } from "@/hooks/useOutsideClick";
+import { useClickOutside } from "@/hooks/useClickOutside";
 
 import { useUnseenQuery } from "../../hooks/queries/useUnseenQuery";
 import { useMarkSeenMutation } from "../../hooks/mutations/useMarkSeenMutation";
@@ -22,7 +22,7 @@ export default function NotificationBell() {
 
   const close = useCallback(() => setOpen(false), []);
 
-  useOutsideClick(wrapRef, close, open);
+  useClickOutside(wrapRef, close, open);
 
   useEffect(() => {
     if (!open) return;

@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 
+import Badge from "@/components/Badge/Badge";
+import SegmentedTabs, {
+  type SegmentedOption,
+} from "@/components/SegmentedTabs/SegmentedTabs";
+
 import {
   CATEGORY_LABEL,
   type Budget,
@@ -15,6 +20,11 @@ interface BudgetSummaryCardProps {
 }
 
 type Tab = "category" | "department";
+
+const TAB_OPTIONS: SegmentedOption<Tab>[] = [
+  { value: "category", label: "항목별" },
+  { value: "department", label: "부서별" },
+];
 
 // 비중 도넛 색 (많은 순). 5번째부터는 회색으로 묶어 표현한다.
 const SHARE_TONES = ["tone1", "tone2", "tone3", "tone4"] as const;
@@ -66,29 +76,19 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
       <div className={styles.head}>
         <div className={styles.headLeft}>
           <h2 className={styles.title}>예산 현황</h2>
-          {isOver && <span className={styles.overBadge}>초과</span>}
+          {isOver && (
+            <Badge type="red" badgeStyle="weak" size="medium">
+              초과
+            </Badge>
+          )}
         </div>
 
-        <div className={styles.tabs} role="tablist">
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === "category" ? styles.tabOn : ""}`}
-            onClick={() => setTab("category")}
-            role="tab"
-            aria-selected={tab === "category"}
-          >
-            항목별
-          </button>
-          <button
-            type="button"
-            className={`${styles.tab} ${tab === "department" ? styles.tabOn : ""}`}
-            onClick={() => setTab("department")}
-            role="tab"
-            aria-selected={tab === "department"}
-          >
-            부서별
-          </button>
-        </div>
+        <SegmentedTabs
+          options={TAB_OPTIONS}
+          value={tab}
+          onChange={setTab}
+          variant="segment"
+        />
       </div>
 
       <div className={styles.body}>

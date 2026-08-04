@@ -2,15 +2,23 @@
 
 import { useState } from "react";
 
+import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
+import SegmentedTabs, {
+  type SegmentedOption,
+} from "@/components/SegmentedTabs/SegmentedTabs";
 
 import { useDebounce } from "@/hooks/useDebounce";
+import { useCurrentUserId } from "@/lib/auth/currentUser";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
 import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
-import type { ExpenseStatus } from "@/features/project/finance/api/financeApi";
+import type {
+  Expense,
+  ExpenseStatus,
+} from "@/features/project/finance/api/financeApi";
 
 import BudgetSummaryCard from "@/features/project/finance/components/BudgetSummaryCard/BudgetSummaryCard";
 import ExpenseTable from "@/features/project/finance/components/ExpenseTable/ExpenseTable";
@@ -19,6 +27,11 @@ import ExpenseFormModal from "@/features/project/finance/components/ExpenseFormM
 import styles from "./ProjectFinanceView.module.css";
 
 const PAGE_SIZE = 10;
+
+const STATUS_OPTIONS: SegmentedOption<ExpenseStatus>[] = [
+  { value: "EXECUTED", label: "사용 내역" },
+  { value: "PLANNED", label: "예정" },
+];
 
 interface ProjectFinanceViewProps {
   projectId?: string;
@@ -32,6 +45,12 @@ export default function ProjectFinanceView({
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  // 값이 있으면 모달이 수정 모드로 열린다
+  const [editingExpense, setEditingExpense] = useState<Expense>();
+
+  // 본인이 등록한 지출만 고칠 수 있다 (EXPENSE_005).
+  // 목록이 spender를 함께 내려주는 이유가 이 판정이다.
+  const currentUserId = useCurrentUserId();
 
   // 입력이 멈춘 뒤에만 조회 (타이핑마다 요청 방지)
   const debouncedKeyword = useDebounce(keyword);
@@ -78,6 +97,20 @@ export default function ProjectFinanceView({
     setPage(1);
   };
 
+  // 남의 지출은 열어도 저장할 수 없어(EXPENSE_005) 아예 열지 않는다
+  const handleSelectExpense = (expense: Expense) => {
+    if (String(expense.spender.userId) !== currentUserId) return;
+
+    setEditingExpense(expense);
+    setIsFormOpen(true);
+  };
+
+  const handleCloseForm = () => {
+    setIsFormOpen(false);
+    // 다음에 '지출 추가'로 열 때 수정 모드가 남지 않게 비운다
+    setEditingExpense(undefined);
+  };
+
   return (
     <div className={styles.container}>
       {/* 예산 현황 */}
@@ -96,14 +129,15 @@ export default function ProjectFinanceView({
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>지출 내역</h2>
-            <span className={styles.countBadge}>{totalElements}</span>
+            <Badge type="elephant" badgeStyle="weak">{totalElements}</Badge>
           </div>
           <Button
-            name="지출 추가"
-            size="sm"
-            hasPlus
+            size="medium"
+            leftAccessory="+"
             onClick={() => setIsFormOpen(true)}
-          />
+          >
+            지출 추가
+          </Button>
         </div>
 
         <div className={styles.filterbar}>
@@ -114,26 +148,12 @@ export default function ProjectFinanceView({
           />
 
           {/* 사용일이 오늘 이전이면 사용 내역, 이후면 예정 (서버가 날짜로 파생) */}
-          <div className={styles.tabs} role="tablist">
-            <button
-              type="button"
-              className={`${styles.tab} ${status === "EXECUTED" ? styles.tabOn : ""}`}
-              onClick={() => handleStatusChange("EXECUTED")}
-              role="tab"
-              aria-selected={status === "EXECUTED"}
-            >
-              사용 내역
-            </button>
-            <button
-              type="button"
-              className={`${styles.tab} ${status === "PLANNED" ? styles.tabOn : ""}`}
-              onClick={() => handleStatusChange("PLANNED")}
-              role="tab"
-              aria-selected={status === "PLANNED"}
-            >
-              예정
-            </button>
-          </div>
+          <SegmentedTabs
+            options={STATUS_OPTIONS}
+            value={status}
+            onChange={handleStatusChange}
+            variant="segment"
+          />
         </div>
 
         {isExpensesLoading ? (
@@ -145,7 +165,11 @@ export default function ProjectFinanceView({
         ) : expenses.length === 0 ? (
           <p className={styles.stateText}>표시할 지출 내역이 없어요.</p>
         ) : (
-          <ExpenseTable expenses={expenses} />
+          <ExpenseTable
+            expenses={expenses}
+            editableUserId={currentUserId}
+            onSelect={handleSelectExpense}
+          />
         )}
 
         {totalPages > 1 && (
@@ -159,9 +183,10 @@ export default function ProjectFinanceView({
 
       <ExpenseFormModal
         open={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
+        onClose={handleCloseForm}
         projectId={projectId ?? ""}
         period={period}
+        expense={editingExpense}
       />
     </div>
   );

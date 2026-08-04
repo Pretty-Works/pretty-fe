@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: "회의록 상세 페이지입니다.",
 };
 
-export default function Page() {
-  return <MeetingDetailView />;
+interface MeetingDetailPageProps {
+  params: Promise<{ projectId: string; meetingId: string }>;
+}
+
+export default async function Page({ params }: MeetingDetailPageProps) {
+  const { projectId, meetingId } = await params;
+
+  return <MeetingDetailView projectId={projectId} meetingId={meetingId} />;
 }

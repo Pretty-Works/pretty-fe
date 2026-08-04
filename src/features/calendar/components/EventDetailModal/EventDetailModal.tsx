@@ -75,14 +75,23 @@ export default function EventDetailModal({
         <>
           {canLeave && (
             <Button
-              ui="red"
-              size="sm"
-              name="나가기"
+              type="danger"
+              buttonStyle="weak"
+              size="medium"
               className={styles.leaveButton}
               onClick={onLeave}
-            />
+            >
+              나가기
+            </Button>
           )}
-          <Button status="cancel" size="sm" name="닫기" onClick={onClose} />
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={onClose}
+          >
+            닫기
+          </Button>
         </>
       }
     >
@@ -130,11 +139,6 @@ export default function EventDetailModal({
         )}
       </dl>
 
-      <p className={styles.notice}>
-        {canLeave
-          ? "다른 사람이 만든 일정이라 수정할 수 없어요. 나가면 내 캘린더에서만 사라져요."
-          : "다른 사람이 만든 일정이라 보기만 할 수 있어요."}
-      </p>
     </Modal>
   );
 }

@@ -17,8 +17,20 @@ export default function ConfirmRequestCard({
 }: ConfirmRequestCardProps) {
   return (
     <div className={styles.card}>
-      {/* 이 블록은 아직 전부 mock 데이터다 */}
-      <span className={`${styles.label} mock-value`}>{request.label}</span>
+      <div className={styles.head}>
+        {/* 이 블록은 아직 전부 mock 데이터다 */}
+        <span className={`${styles.label} mock-value`}>{request.label}</span>
+
+        {/* 중단 = 진행 중인 에이전트 작업 멈춤 */}
+        <button
+          type="button"
+          className={styles.stop}
+          onClick={() => onStop?.(request.id)}
+          aria-label={`${request.label} · 에이전트 작업 중단`}
+        >
+          중단
+        </button>
+      </div>
 
       <div className={styles.options}>
         {request.options.map((option) => (
@@ -32,18 +44,6 @@ export default function ConfirmRequestCard({
           </button>
         ))}
       </div>
-
-      <span className={styles.divider} aria-hidden="true" />
-
-      {/* 중단 = 진행 중인 에이전트 작업 멈춤 */}
-      <button
-        type="button"
-        className={styles.stop}
-        onClick={() => onStop?.(request.id)}
-        aria-label={`${request.label} · 에이전트 작업 중단`}
-      >
-        중단
-      </button>
     </div>
   );
 }

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +11,7 @@ import FormField from "@/components/FormField/FormField";
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 
+import { safeReturnTo } from "@/constants/routes";
 import { useLoginMutation } from "@/features/auth/login/hooks/mutations/useLoginMutation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -41,6 +41,11 @@ export default function LoginView() {
   const { mutate: login, isPending } = useLoginMutation();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
+  // AuthGuard가 붙여 준 ?returnTo= — 로그인 후 원래 보려던 화면으로 돌아간다.
+  // 쿼리 값을 그대로 쓰면 외부로 튕겨나갈 수 있어 safeReturnTo로 거른다.
+  const getReturnTo = () =>
+    safeReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
+
   // Event Handler
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +64,7 @@ export default function LoginView() {
       {
         onSuccess: (data) => {
           setAccessToken(data.result.accessToken);
-          router.push("/");
+          router.push(getReturnTo());
         },
         onError: (err) => {
           const status = axios.isAxiosError(err)
@@ -87,6 +92,11 @@ export default function LoginView() {
   };
 
   // Effect
+  // 이미 로그인한 채로 들어온 경우(뒤로가기·주소 직접 입력)엔 로그인 폼을 보여줄 이유가 없다.
+  // 마운트 시점의 상태만 보므로(구독하지 않는다) 로그인 성공 직후의 이동과 겹치지 않는다.
+  useEffect(() => {
+    if (useAuthStore.getState().accessToken) router.replace(getReturnTo());
+  }, [router]);
 
   return (
     <main className={styles.container}>
@@ -104,8 +114,8 @@ export default function LoginView() {
             label="사번 (ID)"
             placeholder="사번을 입력하세요"
             value={employeeNo}
-            error={errors.employeeNo}
-            invalid={errors.credential}
+            help={errors.employeeNo}
+            hasError={!!errors.employeeNo || errors.credential}
             onChange={(e) => {
               setEmployeeNo(e.target.value);
               setErrors((prev) => ({
@@ -119,10 +129,11 @@ export default function LoginView() {
           <FormField
             label="비밀번호"
             type="password"
+            revealable
             placeholder="비밀번호를 입력하세요"
             value={password}
-            error={errors.password}
-            invalid={errors.credential}
+            help={errors.password}
+            hasError={!!errors.password || errors.credential}
             onChange={(e) => {
               setPassword(e.target.value);
               setErrors((prev) => ({
@@ -133,20 +144,9 @@ export default function LoginView() {
             }}
           />
 
-          <Button
-            type="submit"
-            status="primary"
-            name={isPending ? "로그인 중…" : "로그인"}
-            disabled={isPending}
-            className={styles.submit}
-          />
-
-          <p className={styles.signup}>
-            아직 계정이 없으신가요?{" "}
-            <Link className={styles.signupLink} href="/signup">
-              회원가입
-            </Link>
-          </p>
+          <Button htmlType="submit" size="big" display="full" loading={isPending}>
+            로그인
+          </Button>
         </form>
       </section>
 
@@ -157,11 +157,7 @@ export default function LoginView() {
         title="로그인 실패"
         width={400}
         footer={
-          <Button
-            status="primary"
-            name="확인"
-            onClick={() => setServerError("")}
-          />
+          <Button onClick={() => setServerError("")}>확인</Button>
         }
       >
         <p className={styles.errorText}>{serverError}</p>
