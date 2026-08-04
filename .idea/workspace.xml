@@ -1,17 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)">
+    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/providers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/providers.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/auth/login/hooks/mutations/useLogoutMutation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/login/hooks/mutations/useLogoutMutation.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib/api/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/gnb/Gnb.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/gnb/Gnb.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/gnb/Gnb.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/gnb/Gnb.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/BudgetSummaryCard/BudgetSummaryCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/components/BudgetSummaryCard/BudgetSummaryCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/date.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/date.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,24 +35,24 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/#15&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tnals/Desktop/PrettyWorks_FE&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "feat/#31",
+    "kotlin-language-version-configured": "true",
+    "kronk.content.tree.expanded.paths": "",
+    "last_opened_file_path": "C:/Users/tnals/Desktop/PrettyWorks_FE",
+    "nodejs_interpreter_path": "C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "ts.external.directory.path": "C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -106,7 +101,23 @@
       <option name="project" value="LOCAL" />
       <updated>1785504470166</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fix : 로그아웃 시 캐시가 그대로 남아있는 문제를 해결(#17)">
+      <option name="closed" value="true" />
+      <created>1785650156147</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1785650156147</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)">
+      <option name="closed" value="true" />
+      <created>1785653061536</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1785653061536</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -116,6 +127,8 @@
     <MESSAGE value="feat : 대시보드/프로젝트 생성/프로젝트 개요/할 일 추가 화면 구현(#9)" />
     <MESSAGE value="feat : 충돌 통합(#9)" />
     <MESSAGE value="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)" />
+    <MESSAGE value="fix : 로그아웃 시 캐시가 그대로 남아있는 문제를 해결(#17)" />
+    <MESSAGE value="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)" />
   </component>
 </project>

@@ -1,0 +1,113 @@
+"use client";
+
+import { Fragment, useEffect, useRef } from "react";
+
+import { useRouter } from "next/navigation";
+
+import { formatDayLabel } from "@/lib/date";
+
+import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
+import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
+import { getNotificationHref } from "../../utils/notificationLink";
+import type { AppNotification } from "../../api/notificationApi";
+import NotificationItem from "../NotificationItem/NotificationItem";
+
+import styles from "./NotificationDropdown.module.css";
+
+interface NotificationDropdownProps {
+  onClose: () => void;
+}
+
+export default function NotificationDropdown({
+  onClose,
+}: NotificationDropdownProps) {
+  const router = useRouter();
+
+  const {
+    data: notifications,
+    isPending,
+    isError,
+    hasNextPage,
+    fetchNextPage,
+    isFetchingNextPage,
+  } = useNotificationsQuery();
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const { mutate: read } = useReadNotificationMutation();
+
+  // 목록 바닥이 보이면 다음 커서를 요청한다.
+  // 전체 건수를 주지 않으므로 "몇 페이지 중 몇" 같은 표시는 만들 수 없다.
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) fetchNextPage();
+      },
+      { root: listRef.current },
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // 읽음 처리와 화면 이동을 함께 한다. 이동할 곳이 없으면 읽음 처리만 하고 드롭다운을 닫는다.
+  const handleSelect = (notification: AppNotification) => {
+    if (!notification.read) read(notification.id);
+
+    const href = getNotificationHref(notification);
+    onClose();
+    if (href) router.push(href);
+  };
+
+  return (
+    <div className={styles.dropdown} role="dialog" aria-label="알림">
+      <div className={styles.list} ref={listRef}>
+        {isPending && <p className={styles.state}>불러오는 중…</p>}
+
+        {isError && <p className={styles.state}>알림을 불러오지 못했습니다</p>}
+
+        {/* 결과가 없는 건 에러가 아니다 */}
+        {notifications?.length === 0 && (
+          <div className={styles.empty}>
+            <p className={styles.emptyTitle}>받은 알림이 없습니다</p>
+            <p className={styles.emptyHint}>
+              프로젝트에 변화가 생기면 여기에 쌓입니다
+            </p>
+          </div>
+        )}
+
+        {/* 최신순으로 내려오므로 날짜가 바뀌는 지점에만 머리글을 끼운다 */}
+        {notifications?.map((notification, index) => {
+          const dayLabel = formatDayLabel(notification.createdAt);
+          const isNewDay =
+            index === 0 ||
+            dayLabel !== formatDayLabel(notifications[index - 1].createdAt);
+
+          return (
+            <Fragment key={notification.id}>
+              {isNewDay && <p className={styles.day}>{dayLabel}</p>}
+
+              <NotificationItem
+                notification={notification}
+                onSelect={handleSelect}
+              />
+            </Fragment>
+          );
+        })}
+
+        {hasNextPage && <div ref={sentinelRef} className={styles.sentinel} />}
+
+        {isFetchingNextPage && <p className={styles.state}>불러오는 중…</p>}
+      </div>
+
+      {/* 90일이 지난 알림은 서버가 지운다. 목록 끝에서 사라진 이유를 알 수 있게 적어둔다 */}
+      {!isPending && !isError && (
+        <p className={styles.footer}>최근 90일의 알림만 보관됩니다</p>
+      )}
+    </div>
+  );
+}

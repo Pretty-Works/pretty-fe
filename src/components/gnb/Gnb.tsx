@@ -5,8 +5,6 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { LuBell } from "react-icons/lu";
-
 import { usePathname } from "next/navigation";
 
 import { useAgentStore } from "@/stores/useAgentStore";
@@ -14,10 +12,10 @@ import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogo
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { POSITION_LABEL } from "@/features/user/api/userApi";
 import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
+import NotificationBell from "@/features/notification/components/NotificationBell/NotificationBell";
 
 import Logo from "@/assets/brand/logo.png";
 import AgentIcon from "@/assets/icons/menu/agent.svg";
-import AlarmIcon from "@/assets/icons/menu/alarm.svg";
 
 import styles from "./Gnb.module.css";
 
@@ -110,10 +108,7 @@ export default function Gnb() {
         <div className={styles.right}>
           {/* 알림/에이전트 */}
           <div className={styles.actions}>
-            <LuBell
-              className={styles.bell}
-              aria-label="alarm-icon"
-            />
+            <NotificationBell />
 
             <AgentIcon
               className={styles.icon}

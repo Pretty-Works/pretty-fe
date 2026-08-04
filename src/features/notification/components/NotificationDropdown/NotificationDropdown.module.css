@@ -1,0 +1,87 @@
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  /* 좁은 화면에선 280px을 지키고 넓어지면 같이 커진다.
+     상단바가 최대 1100px이라 380px을 넘기면 화면 폭을 너무 차지한다 */
+  width: clamp(280px, 24vw, 380px);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+/* 커서 페이지네이션이라 스크롤이 바닥에 닿으면 다음 묶음을 이어 붙인다 */
+.list {
+  display: flex;
+  flex-direction: column;
+  max-height: clamp(320px, 48vh, 460px);
+  /* 여백은 항목과 머리글이 각자 갖는다. 여기에 두면 구분선이 폭 끝까지 닿지 않고,
+     위쪽 여백은 sticky 머리글을 6px 내려서 그 틈으로 지나가는 항목이 비친다 */
+  padding: 0;
+  overflow-y: auto;
+}
+
+/* 오늘 / 어제 / 8월 2일 (일)
+   스크롤 중에도 지금 보는 게 언제 알림인지 남아 있게 위에 붙인다 */
+.day {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 6px 12px;
+  /* 항목 사이 구분선(--line)과 같은 선을 쓰면 머리글이 그냥 또 하나의 항목처럼 보인다.
+     회색 띠 + 한 톤 진한 선으로 층을 나눈다 */
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  /* 위쪽 선을 border가 아니라 그림자로 그린다.
+     border로 그리면 (1) 머리글이 위에 붙어 설 때 패널 테두리와 겹쳐 이중선이 되고,
+     (2) 그걸 top:-1px로 피하면 고정되는 순간 머리글이 1px 튄다.
+     그림자는 상자 밖에 그려져서 위에 붙는 순간 스크롤 영역 밖으로 잘리고,
+     자리를 차지하지 않아 튀지도 않는다 */
+  box-shadow: 0 -1px 0 var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.state {
+  padding: 18px 10px;
+  font-size: 11.5px;
+  color: var(--text-placeholder);
+  text-align: center;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 34px 12px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.emptyHint {
+  font-size: 11px;
+  color: var(--text-placeholder);
+}
+
+/* 관찰용 표식이라 보이지 않는다 */
+.sentinel {
+  height: 1px;
+  flex-shrink: 0;
+}
+
+.footer {
+  padding: 7px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px;
+  color: var(--text-placeholder);
+  text-align: center;
+}

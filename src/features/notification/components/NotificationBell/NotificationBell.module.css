@@ -1,0 +1,41 @@
+.wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--surface);
+}
+
+.bell {
+  width: 21px;
+  height: 21px;
+  color: var(--icon);
+}
+
+/* 확인 안 한 새 소식이 있다는 표시. 드롭다운을 열면 꺼진다 */
+.badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--white);
+  border-radius: 50%;
+  background: var(--danger);
+}

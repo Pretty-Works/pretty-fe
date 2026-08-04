@@ -6,6 +6,9 @@
   border-radius: 16px;
   background: var(--white);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  /* 아래 @container의 기준. 화면 폭이 아니라 이 카드가 실제로 차지한 폭을 본다 —
+     오른쪽 에이전트 패널이 열리면 화면은 그대로인데 카드만 좁아지기 때문이다 */
+  container-type: inline-size;
 }
 
 .head {
@@ -175,11 +178,12 @@
   border-left: 1px solid var(--line);
 }
 
-/* 도넛은 SVG viewBox 비율을 지키며 폭에 맞춰 줄어든다 */
+/* 도넛은 SVG viewBox 비율을 지키며 폭에 맞춰 줄어든다.
+   다만 너무 줄면 조각 구분이 안 되므로 하한을 두고, 그 아래는 아래로 내려 배치한다 */
 .donut {
   position: relative;
   flex: 0 1 150px;
-  min-width: 92px;
+  min-width: 120px;
 }
 
 .donut svg {
@@ -275,4 +279,44 @@
   text-align: center;
   font-size: 13px;
   color: var(--text-placeholder);
+}
+
+/*
+ * 카드가 좁아지면 좌우 배치를 위아래로 바꾼다.
+ * 계속 좌우로 두면 금액 4칸과 도넛이 같이 눌려서 양쪽 다 못 읽게 된다.
+ */
+@container (max-width: 660px) {
+  .body {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* 세로로 쌓이면 경계도 세로선이 아니라 가로선이어야 한다 */
+  .shareArea {
+    justify-content: center;
+    min-height: 0;
+    padding-left: 0;
+    padding-top: 18px;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+}
+
+/* 더 좁아지면 도넛과 범례도 위아래로 */
+@container (max-width: 400px) {
+  .head {
+    flex-wrap: wrap;
+  }
+
+  .amountGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .shareArea {
+    flex-direction: column;
+  }
+
+  .legend {
+    width: 100%;
+  }
 }
