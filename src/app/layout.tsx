@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 import AgentLayout from "@/layouts/AgentLayout";
-import ToastViewport from "@/components/Toast/ToastViewport";
+import AuthGuard from "@/layouts/AuthGuard/AuthGuard";
+import ToastViewport from "@/layouts/Toast/ToastViewport";
 import Providers from "./providers";
 
 import "@/styles/globals.css";
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <Providers>
-          <AgentLayout>{children}</AgentLayout>
+          <AuthGuard>
+            <AgentLayout>{children}</AgentLayout>
+          </AuthGuard>
           <ToastViewport />
         </Providers>
       </body>

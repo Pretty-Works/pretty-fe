@@ -1,19 +1,17 @@
 "use client";
 
+import Badge from "@/components/Badge/Badge";
 import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
+
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
-import ProjectTable, {
-  type ProjectTableColumn,
-} from "@/features/project/components/ProjectTable/ProjectTable";
+import ProjectTable, { type ProjectTableColumn } from "@/features/project/components/ProjectTable/ProjectTable";
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
-import ImportanceFilter, {
-  type ImportanceFilterValue,
-} from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
+import ImportanceFilter, { type ImportanceFilterValue } from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
 import type { BoardPost } from "@/features/project/board/types";
 
 import styles from "./ProjectBoardView.module.css";
@@ -114,13 +112,14 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>게시판</h2>
-            <span className={styles.countBadge}>{TOTAL_COUNT}</span>
+            <Badge type="elephant" badgeStyle="weak">{TOTAL_COUNT}</Badge>
           </div>
           <Button
-            name="글쓰기"
-            size="xs"
+            size="tiny"
             onClick={() => router.push(`/projects/${projectId}/board/write`)}
-          />
+          >
+            글쓰기
+          </Button>
         </div>
 
         <div className={styles.filterbar}>

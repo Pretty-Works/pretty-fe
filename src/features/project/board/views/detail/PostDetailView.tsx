@@ -37,7 +37,7 @@ export default function PostDetailView({ projectId }: PostDetailViewProps) {
   const router = useRouter();
 
   return (
-    <>
+    <div className={styles.page}>
       <button
         type="button"
         className={styles.backBtn}
@@ -64,17 +64,17 @@ export default function PostDetailView({ projectId }: PostDetailViewProps) {
 
         <div className={styles.actions}>
           <Button
-            status="primary"
-            size="sm"
-            name="수정"
+            size="medium"
             onClick={() => router.push(`/projects/${projectId}/board/write`)}
-          />
+          >
+            수정
+          </Button>
         </div>
       </div>
 
       <section className={styles.card}>
         <p className={styles.content}>{POST.content}</p>
       </section>
-    </>
+    </div>
   );
 }

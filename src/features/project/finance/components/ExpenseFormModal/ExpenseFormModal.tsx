@@ -129,14 +129,22 @@ export default function ExpenseFormModal({
       width={520}
       footer={
         <>
-          <Button status="cancel" size="sm" name="취소" onClick={resetAndClose} />
           <Button
-            status="primary"
-            size="sm"
-            name={isPending ? "추가 중…" : "추가"}
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={resetAndClose}
+          >
+            취소
+          </Button>
+          <Button
+            size="medium"
+            loading={isPending}
             disabled={!canSubmit}
             onClick={handleSubmit}
-          />
+          >
+            추가
+          </Button>
         </>
       }
     >
@@ -202,7 +210,7 @@ export default function ExpenseFormModal({
           placeholder="0"
           value={amount ? Number(amount).toLocaleString("ko-KR") : ""}
           onChange={handleAmountChange}
-          rightSlot="원"
+          right="원"
         />
 
         {errorText && <p className={styles.error}>{errorText}</p>}

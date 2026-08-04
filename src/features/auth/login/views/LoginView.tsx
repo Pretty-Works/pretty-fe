@@ -104,8 +104,8 @@ export default function LoginView() {
             label="사번 (ID)"
             placeholder="사번을 입력하세요"
             value={employeeNo}
-            error={errors.employeeNo}
-            invalid={errors.credential}
+            help={errors.employeeNo}
+            hasError={!!errors.employeeNo || errors.credential}
             onChange={(e) => {
               setEmployeeNo(e.target.value);
               setErrors((prev) => ({
@@ -121,8 +121,8 @@ export default function LoginView() {
             type="password"
             placeholder="비밀번호를 입력하세요"
             value={password}
-            error={errors.password}
-            invalid={errors.credential}
+            help={errors.password}
+            hasError={!!errors.password || errors.credential}
             onChange={(e) => {
               setPassword(e.target.value);
               setErrors((prev) => ({
@@ -133,13 +133,9 @@ export default function LoginView() {
             }}
           />
 
-          <Button
-            type="submit"
-            status="primary"
-            name={isPending ? "로그인 중…" : "로그인"}
-            disabled={isPending}
-            className={styles.submit}
-          />
+          <Button htmlType="submit" size="big" display="full" loading={isPending}>
+            로그인
+          </Button>
 
           <p className={styles.signup}>
             아직 계정이 없으신가요?{" "}
@@ -157,11 +153,7 @@ export default function LoginView() {
         title="로그인 실패"
         width={400}
         footer={
-          <Button
-            status="primary"
-            name="확인"
-            onClick={() => setServerError("")}
-          />
+          <Button onClick={() => setServerError("")}>확인</Button>
         }
       >
         <p className={styles.errorText}>{serverError}</p>

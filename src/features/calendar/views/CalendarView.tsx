@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import AiScheduleButton from "@/features/calendar/components/AiScheduleButton/AiScheduleButton";
+import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
 import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmModal";
 import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
 import CalendarRail from "@/features/calendar/components/CalendarRail/CalendarRail";
@@ -24,7 +24,6 @@ import {
   toDateKey,
 } from "@/features/calendar/utils/calendar";
 import type { ScheduleSubmit } from "@/features/calendar/types";
-import { useAgentStore } from "@/stores/useAgentStore";
 import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./CalendarView.module.css";
@@ -55,7 +54,6 @@ export default function CalendarView() {
   );
   const [selectedDate, setSelectedDate] = useState(today);
   const detailRef = useRef<HTMLDivElement>(null);
-  const openAgent = useAgentStore((state) => state.openAgent);
 
   // 달력 격자는 앞뒤 달을 물고 있어서 보이는 칸 전체를 조회 범위로 쓴다
   const range = useMemo(() => {
@@ -177,7 +175,9 @@ export default function CalendarView() {
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <h1 className={styles.pageTitle}>캘린더</h1>
-          <AiScheduleButton onClick={openAgent} />
+          <OpenAgentButton>
+            AI와 함께 참여자 일정을 고려해 일정을 잡을 수 있어요 →
+          </OpenAgentButton>
         </div>
       </div>
 

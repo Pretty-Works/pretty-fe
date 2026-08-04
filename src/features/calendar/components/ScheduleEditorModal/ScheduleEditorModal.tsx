@@ -166,20 +166,29 @@ export default function ScheduleEditorModal({
         <>
           {mode === "edit" && onDelete && (
             <Button
-              ui="red"
-              size="sm"
-              name="삭제"
+              type="danger"
+              buttonStyle="weak"
+              size="medium"
               className={styles.deleteButton}
               onClick={onDelete}
-            />
+            >
+              삭제
+            </Button>
           )}
-          <Button status="cancel" size="sm" name="취소" onClick={onClose} />
           <Button
-            status="primary"
-            size="sm"
-            name={mode === "create" ? "등록" : "저장"}
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={onClose}
+          >
+            취소
+          </Button>
+          <Button
+            size="medium"
             onClick={handleSubmit}
-          />
+          >
+            {mode === "create" ? "등록" : "저장"}
+          </Button>
         </>
       }
     >

@@ -1,0 +1,108 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.blue.fill {
+  background: #3182f6;
+  color: var(--white);
+}
+
+.blue.weak {
+  background: #e8f1fe;
+  color: #1b64da;
+}
+
+.teal.fill {
+  background: #0891b2;
+  color: var(--white);
+}
+
+.teal.weak {
+  background: #e0f5f9;
+  color: #0e7490;
+}
+
+.green.fill {
+  background: var(--success);
+  color: var(--white);
+}
+
+.green.weak {
+  background: #e6f7ef;
+  color: #0f9d63;
+}
+
+.red.fill {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.red.weak {
+  background: #fdecec;
+  color: #d94a4c;
+}
+
+.yellow.fill {
+  background: var(--warning);
+  color: var(--white);
+}
+
+.yellow.weak {
+  background: #fff7e0;
+  color: #b0780a;
+}
+
+.purple.fill {
+  background: var(--primary);
+  color: var(--white);
+}
+
+.purple.weak {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.elephant.fill {
+  background: #8b95a1;
+  color: var(--white);
+}
+
+.elephant.weak {
+  background: #f1f3f5;
+  color: var(--text-sub);
+}
+
+.large {
+  min-width: 26px;
+  height: 24px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.medium {
+  min-width: 24px;
+  height: 22px;
+  padding: 0 8px;
+  font-size: 11.5px;
+}
+
+.small {
+  min-width: 22px;
+  height: 20px;
+  padding: 0 7px;
+  font-size: 11px;
+}
+
+.tiny {
+  min-width: 20px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 6px;
+  font-size: 10px;
+}

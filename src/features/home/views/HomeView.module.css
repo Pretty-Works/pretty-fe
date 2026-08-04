@@ -57,19 +57,6 @@
   color: var(--text);
 }
 
-.countBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 6px;
-  border-radius: 999px;
-  background: var(--primary-bg);
-  color: var(--primary);
-  font-size: 12px;
-  font-weight: 700;
-}
 
 .filterbar {
   padding: 6px 0 10px;

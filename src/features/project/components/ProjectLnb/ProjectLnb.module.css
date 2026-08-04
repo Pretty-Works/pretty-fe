@@ -1,0 +1,98 @@
+.lnb {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 200px;
+  flex-shrink: 0;
+  padding: 12px;
+  background: var(--white);
+}
+
+.caption {
+  padding: 6px 12px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-placeholder);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+  transition:
+    background 0.12s ease,
+    color 0.12s ease;
+}
+
+.item:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+.item:active {
+  background: #eceef1;
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text-placeholder);
+  transition: color 0.12s ease;
+}
+
+.item:hover .icon {
+  color: var(--text-sub);
+}
+
+.label {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.active,
+.active:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.active .icon,
+.active:hover .icon {
+  color: var(--primary);
+}
+
+.divider {
+  margin: 8px 10px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+@container project-area (max-width: 900px) {
+  .lnb {
+    width: 60px;
+    padding: 10px 8px;
+    border-radius: 16px;
+  }
+
+  .caption,
+  .label {
+    display: none;
+  }
+
+  .item {
+    justify-content: center;
+    gap: 0;
+    padding: 0;
+  }
+}

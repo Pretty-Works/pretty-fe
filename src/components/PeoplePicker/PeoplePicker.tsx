@@ -111,7 +111,7 @@ export default function PeoplePicker({
           placeholder={placeholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          rightSlot={hint}
+          right={hint}
         />
 
         {query.trim() && (

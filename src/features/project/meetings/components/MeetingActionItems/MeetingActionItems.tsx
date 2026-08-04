@@ -7,7 +7,7 @@ interface MeetingActionItemsProps {
   items: MeetingActionItem[];
 }
 
-// 회의록 실행 항목 (에이전트 영역)
+// 회의록 실행 항목
 export default function MeetingActionItems({ items }: MeetingActionItemsProps) {
   if (items.length === 0) return null;
 
@@ -28,7 +28,7 @@ export default function MeetingActionItems({ items }: MeetingActionItemsProps) {
             알림을 보냅니다.
           </span>
         </div>
-        <Button status="primary" size="sm" name="에이전트로 할 일 생성" />
+        <Button size="medium">에이전트로 할 일 생성</Button>
       </div>
 
       <div className={styles.taskTable} role="table">

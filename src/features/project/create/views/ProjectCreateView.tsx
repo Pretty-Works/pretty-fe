@@ -358,26 +358,21 @@ export default function ProjectCreateView({
         </div>
         <div className={styles.actions}>
           <Button
-            status="cancel"
-            size="sm"
-            name="취소"
+            type="light"
+            buttonStyle="weak"
+            size="medium"
             onClick={() => router.back()}
-          />
+          >
+            취소
+          </Button>
           <Button
-            status="primary"
-            size="sm"
-            name={
-              isPending
-                ? isEdit
-                  ? "저장 중…"
-                  : "생성 중…"
-                : isEdit
-                  ? "수정하기"
-                  : "생성하기"
-            }
+            size="medium"
+            loading={isPending}
             disabled={!canSubmit}
             onClick={handleSubmit}
-          />
+          >
+            {isEdit ? "수정하기" : "생성하기"}
+          </Button>
         </div>
       </div>
 
@@ -571,13 +566,14 @@ export default function ProjectCreateView({
         <div className={styles.cardHead}>
           <h3 className={styles.cardTitle}>마일스톤</h3>
           <Button
-            ui="tonal"
-            size="xs"
-            name="마일스톤 추가"
-            hasPlus
+            buttonStyle="weak"
+            size="tiny"
+            leftAccessory="+"
             disabled={milestones.length >= MAX.milestones}
             onClick={addMilestone}
-          />
+          >
+            마일스톤 추가
+          </Button>
         </div>
 
         {milestones.length === 0 ? (
