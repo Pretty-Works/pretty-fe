@@ -29,7 +29,8 @@ export interface CalendarMembers {
  *   2) 내 프로젝트 참여자 — 레일·인원 후보의 기본 목록
  *   3) 일정 응답에 실려 온 이름 — 프로젝트 밖 사람이 만든 일정까지 덮는다
  *
- * 아직 사내 사용자 **검색** API(`GET /users?keyword=`)가 없어서, 후보는 2·3에 등장한 사람으로 제한된다.
+ * 여기 모이는 건 "이미 화면에 등장한 사람"이다. 사내 전체에서 사람을 찾는 건
+ * `GET /users/search`(useUserSearchQuery)가 맡고, 일정 참여 인원 선택에서만 쓴다.
  */
 export const useCalendarMembers = (
   namesById: Record<string, string>,
@@ -53,7 +54,17 @@ export const useCalendarMembers = (
     [namesById, myId],
   );
 
-  const knownMembers = projectMembers.length ? projectMembers : scheduleMembers;
+  // 두 출처를 합친다. 프로젝트 참여자가 있다고 일정에만 등장한 사람을 후보에서 빼면
+  // 그 사람이 화면엔 보이는데 검색으로는 못 찾아 다시 일정을 잡을 수 없다.
+  const knownMembers = useMemo(() => {
+    const byId = new Map<string, CalendarMember>();
+
+    scheduleMembers.forEach((member) => byId.set(member.id, member));
+    // 프로젝트 쪽 정보가 더 정확하므로 뒤에 덮어쓴다
+    projectMembers.forEach((member) => byId.set(member.id, member));
+
+    return [...byId.values()];
+  }, [scheduleMembers, projectMembers]);
 
   const me = useMemo(() => {
     if (!myId) return null;

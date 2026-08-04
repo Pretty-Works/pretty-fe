@@ -9,6 +9,13 @@
   box-shadow: 0 2px 10px rgba(69, 41, 120, 0.05);
 }
 
+/* 한 단으로 접히면 레일이 가로로 길어져 여백이 과하게 보인다 */
+@media (max-width: 1000px) {
+  .rail {
+    padding: 22px 20px;
+  }
+}
+
 .projects {
   display: flex;
   flex-direction: column;

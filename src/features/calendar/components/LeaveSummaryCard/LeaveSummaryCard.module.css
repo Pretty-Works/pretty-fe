@@ -22,7 +22,9 @@
 
 .progressHead {
   display: flex;
-  align-items: flex-start;
+  /* 제목(16px)과 안내 문구(12.5px)는 크기가 달라 윗줄을 맞추면 밑선이 어긋난다.
+     읽을 때 눈에 걸리는 건 밑선이라 baseline으로 맞춘다. */
+  align-items: baseline;
   justify-content: space-between;
   gap: 16px;
 }
@@ -47,7 +49,6 @@
 }
 
 .caption {
-  padding-top: 2px;
   font-size: 12.5px;
   font-weight: 500;
   color: var(--primary);
@@ -74,6 +75,8 @@
   font-size: 13px;
   font-weight: 500;
   color: var(--text-sub);
+  /* "잔여 연차"가 "잔여 연 / 차"로 갈라지지 않게 */
+  white-space: nowrap;
 }
 
 .statValue {
@@ -97,4 +100,29 @@
   font-weight: 600;
   color: var(--text-placeholder);
   white-space: nowrap;
+}
+
+/* 진행률과 수치 4개를 한 줄에 두기엔 좁아지는 지점 (수치 하나에 90px는 있어야 한다).
+   위아래로 나누면 수치들이 카드 폭을 통째로 쓴다. */
+@media (max-width: 900px) {
+  .card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .progressArea {
+    max-width: none;
+    padding-right: 0;
+    padding-bottom: 18px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* 가로로 있을 땐 진행률 영역의 오른쪽 선이 구분자였는데,
+     세로로 접히면 이 선만 카드 맨 왼쪽에 덩그러니 남는다. */
+  .stat:first-child {
+    padding-left: 0;
+    border-left: none;
+  }
 }

@@ -30,6 +30,9 @@ export const useCalendarPeopleQuery = () => {
 
   return useQuery<CalendarPeople>({
     queryKey: ["calendar", "people", myId],
+    // 프로젝트 구성원은 자주 바뀌지 않는데 조회는 (프로젝트 수 + 1)번 나간다.
+    // 캐시를 두지 않으면 캘린더에 들를 때마다 그만큼 다시 부른다.
+    staleTime: 5 * 60 * 1000,
     queryFn: async () => {
       const summaries = await fetchMyProjects();
       // 상세 한 건이 실패해도 나머지 프로젝트는 그린다 (레일 전체가 비지 않도록)
