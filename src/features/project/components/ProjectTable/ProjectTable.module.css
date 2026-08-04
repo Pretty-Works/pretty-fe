@@ -21,6 +21,11 @@
   transition: background 0.15s ease;
 }
 
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.row:last-child {
+  border-bottom: none;
+}
+
 .row:hover {
   background: var(--surface);
 }

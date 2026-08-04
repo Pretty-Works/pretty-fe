@@ -1,0 +1,86 @@
+.item {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  /* 구분선이 곧게 떨어지도록 모서리를 굴리지 않는다 */
+  border-radius: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 항목 사이 구분선. 날짜 머리글 바로 밑에는 붙지 않는다(머리글이 이미 나눠줌) */
+.item + .item {
+  border-top: 1px solid var(--line);
+}
+
+.item:hover {
+  background: var(--surface);
+}
+
+/* 프로젝트명 · 안 읽음 점 · 시각을 한 줄에.
+   이름이 길면 이름만 줄어들고 점과 시각은 자리를 지킨다 */
+.head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* 안 읽음 표시 */
+.dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* 프로젝트명(마일스톤 알림은 마일스톤 목표) */
+.subject {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-placeholder);
+  /* 이름이 길어도 두 줄로 늘어지지 않게 한 줄로 자른다 */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.body {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-placeholder);
+  /* 문구가 길어도 드롭다운이 세로로 늘어지지 않게 두 줄까지만 */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.unread .subject {
+  color: var(--text);
+}
+
+.unread .body {
+  color: var(--text-sub);
+}
+
+.time {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 10.5px;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+}

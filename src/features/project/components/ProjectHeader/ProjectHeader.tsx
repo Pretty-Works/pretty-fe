@@ -7,6 +7,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { getErrorCode } from "@/lib/api/errorCode";
 import { useToastStore, type ToastTone } from "@/stores/useToastStore";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
+import { useRememberLastProject } from "@/features/project/hooks/useRememberLastProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useChangeProjectStatusMutation } from "@/features/project/overview/hooks/mutations/useChangeProjectStatusMutation";
 import { getProjectTabSegment } from "@/features/project/constants/projectTabs";
@@ -62,6 +63,12 @@ export default function ProjectHeader() {
   // 수정(PROJECT_005)과 상태 변경(PROJECT_017)의 판정 기준이 같다 — 오너이거나 역할이 PM
   const canManage = useCanManageProject(projectId);
 
+  // 상단바 '프로젝트'가 여기로 되돌아온다. 이 컴포넌트가 네 탭 모두에 있어 탭을 옮길 때마다 갱신된다.
+  useRememberLastProject(projectId, currentTab, {
+    ready: !!project,
+    unavailable: isError,
+  });
+
   // 완료·보관 프로젝트는 수정할 수 없다 (BE ProjectPolicy.isOpenForContent → PROJECT_020)
   const isOpenForContent =
     !!project &&
@@ -110,20 +117,23 @@ export default function ProjectHeader() {
           />
         </button>
 
-        {/* 열 수 없는 프로젝트면 이름 자리를 비워두지 않고 상태를 알린다 */}
-        <span className={`${styles.name} ${!project ? styles.namePlaceholder : ""}`}>
-          {project?.name ?? (isError ? "열 수 없는 프로젝트" : "불러오는 중…")}
-        </span>
-
-        {/* 화살표 — 다른 프로젝트로 이동 */}
+        {/* 이름 + 화살표 — 통째로 눌러 다른 프로젝트로 이동.
+            이름까지 누를 수 있어야 10px짜리 화살표를 조준하지 않아도 된다.
+            버튼 글자가 곧 이름이라 aria-label을 따로 두지 않는다(이름을 덮어쓴다) */}
         <button
           type="button"
-          className={styles.caretButton}
+          className={styles.switchButton}
           onClick={() => toggle("switch")}
           aria-haspopup="menu"
           aria-expanded={openMenu === "switch"}
-          aria-label="다른 프로젝트 선택"
         >
+          {/* 열 수 없는 프로젝트면 이름 자리를 비워두지 않고 상태를 알린다 */}
+          <span
+            className={`${styles.name} ${!project ? styles.namePlaceholder : ""}`}
+          >
+            {project?.name ?? (isError ? "열 수 없는 프로젝트" : "불러오는 중…")}
+          </span>
+
           <span className={styles.caret} aria-hidden="true" />
         </button>
 

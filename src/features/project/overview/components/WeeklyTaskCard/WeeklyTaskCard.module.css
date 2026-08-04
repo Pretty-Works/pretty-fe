@@ -21,12 +21,16 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 0;
+  /* min-width:0이면 끝없이 줄어들기만 해서 위 flex-wrap이 끝내 동작하지 않는다.
+     제목·주차 이동이 제 크기를 지켜야 버튼이 아래 줄로 내려간다 */
+  flex-wrap: wrap;
 }
 
 .title {
   flex-shrink: 0;
   font-size: 15.5px;
+  /* 옆의 주차 이동과 글자 중심을 맞춘다 (PeriodNavigator.module.css 주석 참고) */
+  line-height: 1;
   font-weight: 700;
   color: var(--text);
 }

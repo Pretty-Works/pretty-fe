@@ -18,6 +18,36 @@ export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+// "2026-08-04T14:22:10" → "오늘" | "어제" | "8월 2일 (일)"
+// 목록을 날짜로 묶는 머리글에 쓴다.
+// 서버가 LocalDateTime(타임존 없음)을 주므로 브라우저 로컬 시각으로 해석된다.
+export function formatDayLabel(dateTime: string): string {
+  const date = new Date(dateTime);
+  if (Number.isNaN(date.getTime())) return dateTime;
+
+  // 시각이 아니라 날짜가 며칠 차이인지를 본다 (23시와 다음 날 1시는 하루 차이)
+  const days = Math.round(
+    (startOfDay(new Date()).getTime() - startOfDay(date).getTime()) / 86400000,
+  );
+
+  if (days === 0) return "오늘";
+  if (days === 1) return "어제";
+
+  return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
+}
+
+// "2026-08-04T14:22:10" → "14:22" (24시간제)
+// toLocaleTimeString은 환경마다 결과가 달라 직접 만든다.
+export function formatTimeOfDay(dateTime: string): string {
+  const date = new Date(dateTime);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return `${hours}:${minutes}`;
+}
+
 // "2026-02-26" → "2026-02-26 (목)"
 export function formatDateLabel(iso: string): string {
   const parts = iso.split("-").map(Number);

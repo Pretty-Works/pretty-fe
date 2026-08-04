@@ -61,6 +61,11 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.taskRow:last-child {
+  border-bottom: none;
+}
+
 .taskHead {
   padding: 6px 2px 12px;
   border-bottom: 1px solid var(--border);

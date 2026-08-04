@@ -2,6 +2,8 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* 가로로 늘어선 줄(필터바·카드 머리)에 놓여도 눌리지 않는다 */
+  flex-shrink: 0;
 }
 
 .fieldLabel {
@@ -48,4 +50,42 @@
   border-color: var(--primary);
   background: var(--primary);
   color: var(--white);
+}
+
+/*
+ * segment 변형 — 회색 트랙 위에서 선택한 칸만 흰 카드로 떠오른다.
+ * 값을 고르는 pill과 달리 '같은 목록을 다른 기준으로 보기'를 나타내므로,
+ * 칸들이 하나의 덩어리로 붙어 있어야 서로 배타적인 보기라는 게 읽힌다.
+ */
+.trackSegment {
+  flex-wrap: nowrap;
+  gap: 0;
+  /* 옆에 검색바가 있는 자리에서 눌리지 않게 */
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 9px;
+  background: var(--surface);
+}
+
+.trackSegment .tab {
+  height: auto;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 12.5px;
+  color: var(--text-placeholder);
+  white-space: nowrap;
+}
+
+.trackSegment .tab:hover:not(.active) {
+  border-color: transparent;
+  color: var(--text-sub);
+}
+
+.trackSegment .active {
+  background: var(--white);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }

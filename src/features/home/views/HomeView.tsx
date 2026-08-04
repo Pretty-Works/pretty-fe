@@ -178,7 +178,6 @@ export default function HomeView() {
           <div className={styles.panelHead}>
             <div className={styles.panelHeadLeft}>
               <h2 className={styles.panelTitle}>프로젝트</h2>
-              <ProjectStatusSelect value={status} onChange={handleStatusChange} />
             </div>
             {/* 팀장 이상 또는 PM 부서만 만들 수 있다. 판정에 쓰는 직급 서열이
                 서버에만 있어 결과(canCreateProject)를 그대로 따른다. */}
@@ -193,12 +192,15 @@ export default function HomeView() {
             )}
           </div>
 
+          {/* 검색과 상태 필터는 같은 목록을 좁히는 짝이라 한 줄에 둔다 */}
           <div className={styles.filterbar}>
             <SearchBar
               placeholder="프로젝트 검색"
               value={keyword}
               onChange={handleKeywordChange}
             />
+
+            <ProjectStatusSelect value={status} onChange={handleStatusChange} />
           </div>
 
           {isProjectsLoading ? (

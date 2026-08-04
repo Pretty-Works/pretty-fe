@@ -9,9 +9,14 @@ import SelectField from "@/components/SelectField/SelectField";
 import DatePicker from "@/components/DatePicker/DatePicker";
 
 import { getErrorCode } from "@/lib/api/errorCode";
-import { useCreateExpenseMutation } from "@/features/project/finance/hooks/mutations/useExpenseMutations";
+import {
+  useCreateExpenseMutation,
+  useUpdateExpenseMutation,
+  useDeleteExpenseMutation,
+} from "@/features/project/finance/hooks/mutations/useExpenseMutations";
 import {
   CATEGORY_LABEL,
+  type Expense,
   type ExpenseCategory,
 } from "@/features/project/finance/api/financeApi";
 
@@ -28,6 +33,9 @@ const CATEGORY_OPTIONS = (
 // 원인별로 다르게 알려준다 — 사용일 범위와 권한은 사용자가 고칠 수 있는 문제라 구분이 필요하다.
 const ERROR_MESSAGE: Record<string, string> = {
   EXPENSE_003: "사용일이 프로젝트 기간을 벗어났어요.",
+  EXPENSE_004: "지출 내역을 찾을 수 없어요.",
+  EXPENSE_005: "본인이 등록한 지출만 수정·삭제할 수 있어요.",
+  EXPENSE_006: "이미 삭제된 지출이에요.",
   MEMBER_001: "이 프로젝트에 참여 중일 때만 지출을 등록할 수 있어요.",
   PROJECT_004: "프로젝트를 찾을 수 없어요.",
   USER_003: "퇴사한 사용자는 지출을 등록할 수 없어요.",
@@ -41,6 +49,8 @@ interface ExpenseFormModalProps {
   projectId: string;
   // 사용일은 프로젝트 기간 안에서만 고를 수 있다 (EXPENSE_003)
   period?: { startDate: string; endDate: string };
+  // 값을 넘기면 수정 모드가 된다 (없으면 추가 모드)
+  expense?: Expense;
 }
 
 export default function ExpenseFormModal({
@@ -48,7 +58,10 @@ export default function ExpenseFormModal({
   onClose,
   projectId,
   period,
+  expense,
 }: ExpenseFormModalProps) {
+  const isEdit = !!expense;
+
   // State
   const [expenseDate, setExpenseDate] = useState("");
   const [category, setCategory] = useState("");
@@ -61,14 +74,34 @@ export default function ExpenseFormModal({
   const [idempotencyKey, setIdempotencyKey] = useState("");
 
   // Query
-  const { mutate: createExpense, isPending } =
+  const { mutate: createExpense, isPending: isCreating } =
     useCreateExpenseMutation(projectId);
+  const { mutate: updateExpense, isPending: isUpdating } =
+    useUpdateExpenseMutation(projectId);
+  const { mutate: deleteExpense, isPending: isDeleting } =
+    useDeleteExpenseMutation(projectId);
 
-  // Effect — 열릴 때마다 새 키를 발급한다 (닫았다 다시 열면 별개의 등록)
+  // 저장(추가·수정)과 삭제를 나눠 둔다 — 삭제 중에 저장 버튼이 진행 상태로 보이면 안 된다.
+  const isSaving = isCreating || isUpdating;
+  const isPending = isSaving || isDeleting;
+
+  // Effect — 열릴 때 초기값을 채운다 (수정 모드면 기존 값, 아니면 빈 폼 + 새 멱등 키)
   useEffect(() => {
     if (!open) return;
+
+    if (expense) {
+      setExpenseDate(expense.expenseDate);
+      setCategory(expense.category);
+      setMerchant(expense.merchant);
+      setPurpose(expense.purpose);
+      setAmount(String(expense.amount));
+      return;
+    }
+
+    // 연타·재시도로 지출이 두 건 생기지 않게 한 번 발급한다.
+    // 수정은 PUT(멱등)이라 키가 필요 없다.
     setIdempotencyKey(crypto.randomUUID());
-  }, [open]);
+  }, [open, expense]);
 
   // Event Handler
   const resetAndClose = () => {
@@ -81,6 +114,12 @@ export default function ExpenseFormModal({
     onClose();
   };
 
+  // 서버가 돌려준 실패 원인을 문구로 바꾼다
+  const showError = (error: unknown, fallback: string) => {
+    const code = getErrorCode(error);
+    setErrorText((code && ERROR_MESSAGE[code]) || fallback);
+  };
+
   // 숫자만 남긴다 — 서버가 1원 이상의 정수만 받는다
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setAmount(e.target.value.replace(/[^0-9]/g, ""));
@@ -89,27 +128,43 @@ export default function ExpenseFormModal({
   const handleSubmit = () => {
     setErrorText("");
 
-    createExpense(
-      {
-        body: {
-          expenseDate,
-          category: category as ExpenseCategory,
-          merchant: merchant.trim(),
-          purpose: purpose.trim(),
-          amount: Number(amount),
+    // PUT은 전체 교체라 수정 때도 다섯 필드를 모두 보낸다
+    const body = {
+      expenseDate,
+      category: category as ExpenseCategory,
+      merchant: merchant.trim(),
+      purpose: purpose.trim(),
+      amount: Number(amount),
+    };
+
+    if (expense) {
+      updateExpense(
+        { expenseId: expense.expenseId, body },
+        {
+          onSuccess: resetAndClose,
+          onError: (error) => showError(error, "지출을 수정하지 못했어요."),
         },
-        idempotencyKey,
-      },
+      );
+      return;
+    }
+
+    createExpense(
+      { body, idempotencyKey },
       {
         onSuccess: resetAndClose,
-        onError: (error) => {
-          const code = getErrorCode(error);
-          setErrorText(
-            (code && ERROR_MESSAGE[code]) || "지출을 등록하지 못했어요.",
-          );
-        },
+        onError: (error) => showError(error, "지출을 등록하지 못했어요."),
       },
     );
+  };
+
+  const handleDelete = () => {
+    if (!expense) return;
+    setErrorText("");
+
+    deleteExpense(expense.expenseId, {
+      onSuccess: resetAndClose,
+      onError: (error) => showError(error, "지출을 삭제하지 못했어요."),
+    });
   };
 
   // 다섯 항목 모두 필수. 금액은 1원 이상.
@@ -125,10 +180,21 @@ export default function ExpenseFormModal({
     <Modal
       open={open}
       onClose={resetAndClose}
-      title="지출 추가"
+      title={isEdit ? "지출 수정" : "지출 추가"}
       width={520}
       footer={
         <>
+          {/* 삭제는 왼쪽 끝으로 밀어 실수로 누르지 않게 한다 */}
+          {isEdit && (
+            <button
+              type="button"
+              className={styles.deleteButton}
+              disabled={isPending}
+              onClick={handleDelete}
+            >
+              {isDeleting ? "삭제 중…" : "삭제"}
+            </button>
+          )}
           <Button
             type="light"
             buttonStyle="weak"
@@ -139,11 +205,11 @@ export default function ExpenseFormModal({
           </Button>
           <Button
             size="medium"
-            loading={isPending}
+            loading={isSaving}
             disabled={!canSubmit}
             onClick={handleSubmit}
           >
-            추가
+            {isEdit ? "수정" : "추가"}
           </Button>
         </>
       }

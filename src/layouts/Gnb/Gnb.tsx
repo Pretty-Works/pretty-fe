@@ -5,15 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import { LuBell } from "react-icons/lu";
-
 import { usePathname } from "next/navigation";
 
 import { useAgentStore } from "@/stores/useAgentStore";
+import { useLastProjectStore } from "@/stores/useLastProjectStore";
+import { DEFAULT_PROJECT_TAB } from "@/features/project/constants/projectTabs";
 import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { POSITION_LABEL } from "@/features/user/api/userApi";
 import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
+import NotificationBell from "@/features/notification/components/NotificationBell/NotificationBell";
 
 import Logo from "@/assets/brand/logo.png";
 import AgentIcon from "@/assets/icons/menu/agent.svg";
@@ -30,6 +31,20 @@ export default function Gnb() {
   const menuRef = useRef<HTMLDivElement>(null);
   const { mutate: logout } = useLogoutMutation();
   const { data: me } = useMyProfileQuery();
+
+  // '프로젝트'는 마지막으로 보던 프로젝트·탭으로 되돌아간다.
+  // 프로젝트 목록 화면이 따로 없어, 기억해둔 게 없으면 목록이 있는 홈으로 보낸다.
+  const lastProjectId = useLastProjectStore((state) => state.projectId);
+  const lastProjectTab = useLastProjectStore((state) => state.tab);
+
+  // localStorage 값이라 서버 렌더에는 없다. 마운트 뒤에 꺼내 써야 첫 그림이 어긋나지 않는다.
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
+  const projectPath =
+    hydrated && lastProjectId
+      ? `/projects/${lastProjectId}/${lastProjectTab ?? DEFAULT_PROJECT_TAB}`
+      : "/";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -59,7 +74,8 @@ export default function Gnb() {
     },
     {
       label: "프로젝트",
-      path: "/projects",
+      path: projectPath,
+      // 활성 표시는 목적지가 아니라 지금 어디에 있는지로 판단한다
       paths: ["/projects"],
     },
     {
@@ -93,7 +109,8 @@ export default function Gnb() {
 
             return (
               <Link
-                key={menu.path}
+                /* 목적지가 바뀌어도(마지막 프로젝트) 같은 메뉴로 남게 라벨을 키로 쓴다 */
+                key={menu.label}
                 href={menu.path}
                 className={`${styles.menuItem} ${isActive ? styles.active : ""}`}
               >
@@ -107,10 +124,7 @@ export default function Gnb() {
         <div className={styles.right}>
           {/* 알림/에이전트 */}
           <div className={styles.actions}>
-            <LuBell
-              className={styles.bell}
-              aria-label="alarm-icon"
-            />
+            <NotificationBell />
 
             <button
               type="button"

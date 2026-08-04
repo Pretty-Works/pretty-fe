@@ -1,17 +1,155 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)">
+    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="feat : 알림 배지 구현(#31)">
+      <change afterPath="$PROJECT_DIR$/.claude/launch.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/error.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/global-error.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/not-found.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/error.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/assets/icons/menu/agent-active.svg" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Badge/Badge.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Badge/Badge.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Button/Button.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/OpenAgentButton/OpenAgentButton.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/OpenAgentButton/OpenAgentButton.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/PeriodNavigator/PeriodNavigator.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/PeriodNavigator/PeriodNavigator.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Result/Result.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/constants/routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/board/components/modal/InvalidFormModal/InvalidFormModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/board/components/modal/PostSavedModal/PostSavedModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/board/hooks/usePostWriteForm.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/components/ProjectLnb/ProjectLnb.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/components/ProjectLnb/ProjectLnb.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/components/modal/DialogNotice/DialogNotice.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/components/modal/DialogNotice/DialogNotice.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingDetailContent/MeetingDetailContent.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingDetailContent/MeetingDetailContent.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/components/modal/DeleteMeetingModal/DeleteMeetingModal.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/components/modal/DeleteMeetingModal/DeleteMeetingModal.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/mutations/useCreateMeetingMutation.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/mutations/useDeleteMeetingMutation.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/mutations/useUpdateMeetingMutation.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/queries/useMeetingDetailQuery.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/queries/useMeetingsQuery.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/useAttendeeOptions.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/useMeetingDetailPage.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/hooks/useMeetingListPage.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/project/meetings/lib/format.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/features/user/hooks/queries/useUserSearchQuery.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/layouts/AuthGuard/AuthGuard.module.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/layouts/AuthGuard/AuthGuard.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/layouts/ErrorPage/ErrorPage.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/stores/useChatStore.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/layout.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/layout.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/meetings/[meetingId]/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/meetings/[meetingId]/page.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/meetings/write/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/projects/[projectId]/(tabs)/meetings/write/page.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/app/providers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/providers.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/auth/login/hooks/mutations/useLogoutMutation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/login/hooks/mutations/useLogoutMutation.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/agent/close.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/agent/file.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/agent/menu.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/agent/plus.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/menu/agent.svg" beforeDir="false" afterPath="$PROJECT_DIR$/src/assets/icons/menu/agent.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/icons/menu/alarm.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/DatePicker/DatePicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/FormField/FormField.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormField/FormField.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Modal/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Modal/Modal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/PeoplePicker/PeoplePicker.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/PeoplePicker/PeoplePicker.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SearchBar/SearchBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/SelectField/SelectField.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/SelectField/SelectField.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Toast/ToastViewport.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/Toast/ToastViewport.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Toast/ToastViewport.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/Toast/ToastViewport.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/button/button.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/Button.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/button/button.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/gnb/Gnb.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/Gnb/Gnb.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/gnb/Gnb.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/Gnb/Gnb.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/agent/components/ChoicePrompt/ChoicePrompt.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/agent/components/ChoicePrompt/ChoicePrompt.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/agent/hooks/useChat.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/agent/hooks/useChat.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/agent/views/AgentView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/agent/views/AgentView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/agent/views/AgentView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/agent/views/AgentView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/AiScheduleButton/AiScheduleButton.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/AiScheduleButton/AiScheduleButton.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/CalendarRail/CalendarRail.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/CalendarRail/CalendarRail.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/CalendarRail/CalendarRail.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/CalendarRail/CalendarRail.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/ConfirmModal/ConfirmModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/ConfirmModal/ConfirmModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/DayDetailCard/DayDetailCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/DayDetailCard/DayDetailCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/DayDetailCard/DayDetailCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/DayDetailCard/DayDetailCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/EventDetailModal/EventDetailModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/EventDetailModal/EventDetailModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/EventDetailModal/EventDetailModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/EventDetailModal/EventDetailModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/MonthCalendar/MonthCalendar.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/MonthCalendar/MonthCalendar.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/MonthCalendar/MonthCalendar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/MonthCalendar/MonthCalendar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/hooks/queries/useCalendarPeopleQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/hooks/queries/useCalendarPeopleQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/hooks/queries/useLeaveBalanceQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/hooks/queries/useLeaveBalanceQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarData.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarData.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarFilters.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarFilters.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarMembers.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/hooks/useCalendarMembers.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/utils/memberColor.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/utils/memberColor.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/views/CalendarView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/views/CalendarView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/calendar/views/CalendarView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/calendar/views/CalendarView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/ProjectProgressList/ProjectProgressList.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/ProjectProgressList/ProjectProgressList.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/notification/components/NotificationBell/NotificationBell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/components/NotificationBell/NotificationBell.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/ProjectBoardView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/ProjectBoardView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/ProjectBoardView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/ProjectBoardView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/detail/PostDetailView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/detail/PostDetailView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/detail/PostDetailView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/detail/PostDetailView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/write/PostWriteView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/write/PostWriteView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/board/views/write/PostWriteView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/board/views/write/PostWriteView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTabBar/ProjectTabBar.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTabBar/ProjectTabBar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/constants/projectTabs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/constants/projectTabs.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseFormModal/ExpenseFormModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseFormModal/ExpenseFormModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseTable/ExpenseTable.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseTable/ExpenseTable.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/api/meetingApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/api/meetingApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingActionItems/MeetingActionItems.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingActionItems/MeetingActionItems.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingActionItems/MeetingActionItems.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingActionItems/MeetingActionItems.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingForm/MeetingForm.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingForm/MeetingForm.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingForm/MeetingForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/MeetingForm/MeetingForm.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/StateView/StateView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Result/Result.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/StateView/StateView.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/TableSkeleton/TableSkeleton.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/TableSkeleton/TableSkeleton.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/TableSkeleton/TableSkeleton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/TableSkeleton/TableSkeleton.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/TranscriptUploadModal/TranscriptUploadModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/modal/TranscriptUploadModal/TranscriptUploadModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/components/TranscriptUploadModal/TranscriptUploadModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/components/modal/TranscriptUploadModal/TranscriptUploadModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/ProjectMeetingView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/ProjectMeetingView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/ProjectMeetingView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/ProjectMeetingView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/detail/MeetingDetailView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/detail/MeetingDetailView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/detail/MeetingDetailView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/detail/MeetingDetailView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/write/MeetingWriteView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/write/MeetingWriteView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/meetings/views/write/MeetingWriteView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/meetings/views/write/MeetingWriteView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/user/api/userApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/user/api/userApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hooks/useOutsideClick.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layouts/AgentLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/AgentLayout.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib/api/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/errorCode.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/errorCode.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/auth/currentUser.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/auth/currentUser.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/useAgentStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/useAgentStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/useAuthStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/useAuthStore.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/stores/useToastStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/stores/useToastStore.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,24 +178,24 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/#15&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tnals/Desktop/PrettyWorks_FE&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "Merging feat/#31",
+    "kotlin-language-version-configured": "true",
+    "kronk.content.tree.expanded.paths": "",
+    "last_opened_file_path": "C:/Users/tnals/Desktop/PrettyWorks_FE",
+    "nodejs_interpreter_path": "C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "ts.external.directory.path": "C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -106,7 +244,31 @@
       <option name="project" value="LOCAL" />
       <updated>1785504470166</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="fix : 로그아웃 시 캐시가 그대로 남아있는 문제를 해결(#17)">
+      <option name="closed" value="true" />
+      <created>1785650156147</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1785650156147</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)">
+      <option name="closed" value="true" />
+      <created>1785653061536</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1785653061536</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat : 알림 배지 구현(#31)">
+      <option name="closed" value="true" />
+      <created>1785849415069</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1785849415069</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -116,6 +278,9 @@
     <MESSAGE value="feat : 대시보드/프로젝트 생성/프로젝트 개요/할 일 추가 화면 구현(#9)" />
     <MESSAGE value="feat : 충돌 통합(#9)" />
     <MESSAGE value="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat : 프로젝트 생성 및 수정/개요/재무 화면구현 및 API 연결(#15)" />
+    <MESSAGE value="fix : 로그아웃 시 캐시가 그대로 남아있는 문제를 해결(#17)" />
+    <MESSAGE value="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)" />
+    <MESSAGE value="feat : 알림 배지 구현(#31)" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat : 알림 배지 구현(#31)" />
   </component>
 </project>
