@@ -1,0 +1,56 @@
+/* 피그마 `⑥ 전체 화면 로딩 · App Loading (스플래시)` 1649:317 실측
+   로고 210×25.2 · gap 30 · 스피너 56 · gap 30 · 안내문 (총 높이 163.2) */
+
+.loading {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  /* 순백이 아니라 살짝 눌린 흰색. 대응하는 토큰이 없는 스플래시 전용 값이다 */
+  background: #fafafc;
+  /* 빨리 뜨면 스플래시를 아예 안 보여준다 (짧은 깜빡임이 더 거슬린다) */
+  opacity: 0;
+  animation: reveal 0s linear 0.15s forwards;
+}
+
+.logo {
+  width: 210px;
+  height: auto;
+}
+
+.spinner {
+  width: 56px;
+  height: 56px;
+  border: 6px solid var(--primary-bg);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.message {
+  font-size: 14px;
+  line-height: 22px;
+  color: #6b7484;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.4s;
+  }
+}

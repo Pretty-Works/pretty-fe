@@ -58,23 +58,6 @@
   font-size: 15px;
 }
 
-.signup {
-  margin-top: 4px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-placeholder);
-}
-
-.signupLink {
-  color: var(--primary);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.signupLink:hover {
-  text-decoration: underline;
-}
-
 /* 모바일: 브랜드 패널 숨기고 폼만 */
 @media (max-width: 768px) {
   .brand {
