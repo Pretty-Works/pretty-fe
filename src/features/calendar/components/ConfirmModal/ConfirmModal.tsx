@@ -37,16 +37,25 @@ export default function ConfirmModal({
       label={title}
       footer={
         <>
-          <Button status="cancel" size="sm" name={cancelLabel} onClick={onClose} />
           <Button
-            ui={tone === "danger" ? "red" : "filled"}
-            size="sm"
-            name={confirmLabel}
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={onClose}
+          >
+            {cancelLabel}
+          </Button>
+          <Button
+            type={tone === "danger" ? "danger" : "primary"}
+            buttonStyle={tone === "danger" ? "weak" : "fill"}
+            size="medium"
             onClick={() => {
               onConfirm();
               onClose();
             }}
-          />
+          >
+            {confirmLabel}
+          </Button>
         </>
       }
     >

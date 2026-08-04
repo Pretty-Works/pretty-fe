@@ -4,8 +4,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 
-import Button from "@/components/Button/Button";
-
 import { getErrorCode } from "@/lib/api/errorCode";
 import { useToastStore, type ToastTone } from "@/stores/useToastStore";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
@@ -88,7 +86,10 @@ export default function ProjectHeader() {
     setOpenMenu((prev) => (prev === menu ? null : menu));
 
   // 보관은 목록에서 사라지므로 화면에 남겨두지 않고 홈으로 보낸다
-  const statusTone = project ? PROJECT_STATUS_META[project.status]?.tone : null;
+  const statusTone =
+    project && project.status !== "ARCHIVED"
+      ? PROJECT_STATUS_META[project.status].tone
+      : null;
 
   return (
     <div className={styles.header}>
@@ -171,15 +172,6 @@ export default function ProjectHeader() {
         )}
       </div>
 
-      {/* 완료·보관은 수정 자체가 막히고(PROJECT_020), 오너·PM만 수정할 수 있다(PROJECT_005) */}
-      {isOpenForContent && canManage && (
-        <Button
-          status="edit"
-          size="sm"
-          name="프로젝트 수정"
-          onClick={() => router.push(`/projects/${projectId}/edit`)}
-        />
-      )}
     </div>
   );
 }

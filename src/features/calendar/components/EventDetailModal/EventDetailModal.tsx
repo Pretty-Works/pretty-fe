@@ -75,14 +75,23 @@ export default function EventDetailModal({
         <>
           {canLeave && (
             <Button
-              ui="red"
-              size="sm"
-              name="나가기"
+              type="danger"
+              buttonStyle="weak"
+              size="medium"
               className={styles.leaveButton}
               onClick={onLeave}
-            />
+            >
+              나가기
+            </Button>
           )}
-          <Button status="cancel" size="sm" name="닫기" onClick={onClose} />
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={onClose}
+          >
+            닫기
+          </Button>
         </>
       }
     >

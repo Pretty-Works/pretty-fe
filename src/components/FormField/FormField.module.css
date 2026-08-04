@@ -35,7 +35,13 @@
   border-color: var(--danger);
 }
 
-.errorText {
+/* 하단 도움말 — 에러일 때만 붉게 */
+.help {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.helpError {
   font-size: 12px;
   color: var(--danger);
 }

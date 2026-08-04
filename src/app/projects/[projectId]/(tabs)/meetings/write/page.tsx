@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: "회의록 작성 페이지입니다.",
 };
 
-export default function Page() {
-  return <MeetingWriteView />;
+interface MeetingWritePageProps {
+  params: Promise<{ projectId: string }>;
+}
+
+export default async function Page({ params }: MeetingWritePageProps) {
+  const { projectId } = await params;
+
+  return <MeetingWriteView projectId={projectId} />;
 }

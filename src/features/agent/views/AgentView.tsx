@@ -8,21 +8,23 @@ import { usePathname, useRouter } from "next/navigation";
 import { IoMenu, IoClose } from "react-icons/io5";
 import { LuPlus } from "react-icons/lu";
 import { FaExpand, FaCompress } from "react-icons/fa";
+import { FaRegFile } from "react-icons/fa";
 
 import { useAgentStore } from "@/stores/useAgentStore";
 
 import AgentChatIcon from "@/assets/icons/agent/agent-chat.png";
 import SendIcon from "@/assets/icons/agent/send.png";
-import FileIcon from "@/assets/icons/agent/file.png";
 
-import styles from "./AgentView.module.css";
-import Button from "@/components/Button/Button";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import AgentRunIndicator from "@/features/agent/components/AgentRunIndicator/AgentRunIndicator";
 import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt";
+
 import { useChat } from "@/features/agent/hooks/useChat";
+
 import { RECOMMENDED_PROMPTS } from "@/features/agent/mock";
 import { resolveRoute } from "@/features/agent/screenRegistry";
+
+import styles from "./AgentView.module.css";
 
 const HEADER_ICONS = [
   { id: "menu", Icon: IoMenu, alt: "agent-menu-icon" },
@@ -38,6 +40,8 @@ export default function AgentView() {
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
   const toggleExpanded = useAgentStore((state) => state.toggleExpanded);
   const expanded = useAgentStore((state) => state.expanded);
+  const autoApprove = useAgentStore((state) => state.autoApprove);
+  const setAutoApprove = useAgentStore((state) => state.setAutoApprove);
 
   const {
     conversations,
@@ -71,6 +75,10 @@ export default function AgentView() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, runAgents, pendingChoice, approvalAction]);
+
+  useEffect(() => {
+    if (autoApprove && approvalAction) approve();
+  }, [autoApprove, approvalAction, approve]);
 
   const handleSend = () => {
     if (isBlocked) return;
@@ -226,7 +234,12 @@ export default function AgentView() {
             >
               <span className={styles.menuTitle}>{conversation.title}</span>
               {conversation.pending && (
-                <span className={styles.pendingBadge}>pending</span>
+                <span
+                  className={styles.pendingDot}
+                  role="img"
+                  aria-label="응답 대기 중"
+                  title="응답 대기 중"
+                />
               )}
             </button>
           ))}
@@ -292,7 +305,7 @@ export default function AgentView() {
         {attachedFile && (
           <div className={styles.attachment}>
             <div className={styles.attachmentIcon}>
-              <Image src={FileIcon} alt="file-icon" width={13} height={13} />
+              <FaRegFile width={13} height={13}/>
             </div>
             <span className={styles.attachmentName}>{attachedFile.name}</span>
             <button
@@ -307,26 +320,10 @@ export default function AgentView() {
         )}
 
         <div
-          className={[styles.inputWrapper, isBlocked && styles.inputWrapperBlocked]
+          className={[styles.composer, isBlocked && styles.composerBlocked]
             .filter(Boolean)
             .join(" ")}
         >
-          <button
-            type="button"
-            className={styles.iconButton}
-            onClick={() => fileInputRef.current?.click()}
-            disabled={isBlocked}
-          >
-            📎
-          </button>
-
-          <input
-            ref={fileInputRef}
-            hidden
-            type="file"
-            onChange={handleFileSelect}
-          />
-
           <textarea
             ref={textareaRef}
             className={styles.input}
@@ -340,12 +337,78 @@ export default function AgentView() {
             disabled={isBlocked}
           />
 
-          <Button
-            status="agent"
-            onClick={handleSend}
-            disabled={isBlocked}
-            icon={<Image src={SendIcon} alt="send" width={18} height={18} />}
-          />
+          <div className={styles.composerBar}>
+            <div className={styles.composerTools}>
+              <button
+                type="button"
+                className={styles.iconButton}
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isBlocked}
+                aria-label="파일 첨부"
+              >
+                📎
+              </button>
+
+              <input
+                ref={fileInputRef}
+                hidden
+                type="file"
+                onChange={handleFileSelect}
+              />
+
+              <div
+                className={styles.modeToggle}
+                role="group"
+                aria-label="에이전트 실행 승인 방식"
+              >
+                <span
+                  className={[styles.modeThumb, autoApprove && styles.modeThumbOn]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-hidden="true"
+                />
+
+                <button
+                  type="button"
+                  className={[
+                    styles.modeOption,
+                    !autoApprove && styles.modeOptionOnManual,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-pressed={!autoApprove}
+                  title="실행 요청을 매번 확인한 뒤 승인해요"
+                  onClick={() => setAutoApprove(false)}
+                >
+                  수동
+                </button>
+                <button
+                  type="button"
+                  className={[
+                    styles.modeOption,
+                    autoApprove && styles.modeOptionOnAuto,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  aria-pressed={autoApprove}
+                  title="실행 요청을 자동으로 승인해요"
+                  onClick={() => setAutoApprove(true)}
+                >
+                  승인
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className={styles.sendButton}
+              onClick={handleSend}
+              disabled={isBlocked}
+              aria-label="메시지 보내기"
+            >
+              <Image src={SendIcon} alt="" width={18} height={18} />
+            </button>
+          </div>
         </div>
       </footer>
     </div>

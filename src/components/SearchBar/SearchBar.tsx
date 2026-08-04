@@ -17,7 +17,7 @@ export default function SearchBar({
         placeholder={placeholder}
         {...rest}
       />
-      {/* 돋보기 — CSS로 그린다 (렌즈 + 손잡이) */}
+
       <span className={styles.icon} aria-hidden="true" />
     </div>
   );

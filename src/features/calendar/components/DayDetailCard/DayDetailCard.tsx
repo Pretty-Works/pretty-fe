@@ -34,12 +34,13 @@ export default function DayDetailCard({
         </span>
 
         <Button
-          name="일정 추가"
-          size="xs"
-          hasPlus
+          size="tiny"
+          leftAccessory="+"
           className={styles.addButton}
           onClick={onAddEvent}
-        />
+        >
+          일정 추가
+        </Button>
       </div>
 
       {events.length === 0 ? (

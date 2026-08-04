@@ -1,0 +1,177 @@
+.gnb {
+  width: 100%;
+  height: 60px;
+  border-bottom: 1px solid #e5e5e5;
+  background: var(--white);
+}
+
+.container {
+  max-width: 1100px;
+  padding: 0 14px;
+  height: 60px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.brand {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.menu a {
+  text-decoration: none;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  height: 33px;
+  padding: 0 2px;
+  text-decoration: none;
+  color: #8B8F98;
+  transition: color 0.15s ease;
+}
+
+.menuItem:hover {
+  color: var(--text);
+}
+
+.menuItem.active {
+  color: var(--primary);
+  font-weight: bold;
+}
+
+.right {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.actions img {
+  cursor: pointer;
+}
+
+.bell {
+  cursor: pointer;
+  color: var(--icon);
+  width: 21px;
+  height: 21px;
+}
+
+.agentBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.agent {
+  width: 22px;
+  height: 22px;
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--line);
+  border: 0;
+}
+
+.profileWrap {
+  position: relative;
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  padding: 0;
+  border-radius: 50%;
+  background-color: var(--primary);
+  color: var(--white);
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  /* 부서·직급이 길다 (예: 프론트엔드개발 · 부사장) */
+  min-width: 190px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+/* 내 정보 — 누르는 항목이 아니라 읽는 영역이라 hover도 커서도 없다 */
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 12px 10px;
+}
+
+.profileName {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.profileMeta {
+  font-size: 12px;
+  color: var(--text-sub);
+}
+
+.dropdownDivider {
+  margin: 0 6px 4px;
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dropdownItem:hover {
+  background: var(--surface);
+}

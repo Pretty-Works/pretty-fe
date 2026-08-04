@@ -33,19 +33,6 @@
   color: var(--text);
 }
 
-.countBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 20px;
-  padding: 0 7px;
-  border-radius: 999px;
-  background: var(--surface);
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-sub);
-}
 
 /* 검색 + 사용/예정 탭 */
 .filterbar {

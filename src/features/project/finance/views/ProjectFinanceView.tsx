@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
@@ -96,14 +97,15 @@ export default function ProjectFinanceView({
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>지출 내역</h2>
-            <span className={styles.countBadge}>{totalElements}</span>
+            <Badge type="elephant" badgeStyle="weak">{totalElements}</Badge>
           </div>
           <Button
-            name="지출 추가"
-            size="sm"
-            hasPlus
+            size="medium"
+            leftAccessory="+"
             onClick={() => setIsFormOpen(true)}
-          />
+          >
+            지출 추가
+          </Button>
         </div>
 
         <div className={styles.filterbar}>

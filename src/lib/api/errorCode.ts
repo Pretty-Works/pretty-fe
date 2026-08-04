@@ -7,3 +7,26 @@ export const getErrorCode = (error: unknown): string | undefined => {
 
   return error.response?.data?.errorCode;
 };
+
+interface ApiErrorBody {
+  errorCode?: string | null;
+  message?: string;
+}
+
+export const getApiErrorMessage = (error: unknown, fallback: string) => {
+  if (!axios.isAxiosError<ApiErrorBody>(error)) {
+    return error instanceof Error ? error.message : fallback;
+  }
+
+  const { errorCode, message } = error.response?.data ?? {};
+  if (!message) return fallback;
+
+  return errorCode ? `${message} (${errorCode})` : message;
+};
+
+export const isClientError = (error: unknown) => {
+  if (!axios.isAxiosError(error)) return false;
+
+  const status = error.response?.status;
+  return status !== undefined && status >= 400 && status < 500;
+};

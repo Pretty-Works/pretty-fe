@@ -118,6 +118,8 @@
   color: var(--primary);
   cursor: pointer;
   white-space: nowrap;
+  background: none;
+  border: none;
 }
 
 .addTask:hover {

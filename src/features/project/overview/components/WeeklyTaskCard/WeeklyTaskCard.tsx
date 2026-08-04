@@ -60,7 +60,14 @@ export default function WeeklyTaskCard({
 
         {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
         {onAddTask && (
-          <Button name="할일 추가" size="xs" ui="tonal" hasPlus onClick={onAddTask} />
+          <Button
+            size="tiny"
+            buttonStyle="weak"
+            leftAccessory="+"
+            onClick={onAddTask}
+          >
+            할일 추가
+          </Button>
         )}
       </div>
 

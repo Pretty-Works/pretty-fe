@@ -1,56 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { useRouter } from "next/navigation";
-
+import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
+import Pagination from "@/components/Pagination/Pagination";
+import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
 import type { Meeting } from "@/features/project/meetings/api/meetingApi";
-import StateView from "@/features/project/meetings/components/StateView/StateView";
 import TableSkeleton from "@/features/project/meetings/components/TableSkeleton/TableSkeleton";
+import { useMeetingListPage } from "@/features/project/meetings/hooks/useMeetingListPage";
 
 import styles from "./ProjectMeetingView.module.css";
-
-const MOCK_MEETINGS: Meeting[] = [
-  {
-    id: "1",
-    title: "2월 4주차 스프린트 리뷰",
-    author: "김서준",
-    attendees: ["김서준", "이하늘", "정우진", "박지민", "최유나"],
-    date: "2026-02-26",
-  },
-  {
-    id: "2",
-    title: "요구 재정의 킥오프",
-    author: "정우진",
-    attendees: ["정우진", "한도윤", "김민서", "이서연"],
-    date: "2026-02-20",
-  },
-  {
-    id: "3",
-    title: "검색 인덱스 설계 논의",
-    author: "이하늘",
-    attendees: ["이하늘", "김서준", "정우진"],
-    date: "2026-02-14",
-  },
-  {
-    id: "4",
-    title: "1월 회고 및 목표 설정",
-    author: "김서준",
-    attendees: ["김서준", "이하늘", "한도윤", "정우진", "김민서", "최유나"],
-    date: "2026-02-10",
-  },
-];
 
 // 목록에 표시할 참석자 수 (초과분은 "외 N명")
 const VISIBLE_ATTENDEES = 3;
 
-// 회의록 목록 컬럼 정의 (공용 ProjectTable에 주입)
+// 회의록 목록 컬럼
 const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
   { key: "title", header: "제목", tone: "title" },
   { key: "author", header: "작성자", width: 110, tone: "sub" },
@@ -60,8 +28,9 @@ const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
     width: 250,
     tone: "sub",
     render: (meeting) => {
-      const shown = meeting.attendees.slice(0, VISIBLE_ATTENDEES).join(", ");
-      const rest = Math.max(0, meeting.attendees.length - VISIBLE_ATTENDEES);
+      const attendees = meeting.attendees ?? [];
+      const shown = attendees.slice(0, VISIBLE_ATTENDEES).join(", ");
+      const rest = Math.max(0, attendees.length - VISIBLE_ATTENDEES);
 
       return (
         <>
@@ -74,8 +43,6 @@ const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
   { key: "date", header: "일시", width: 150, tone: "muted" },
 ];
 
-type LoadStatus = "loading" | "error" | "ready";
-
 interface ProjectMeetingViewProps {
   projectId?: string;
 }
@@ -83,42 +50,7 @@ interface ProjectMeetingViewProps {
 export default function ProjectMeetingView({
   projectId,
 }: ProjectMeetingViewProps) {
-  const router = useRouter();
-
-  const [status, setStatus] = useState<LoadStatus>("loading");
-  const [meetings, setMeetings] = useState<Meeting[]>([]);
-  const [keyword, setKeyword] = useState("");
-  const [reloadNonce, setReloadNonce] = useState(0);
-
-  // 목록 로드 (API 연결 예정) — 목업 지연
-  useEffect(() => {
-    let cancelled = false;
-    const timer = setTimeout(() => {
-      if (cancelled) return;
-      setMeetings(MOCK_MEETINGS);
-      setStatus("ready");
-    }, 700);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [reloadNonce]);
-
-  // 다시 시도
-  const reload = () => {
-    setStatus("loading");
-    setMeetings([]);
-    setReloadNonce((n) => n + 1);
-  };
-
-  const q = keyword.trim();
-  const filtered = q
-    ? meetings.filter(
-        (m) => m.title.includes(q) || m.attendees.some((a) => a.includes(q)),
-      )
-    : meetings;
-
-  const goWrite = () => router.push(`/projects/${projectId}/meetings/write`);
+  const page = useMeetingListPage(projectId ?? "");
 
   return (
     <>
@@ -140,60 +72,89 @@ export default function ProjectMeetingView({
       {/* 회의록 */}
       <section className={styles.panel}>
         <div className={styles.panelHead}>
-          <h2 className={styles.panelTitle}>회의록</h2>
-          <Button name="작성하기" size="xs" onClick={goWrite} />
+          <div className={styles.panelHeadLeft}>
+            <h2 className={styles.panelTitle}>회의록</h2>
+            {typeof page.totalCount === "number" && (
+              <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
+            )}
+          </div>
+          <Button size="tiny" onClick={page.goWrite}>작성하기</Button>
         </div>
 
         <div className={styles.filterbar}>
           <SearchBar
             placeholder="제목 · 참석자로 검색"
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
+            value={page.keyword}
+            onChange={(e) => page.changeKeyword(e.target.value)}
           />
         </div>
 
-        {status === "loading" ? (
+        {page.isLoading ? (
           // 로딩 (스켈레톤)
           <TableSkeleton rows={6} />
-        ) : status === "error" ? (
+        ) : page.isError ? (
           // 조회 실패
-          <StateView
-            tone="error"
-            icon="❗"
+          <Result
+            figure={<Result.Figure tone="error">❗</Result.Figure>}
             title="회의록을 불러오지 못했어요"
             description="일시적인 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 문의해 주세요."
-            action={{ label: "↻ 다시 시도", onClick: reload, variant: "outline" }}
+            button={
+              <Result.Button
+                type="light"
+                buttonStyle="weak"
+                onClick={() => void page.retry()}
+              >
+                ↻ 다시 시도
+              </Result.Button>
+            }
           />
-        ) : filtered.length === 0 && q ? (
+        ) : page.meetings.length === 0 && page.query ? (
           // 검색 결과 없음
-          <StateView
-            icon="🔍"
+          <Result
+            figure={<Result.Figure>🔍</Result.Figure>}
             title="검색 결과가 없습니다"
-            description={`‘${q}’와 일치하는 회의록이 없어요. 다른 키워드로 다시 검색해 보세요.`}
-            action={{
-              label: "검색 초기화",
-              onClick: () => setKeyword(""),
-              variant: "outline",
-            }}
+            description={`‘${page.query}’와 일치하는 회의록이 없어요. 다른 키워드로 다시 검색해 보세요.`}
+            button={
+              <Result.Button
+                type="light"
+                buttonStyle="weak"
+                onClick={page.resetSearch}
+              >
+                검색 초기화
+              </Result.Button>
+            }
           />
-        ) : meetings.length === 0 ? (
+        ) : page.meetings.length === 0 ? (
           // 등록된 회의록 없음
-          <StateView
-            icon="📄"
+          <Result
+            figure={<Result.Figure>📄</Result.Figure>}
             title="등록된 회의록이 없습니다"
             description="첫 회의록을 작성하면 참석자·안건·후속 액션을 한곳에서 관리하고, AI가 핵심 논의를 요약해 드려요."
-            action={{ label: "＋ 회의록 작성", onClick: goWrite }}
+            button={
+              <Result.Button leftAccessory="+" onClick={page.goWrite}>
+                회의록 작성
+              </Result.Button>
+            }
           />
         ) : (
           <ProjectTable
             columns={MEETING_COLUMNS}
-            rows={filtered}
-            rowKey={(m) => m.id}
-            onRowClick={(m) =>
-              router.push(`/projects/${projectId}/meetings/${m.id}`)
-            }
+            rows={page.meetings}
+            rowKey={(meeting) => meeting.id}
+            onRowClick={(meeting) => page.goDetail(meeting.id)}
           />
         )}
+
+        {!page.isLoading &&
+          !page.isError &&
+          page.meetings.length > 0 &&
+          page.totalPages > 1 && (
+            <Pagination
+              currentPage={page.page}
+              totalPages={page.totalPages}
+              onPageChange={page.setPage}
+            />
+          )}
       </section>
     </>
   );

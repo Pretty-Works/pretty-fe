@@ -4,22 +4,20 @@ interface FormFieldProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
   label: string;
   required?: boolean;
-  rightSlot?: React.ReactNode;
-  error?: string;
-  // 메시지 없이 에러 테두리만 표시 (예: "사번 또는 비밀번호 오류" 시 두 필드 동시 표시)
-  invalid?: boolean;
+  right?: React.ReactNode;
+  help?: React.ReactNode;
+  hasError?: boolean;
 }
 
 export default function FormField({
   label,
   required = false,
-  rightSlot,
-  error,
-  invalid = false,
+  right,
+  help,
+  hasError = false,
   placeholder,
   ...rest
 }: FormFieldProps) {
-  const hasError = Boolean(error) || invalid;
   const controlClass = hasError
     ? `${styles.control} ${styles.controlError}`
     : styles.control;
@@ -37,9 +35,11 @@ export default function FormField({
           aria-invalid={hasError ? true : undefined}
           {...rest}
         />
-        {rightSlot ? <span className={styles.right}>{rightSlot}</span> : null}
+        {right ? <span className={styles.right}>{right}</span> : null}
       </span>
-      {error && <span className={styles.errorText}>{error}</span>}
+      {help && (
+        <span className={hasError ? styles.helpError : styles.help}>{help}</span>
+      )}
     </label>
   );
 }

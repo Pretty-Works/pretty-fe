@@ -4,6 +4,8 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import Badge from "@/components/Badge/Badge";
+
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
@@ -142,7 +144,7 @@ export default function HomeView() {
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>확인이 필요한 요청</h2>
             {visibleRequests.length > 0 && (
-              <span className={styles.countBadge}>{visibleRequests.length}</span>
+              <Badge type="purple" badgeStyle="weak">{visibleRequests.length}</Badge>
             )}
           </div>
         </div>
@@ -182,11 +184,12 @@ export default function HomeView() {
                 서버에만 있어 결과(canCreateProject)를 그대로 따른다. */}
             {me?.canCreateProject && (
               <Button
-                name="프로젝트 생성"
-                size="sm"
-                hasPlus
+                size="medium"
+                leftAccessory="+"
                 onClick={() => router.push("/projects/new")}
-              />
+              >
+                프로젝트 생성
+              </Button>
             )}
           </div>
 
@@ -227,11 +230,12 @@ export default function HomeView() {
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>내 할 일</h2>
             <Button
-              name="할 일"
-              size="sm"
-              hasPlus
+              size="medium"
+              leftAccessory="+"
               onClick={() => setTaskModalOpen(true)}
-            />
+            >
+              할 일
+            </Button>
           </div>
 
           {isTasksLoading ? (

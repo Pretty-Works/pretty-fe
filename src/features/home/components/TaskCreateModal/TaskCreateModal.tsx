@@ -157,22 +157,22 @@ export default function TaskCreateModal({
               {isDeleting ? "삭제 중…" : "삭제"}
             </button>
           )}
-          <Button status="cancel" size="sm" name="취소" onClick={resetAndClose} />
           <Button
-            status="primary"
-            size="sm"
-            name={
-              isSaving
-                ? isEdit
-                  ? "저장 중…"
-                  : "추가 중…"
-                : isEdit
-                  ? "수정"
-                  : "추가"
-            }
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={resetAndClose}
+          >
+            취소
+          </Button>
+          <Button
+            size="medium"
+            loading={isSaving}
             disabled={!canSubmit}
             onClick={handleSubmit}
-          />
+          >
+            {isEdit ? "수정" : "추가"}
+          </Button>
         </>
       }
     >
@@ -192,7 +192,7 @@ export default function TaskCreateModal({
               value: project.id,
               label: project.name,
             }))}
-            rightSlot={
+            right={
               <button
                 type="button"
                 className={[styles.personal, isPersonal && styles.personalOn]
