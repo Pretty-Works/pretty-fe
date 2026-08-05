@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { LuCrown } from "react-icons/lu";
+
 import Button from "@/components/Button/Button";
 import FormField from "@/components/FormField/FormField";
 import DatePicker from "@/components/DatePicker/DatePicker";
@@ -14,15 +16,13 @@ import { useAgentStore } from "@/stores/useAgentStore";
 import { useToastStore } from "@/stores/useToastStore";
 
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
+import type { UserSearchResult } from "@/features/user/api/userApi";
 import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
 import { useCreateProjectMutation } from "@/features/project/create/hooks/mutations/useCreateProjectMutation";
 import { useUpdateProjectMutation } from "@/features/project/create/hooks/mutations/useUpdateProjectMutation";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
-import {
-  fetchCompanyUsers,
-  type CompanyUser,
-  type MilestoneInput,
-} from "@/features/project/create/api/projectApi";
+import { type MilestoneInput } from "@/features/project/create/api/projectApi";
 
 import styles from "./ProjectCreateView.module.css";
 
@@ -53,7 +53,11 @@ const MAX = {
   milestones: 50,
 } as const;
 
-interface MemberRow extends CompanyUser {
+interface MemberRow {
+  userId: number;
+  name: string;
+  // 부서 라벨. 상세 조회 응답에는 부서가 없어 수정 모드에서는 비어 있다
+  team: string;
   role: string;
 }
 
@@ -131,7 +135,6 @@ export default function ProjectCreateView({
   const [ownerRole, setOwnerRole] = useState("PM");
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [memberKeyword, setMemberKeyword] = useState("");
-  const [suggestions, setSuggestions] = useState<CompanyUser[]>([]);
 
   const [milestones, setMilestones] = useState<MilestoneRow[]>([]);
 
@@ -185,18 +188,9 @@ export default function ProjectCreateView({
     );
   }, [isEdit, detail]);
 
-  // Effect — 참여자 검색
-  useEffect(() => {
-    let alive = true;
-
-    fetchCompanyUsers(memberKeyword).then((users) => {
-      if (alive) setSuggestions(users);
-    });
-
-    return () => {
-      alive = false;
-    };
-  }, [memberKeyword]);
+  // 참여자 검색 — 캘린더 인원 선택과 같은 훅(GET /users/search).
+  // 디바운스·캐시·검색어 규칙(한글/영문만, 20자 이내)을 훅이 들고 있다.
+  const { results: suggestions, searching } = useUserSearchQuery(memberKeyword);
 
   // 이미 담긴 사람은 검색 결과에서 숨긴다 — 오너 + 추가된 참여자.
   // 수정 모드의 오너는 서버가 준 값, 생성 모드는 나다.
@@ -221,15 +215,27 @@ export default function ProjectCreateView({
     if (endDate && next > endDate) setEndDate("");
   };
 
+  // 숫자만 남기고 앞자리 0을 떼어낸다. 0은 서버에서 '제한 없음'을 뜻해서,
+  // 금액으로 0을 적어 넣으면 의도와 다른 프로젝트가 만들어진다.
+  // 제한이 없다는 뜻이면 옆의 '제한 없음' 버튼으로 밝히게 한다.
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBudget(e.target.value.replace(/[^\d]/g, ""));
+    setBudget(e.target.value.replace(/[^\d]/g, "").replace(/^0+/, ""));
   };
 
-  const addMember = (user: CompanyUser) => {
+  const addMember = (user: UserSearchResult) => {
     setMembers((prev) => {
       if (prev.some((m) => m.userId === user.userId)) return prev;
       if (prev.length >= MAX.members) return prev; // 참여자 상한
-      return [...prev, { ...user, role: "" }];
+
+      return [
+        ...prev,
+        {
+          userId: user.userId,
+          name: user.name,
+          team: DEPARTMENT_LABEL[user.department],
+          role: "",
+        },
+      ];
     });
     setMemberKeyword("");
   };
@@ -286,8 +292,8 @@ export default function ProjectCreateView({
       name,
       startDate,
       endDate,
-      // 0 = 예산 제한 없음. 미입력(null)도 서버가 0으로 저장한다.
-      budget: noBudgetLimit ? 0 : budget ? Number(budget) : null,
+      // 0 = 예산 제한 없음. '제한 없음'을 고른 경우에만 보낸다.
+      budget: noBudgetLimit ? 0 : Number(budget),
       description,
       ownerRole: ownerRole || null,
       members: members.map((m) => ({ userId: m.userId, role: m.role || null })),
@@ -337,6 +343,8 @@ export default function ProjectCreateView({
     !!name.trim() &&
     !!startDate &&
     !!endDate &&
+    // 제한 없음을 고르지 않았다면 금액을 1원 이상 적어야 한다
+    (noBudgetLimit || Number(budget) >= 1) &&
     !isPending &&
     (!isEdit || !!detail);
 
@@ -384,7 +392,6 @@ export default function ProjectCreateView({
           <FormField
             label="프로젝트명"
             required
-            placeholder="예: 그룹웨어 AI 고도화"
             maxLength={MAX.name}
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -399,7 +406,6 @@ export default function ProjectCreateView({
         <div className={styles.fieldWrap}>
           <FormField
             label="프로젝트 설명"
-            placeholder="예: 사내 그룹웨어에 AI 기능을 더하는 프로젝트"
             maxLength={MAX.description}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -445,7 +451,11 @@ export default function ProjectCreateView({
           <div className={styles.col}>
             <FormField
               label="목표 예산"
-              placeholder={noBudgetLimit ? "제한 없음" : "₩ 120,000,000"}
+              /* '제한 없음'을 골라도 표시를 유지한다 — 켤 때마다 사라졌다 나타나면
+                 깜빡여 보이고, 필수 항목이라는 사실도 흐려진다.
+                 '제한 없음'은 안 채우는 게 아니라 다른 방식으로 채우는 것이다. */
+              required
+              placeholder={noBudgetLimit ? "제한 없음" : ""}
               value={noBudgetLimit || !budget ? "" : `₩ ${withComma(budget)}`}
               onChange={handleBudgetChange}
               readOnly={noBudgetLimit}
@@ -484,7 +494,7 @@ export default function ProjectCreateView({
             placeholder={
               members.length >= MAX.members
                 ? `참여자는 최대 ${MAX.members}명까지 등록할 수 있어요`
-                : "이름으로 참여자 검색·추가"
+                : "이름으로 참여자 추가"
             }
             value={memberKeyword}
             onChange={(e) => setMemberKeyword(e.target.value)}
@@ -495,28 +505,38 @@ export default function ProjectCreateView({
               {selectableSuggestions.length > 0 ? (
                 selectableSuggestions.map((user) => (
                   <li key={user.userId}>
-                    {/* 전사 임직원 검색 API(GET /users)가 없어 아직 목업이다.
-                        여기서 고른 userId는 실제 DB에 없어 생성 시 PROJECT_002(404)가 난다. */}
                     <button
                       type="button"
-                      className={`${styles.suggestItem} mock-value`}
+                      className={styles.suggestItem}
                       onClick={() => addMember(user)}
                     >
-                      {user.name} · {user.team}
+                      <span className={styles.suggestName}>
+                        {user.name} · {DEPARTMENT_LABEL[user.department]}
+                      </span>
+
+                      {/* 서버는 재직·휴직만 내려준다. 휴직자도 넣을 수는 있지만
+                          당장 일을 맡길 수 없어, 고르기 전에 알 수 있게 표시한다 */}
+                      {user.status === "ON_LEAVE" && (
+                        <span className={styles.suggestLeave}>휴직</span>
+                      )}
                     </button>
                   </li>
                 ))
               ) : (
-                <li className={styles.suggestEmpty}>검색 결과가 없어요</li>
+                /* 아직 요청 중인 구간까지 '없어요'로 보이면 사람이 없는 줄 안다 */
+                <li className={styles.suggestEmpty}>
+                  {searching ? "찾는 중이에요…" : "검색 결과가 없어요"}
+                </li>
               )}
             </ul>
           )}
         </div>
 
         <div className={styles.memberGrid}>
-          {/* 오너(생성자) — 제거 불가 */}
-          {/* 책임자는 별도 배지 대신 테두리를 강조해 구분한다 */}
-          <div className={`${styles.memberCard} ${styles.memberCardOwner}`}>
+          {/* 오너(생성자) — 제거 불가.
+              다른 참여자의 제거(✕) 자리에 왕관을 둔다. 칸 구조가 같아 줄이 어긋나지 않고,
+              "이 사람은 뺄 수 없다"는 것도 그 자리에서 바로 읽힌다. */}
+          <div className={styles.memberCard}>
             {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다.
                 상세 응답에 부서가 없어 수정 모드에서는 이름만 보인다. */}
             <span className={styles.memberName}>{ownerName}</span>
@@ -531,6 +551,9 @@ export default function ProjectCreateView({
               onChange={(e) => setOwnerRole(e.target.value)}
               aria-label={`${ownerName} 역할`}
             />
+            <span className={styles.ownerMark} title="프로젝트 책임자">
+              <LuCrown aria-label="프로젝트 책임자" />
+            </span>
           </div>
 
           {members.map((member) => (
@@ -566,7 +589,6 @@ export default function ProjectCreateView({
         <div className={styles.cardHead}>
           <h3 className={styles.cardTitle}>마일스톤</h3>
           <Button
-            buttonStyle="weak"
             size="tiny"
             leftAccessory="+"
             disabled={milestones.length >= MAX.milestones}
@@ -578,7 +600,7 @@ export default function ProjectCreateView({
 
         {milestones.length === 0 ? (
           <p className={styles.emptyText}>
-            시기별 목표를 추가해 주세요. 목표일과 목표 내용을 모두 입력해야 저장됩니다.
+            시기별 목표를 추가해 주세요.
           </p>
         ) : (
           <>
@@ -648,7 +670,6 @@ export default function ProjectCreateView({
                 </div>
                 <input
                   className={styles.msGoal}
-                  placeholder="예: 요구 정의 · 아키텍처 설계"
                   maxLength={MAX.milestoneGoal}
                   value={ms.goal}
                   onChange={(e) => changeMilestone(ms.key, { goal: e.target.value })}

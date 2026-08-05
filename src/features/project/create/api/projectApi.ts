@@ -1,6 +1,6 @@
 // 프로젝트 생성·수정 API
-//   연동 완료: 생성(POST /projects) · 수정(PUT /projects/{id})
-//   mock 유지: 사내 사용자 검색 (BE 미구현)
+//   생성(POST /projects) · 수정(PUT /projects/{id})
+//   참여자 검색은 공용 사용자 검색(GET /users/search)을 쓴다 — features/user/api/userApi.ts
 
 import { api } from "@/lib/api/client";
 
@@ -32,40 +32,6 @@ export interface CreateProjectResponse {
   message: string;
   result: { projectId: number };
 }
-
-// 참여자 검색용 사내 사용자
-export interface CompanyUser {
-  userId: number;
-  name: string;
-  team: string;
-}
-
-const MOCK_USERS: CompanyUser[] = [
-  { userId: 12, name: "김서준", team: "PM팀" },
-  { userId: 27, name: "정우진", team: "LLM팀" },
-  { userId: 34, name: "이하늘", team: "백엔드팀" },
-  { userId: 41, name: "최유나", team: "프론트팀" },
-  { userId: 52, name: "한도윤", team: "재무팀" },
-  { userId: 63, name: "김민서", team: "디자인팀" },
-  { userId: 74, name: "이서연", team: "QA팀" },
-  { userId: 85, name: "박지민", team: "데이터팀" },
-];
-
-// 이름으로 사내 사용자 검색
-// ⚠️ 아직 mock이다. GET /api/v1/users가 BE에 구현되어 있지 않다(노션도 '공사중').
-//    구현되면 아래 두 줄로 교체한다.
-//    const response = await api.get("/users", { params: { keyword } });
-//    return response.data.result;
-export const fetchCompanyUsers = async (
-  keyword?: string,
-): Promise<CompanyUser[]> => {
-  const trimmed = keyword?.trim() ?? "";
-  if (!trimmed) return [];
-
-  await new Promise((resolve) => setTimeout(resolve, 200));
-
-  return MOCK_USERS.filter((user) => user.name.includes(trimmed));
-};
 
 // 프로젝트 수정 — PUT /api/v1/projects/{projectId}
 // 생성과 body 구조가 같다. 다만 두 가지가 다르다.

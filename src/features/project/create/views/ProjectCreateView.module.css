@@ -124,7 +124,10 @@
 }
 
 .suggestItem {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   width: 100%;
   padding: 9px 12px;
   border: none;
@@ -135,6 +138,24 @@
   color: var(--text);
   text-align: left;
   cursor: pointer;
+}
+
+/* 이름이 길면 이름만 줄어들고 휴직 표시는 자리를 지킨다 */
+.suggestName {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.suggestLeave {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
 }
 
 .suggestItem:hover {
@@ -205,9 +226,21 @@
 }
 
 /* 책임자 — 배지 대신 테두리를 강조해 구분한다 */
-.memberCardOwner {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
+/* 책임자 표시 — 다른 참여자의 제거(✕) 버튼과 같은 자리·같은 크기.
+   누르는 물건이 아니라 표시라서 배경도 커서도 없다. */
+.ownerMark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  color: var(--primary);
+}
+
+.ownerMark svg {
+  width: 15px;
+  height: 15px;
 }
 
 .memberRemove {

@@ -55,8 +55,10 @@
   border-color: var(--border);
 }
 
+/* 값이 채워져도 흐린 색을 유지한다 — 내가 쓴 글자가 아니라
+   다른 입력에서 계산돼 나온 값이라, 직접 쓴 칸과 같은 농도면 고칠 수 있어 보인다 */
 .input:read-only {
-  color: var(--text-sub);
+  color: var(--text-placeholder);
   cursor: default;
 }
 
