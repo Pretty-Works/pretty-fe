@@ -18,6 +18,11 @@
   cursor: pointer;
 }
 
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.option:last-child {
+  border-bottom: none;
+}
+
 .option:hover {
   background: var(--surface);
 }

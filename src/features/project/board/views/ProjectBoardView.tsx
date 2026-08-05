@@ -1,65 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
+import Pagination from "@/components/Pagination/Pagination";
+import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
-import { useListParams } from "@/hooks/useListParams";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
 import ProjectTable, { type ProjectTableColumn } from "@/features/project/components/ProjectTable/ProjectTable";
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
-import ImportanceFilter, { type ImportanceFilterValue } from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
+import ImportanceFilter from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
+import { usePostListPage } from "@/features/project/board/hooks/usePostListPage";
+import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 import type { BoardPost } from "@/features/project/board/types";
 
 import styles from "./ProjectBoardView.module.css";
 
-const MOCK_POSTS: BoardPost[] = [
-  {
-    id: "1",
-    title: "부하 테스트 착수 지연 관련 공유",
-    importance: "HIGH",
-    author: "김서준",
-    dept: "PM",
-    createdAt: "2026-02-27 09:12",
-  },
-  {
-    id: "2",
-    title: "2월 데모 데이 일정 2/28(금)로 확정",
-    importance: "MEDIUM",
-    author: "김서준",
-    dept: "PM",
-    createdAt: "2026-02-26 18:03",
-  },
-  {
-    id: "3",
-    title: "LLM 스펙 합의 관련 진행 상황",
-    importance: "MEDIUM",
-    author: "정우진",
-    dept: "LLM팀",
-    createdAt: "2026-02-25 11:40",
-  },
-  {
-    id: "4",
-    title: "디자인 QA 체크리스트 공유합니다",
-    importance: "LOW",
-    author: "이하늘",
-    dept: "백엔드팀",
-    createdAt: "2026-02-25 09:20",
-  },
-  {
-    id: "5",
-    title: "이번 주 진행 요약 정리",
-    importance: "LOW",
-    author: "최유나",
-    dept: "프론트팀",
-    createdAt: "2026-02-24 17:55",
-  },
-];
-
-const TOTAL_COUNT = 58;
-
+// 좁아지면 부서 → 작성자 순으로 접힌다. 제목·중요도·일시는 목록에서 고르는 기준이라 남긴다.
 const BOARD_COLUMNS: ProjectTableColumn<BoardPost>[] = [
   { key: "title", header: "제목", tone: "title" },
   {
@@ -69,8 +26,8 @@ const BOARD_COLUMNS: ProjectTableColumn<BoardPost>[] = [
     align: "center",
     render: (post) => <ImportanceDot importance={post.importance} round />,
   },
-  { key: "author", header: "작성자", width: 110, tone: "sub" },
-  { key: "dept", header: "부서", width: 120, tone: "sub" },
+  { key: "author", header: "작성자", width: 110, tone: "sub", fold: "compact" },
+  { key: "dept", header: "부서", width: 120, tone: "sub", fold: "narrow" },
   { key: "createdAt", header: "일시", width: 150, tone: "muted" },
 ];
 
@@ -79,16 +36,7 @@ interface ProjectBoardViewProps {
 }
 
 export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
-  const router = useRouter();
-
-  const list = useListParams<ImportanceFilterValue>({ initialFilter: "ALL" });
-
-  // 아직 목업이라 화면에서 거른다. 게시판 API가 붙으면 서버 조회 파라미터로 넘긴다.
-  const posts = MOCK_POSTS.filter(
-    (post) =>
-      (list.filter === "ALL" || post.importance === list.filter) &&
-      (list.query === "" || post.title.includes(list.query)),
-  );
+  const page = usePostListPage(projectId ?? "");
 
   return (
     <>
@@ -110,36 +58,94 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>게시판</h2>
-            <Badge type="elephant" badgeStyle="weak">{TOTAL_COUNT}</Badge>
+            {typeof page.totalCount === "number" && (
+              <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
+            )}
           </div>
-          <Button
-            size="tiny"
-            onClick={() => router.push(`/projects/${projectId}/board/write`)}
-          >
-            글쓰기
-          </Button>
+          <Button size="tiny" onClick={page.goWrite}>글쓰기</Button>
         </div>
 
         <div className={styles.filterbar}>
           <div className={styles.searchWrap}>
             <SearchBar
               placeholder="제목으로 검색"
-              value={list.keyword}
-              onChange={(e) => list.changeKeyword(e.target.value)}
+              value={page.keyword}
+              onChange={(e) => page.changeKeyword(e.target.value)}
             />
           </div>
 
-          <ImportanceFilter value={list.filter} onChange={list.changeFilter} />
+          <ImportanceFilter value={page.filter} onChange={page.changeFilter} />
         </div>
 
-        <ProjectTable
-          columns={BOARD_COLUMNS}
-          rows={posts}
-          rowKey={(post) => post.id}
-          onRowClick={(post) =>
-            router.push(`/projects/${projectId}/board/${post.id}`)
-          }
-        />
+        {page.isLoading ? (
+          // 로딩 (스켈레톤)
+          <TableSkeleton rows={6} />
+        ) : page.isError ? (
+          // 조회 실패
+          <Result
+            figure={<Result.Figure tone="error">❗</Result.Figure>}
+            title="게시글을 불러오지 못했어요"
+            description="일시적인 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 문의해 주세요."
+            button={
+              <Result.Button
+                type="light"
+                buttonStyle="weak"
+                onClick={() => void page.retry()}
+              >
+                ↻ 다시 시도
+              </Result.Button>
+            }
+          />
+        ) : page.posts.length === 0 && (page.query || page.filter !== "ALL") ? (
+          // 검색·필터 결과 없음
+          <Result
+            figure={<Result.Figure>🔍</Result.Figure>}
+            title="검색 결과가 없습니다"
+            description="조건에 맞는 게시글이 없어요. 다른 키워드나 중요도로 다시 찾아보세요."
+            button={
+              <Result.Button
+                type="light"
+                buttonStyle="weak"
+                onClick={() => {
+                  page.resetSearch();
+                  page.changeFilter("ALL");
+                }}
+              >
+                검색 초기화
+              </Result.Button>
+            }
+          />
+        ) : page.posts.length === 0 ? (
+          // 등록된 게시글 없음
+          <Result
+            figure={<Result.Figure>📋</Result.Figure>}
+            title="등록된 게시글이 없습니다"
+            description="첫 글을 남기면 공지·이슈·논의 내용을 팀원과 한곳에서 나눌 수 있어요."
+            button={
+              <Result.Button leftAccessory="+" onClick={page.goWrite}>
+                글쓰기
+              </Result.Button>
+            }
+          />
+        ) : (
+          <ProjectTable
+            columns={BOARD_COLUMNS}
+            rows={page.posts}
+            rowKey={(post) => post.id}
+            onRowClick={(post) => page.goDetail(post.id)}
+          />
+        )}
+
+        {!page.isLoading &&
+          !page.isError &&
+          page.posts.length > 0 &&
+          page.totalPages > 1 && (
+            <Pagination
+              currentPage={page.page}
+              totalPages={page.totalPages}
+              onPageChange={page.setPage}
+            />
+          )}
       </section>
     </>
   );

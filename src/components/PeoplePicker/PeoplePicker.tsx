@@ -29,11 +29,23 @@ interface PeoplePickerProps {
    * value에 들어가지 않아 서버로 보낼 목록과 분리되고, 제거·재선택도 막힌다.
    */
   pinned?: PeopleOption[];
+  /**
+   * 고른 사람 중 뺄 수 없는 id (수정 화면의 나 등).
+   * pinned와 달리 value에 그대로 남아 서버로 나가고, 칩의 ✕만 사라진다.
+   */
+  lockedIds?: string[];
   required?: boolean;
   placeholder?: string;
   emptyText?: string;
   /** 입력창 오른쪽에 표시되는 보조 안내 (예: "Enter ↵") */
   hint?: React.ReactNode;
+  /**
+   * 검색어가 바뀔 때마다 호출. 서버에서 후보를 찾아 `options`에 실어 주는 용도다.
+   * 넘기지 않으면 `options` 안에서만 찾는 기존 동작 그대로다.
+   */
+  onQueryChange?: (query: string) => void;
+  /** 서버 검색 중 — "검색 결과가 없어요" 대신 진행 중임을 알린다 */
+  searching?: boolean;
 }
 
 const labelOf = (person: PeopleOption) =>
@@ -47,16 +59,32 @@ export default function PeoplePicker({
   value,
   onChange,
   pinned = [],
+  lockedIds = [],
   required = false,
   placeholder = "이름을 검색한 뒤 목록에서 선택하세요",
   emptyText = "검색 결과가 없어요",
   hint,
+  onQueryChange,
+  searching = false,
 }: PeoplePickerProps) {
   const [query, setQuery] = useState("");
 
+  // 검색어는 두 곳이 봐야 한다 — 목록을 거르는 이 컴포넌트와, 서버에 물어보는 부모.
+  const changeQuery = useCallback(
+    (next: string) => {
+      setQuery(next);
+      onQueryChange?.(next);
+    },
+    [onQueryChange],
+  );
+
   const searchRef = useRef<HTMLDivElement>(null);
-  const closeSuggest = useCallback(() => setQuery(""), []);
+  const closeSuggest = useCallback(() => changeQuery(""), [changeQuery]);
   useClickOutside(searchRef, closeSuggest, query.trim().length > 0);
+
+  // 서버 검색을 쓰면 후보 목록이 검색어마다 통째로 갈린다.
+  // 고른 사람을 따로 기억해 두지 않으면 다음 글자를 치는 순간 칩이 사라진다.
+  const [pickedById, setPickedById] = useState<Record<string, PeopleOption>>({});
 
   const pinnedIds = pinned.map((person) => person.id);
 
@@ -71,15 +99,22 @@ export default function PeoplePicker({
   const selected = useMemo(
     () =>
       value
-        .map((id) => options.find((option) => option.id === id))
+        .map(
+          (id) => pickedById[id] ?? options.find((option) => option.id === id),
+        )
         .filter((option): option is PeopleOption => Boolean(option)),
-    [value, options],
+    [value, options, pickedById],
   );
 
   const add = (name: string) => {
     const picked = suggestions.find((option) => labelOf(option) === name);
-    if (picked && !value.includes(picked.id)) onChange([...value, picked.id]);
-    setQuery("");
+
+    if (picked && !value.includes(picked.id)) {
+      setPickedById((current) => ({ ...current, [picked.id]: picked }));
+      onChange([...value, picked.id]);
+    }
+
+    changeQuery("");
   };
 
   const remove = (id: string) => {
@@ -92,7 +127,7 @@ export default function PeoplePicker({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === "Escape" && query.trim()) {
       e.stopPropagation();
-      setQuery("");
+      changeQuery("");
       return;
     }
 
@@ -110,7 +145,7 @@ export default function PeoplePicker({
           required={required}
           placeholder={placeholder}
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => changeQuery(e.target.value)}
           right={hint}
         />
 
@@ -118,7 +153,7 @@ export default function PeoplePicker({
           <SuggestList
             items={suggestions.map(labelOf)}
             onSelect={add}
-            emptyText={emptyText}
+            emptyText={searching ? "찾는 중이에요…" : emptyText}
           />
         )}
       </div>
@@ -130,12 +165,17 @@ export default function PeoplePicker({
             <Chip key={person.id} label={labelOf(person)} />
           ))}
 
+          {/* 뺄 수 없는 사람은 onRemove를 넘기지 않아 ✕ 없이 렌더된다 */}
           {selected.map((person) => (
             <Chip
               key={person.id}
               label={labelOf(person)}
               tone="primary"
-              onRemove={() => remove(person.id)}
+              onRemove={
+                lockedIds.includes(person.id)
+                  ? undefined
+                  : () => remove(person.id)
+              }
             />
           ))}
         </div>

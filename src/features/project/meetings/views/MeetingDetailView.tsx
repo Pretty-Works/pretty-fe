@@ -59,6 +59,7 @@ export default function MeetingDetailView({
       <div className={styles.page}>
         <MeetingForm
           mode="edit"
+          projectId={projectId}
           initial={toMeetingFormData(page.meeting, page.projectName)}
           initialAttendeeIds={page.meeting.attendees.map((person) =>
             String(person.userId),
@@ -77,6 +78,8 @@ export default function MeetingDetailView({
       <MeetingDetailContent
         meeting={page.meeting}
         projectName={page.projectName}
+        canEdit={page.canEdit}
+        canDelete={page.canDelete}
         onList={page.goList}
         onDelete={page.openDelete}
         onEdit={page.startEdit}

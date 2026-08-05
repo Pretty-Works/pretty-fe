@@ -9,6 +9,7 @@ import type { CreateMeetingRequest } from "@/features/project/meetings/api/meeti
 import { useDeleteMeetingMutation } from "@/features/project/meetings/hooks/mutations/useDeleteMeetingMutation";
 import { useUpdateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useUpdateMeetingMutation";
 import { useMeetingDetailQuery } from "@/features/project/meetings/hooks/queries/useMeetingDetailQuery";
+import { useMeetingPermission } from "@/features/project/meetings/hooks/useMeetingPermission";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useToastStore } from "@/stores/useToastStore";
 
@@ -28,6 +29,9 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
   const { data: project } = useProjectDetailQuery(projectId);
   const updateMutation = useUpdateMeetingMutation(projectId, meetingId);
   const deleteMutation = useDeleteMeetingMutation(projectId, meetingId);
+
+  // 작성자 · 참석자만 고칠 수 있고, 지우는 건 작성자만 할 수 있다
+  const { canEdit, canDelete } = useMeetingPermission(meeting);
 
   const saveEdit = (body: CreateMeetingRequest) => {
     updateMutation.mutate(body, {
@@ -72,14 +76,18 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
     isError,
     retry: refetch,
 
-    editing,
-    startEdit: () => setEditing(true),
+    canEdit,
+    canDelete,
+
+    // 버튼을 감췄어도 상태로는 들어갈 수 있어 한 번 더 막는다
+    editing: editing && canEdit,
+    startEdit: () => setEditing(canEdit),
     stopEdit: () => setEditing(false),
     isSaving: updateMutation.isPending,
     saveEdit,
 
-    deleteOpen,
-    openDelete: () => setDeleteOpen(true),
+    deleteOpen: deleteOpen && canDelete,
+    openDelete: () => setDeleteOpen(canDelete),
     closeDelete: () => {
       if (!deleteMutation.isPending) setDeleteOpen(false);
     },

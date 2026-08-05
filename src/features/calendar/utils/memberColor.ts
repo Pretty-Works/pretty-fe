@@ -34,7 +34,13 @@ const EVENT_COLORS: Record<string, { background: string; color: string }> = {
   "#7c3aed": { background: "#e8ddff", color: "#5930a7" },
 };
 
+// 아직 누구인지 모르는 작성자(이름·색을 못 받은 상태)용 중립색.
+// 여기서 내 색으로 떨어뜨리면 남의 일정을 내 일정으로 오인하게 된다.
+const UNKNOWN_COLORS = { background: "#eceef1", color: "#4b5563" };
+
 /** 월간 일정 배너 전용 저채도 배경과 읽기 쉬운 전경색 */
 export function calendarEventColors(memberColorValue?: string) {
-  return EVENT_COLORS[memberColorValue ?? ME_COLOR] ?? EVENT_COLORS[ME_COLOR];
+  if (!memberColorValue) return UNKNOWN_COLORS;
+
+  return EVENT_COLORS[memberColorValue] ?? UNKNOWN_COLORS;
 }

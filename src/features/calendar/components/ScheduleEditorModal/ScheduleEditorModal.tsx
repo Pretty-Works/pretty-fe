@@ -42,6 +42,11 @@ interface ScheduleEditorModalProps {
   people: PeopleOption[];
   /** 본인 — 서버가 자동으로 참여자에 넣으므로 표시만 한다. 아직 모르면 생략 */
   me?: PeopleOption;
+  /** 참여 인원 검색어 — 부모가 서버에 물어 `people`을 채운다 */
+  onSearchPeople?: (query: string) => void;
+  peopleSearching?: boolean;
+  /** 저장 요청 중 — 응답이 올 때까지 모달을 열어 둔다 */
+  submitting?: boolean;
   onClose: () => void;
   onSubmit: (submit: ScheduleSubmit) => void;
   onDelete?: () => void;
@@ -53,6 +58,9 @@ export default function ScheduleEditorModal({
   initial,
   people,
   me,
+  onSearchPeople,
+  peopleSearching,
+  submitting = false,
   onClose,
   onSubmit,
   onDelete,
@@ -100,7 +108,11 @@ export default function ScheduleEditorModal({
     patch({ startDate: range.start, endDate: range.end });
   };
 
+  // 저장은 부모가 서버 응답을 받은 뒤에 닫는다.
+  // 여기서 미리 닫아 버리면 실패했을 때 입력하던 내용이 통째로 사라진다.
   const handleSubmit = () => {
+    if (submitting) return;
+
     if (!draft.startDate || !draft.endDate) {
       setError(useRange ? "기간을 선택해 주세요." : "날짜를 선택해 주세요.");
       return;
@@ -120,7 +132,6 @@ export default function ScheduleEditorModal({
           reason: draft.reason.trim() || (mode === "edit" ? "" : undefined),
         },
       });
-      onClose();
       return;
     }
 
@@ -129,13 +140,18 @@ export default function ScheduleEditorModal({
       return;
     }
 
+    // 시간을 지정하는 일정은 하루 안에서만 만든다 (자정 넘김은 종일로 잡는다).
+    // 화면에도 날짜 입력이 하나뿐이므로 종료일을 시작일로 고정해, 수정으로 열린
+    // 여러 날짜짜리 옛 일정이 보이지 않는 종료일을 그대로 들고 나가지 않게 한다.
+    const endDate = draft.allDay ? draft.endDate : draft.startDate;
+
     // allDay면 서버가 00:00:00~23:59:59로 정규화하지만 형식은 맞춰 보낸다
     const startAt = draft.allDay
       ? `${draft.startDate}T00:00:00`
       : `${draft.startDate}T${draft.startTime}:00`;
     const endAt = draft.allDay
-      ? `${draft.endDate}T23:59:59`
-      : `${draft.endDate}T${draft.endTime}:00`;
+      ? `${endDate}T23:59:59`
+      : `${endDate}T${draft.endTime}:00`;
 
     if (endAt <= startAt) {
       setError("종료가 시작보다 빠를 수 없어요.");
@@ -154,7 +170,6 @@ export default function ScheduleEditorModal({
         participantUserIds: draft.participantIds,
       },
     });
-    onClose();
   };
 
   return (
@@ -171,6 +186,7 @@ export default function ScheduleEditorModal({
               size="medium"
               className={styles.deleteButton}
               onClick={onDelete}
+              disabled={submitting}
             >
               삭제
             </Button>
@@ -180,14 +196,20 @@ export default function ScheduleEditorModal({
             buttonStyle="weak"
             size="medium"
             onClick={onClose}
+            disabled={submitting}
           >
             취소
           </Button>
           <Button
             size="medium"
             onClick={handleSubmit}
+            loading={submitting}
           >
-            {mode === "create" ? "등록" : "저장"}
+            {submitting
+              ? "저장 중…"
+              : mode === "create"
+                ? "등록"
+                : "저장"}
           </Button>
         </>
       }
@@ -281,6 +303,8 @@ export default function ScheduleEditorModal({
           pinned={me ? [{ ...me, description: "나" }] : []}
           value={draft.participantIds}
           onChange={(participantIds) => patch({ participantIds })}
+          onQueryChange={onSearchPeople}
+          searching={peopleSearching}
         />
       )}
 

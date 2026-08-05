@@ -11,6 +11,11 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.row:last-child {
+  border-bottom: none;
+}
+
 .bar {
   height: 12px;
   border-radius: 999px;

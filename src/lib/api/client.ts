@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { API_BASE_URL } from "../config";
 import { clearQueryCache } from "./queryCache";
+import { loginPathFor } from "@/constants/routes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 export const api = axios.create({
@@ -57,7 +58,11 @@ api.interceptors.response.use(
         useAuthStore.getState().clear();
         clearQueryCache();
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          // 보던 화면을 returnTo로 달아 로그인 후 그 자리로 돌아오게 한다
+          window.location.href = loginPathFor(
+            window.location.pathname,
+            window.location.search,
+          );
         }
         return Promise.reject(refreshError);
       }

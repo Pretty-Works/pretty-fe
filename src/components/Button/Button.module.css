@@ -3,6 +3,9 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
+  /* flex 안에서 눌리면 <button>은 글자를 잘라내고 네모만 남긴다.
+     좁아질 때 줄어들어야 하는 건 버튼이 아니라 옆의 내용이다 */
+  flex-shrink: 0;
   border-radius: 10px;
   border: 1px solid transparent;
   background: transparent;

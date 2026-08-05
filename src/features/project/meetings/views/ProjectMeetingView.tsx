@@ -10,7 +10,7 @@ import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
 import type { Meeting } from "@/features/project/meetings/api/meetingApi";
-import TableSkeleton from "@/features/project/meetings/components/TableSkeleton/TableSkeleton";
+import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 import { useMeetingListPage } from "@/features/project/meetings/hooks/useMeetingListPage";
 
 import styles from "./ProjectMeetingView.module.css";
@@ -19,14 +19,17 @@ import styles from "./ProjectMeetingView.module.css";
 const VISIBLE_ATTENDEES = 3;
 
 // 회의록 목록 컬럼
+// 좁아지면 참석자 → 작성자 순으로 접힌다. 참석자는 폭을 가장 많이 쓰면서
+// 목록에서는 훑어보는 값이라 먼저 접고, 제목·일시는 끝까지 남긴다.
 const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
   { key: "title", header: "제목", tone: "title" },
-  { key: "author", header: "작성자", width: 110, tone: "sub" },
+  { key: "author", header: "작성자", width: 110, tone: "sub", fold: "compact" },
   {
     key: "attendees",
     header: "참석자",
     width: 250,
     tone: "sub",
+    fold: "narrow",
     render: (meeting) => {
       const attendees = meeting.attendees ?? [];
       const shown = attendees.slice(0, VISIBLE_ATTENDEES).join(", ");

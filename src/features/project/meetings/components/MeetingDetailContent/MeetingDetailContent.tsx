@@ -9,6 +9,10 @@ import styles from "./MeetingDetailContent.module.css";
 interface MeetingDetailContentProps {
   meeting: MeetingDetail;
   projectName: string;
+  // 작성자 · 참석자만 고칠 수 있고, 지우는 건 작성자만 할 수 있다.
+  // 할 수 없는 일은 흐리게 두지 않고 아예 띄우지 않는다.
+  canEdit: boolean;
+  canDelete: boolean;
   onList: () => void;
   onDelete: () => void;
   onEdit: () => void;
@@ -17,6 +21,8 @@ interface MeetingDetailContentProps {
 export default function MeetingDetailContent({
   meeting,
   projectName,
+  canEdit,
+  canDelete,
   onList,
   onDelete,
   onEdit,
@@ -44,15 +50,19 @@ export default function MeetingDetailContent({
           >
             목록
           </Button>
-          <Button
-            type="danger"
-            buttonStyle="weak"
-            size="medium"
-            onClick={onDelete}
-          >
-            삭제
-          </Button>
-          <Button size="medium" onClick={onEdit}>수정</Button>
+          {canDelete && (
+            <Button
+              type="danger"
+              buttonStyle="weak"
+              size="medium"
+              onClick={onDelete}
+            >
+              삭제
+            </Button>
+          )}
+          {canEdit && (
+            <Button size="medium" onClick={onEdit}>수정</Button>
+          )}
         </div>
       </div>
 

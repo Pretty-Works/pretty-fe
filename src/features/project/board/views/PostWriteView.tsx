@@ -4,7 +4,6 @@ import Button from "@/components/Button/Button";
 import FormField from "@/components/FormField/FormField";
 import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
 import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
-import InvalidFormModal from "@/features/project/board/components/modal/InvalidFormModal/InvalidFormModal";
 import PostSavedModal from "@/features/project/board/components/modal/PostSavedModal/PostSavedModal";
 import { usePostWriteForm } from "@/features/project/board/hooks/usePostWriteForm";
 import { IMPORTANCE_OPTIONS } from "@/features/project/board/types";
@@ -22,17 +21,6 @@ export default function PostWriteView({ projectId }: PostWriteViewProps) {
 
   return (
     <div className={styles.page}>
-      <button
-        type="button"
-        className={styles.backBtn}
-        onClick={form.handleLeave}
-      >
-        <span className={styles.backIcon} aria-hidden="true">
-          ←
-        </span>
-        뒤로가기
-      </button>
-
       <div className={styles.pageHead}>
         <div className={styles.pageHeadText}>
           <h2 className={styles.pageTitle}>게시글 작성</h2>
@@ -43,7 +31,22 @@ export default function PostWriteView({ projectId }: PostWriteViewProps) {
           </div>
         </div>
         <div className={styles.actions}>
-          <Button size="medium" onClick={form.handleSubmit}>등록</Button>
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={form.handleLeave}
+          >
+            목록
+          </Button>
+          <Button
+            size="medium"
+            loading={form.isSaving}
+            disabled={!form.canSubmit}
+            onClick={form.handleSubmit}
+          >
+            등록
+          </Button>
         </div>
       </div>
 
@@ -87,12 +90,6 @@ export default function PostWriteView({ projectId }: PostWriteViewProps) {
           placeholder="내용을 입력하세요"
         />
       </section>
-
-      <InvalidFormModal
-        open={form.invalidOpen}
-        missing={form.missing}
-        onClose={form.closeInvalid}
-      />
 
       <LeaveConfirmModal
         open={form.warnOpen}

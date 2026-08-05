@@ -15,13 +15,16 @@ import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmM
 import TranscriptUploadModal from "@/features/project/meetings/components/modal/TranscriptUploadModal/TranscriptUploadModal";
 import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
 import type { MeetingData } from "@/features/project/meetings/types";
-import { todayISO } from "@/lib/date";
-import { useToastStore } from "@/stores/useToastStore";
+import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import { clampDate, todayISO } from "@/lib/date";
 
 import styles from "./MeetingForm.module.css";
 
 interface MeetingFormProps {
   mode: "create" | "edit";
+  // 회의 일시를 이 프로젝트 기간 안으로 묶는 데 쓴다
+  projectId: string;
   author?: string;
   initial?: MeetingData;
   initialAttendeeIds?: string[];
@@ -33,6 +36,7 @@ interface MeetingFormProps {
 
 export default function MeetingForm({
   mode,
+  projectId,
   author,
   initial,
   initialAttendeeIds = [],
@@ -41,13 +45,12 @@ export default function MeetingForm({
   onSave,
   onExit,
 }: MeetingFormProps) {
-  const showToast = useToastStore((state) => state.showToast);
   const authorLabel =
     initial?.author ?? author ?? "작성자 정보를 불러오는 중";
 
   const [title, setTitle] = useState(initial?.title ?? "");
   // 신규 작성 시 일시 기본값 = 오늘
-  const [date, setDate] = useState(() =>
+  const [pickedDate, setPickedDate] = useState(() =>
     mode === "create" ? todayISO() : (initial?.date ?? ""),
   );
   const [place, setPlace] = useState(initial?.place ?? "");
@@ -60,6 +63,37 @@ export default function MeetingForm({
   );
   const [uploadOpen, setUploadOpen] = useState(false);
   const [warnOpen, setWarnOpen] = useState(false); // 이탈 경고
+
+  // 회의는 프로젝트가 굴러가는 동안에만 열릴 수 있다.
+  // 개요·할 일 추가와 같은 상세 조회라 캐시를 공유한다 (요청이 늘지 않는다).
+  const { data: project } = useProjectDetailQuery(projectId);
+
+  // 참석자로 들어가 있는 나는 내가 뺄 수 없다 — 회의에 있었다는 사실을 스스로 지우는 셈이 된다.
+  // (작성 화면에서는 내가 후보에 없어 애초에 담기지 않는다)
+  const { data: me } = useMyProfileQuery();
+  const lockedAttendeeIds = me ? [String(me.userId)] : [];
+
+  const period = project
+    ? { startDate: project.startDate, targetDate: project.endDate }
+    : undefined;
+
+  // 고를 수 있는 마지막 날 — 기간이 이미 끝났으면 목표일, 아니면 오늘.
+  // 아직 열리지 않은 회의는 기록할 게 없어서 오늘을 넘기지 않는다(allowFuture={false}와 같은 기준).
+  const today = todayISO();
+  const lastDay =
+    period && period.targetDate < today ? period.targetDate : today;
+
+  // 기간 밖이면 가장 가까운 날로 당긴다 — 기본값(오늘)이 목표일을 지난 경우가 여기 걸린다.
+  // (예: 기간이 8/1까지인데 오늘이 8/3이면 8/1이 잡힌다)
+  // 기간을 나중에 알게 되므로 초기값을 고치는 대신 여기서 당긴다.
+  // 저장된 회의록은 늘 기간 안이라(BE가 회의록이 걸리는 기간 축소를 PROJECT_021로 막는다)
+  // 실제로 당겨지는 건 작성 화면의 기본값뿐이다.
+  const date = !period
+    ? pickedDate
+    : // 아직 시작하지 않은 프로젝트는 고를 수 있는 날이 하루도 없다
+      period.startDate > lastDay
+      ? ""
+      : clampDate(pickedDate, period.startDate, lastDay);
 
   // 초기값 스냅샷
   const snapshot = useMemo(
@@ -88,18 +122,18 @@ export default function MeetingForm({
     attendees.length !== snapshot.attendees.length ||
     attendees.some((a, i) => a !== snapshot.attendees[i]);
 
-  // 뒤로가기 (변경 있으면 경고)
+  // 목록·취소로 나가기 (변경 있으면 경고)
   const handleBack = () => {
     if (isDirty) setWarnOpen(true);
     else onExit();
   };
 
-  const handleSave = () => {
-    if (!title.trim() || !date || attendees.length === 0) {
-      showToast("회의명, 일시, 참석자를 모두 입력해 주세요.", "orange");
-      return;
-    }
+  // 회의명·일시·참석자는 서버 필수값이다. 다 채우기 전에는 저장할 수 없다 —
+  // 눌러 놓고 무엇이 빠졌는지 되묻는 것보다 버튼으로 미리 알려 주는 편이 낫다.
+  const canSave =
+    !!title.trim() && !!date && attendees.length > 0 && !isSaving;
 
+  const handleSave = () => {
     onSave?.({
       title: title.trim(),
       meetingDate: date,
@@ -114,14 +148,6 @@ export default function MeetingForm({
 
   return (
     <>
-      {/* 뒤로가기 */}
-      <button type="button" className={styles.backBtn} onClick={handleBack}>
-        <span className={styles.backIcon} aria-hidden="true">
-          ←
-        </span>
-        뒤로가기
-      </button>
-
       {/* 헤더 */}
       <div className={styles.head}>
         <div className={styles.headText}>
@@ -144,7 +170,21 @@ export default function MeetingForm({
           >
             {transcript ? "녹취록 재업로드" : "녹취록 업로드"}
           </Button>
-          <Button size="medium" loading={isSaving} onClick={handleSave}>
+          {/* 작성은 목록으로, 수정은 보던 회의록으로 돌아간다 */}
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={handleBack}
+          >
+            {mode === "create" ? "목록" : "취소"}
+          </Button>
+          <Button
+            size="medium"
+            loading={isSaving}
+            disabled={!canSave}
+            onClick={handleSave}
+          >
             저장
           </Button>
         </div>
@@ -185,12 +225,18 @@ export default function MeetingForm({
 
         <div className={styles.row}>
           <div className={styles.col}>
+            {/* 기간 안내는 라벨 줄에 얹는다 — 아래에 두면 불러오는 사이 폼 높이가 변한다 */}
             <DatePicker
               label="일시"
               required
+              labelSlot={period ? "프로젝트 기간 내에서만 선택" : undefined}
               value={date}
-              onChange={setDate}
+              onChange={setPickedDate}
+              /* 아직 열리지 않은 회의는 기록할 게 없다 */
               allowFuture={false}
+              /* 회의는 프로젝트 기간 안에서만 열린다 */
+              minDate={period?.startDate}
+              maxDate={period?.targetDate}
               placeholder="날짜를 선택하세요"
             />
           </div>
@@ -217,6 +263,7 @@ export default function MeetingForm({
           options={attendeeOptions}
           value={attendees}
           onChange={setAttendees}
+          lockedIds={lockedAttendeeIds}
         />
       </section>
 

@@ -7,6 +7,13 @@
   gap: 16px;
 }
 
+/* 수정 화면 — 프로젝트 레이아웃 안쪽이라 폭·여백을 다른 탭 화면과 맞춘다 */
+.embedded {
+  max-width: none;
+  margin: 0;
+  padding: 0 var(--page-inline-pad, 44px);
+}
+
 /* 페이지 헤더 */
 .pageHead {
   display: flex;

@@ -1,14 +1,23 @@
 .table {
   --col-gap: clamp(8px, 1vw, 12px);
+  /* 컬럼 최소 폭의 합 (고정 92+72+116 · 최소 62+84+90 · 간격 12×5).
+     이보다 좁아지면 줄이 컨테이너를 넘어 금액 칸이 가로선 밖으로 삐져나온다 */
+  --row-min: 576px;
 
   display: flex;
   flex-direction: column;
+  /* 더는 줄일 수 없는 폭에 닿으면 가로로 민다. 날짜·금액을 잘라내는 것보다 낫다 */
+  overflow-x: auto;
+  /* 이게 없으면 flex 아이템의 기본 최소 크기(min-width:auto)가 줄 폭(576px)이 되어
+     표가 줄어들지 못하고, 스크롤 대신 카드 밖으로 통째로 밀려난다 */
+  min-width: 0;
 }
 
 .head {
   display: flex;
   gap: var(--col-gap);
   align-items: center;
+  min-width: var(--row-min);
   height: 44px;
   border-bottom: 1px solid var(--line);
 }
@@ -28,13 +37,23 @@
   display: flex;
   gap: var(--col-gap);
   align-items: center;
+  min-width: var(--row-min);
   height: 48px;
   border-bottom: 1px solid var(--line);
-  cursor: pointer;
   transition: background 0.15s ease;
 }
 
-.row:hover {
+/* 본인이 등록한 지출만 눌러서 고칠 수 있다. 나머지는 누를 수 있는 것처럼 보이지 않게 한다 */
+.rowEditable {
+  cursor: pointer;
+}
+
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowEditable:hover {
   background: var(--surface);
 }
 

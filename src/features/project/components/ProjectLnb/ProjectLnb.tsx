@@ -14,6 +14,7 @@ import {
 import { PROJECT_TABS } from "@/features/project/constants/projectTabs";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import styles from "./ProjectLnb.module.css";
 
@@ -38,6 +39,19 @@ export default function ProjectLnb() {
     project.status !== "COMPLETED" &&
     project.status !== "ARCHIVED";
 
+  // 작성 중인 화면(프로젝트 수정 등)에서 메뉴를 누르면 먼저 확인을 받는다.
+  // 지금 보고 있는 메뉴는 나가는 게 아니므로 막지 않는다.
+  const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
+
+  const guard =
+    (href: string, isActive: boolean) =>
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!isActive && requestLeave(href)) e.preventDefault();
+    };
+
+  const isEditActive = activeSegment === "edit";
+  const editHref = `/projects/${projectId}/edit`;
+
   return (
     <nav className={styles.lnb} aria-label="프로젝트 메뉴">
       <span className={styles.caption}>프로젝트 메뉴</span>
@@ -45,11 +59,13 @@ export default function ProjectLnb() {
       {PROJECT_TABS.map((tab) => {
         const isActive = tab.segment === activeSegment;
         const Icon = TAB_ICONS[tab.segment];
+        const href = `/projects/${projectId}/${tab.segment}`;
 
         return (
           <Link
             key={tab.segment}
-            href={`/projects/${projectId}/${tab.segment}`}
+            href={href}
+            onClick={guard(href, isActive)}
             aria-current={isActive ? "page" : undefined}
             title={tab.label}
             className={`${styles.item} ${isActive ? styles.active : ""}`}
@@ -64,9 +80,11 @@ export default function ProjectLnb() {
         <>
           <hr className={styles.divider} />
           <Link
-            href={`/projects/${projectId}/edit`}
+            href={editHref}
+            onClick={guard(editHref, isEditActive)}
+            aria-current={isEditActive ? "page" : undefined}
             title="프로젝트 수정"
-            className={styles.item}
+            className={`${styles.item} ${isEditActive ? styles.active : ""}`}
           >
             <LuPencilLine className={styles.icon} aria-hidden="true" />
             <span className={styles.label}>프로젝트 수정</span>

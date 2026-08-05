@@ -1,24 +1,42 @@
 .table {
+  /* ProjectTable.tsx의 COLUMN_GAP과 같은 값이어야 한다 (줄 최소 폭 계산에 쓰인다) */
+  --col-gap: 12px;
+
   display: flex;
   flex-direction: column;
+  /* 아래 @container의 기준. 화면 폭이 아니라 표가 실제로 차지한 폭을 본다 —
+     오른쪽 에이전트 패널이 열리면 화면은 그대로인데 표만 좁아지기 때문이다 */
+  container-type: inline-size;
+  /* 더는 줄일 수 없는 폭에 닿으면 가로로 민다. 제목 칸이 사라지는 것보다 낫다 */
+  overflow-x: auto;
+  /* 이게 없으면 flex 아이템의 기본 최소 크기(min-width:auto)가 줄 폭이 되어
+     표가 줄어들지 못하고, 스크롤 대신 카드 밖으로 통째로 밀려난다 */
+  min-width: 0;
 }
 
 .head {
   display: flex;
-  gap: 12px;
+  gap: var(--col-gap);
   align-items: center;
+  min-width: var(--row-min, auto);
   height: 48px;
   border-bottom: 1px solid var(--line);
 }
 
 .row {
   display: flex;
-  gap: 12px;
+  gap: var(--col-gap);
   align-items: center;
+  min-width: var(--row-min, auto);
   height: 48px;
   border-bottom: 1px solid var(--line);
   cursor: pointer;
   transition: background 0.15s ease;
+}
+
+/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
+.row:last-child {
+  border-bottom: none;
 }
 
 .row:hover {
@@ -28,10 +46,12 @@
 .col {
   display: flex;
   align-items: center;
+  overflow: hidden;
   font-size: 12px;
   font-weight: 500;
   color: var(--text-placeholder);
   white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .cell {
@@ -65,4 +85,31 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/*
+ * 반응형 — 좁아지면 보조 칸부터 접는다.
+ * 접는 만큼 줄의 최소 폭도 함께 줄어서 가로 스크롤이 그만큼 늦게 나타난다.
+ * (접힌 값은 줄을 눌러 상세에서 볼 수 있다 — 그래서 접어도 되는 칸만 표시해 둔다)
+ */
+@container (max-width: 700px) {
+  .foldNarrow {
+    display: none;
+  }
+
+  .head,
+  .row {
+    min-width: var(--row-min-narrow, auto);
+  }
+}
+
+@container (max-width: 520px) {
+  .foldCompact {
+    display: none;
+  }
+
+  .head,
+  .row {
+    min-width: var(--row-min-compact, auto);
+  }
 }

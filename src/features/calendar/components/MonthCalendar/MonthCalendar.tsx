@@ -30,11 +30,17 @@ interface MonthCalendarProps {
   onSelectDate: (date: string) => void;
 }
 
-/** 7칸(간격 4px) 기준으로 col번째 칸의 left, n칸짜리 막대의 width */
+// 여러 날 일정 막대는 칸 위에 절대 위치로 겹쳐 그린다.
+// 칸 간격은 CSS의 `--cal-gap`(MonthCalendar.module.css)에서 읽어 화면 폭에 따라 바뀌어도 어긋나지 않는다.
+// 한 칸 너비 = (전체 - 간격 6개) / 7
+
+/** col번째 칸의 left */
 const columnLeft = (col: number) =>
-  `calc((100% - 24px) / 7 * ${col} + ${col * 4}px)`;
+  `calc((100% - var(--cal-gap) * 6) / 7 * ${col} + var(--cal-gap) * ${col})`;
+
+/** span칸을 덮는 막대의 width */
 const columnWidth = (span: number) =>
-  `calc((100% - 24px) / 7 * ${span} + ${(span - 1) * 4}px)`;
+  `calc((100% - var(--cal-gap) * 6) / 7 * ${span} + var(--cal-gap) * ${span - 1})`;
 
 export default function MonthCalendar({
   month,
@@ -47,6 +53,19 @@ export default function MonthCalendar({
   onSelectDate,
 }: MonthCalendarProps) {
   const weeks = buildMonthWeeks(month);
+  const isViewingCurrentMonth =
+    `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, "0")}` ===
+    todayDate.slice(0, 7);
+
+  // Tab으로 격자에 들어올 칸. 보통은 선택한 날짜지만, PageUp/Down으로 달만 넘기면
+  // 선택일이 이 격자에 없어 모든 칸이 tabIndex=-1이 되고 키보드로 진입할 수 없게 된다.
+  // 그럴 때는 그 달 1일을 대신 진입점으로 쓴다.
+  const selectedInGrid = weeks.some((week) =>
+    week.some((date) => toDateKey(date) === selectedDate),
+  );
+  const focusableDate = selectedInGrid
+    ? selectedDate
+    : toDateKey(new Date(month.getFullYear(), month.getMonth(), 1));
 
   const gridRef = useRef<HTMLDivElement>(null);
   // 화살표로 옮긴 뒤에만 포커스를 따라 보낸다 (마우스로 고른 날짜까지 뺏어오지 않게).
@@ -99,7 +118,7 @@ export default function MonthCalendar({
           previousLabel="이전 달"
           nextLabel="다음 달"
           resetLabel="오늘"
-          isCurrent={selectedDate === todayDate}
+          isCurrent={isViewingCurrentMonth && selectedDate === todayDate}
           onPrevious={() => onChangeMonth(-1)}
           onNext={() => onChangeMonth(1)}
           onReset={onResetMonth}
@@ -164,7 +183,7 @@ export default function MonthCalendar({
                     className={cellClasses}
                     data-date={key}
                     // 격자 안에서는 Tab이 아니라 화살표로 옮긴다 (칸 42개를 다 지나가지 않도록)
-                    tabIndex={key === selectedDate ? 0 : -1}
+                    tabIndex={key === focusableDate ? 0 : -1}
                     onClick={() => onSelectDate(key)}
                     aria-pressed={key === selectedDate}
                     aria-label={formatDayLabel(key)}

@@ -13,7 +13,7 @@ const OPTIONS: { value: ImportanceFilterValue; label: string; dot?: string }[] =
   [
     { value: "ALL", label: "전체" },
     { value: "HIGH", label: "High", dot: IMPORTANCE_META.HIGH.dot },
-    { value: "MEDIUM", label: "Medium", dot: IMPORTANCE_META.MEDIUM.dot },
+    { value: "MID", label: "Medium", dot: IMPORTANCE_META.MID.dot },
     { value: "LOW", label: "Low", dot: IMPORTANCE_META.LOW.dot },
   ];
 

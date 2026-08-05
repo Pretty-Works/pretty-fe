@@ -49,11 +49,13 @@ export default function MeetingWriteView({ projectId }: MeetingWriteViewProps) {
     <div className={styles.page}>
       <MeetingForm
         mode="create"
+        projectId={projectId}
         author={profile?.name}
         attendeeOptions={attendeeOptions}
         isSaving={createMutation.isPending}
         onSave={handleSave}
-        onExit={() => router.back()}
+        /* '목록'이라 적혀 있으니 back이 아니라 목록으로 보낸다 (어디서 들어왔든) */
+        onExit={() => router.push(`/projects/${projectId}/meetings`)}
       />
     </div>
   );

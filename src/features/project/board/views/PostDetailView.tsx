@@ -38,17 +38,6 @@ export default function PostDetailView({ projectId }: PostDetailViewProps) {
 
   return (
     <div className={styles.page}>
-      <button
-        type="button"
-        className={styles.backBtn}
-        onClick={() => router.back()}
-      >
-        <span className={styles.backIcon} aria-hidden="true">
-          ←
-        </span>
-        뒤로가기
-      </button>
-
       <div className={styles.head}>
         <div className={styles.headText}>
           <div className={styles.titleRow}>
@@ -63,6 +52,14 @@ export default function PostDetailView({ projectId }: PostDetailViewProps) {
         </div>
 
         <div className={styles.actions}>
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={() => router.push(`/projects/${projectId}/board`)}
+          >
+            목록
+          </Button>
           <Button
             size="medium"
             onClick={() => router.push(`/projects/${projectId}/board/write`)}
