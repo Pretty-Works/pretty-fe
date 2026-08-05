@@ -21,31 +21,6 @@
   align-items: flex-start;
 }
 
-.fileCard {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  padding: 8px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--white);
-  font-size: 13px;
-  color: var(--text);
-}
-
-.fileIcon {
-  font-size: 16px;
-  flex-shrink: 0;
-}
-
-.fileName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 220px;
-}
-
 .bubble {
   padding: 10px 14px;
   border-radius: 16px;

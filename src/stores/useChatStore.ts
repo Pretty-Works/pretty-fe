@@ -6,7 +6,6 @@ import {
   type AgentAction,
   type AgentChoice,
   type AgentKind,
-  type ChatAttachment,
   type ChatMessage,
   type Conversation,
 } from "@/features/agent/types";
@@ -34,7 +33,7 @@ interface ChatStore {
   pendingChoice: AgentChoice | null;
   approvalAction: AgentAction | null;
 
-  sendMessage: (text: string, attachment?: ChatAttachment) => void;
+  sendMessage: (text: string) => void;
   answerChoice: (value: string) => void;
   answerApproval: (value: string) => void;
   approve: () => void;
@@ -54,11 +53,7 @@ const clearTimers = () => {
 };
 
 export const useChatStore = create<ChatStore>((set, get) => {
-  const addMessage = (
-    role: ChatMessage["role"],
-    content: string,
-    attachment?: ChatAttachment
-  ) => {
+  const addMessage = (role: ChatMessage["role"], content: string) => {
     set((state) => ({
       messages: [
         ...state.messages,
@@ -67,7 +62,6 @@ export const useChatStore = create<ChatStore>((set, get) => {
           role,
           content,
           createdAt: new Date().toISOString(),
-          attachment,
         },
       ],
     }));
@@ -117,13 +111,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
     pendingChoice: null,
     approvalAction: null,
 
-    sendMessage: (text, attachment) => {
+    sendMessage: (text) => {
       if (get().pendingChoice || get().approvalAction) return; // 선택 대기 중엔 전송 불가
       const trimmed = text.trim();
-      if (!trimmed && !attachment) return;
+      if (!trimmed) return;
 
-      const cid = ensureConversation(trimmed || attachment?.name || "새 대화");
-      addMessage("user", trimmed, attachment);
+      const cid = ensureConversation(trimmed);
+      addMessage("user", trimmed);
 
       const scenario = buildMockResponse(trimmed);
       runFor(pickAgents(trimmed), () => {

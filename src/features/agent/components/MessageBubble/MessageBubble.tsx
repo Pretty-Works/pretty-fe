@@ -17,13 +17,6 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
   return (
     <div className={`${styles.row} ${isUser ? styles.rowUser : styles.rowAgent}`}>
       <div className={styles.column}>
-        {message.attachment && (
-          <div className={styles.fileCard}>
-            <span className={styles.fileIcon}>📄</span>
-            <span className={styles.fileName}>{message.attachment.name}</span>
-          </div>
-        )}
-
         {message.content && (
           <div
             className={`${styles.bubble} ${

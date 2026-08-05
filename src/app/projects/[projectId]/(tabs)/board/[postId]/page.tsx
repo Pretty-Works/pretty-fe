@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import PostDetailView from "@/features/project/board/views/detail/PostDetailView";
+import PostDetailView from "@/features/project/board/views/PostDetailView";
 
 export const metadata: Metadata = {
   title: "게시글 상세",
@@ -12,7 +12,7 @@ interface PostDetailPageProps {
 }
 
 export default async function Page({ params }: PostDetailPageProps) {
-  const { projectId } = await params;
+  const { projectId, postId } = await params;
 
-  return <PostDetailView projectId={projectId} />;
+  return <PostDetailView projectId={projectId} postId={postId} />;
 }

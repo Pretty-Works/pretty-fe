@@ -6,7 +6,7 @@ import MeetingForm from "@/features/project/meetings/components/MeetingForm/Meet
 import DeleteMeetingModal from "@/features/project/meetings/components/modal/DeleteMeetingModal/DeleteMeetingModal";
 import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
 import { useMeetingDetailPage } from "@/features/project/meetings/hooks/useMeetingDetailPage";
-import { toMeetingFormData } from "@/features/project/meetings/lib/format";
+import { toMeetingFormData } from "@/features/project/meetings/utils/format";
 
 import styles from "./MeetingDetailView.module.css";
 
@@ -59,6 +59,7 @@ export default function MeetingDetailView({
       <div className={styles.page}>
         <MeetingForm
           mode="edit"
+          projectId={projectId}
           initial={toMeetingFormData(page.meeting, page.projectName)}
           initialAttendeeIds={page.meeting.attendees.map((person) =>
             String(person.userId),
@@ -77,6 +78,8 @@ export default function MeetingDetailView({
       <MeetingDetailContent
         meeting={page.meeting}
         projectName={page.projectName}
+        canEdit={page.canEdit}
+        canDelete={page.canDelete}
         onList={page.goList}
         onDelete={page.openDelete}
         onEdit={page.startEdit}

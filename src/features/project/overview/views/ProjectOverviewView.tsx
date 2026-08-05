@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
+import StateView from "@/components/StateView/StateView";
 
 import { getErrorCode } from "@/lib/api/errorCode";
 import { useToastStore } from "@/stores/useToastStore";
@@ -110,34 +111,37 @@ export default function ProjectOverviewView({
     }
   };
 
-  if (isLoading) {
-    return <p className={styles.stateText}>프로젝트를 불러오는 중이에요…</p>;
-  }
-
-  if (isError || !project) {
+  // 프로젝트를 못 읽으면 아래 내용이 전부 의미를 잃는다 — 여기서 끝낸다.
+  if (isLoading || isError || !project) {
     // 서버가 원인을 코드로 주므로 상황에 맞는 문구를 보여준다.
     //   PROJECT_004 없는 프로젝트 · MEMBER_001 참여자가 아님
     const code = getErrorCode(error);
 
-    const message =
-      code === "PROJECT_004"
-        ? "프로젝트를 찾을 수 없어요. 삭제되었을 수 있습니다."
-        : code === "MEMBER_001"
-          ? "참여 중인 프로젝트가 아니에요."
-          : "프로젝트를 불러오지 못했어요.";
-
     return (
-      <div className={styles.errorBox}>
-        <p className={`${styles.stateText} ${styles.stateError}`}>{message}</p>
-        <Button
-          type="light"
-          buttonStyle="weak"
-          size="medium"
-          onClick={() => router.push("/")}
-        >
-          홈으로
-        </Button>
-      </div>
+      <StateView
+        loading={isLoading}
+        /* 로딩이 아니면 실패다 (StateView는 loading을 먼저 본다) */
+        error
+        size="roomy"
+        loadingText="프로젝트를 불러오는 중이에요…"
+        errorText={
+          code === "PROJECT_004"
+            ? "프로젝트를 찾을 수 없어요. 삭제되었을 수 있습니다."
+            : code === "MEMBER_001"
+              ? "참여 중인 프로젝트가 아니에요."
+              : "프로젝트를 불러오지 못했어요."
+        }
+        action={
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="medium"
+            onClick={() => router.push("/")}
+          >
+            홈으로
+          </Button>
+        }
+      />
     );
   }
 
@@ -197,55 +201,63 @@ export default function ProjectOverviewView({
 
       {/* 마일스톤 완료율 · 주간 Task (2단) */}
       <div className={styles.columns}>
-        {isMilestoneLoading ? (
-          <p className={styles.stateText}>마일스톤을 불러오는 중이에요…</p>
-        ) : isMilestoneError || !milestoneBoard ? (
-          <p className={`${styles.stateText} ${styles.stateError}`}>
-            마일스톤을 불러오지 못했어요.
-          </p>
-        ) : (
-          <MilestoneProgressCard
-            board={milestoneBoard}
-            editable={isOpenForContent && canManage}
-            onToggle={(milestoneId, done) =>
+        <StateView
+          loading={isMilestoneLoading}
+          error={isMilestoneError || !milestoneBoard}
+          size="roomy"
+          loadingText="마일스톤을 불러오는 중이에요…"
+          errorText="마일스톤을 불러오지 못했어요."
+        >
+          {milestoneBoard && (
+            <MilestoneProgressCard
+              board={milestoneBoard}
+              editable={isOpenForContent && canManage}
+              onToggle={(milestoneId, done) =>
+               
               toggleMilestone(
                 { milestoneId, done },
                 { onError: notifyToggleFailure },
               )
-            }
-          />
-        )}
+            
+              }
+            />
+          )}
+        </StateView>
 
-        {isBoardLoading ? (
-          <p className={styles.stateText}>할 일을 불러오는 중이에요…</p>
-        ) : isBoardError || !board ? (
-          <p className={`${styles.stateText} ${styles.stateError}`}>
-            할 일을 불러오지 못했어요.
-          </p>
-        ) : (
-          <WeeklyTaskCard
-            board={board}
-            weekOffset={weekOffset}
-            onWeekChange={setWeekOffset}
-            onAddTask={isOpenForContent ? () => setTaskModalOpen(true) : undefined}
-            onToggleTask={(taskId, done) =>
-              toggleTask(
-                { taskId: String(taskId), done },
-                { onSuccess: () => notifyIfCarriedOver(taskId, done) },
-              )
-            }
-            onSelectTask={(task) => {
-              // 이 화면의 할 일은 모두 현재 프로젝트 소속이다
-              setEditingTask({
-                id: String(task.taskId),
-                content: task.content,
-                projectId: project.projectId,
-                dueDate: task.dueDate,
-              });
-              setTaskModalOpen(true);
-            }}
-          />
-        )}
+        <StateView
+          loading={isBoardLoading}
+          error={isBoardError || !board}
+          size="roomy"
+          loadingText="할 일을 불러오는 중이에요…"
+          errorText="할 일을 불러오지 못했어요."
+        >
+          {board && (
+            <WeeklyTaskCard
+              board={board}
+              weekOffset={weekOffset}
+              onWeekChange={setWeekOffset}
+              onAddTask={
+                isOpenForContent ? () => setTaskModalOpen(true) : undefined
+              }
+              onToggleTask={(taskId, done) =>
+                toggleTask(
+                  { taskId: String(taskId), done },
+                  { onSuccess: () => notifyIfCarriedOver(taskId, done) },
+                )
+              }
+              onSelectTask={(task) => {
+                // 이 화면의 할 일은 모두 현재 프로젝트 소속이다
+                setEditingTask({
+                  id: String(task.taskId),
+                  content: task.content,
+                  projectId: project.projectId,
+                  dueDate: task.dueDate,
+                });
+                setTaskModalOpen(true);
+              }}
+            />
+          )}
+        </StateView>
       </div>
 
       {/* 할 일 추가 — 이 화면은 프로젝트가 정해져 있어 고정으로 연다 */}

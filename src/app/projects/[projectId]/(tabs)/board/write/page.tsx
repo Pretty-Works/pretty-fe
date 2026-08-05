@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import PostWriteView from "@/features/project/board/views/write/PostWriteView";
+import PostWriteView from "@/features/project/board/views/PostWriteView";
 
 export const metadata: Metadata = {
   title: "게시글 작성",

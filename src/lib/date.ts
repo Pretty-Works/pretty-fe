@@ -18,6 +18,17 @@ export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+// "YYYY-MM-DD"를 [min, max] 안으로 당긴다 — 범위 밖이면 가장 가까운 끝날.
+// 기본값(오늘)이 프로젝트 기간을 벗어난 화면에서 쓴다.
+// 빈 값은 아직 고르지 않은 것이라 그대로 둔다.
+export function clampDate(iso: string, min: string, max: string): string {
+  if (!iso) return iso;
+  if (iso < min) return min;
+  if (iso > max) return max;
+
+  return iso;
+}
+
 // "2026-08-04T14:22:10" → "오늘" | "어제" | "8월 2일 (일)"
 // 목록을 날짜로 묶는 머리글에 쓴다.
 // 서버가 LocalDateTime(타임존 없음)을 주므로 브라우저 로컬 시각으로 해석된다.

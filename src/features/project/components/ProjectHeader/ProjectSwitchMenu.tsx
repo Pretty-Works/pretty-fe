@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import SearchBar from "@/components/SearchBar/SearchBar";
+import StateView from "@/components/StateView/StateView";
 
 import { useDebounce } from "@/hooks/useDebounce";
 import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
@@ -43,16 +44,15 @@ export default function ProjectSwitchMenu({
       </div>
 
       <div className={styles.list}>
-        {isLoading ? (
-          <p className={styles.stateText}>불러오는 중이에요…</p>
-        ) : isError ? (
-          <p className={`${styles.stateText} ${styles.stateError}`}>
-            목록을 불러오지 못했어요.
-          </p>
-        ) : projects.length === 0 ? (
-          <p className={styles.stateText}>프로젝트가 없어요.</p>
-        ) : (
-          projects.map((project) => {
+        <StateView
+          loading={isLoading}
+          error={isError}
+          empty={projects.length === 0}
+          size="compact"
+          errorText="목록을 불러오지 못했어요."
+          emptyText="프로젝트가 없어요."
+        >
+          {projects.map((project) => {
             const isCurrent = project.id === currentProjectId;
 
             return (
@@ -72,8 +72,8 @@ export default function ProjectSwitchMenu({
                 {isCurrent && <span className={styles.check}>✓</span>}
               </button>
             );
-          })
-        )}
+          })}
+        </StateView>
       </div>
     </div>
   );

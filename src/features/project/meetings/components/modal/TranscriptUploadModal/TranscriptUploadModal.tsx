@@ -20,15 +20,25 @@ export default function TranscriptUploadModal({
 }: TranscriptUploadModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // 한 번에 하나만
+  // 한 번에 하나만. accept 속성은 드래그 앤 드롭에는 안 먹으므로 여기서도 확인한다.
   const takeFirst = (files: FileList | null) => {
     const f = files?.[0] ?? null;
-    if (f) setFile(f);
+    if (!f) return;
+
+    if (!f.name.toLowerCase().endsWith(".txt")) {
+      setError("txt 파일만 업로드할 수 있어요.");
+      return;
+    }
+
+    setError(null);
+    setFile(f);
   };
 
   const handleClose = () => {
     setFile(null);
+    setError(null);
     onClose();
   };
 
@@ -41,7 +51,7 @@ export default function TranscriptUploadModal({
     <Modal
       open={open}
       onClose={handleClose}
-      title="녹취록 업로드"
+      title="텍스트 파일 업로드"
       subtitle="업로드는 선택 사항입니다"
       width={600}
       footer={
@@ -61,7 +71,7 @@ export default function TranscriptUploadModal({
       <input
         ref={inputRef}
         type="file"
-        accept=".mp3,.m4a,.wav,.txt,audio/*,text/plain"
+        accept=".txt,text/plain"
         hidden
         onChange={(e) => {
           takeFirst(e.target.files);
@@ -72,7 +82,7 @@ export default function TranscriptUploadModal({
       {file ? (
         <div className={styles.attached}>
           <span className={styles.fileIcon} aria-hidden="true">
-            🎙️
+            📄
           </span>
           <div className={styles.fileMeta}>
             <span className={styles.fileName}>{file.name}</span>
@@ -104,16 +114,18 @@ export default function TranscriptUploadModal({
             takeFirst(e.dataTransfer.files);
           }}
         >
-          <span className={styles.mic} aria-hidden="true">
-            🎙️
+          <span className={styles.dzIcon} aria-hidden="true">
+            📄
           </span>
           <span className={styles.dzTitle}>
-            녹취록 파일을 끌어다 놓거나 클릭해 업로드하세요
+            txt 파일을 끌어다 놓거나 클릭해 업로드하세요
           </span>
-          <span className={styles.dzHint}>mp3 · m4a · wav · txt · 최대 200MB</span>
+          <span className={styles.dzHint}>txt 파일만 지원 · 최대 10MB</span>
           <span className={styles.dzBtn}>파일 선택</span>
         </div>
       )}
+
+      {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.info}>
         <span className={styles.infoIcon} aria-hidden="true">

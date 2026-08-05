@@ -4,18 +4,6 @@
   gap: 14px;
 }
 
-/* 글자수 경고를 입력칸 아래에 붙이기 위한 묶음 */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.warn {
-  font-size: 12px;
-  color: var(--danger);
-}
-
 /* 수정 모드에서만 뜨는 삭제 — 저장 버튼과 멀리 떨어뜨린다 (할 일 모달과 동일) */
 .deleteButton {
   margin-right: auto;

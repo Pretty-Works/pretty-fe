@@ -16,6 +16,8 @@ import { useAgentStore } from "@/stores/useAgentStore";
 import { useToastStore } from "@/stores/useToastStore";
 
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
+import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
 import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
 import type { UserSearchResult } from "@/features/user/api/userApi";
 import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
@@ -109,6 +111,53 @@ function koreanMoney(value: number) {
 const withComma = (value: string) =>
   value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
+// 생성 모드 오너의 기본 역할
+const DEFAULT_OWNER_ROLE = "PM";
+
+interface FormValues {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  budget: string;
+  noBudgetLimit: boolean;
+  ownerRole: string;
+  members: MemberRow[];
+  milestones: MilestoneRow[];
+}
+
+// 저장하지 않은 변경이 있는지 가리는 데 쓴다. 필드가 많아 하나씩 견주는 대신
+// 저장에 실제로 들어가는 값만 한 벌로 묶는다 (마일스톤은 순서가 바뀐 것도 변경으로 본다).
+const snapshotOf = (values: FormValues) =>
+  JSON.stringify([
+    values.name,
+    values.description,
+    values.startDate,
+    values.endDate,
+    // 예산 제한 없음은 0으로 저장된다 — 입력해 둔 금액이 남아 있어도 결과는 같다
+    values.noBudgetLimit ? "0" : values.budget,
+    values.ownerRole,
+    values.members.map((member) => [member.userId, member.role]),
+    // 목표일·목표가 모두 빈 줄은 추가만 해 두고 아직 아무것도 쓰지 않은 것이라 세지 않는다
+    values.milestones
+      .filter((ms) => ms.targetDate || ms.goal)
+      .map((ms) => [ms.milestoneId ?? null, ms.targetDate, ms.goal]),
+  ]);
+
+// 아직 아무것도 건드리지 않은 상태. 생성 모드의 기준이자,
+// 수정 모드에서 기존 값을 불러오기 전까지의 기준이기도 하다.
+const EMPTY_SNAPSHOT = snapshotOf({
+  name: "",
+  description: "",
+  startDate: "",
+  endDate: "",
+  budget: "",
+  noBudgetLimit: false,
+  ownerRole: DEFAULT_OWNER_ROLE,
+  members: [],
+  milestones: [],
+});
+
 interface ProjectCreateViewProps {
   // 값이 있으면 수정 모드 (없으면 생성)
   projectId?: string;
@@ -132,11 +181,14 @@ export default function ProjectCreateView({
   const [budget, setBudget] = useState("");
   const [noBudgetLimit, setNoBudgetLimit] = useState(false); // 예산 제한 없음(0)
 
-  const [ownerRole, setOwnerRole] = useState("PM");
+  const [ownerRole, setOwnerRole] = useState(DEFAULT_OWNER_ROLE);
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [memberKeyword, setMemberKeyword] = useState("");
 
   const [milestones, setMilestones] = useState<MilestoneRow[]>([]);
+
+  // '변경 없음'의 기준. 수정 모드에서는 불러온 값으로 갈아 끼운다.
+  const [baseline, setBaseline] = useState(EMPTY_SNAPSHOT);
 
   // 마일스톤 드래그 정렬 — 손잡이를 누른 행만 draggable이 된다(입력 선택 방해 방지)
   const [dragKey, setDragKey] = useState<string | null>(null);
@@ -161,31 +213,42 @@ export default function ProjectCreateView({
   useEffect(() => {
     if (!isEdit || !detail) return;
 
-    setName(detail.name);
-    setDescription(detail.description ?? "");
-    setStartDate(detail.startDate);
-    setEndDate(detail.endDate);
-    setBudget(detail.budget === 0 ? "" : String(detail.budget));
-    setNoBudgetLimit(detail.budget === 0);
-    setOwnerRole(detail.owner.ownerRole ?? "");
-    setMembers(
-      detail.members.map((member) => ({
+    const loaded: FormValues = {
+      name: detail.name,
+      description: detail.description ?? "",
+      startDate: detail.startDate,
+      endDate: detail.endDate,
+      budget: detail.budget === 0 ? "" : String(detail.budget),
+      noBudgetLimit: detail.budget === 0,
+      ownerRole: detail.owner.ownerRole ?? "",
+      members: detail.members.map((member) => ({
         userId: member.userId,
         name: member.name,
         // 목록 응답에 팀 정보가 없다
         team: "",
         role: member.role ?? "",
       })),
-    );
-    // milestoneId를 그대로 들고 있어야 완료 상태가 보존된다
-    setMilestones(
-      detail.milestones.map((ms) => ({
+      // milestoneId를 그대로 들고 있어야 완료 상태가 보존된다
+      milestones: detail.milestones.map((ms) => ({
         key: `ms-${ms.milestoneId}`,
         milestoneId: ms.milestoneId,
         targetDate: ms.targetDate,
         goal: ms.goal,
       })),
-    );
+    };
+
+    setName(loaded.name);
+    setDescription(loaded.description);
+    setStartDate(loaded.startDate);
+    setEndDate(loaded.endDate);
+    setBudget(loaded.budget);
+    setNoBudgetLimit(loaded.noBudgetLimit);
+    setOwnerRole(loaded.ownerRole);
+    setMembers(loaded.members);
+    setMilestones(loaded.milestones);
+
+    // 불러온 값이 곧 '아직 고치지 않은 상태'다
+    setBaseline(snapshotOf(loaded));
   }, [isEdit, detail]);
 
   // 참여자 검색 — 캘린더 인원 선택과 같은 훅(GET /users/search).
@@ -206,6 +269,23 @@ export default function ProjectCreateView({
       user.userId !== ownerUserId &&
       !members.some((member) => member.userId === user.userId),
   );
+
+  // 저장하지 않은 변경이 있으면 화면을 벗어나기 전에 한 번 묻는다.
+  // 좌측 프로젝트 메뉴·프로젝트 전환처럼 이 화면 밖에서 시작하는 이동도 여기서 받는다.
+  const isDirty =
+    snapshotOf({
+      name,
+      description,
+      startDate,
+      endDate,
+      budget,
+      noBudgetLimit,
+      ownerRole,
+      members,
+      milestones,
+    }) !== baseline;
+
+  const leaveGuard = useLeaveGuard(isDirty);
 
   // Event Handler
   // 목표일에는 minDate로 시작일 이전을 막아두지만, 시작일을 나중에 목표일 뒤로 옮기면
@@ -349,7 +429,13 @@ export default function ProjectCreateView({
     (!isEdit || !!detail);
 
   return (
-    <main className={styles.container}>
+    // 수정 화면은 프로젝트 레이아웃(좌측 메뉴 + 헤더) 안에 놓인다 —
+    // 폭과 여백을 바깥에서 정하므로 자체 여백을 걷어낸다.
+    <main
+      className={[styles.container, isEdit && styles.embedded]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {/* 페이지 헤더 */}
       <div className={styles.pageHead}>
         <div className={styles.pageHeadText}>
@@ -369,7 +455,7 @@ export default function ProjectCreateView({
             type="light"
             buttonStyle="weak"
             size="medium"
-            onClick={() => router.back()}
+            onClick={leaveGuard.requestBack}
           >
             취소
           </Button>
@@ -388,34 +474,23 @@ export default function ProjectCreateView({
       <section className={styles.card}>
         <h3 className={styles.cardTitle}>기본 정보</h3>
 
-        <div className={styles.fieldWrap}>
-          <FormField
-            label="프로젝트명"
-            required
-            maxLength={MAX.name}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {name.length >= MAX.name && (
-            <p className={styles.warn}>
-              프로젝트명은 최대 {MAX.name}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        {/* 상한을 넘기면 FormField가 알아서 알려 준다 */}
+        <FormField
+          label="프로젝트명"
+          required
+          placeholder="예: 그룹웨어 AI 고도화"
+          maxLength={MAX.name}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <div className={styles.fieldWrap}>
-          <FormField
-            label="프로젝트 설명"
-            maxLength={MAX.description}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          {description.length >= MAX.description && (
-            <p className={styles.warn}>
-              설명은 최대 {MAX.description}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        <FormField
+          label="프로젝트 설명"
+          placeholder="예: 사내 그룹웨어에 AI 기능을 더하는 프로젝트"
+          maxLength={MAX.description}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
         <div className={styles.row}>
           <div className={styles.col}>
@@ -687,6 +762,18 @@ export default function ProjectCreateView({
           </>
         )}
       </section>
+
+      {/* 이탈 경고 — 저장하지 않은 변경이 있을 때만 뜬다 */}
+      <LeaveConfirmModal
+        open={leaveGuard.confirmOpen}
+        description={
+          isEdit
+            ? "저장하지 않은 수정 내용이 모두 사라지고 기존 프로젝트 정보로 돌아갑니다. 그래도 나가시겠어요?"
+            : "입력한 기본 정보·참여자·마일스톤이 모두 사라집니다. 그래도 나가시겠어요?"
+        }
+        onStay={leaveGuard.stay}
+        onLeave={leaveGuard.leave}
+      />
     </main>
   );
 }

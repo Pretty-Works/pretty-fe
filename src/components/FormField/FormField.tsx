@@ -1,8 +1,9 @@
 "use client";
 
 import { useId, useState } from "react";
-
 import { IoEye, IoEyeOff } from "react-icons/io5";
+
+import { withJosa } from "@/lib/text";
 
 import styles from "./FormField.module.css";
 
@@ -13,7 +14,6 @@ interface FormFieldProps
   right?: React.ReactNode;
   help?: React.ReactNode;
   hasError?: boolean;
-  /** 비밀번호 표시·숨김 토글을 붙인다 (`type="password"`일 때만 동작). */
   revealable?: boolean;
 }
 
@@ -25,12 +25,15 @@ export default function FormField({
   hasError = false,
   revealable = false,
   placeholder,
+  value,
+  maxLength,
   id,
   type,
   ...rest
 }: FormFieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
+
   const [revealed, setRevealed] = useState(false);
   const canReveal = revealable && type === "password";
 
@@ -38,9 +41,12 @@ export default function FormField({
     ? `${styles.control} ${styles.controlError}`
     : styles.control;
 
+  const atMaxLength =
+    maxLength !== undefined && String(value ?? "").length >= maxLength;
+
   return (
     <div className={styles.field}>
-      <label className={styles.label} htmlFor={inputId}>
+      <label htmlFor={inputId} className={styles.label}>
         {label}
         {required && <span className={styles.required}> *</span>}
       </label>
@@ -51,27 +57,37 @@ export default function FormField({
           className={styles.input}
           type={canReveal && revealed ? "text" : type}
           placeholder={placeholder}
-          aria-invalid={hasError ? true : undefined}
+          value={value}
+          maxLength={maxLength}
+          aria-invalid={hasError || undefined}
           {...rest}
         />
 
-        {right ? <span className={styles.right}>{right}</span> : null}
+        {right && <span className={styles.right}>{right}</span>}
 
         {canReveal && (
           <button
             type="button"
             className={styles.reveal}
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={() => setRevealed((current) => !current)}
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => setRevealed((prev) => !prev)}
             aria-label={revealed ? "비밀번호 숨기기" : "비밀번호 표시"}
           >
-            {revealed ? <IoEye /> : <IoEyeOff />}
+            {revealed ? <IoEyeOff /> : <IoEye />}
           </button>
         )}
       </div>
 
-      {help && (
-        <span className={hasError ? styles.helpError : styles.help}>{help}</span>
+      {atMaxLength ? (
+        <span className={styles.warn} role="status">
+          {withJosa(label, "은", "는")} 최대 {maxLength}자까지 입력할 수 있어요.
+        </span>
+      ) : (
+        help && (
+          <span className={hasError ? styles.helpError : styles.help}>
+            {help}
+          </span>
+        )
       )}
     </div>
   );

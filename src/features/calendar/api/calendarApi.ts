@@ -204,14 +204,3 @@ export const isIdempotencyConflict = (error: unknown) =>
   error.response?.status === 409 &&
   (error.response.data as BaseResponse<unknown> | undefined)?.errorCode ===
     "REQUEST_028";
-
-// 서버가 내려준 사용자용 메시지 (없으면 기본 문구)
-export const messageOf = (error: unknown, fallback: string) => {
-  if (axios.isAxiosError(error)) {
-    const message = (error.response?.data as BaseResponse<unknown> | undefined)
-      ?.message;
-    if (message) return message;
-  }
-
-  return fallback;
-};

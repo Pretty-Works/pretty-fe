@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useParams, usePathname, useRouter } from "next/navigation";
 
 import { getErrorCode } from "@/lib/api/errorCode";
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 import { useToastStore, type ToastTone } from "@/stores/useToastStore";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useRememberLastProject } from "@/features/project/hooks/useRememberLastProject";
@@ -62,6 +63,9 @@ export default function ProjectHeader() {
 
   // 수정(PROJECT_005)과 상태 변경(PROJECT_017)의 판정 기준이 같다 — 오너이거나 역할이 PM
   const canManage = useCanManageProject(projectId);
+
+  // 프로젝트 수정처럼 작성 중인 화면에서 다른 프로젝트로 넘어가려 하면 먼저 확인을 받는다
+  const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
 
   // 상단바 '프로젝트'가 여기로 되돌아온다. 이 컴포넌트가 네 탭 모두에 있어 탭을 옮길 때마다 갱신된다.
   useRememberLastProject(projectId, currentTab, {
@@ -175,7 +179,9 @@ export default function ProjectHeader() {
               currentProjectId={projectId}
               onSelect={(nextId) => {
                 setOpenMenu(null);
-                router.push(`/projects/${nextId}/${currentTab}`);
+
+                const href = `/projects/${nextId}/${currentTab}`;
+                if (!requestLeave(href)) router.push(href);
               }}
             />
           </div>
