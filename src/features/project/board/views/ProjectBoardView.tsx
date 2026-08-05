@@ -1,13 +1,12 @@
 "use client";
 
-import Badge from "@/components/Badge/Badge";
-import { useState } from "react";
-
 import { useRouter } from "next/navigation";
 
+import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
+import { useListParams } from "@/hooks/useListParams";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
 import ProjectTable, { type ProjectTableColumn } from "@/features/project/components/ProjectTable/ProjectTable";
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
@@ -82,14 +81,13 @@ interface ProjectBoardViewProps {
 export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
   const router = useRouter();
 
-  const [keyword, setKeyword] = useState("");
-  const [filter, setFilter] = useState<ImportanceFilterValue>("ALL");
+  const list = useListParams<ImportanceFilterValue>({ initialFilter: "ALL" });
 
-  const q = keyword.trim();
+  // 아직 목업이라 화면에서 거른다. 게시판 API가 붙으면 서버 조회 파라미터로 넘긴다.
   const posts = MOCK_POSTS.filter(
     (post) =>
-      (filter === "ALL" || post.importance === filter) &&
-      (q === "" || post.title.includes(q)),
+      (list.filter === "ALL" || post.importance === list.filter) &&
+      (list.query === "" || post.title.includes(list.query)),
   );
 
   return (
@@ -126,12 +124,12 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
           <div className={styles.searchWrap}>
             <SearchBar
               placeholder="제목으로 검색"
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
+              value={list.keyword}
+              onChange={(e) => list.changeKeyword(e.target.value)}
             />
           </div>
 
-          <ImportanceFilter value={filter} onChange={setFilter} />
+          <ImportanceFilter value={list.filter} onChange={list.changeFilter} />
         </div>
 
         <ProjectTable

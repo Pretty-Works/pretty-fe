@@ -6,8 +6,9 @@ import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
+import StateView from "@/components/StateView/StateView";
 
-import { useDebounce } from "@/hooks/useDebounce";
+import { useListParams } from "@/hooks/useListParams";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
 import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
@@ -29,13 +30,10 @@ export default function ProjectFinanceView({
   projectId,
 }: ProjectFinanceViewProps) {
   // State
-  const [status, setStatus] = useState<ExpenseStatus>("EXECUTED");
-  const [keyword, setKeyword] = useState("");
-  const [page, setPage] = useState(1);
-  const [isFormOpen, setIsFormOpen] = useState(false);
+  // 검색어·사용/예정 탭·페이지. 조건이 바뀌면 훅이 1페이지로 되돌린다.
+  const list = useListParams<ExpenseStatus>({ initialFilter: "EXECUTED" });
 
-  // 입력이 멈춘 뒤에만 조회 (타이핑마다 요청 방지)
-  const debouncedKeyword = useDebounce(keyword);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Query
   const { data: project } = useProjectDetailQuery(projectId ?? "");
@@ -51,9 +49,9 @@ export default function ProjectFinanceView({
     isLoading: isExpensesLoading,
     isError: isExpensesError,
   } = useExpensesQuery(projectId ?? "", {
-    status,
-    keyword: debouncedKeyword,
-    page: page - 1, // 서버 0-based
+    status: list.filter,
+    keyword: list.query,
+    page: list.pageIndex,
     size: PAGE_SIZE,
   });
 
@@ -68,29 +66,17 @@ export default function ProjectFinanceView({
     ? { startDate: project.startDate, endDate: project.endDate }
     : undefined;
 
-  // Event Handler
-  const handleStatusChange = (next: ExpenseStatus) => {
-    setStatus(next);
-    setPage(1);
-  };
-
-  const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setKeyword(e.target.value);
-    setPage(1);
-  };
-
   return (
     <div className={styles.container}>
       {/* 예산 현황 */}
-      {isBudgetLoading ? (
-        <p className={styles.stateText}>예산 현황을 불러오는 중이에요…</p>
-      ) : isBudgetError || !budget ? (
-        <p className={`${styles.stateText} ${styles.stateError}`}>
-          예산 현황을 불러오지 못했어요.
-        </p>
-      ) : (
-        <BudgetSummaryCard budget={budget} />
-      )}
+      <StateView
+        loading={isBudgetLoading}
+        error={isBudgetError || !budget}
+        loadingText="예산 현황을 불러오는 중이에요…"
+        errorText="예산 현황을 불러오지 못했어요."
+      >
+        {budget && <BudgetSummaryCard budget={budget} />}
+      </StateView>
 
       {/* 지출 내역 */}
       <section className={styles.panel}>
@@ -111,50 +97,49 @@ export default function ProjectFinanceView({
         <div className={styles.filterbar}>
           <SearchBar
             placeholder="사용처 · 사용 목적으로 검색"
-            value={keyword}
-            onChange={handleKeywordChange}
+            value={list.keyword}
+            onChange={(e) => list.changeKeyword(e.target.value)}
           />
 
           {/* 사용일이 오늘 이전이면 사용 내역, 이후면 예정 (서버가 날짜로 파생) */}
           <div className={styles.tabs} role="tablist">
             <button
               type="button"
-              className={`${styles.tab} ${status === "EXECUTED" ? styles.tabOn : ""}`}
-              onClick={() => handleStatusChange("EXECUTED")}
+              className={`${styles.tab} ${list.filter === "EXECUTED" ? styles.tabOn : ""}`}
+              onClick={() => list.changeFilter("EXECUTED")}
               role="tab"
-              aria-selected={status === "EXECUTED"}
+              aria-selected={list.filter === "EXECUTED"}
             >
               사용 내역
             </button>
             <button
               type="button"
-              className={`${styles.tab} ${status === "PLANNED" ? styles.tabOn : ""}`}
-              onClick={() => handleStatusChange("PLANNED")}
+              className={`${styles.tab} ${list.filter === "PLANNED" ? styles.tabOn : ""}`}
+              onClick={() => list.changeFilter("PLANNED")}
               role="tab"
-              aria-selected={status === "PLANNED"}
+              aria-selected={list.filter === "PLANNED"}
             >
               예정
             </button>
           </div>
         </div>
 
-        {isExpensesLoading ? (
-          <p className={styles.stateText}>지출 내역을 불러오는 중이에요…</p>
-        ) : isExpensesError ? (
-          <p className={`${styles.stateText} ${styles.stateError}`}>
-            지출 내역을 불러오지 못했어요.
-          </p>
-        ) : expenses.length === 0 ? (
-          <p className={styles.stateText}>표시할 지출 내역이 없어요.</p>
-        ) : (
+        <StateView
+          loading={isExpensesLoading}
+          error={isExpensesError}
+          empty={expenses.length === 0}
+          loadingText="지출 내역을 불러오는 중이에요…"
+          errorText="지출 내역을 불러오지 못했어요."
+          emptyText="표시할 지출 내역이 없어요."
+        >
           <ExpenseTable expenses={expenses} />
-        )}
+        </StateView>
 
         {totalPages > 1 && (
           <Pagination
-            currentPage={page}
+            currentPage={list.page}
             totalPages={totalPages}
-            onPageChange={setPage}
+            onPageChange={list.setPage}
           />
         )}
       </section>

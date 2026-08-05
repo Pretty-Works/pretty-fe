@@ -207,21 +207,15 @@ export default function TaskCreateModal({
           />
         )}
 
-        <div className={styles.field}>
-          <FormField
-            label="할 일"
-            required
-            placeholder="예: 검색 API 커서 전환"
-            maxLength={MAX_CONTENT}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-          />
-          {content.length >= MAX_CONTENT && (
-            <p className={styles.warn}>
-              할 일 이름은 최대 {MAX_CONTENT}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        {/* 상한을 넘기면 FormField가 알아서 알려 준다 */}
+        <FormField
+          label="할 일"
+          required
+          placeholder="예: 검색 API 커서 전환"
+          maxLength={MAX_CONTENT}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
 
         {/* 기간 안내는 라벨 줄에 얹는다 — 아래에 두면 프로젝트를 고를 때 모달 높이가 변한다 */}
         <DatePicker

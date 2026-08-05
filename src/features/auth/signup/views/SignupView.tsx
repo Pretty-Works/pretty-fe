@@ -1,7 +1,7 @@
 'use client';
 
 // import
-import styles from "./page.module.css";
+import styles from "./SignupView.module.css";
 
 export default function SignupView() {
   // State

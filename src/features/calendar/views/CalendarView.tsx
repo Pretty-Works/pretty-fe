@@ -11,7 +11,7 @@ import EventDetailModal from "@/features/calendar/components/EventDetailModal/Ev
 import LeaveSummaryCard from "@/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard";
 import MonthCalendar from "@/features/calendar/components/MonthCalendar/MonthCalendar";
 
-import { messageOf } from "@/features/calendar/api/calendarApi";
+import { getApiErrorMessage } from "@/lib/api/errorCode";
 import { useRemoveScheduleMutation } from "@/features/calendar/hooks/mutations/useRemoveScheduleMutation";
 import { useSaveScheduleMutation } from "@/features/calendar/hooks/mutations/useSaveScheduleMutation";
 import { useCalendarData } from "@/features/calendar/hooks/useCalendarData";
@@ -122,7 +122,10 @@ export default function CalendarView() {
       { submit, idempotencyKey },
       {
         onError: (error) =>
-          showToast(messageOf(error, "일정을 저장하지 못했어요"), "danger"),
+          showToast(
+            getApiErrorMessage(error, "일정을 저장하지 못했어요"),
+            "danger",
+          ),
       },
     );
   };
@@ -136,7 +139,10 @@ export default function CalendarView() {
       {
         // 화면에서는 이미 지워졌다가 되살아나므로, 왜 되돌아왔는지 알려 준다
         onError: (error) =>
-          showToast(messageOf(error, "일정을 지우지 못했어요"), "danger"),
+          showToast(
+            getApiErrorMessage(error, "일정을 지우지 못했어요"),
+            "danger",
+          ),
       },
     );
 

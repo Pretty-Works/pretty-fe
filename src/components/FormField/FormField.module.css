@@ -46,6 +46,12 @@
   color: var(--danger);
 }
 
+/* maxLength에 닿았을 때 — 더 입력되지 않는 이유 */
+.warn {
+  font-size: 12px;
+  color: var(--danger);
+}
+
 /* 읽기 전용 — 직접 입력하지 않고 자동으로 계산되어 채워지는 칸 */
 .control:has(.input:read-only) {
   background: var(--surface);

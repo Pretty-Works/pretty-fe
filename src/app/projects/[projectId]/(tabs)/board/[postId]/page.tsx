@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import PostDetailView from "@/features/project/board/views/detail/PostDetailView";
+import PostDetailView from "@/features/project/board/views/PostDetailView";
 
 export const metadata: Metadata = {
   title: "게시글 상세",

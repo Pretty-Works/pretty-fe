@@ -170,37 +170,24 @@ export default function ExpenseFormModal({
           options={CATEGORY_OPTIONS}
         />
 
-        <div className={styles.field}>
-          <FormField
-            label="사용처"
-            required
-            placeholder="예: 코레일"
-            maxLength={MAX_MERCHANT}
-            value={merchant}
-            onChange={(e) => setMerchant(e.target.value)}
-          />
-          {merchant.length >= MAX_MERCHANT && (
-            <p className={styles.warn}>
-              사용처는 최대 {MAX_MERCHANT}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        {/* 상한을 넘기면 FormField가 알아서 알려 준다 */}
+        <FormField
+          label="사용처"
+          required
+          placeholder="예: 코레일"
+          maxLength={MAX_MERCHANT}
+          value={merchant}
+          onChange={(e) => setMerchant(e.target.value)}
+        />
 
-        <div className={styles.field}>
-          <FormField
-            label="사용 목적"
-            required
-            placeholder="예: 부산 거래처 미팅 출장"
-            maxLength={MAX_PURPOSE}
-            value={purpose}
-            onChange={(e) => setPurpose(e.target.value)}
-          />
-          {purpose.length >= MAX_PURPOSE && (
-            <p className={styles.warn}>
-              사용 목적은 최대 {MAX_PURPOSE}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        <FormField
+          label="사용 목적"
+          required
+          placeholder="예: 부산 거래처 미팅 출장"
+          maxLength={MAX_PURPOSE}
+          value={purpose}
+          onChange={(e) => setPurpose(e.target.value)}
+        />
 
         {/* 입력은 숫자만 받고, 자릿수를 읽기 쉽게 콤마를 얹어 보여준다 */}
         <FormField

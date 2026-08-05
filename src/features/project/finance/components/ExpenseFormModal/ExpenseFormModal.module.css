@@ -4,18 +4,6 @@
   gap: 14px;
 }
 
-/* 글자수 경고를 입력칸 아래에 붙이기 위한 묶음 */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
-
-.warn {
-  font-size: 12px;
-  color: var(--danger);
-}
-
 /* 서버가 돌려준 실패 원인 */
 .error {
   padding-top: 2px;

@@ -1,46 +1,33 @@
 "use client";
 
-import { useState } from "react";
-
 import { useRouter } from "next/navigation";
 
 import { useMeetingsQuery } from "@/features/project/meetings/hooks/queries/useMeetingsQuery";
-import { useDebounce } from "@/hooks/useDebounce";
+import { useListParams } from "@/hooks/useListParams";
 
 const PAGE_SIZE = 10;
 
 export const useMeetingListPage = (projectId: string) => {
   const router = useRouter();
 
-  const [keyword, setKeyword] = useState("");
-  const [page, setPage] = useState(1);
-  const debouncedKeyword = useDebounce(keyword);
+  const list = useListParams();
 
+  // 검색어 하나로 제목·참석자를 함께 찾는다 (서버가 OR로 본다)
   const { data, isLoading, isError, refetch } = useMeetingsQuery(projectId, {
-    title: debouncedKeyword,
-    attendeeName: debouncedKeyword,
-    page: page - 1,
+    title: list.query,
+    attendeeName: list.query,
+    page: list.pageIndex,
     size: PAGE_SIZE,
   });
 
-  const changeKeyword = (value: string) => {
-    setKeyword(value);
-    setPage(1);
-  };
-
-  const resetSearch = () => {
-    setKeyword("");
-    setPage(1);
-  };
-
   return {
-    keyword,
-    changeKeyword,
-    resetSearch,
-    query: debouncedKeyword.trim(),
+    keyword: list.keyword,
+    changeKeyword: list.changeKeyword,
+    resetSearch: list.resetKeyword,
+    query: list.query,
 
-    page,
-    setPage,
+    page: list.page,
+    setPage: list.setPage,
     totalPages: Math.max(data?.totalPages ?? 1, 1),
     totalCount: data?.totalElements,
 

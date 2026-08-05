@@ -6,7 +6,7 @@ import MeetingForm from "@/features/project/meetings/components/MeetingForm/Meet
 import DeleteMeetingModal from "@/features/project/meetings/components/modal/DeleteMeetingModal/DeleteMeetingModal";
 import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
 import { useMeetingDetailPage } from "@/features/project/meetings/hooks/useMeetingDetailPage";
-import { toMeetingFormData } from "@/features/project/meetings/lib/format";
+import { toMeetingFormData } from "@/features/project/meetings/utils/format";
 
 import styles from "./MeetingDetailView.module.css";
 

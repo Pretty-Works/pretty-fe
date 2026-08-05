@@ -380,36 +380,23 @@ export default function ProjectCreateView({
       <section className={styles.card}>
         <h3 className={styles.cardTitle}>기본 정보</h3>
 
-        <div className={styles.fieldWrap}>
-          <FormField
-            label="프로젝트명"
-            required
-            placeholder="예: 그룹웨어 AI 고도화"
-            maxLength={MAX.name}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {name.length >= MAX.name && (
-            <p className={styles.warn}>
-              프로젝트명은 최대 {MAX.name}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        {/* 상한을 넘기면 FormField가 알아서 알려 준다 */}
+        <FormField
+          label="프로젝트명"
+          required
+          placeholder="예: 그룹웨어 AI 고도화"
+          maxLength={MAX.name}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <div className={styles.fieldWrap}>
-          <FormField
-            label="프로젝트 설명"
-            placeholder="예: 사내 그룹웨어에 AI 기능을 더하는 프로젝트"
-            maxLength={MAX.description}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
-          {description.length >= MAX.description && (
-            <p className={styles.warn}>
-              설명은 최대 {MAX.description}자까지 입력할 수 있어요.
-            </p>
-          )}
-        </div>
+        <FormField
+          label="프로젝트 설명"
+          placeholder="예: 사내 그룹웨어에 AI 기능을 더하는 프로젝트"
+          maxLength={MAX.description}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
         <div className={styles.row}>
           <div className={styles.col}>

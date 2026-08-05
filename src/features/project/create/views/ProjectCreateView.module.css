@@ -83,18 +83,6 @@
   min-width: 0;
 }
 
-/* 입력칸 + 경고 문구 묶음 */
-.fieldWrap {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.warn {
-  font-size: 12px;
-  color: var(--danger);
-}
-
 .emptyText {
   padding: 20px 0;
   text-align: center;

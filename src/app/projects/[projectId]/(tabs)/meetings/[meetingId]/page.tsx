@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import MeetingDetailView from "@/features/project/meetings/views/detail/MeetingDetailView";
+import MeetingDetailView from "@/features/project/meetings/views/MeetingDetailView";
 
 export const metadata: Metadata = {
   title: "회의록 상세",

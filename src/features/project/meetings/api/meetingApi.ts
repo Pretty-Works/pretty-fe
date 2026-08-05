@@ -1,5 +1,3 @@
-import axios from "axios";
-
 import { api } from "@/lib/api/client";
 
 export interface Meeting {
@@ -155,25 +153,6 @@ export interface CreateMeetingResponse {
     meetingId: string | number;
   };
 }
-
-interface MeetingErrorResponse {
-  errorCode?: string | null;
-  message?: string;
-}
-
-export const getMeetingErrorMessage = (
-  error: unknown,
-  fallback = "회의록을 저장하지 못했어요. 다시 시도해 주세요.",
-) => {
-  if (!axios.isAxiosError<MeetingErrorResponse>(error)) {
-    return error instanceof Error ? error.message : fallback;
-  }
-
-  const { errorCode, message } = error.response?.data ?? {};
-  if (!message) return fallback;
-
-  return errorCode ? `${message} (${errorCode})` : message;
-};
 
 // 회의록 작성
 export const createMeeting = async (

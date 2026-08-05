@@ -70,14 +70,3 @@
   font-weight: 600;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-
-.stateText {
-  padding: 32px 0;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-placeholder);
-}
-
-.stateError {
-  color: var(--danger);
-}

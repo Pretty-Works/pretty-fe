@@ -2,10 +2,8 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  getMeetingErrorMessage,
-  type CreateMeetingRequest,
-} from "@/features/project/meetings/api/meetingApi";
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
 import MeetingForm from "@/features/project/meetings/components/MeetingForm/MeetingForm";
 import { useCreateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useCreateMeetingMutation";
 import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
@@ -36,7 +34,13 @@ export default function MeetingWriteView({ projectId }: MeetingWriteViewProps) {
         );
       },
       onError: (error) => {
-        showToast(getMeetingErrorMessage(error), "danger");
+        showToast(
+          getApiErrorMessage(
+            error,
+            "회의록을 저장하지 못했어요. 다시 시도해 주세요.",
+          ),
+          "danger",
+        );
       },
     });
   };

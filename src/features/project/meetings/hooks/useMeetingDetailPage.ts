@@ -4,10 +4,8 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import {
-  getMeetingErrorMessage,
-  type CreateMeetingRequest,
-} from "@/features/project/meetings/api/meetingApi";
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
 import { useDeleteMeetingMutation } from "@/features/project/meetings/hooks/mutations/useDeleteMeetingMutation";
 import { useUpdateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useUpdateMeetingMutation";
 import { useMeetingDetailQuery } from "@/features/project/meetings/hooks/queries/useMeetingDetailQuery";
@@ -39,7 +37,7 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
       },
       onError: (error) => {
         showToast(
-          getMeetingErrorMessage(
+          getApiErrorMessage(
             error,
             "회의록을 수정하지 못했어요. 다시 시도해 주세요.",
           ),
@@ -57,7 +55,7 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
       },
       onError: (error) => {
         showToast(
-          getMeetingErrorMessage(
+          getApiErrorMessage(
             error,
             "회의록을 삭제하지 못했어요. 다시 시도해 주세요.",
           ),

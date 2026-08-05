@@ -9,6 +9,7 @@ import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
+import StateView from "@/components/StateView/StateView";
 import ConfirmRequestCard from "@/features/home/components/ConfirmRequestCard/ConfirmRequestCard";
 import MyTaskList from "@/features/home/components/MyTaskList/MyTaskList";
 import ProjectStatusSelect from "@/features/home/components/ProjectStatusSelect/ProjectStatusSelect";
@@ -19,7 +20,7 @@ import TaskCreateModal, {
 
 import { useAgentStore } from "@/stores/useAgentStore";
 
-import { useDebounce } from "@/hooks/useDebounce";
+import { useListParams } from "@/hooks/useListParams";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
 import { useRequestsQuery } from "@/features/home/hooks/queries/useRequestsQuery";
@@ -40,16 +41,12 @@ export default function HomeView() {
   const { data: me } = useMyProfileQuery();
 
   // State
-  const [keyword, setKeyword] = useState(""); // 검색창
-  const [status, setStatus] = useState<StatusFilter>("ONGOING"); // 상태 필터 (기본: 진행중)
-  const [page, setPage] = useState(1); // 페이지네이션
+  // 검색어·상태 필터·페이지 (기본: 진행중). 조건이 바뀌면 훅이 1페이지로 되돌린다.
+  const list = useListParams<StatusFilter>({ initialFilter: "ONGOING" });
 
   const [stoppedIds, setStoppedIds] = useState<string[]>([]); // 중단한 요청
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
-
-  // 입력이 멈춘 뒤에만 조회 (타이핑마다 요청 방지)
-  const debouncedKeyword = useDebounce(keyword);
 
   // Query
   const {
@@ -57,9 +54,9 @@ export default function HomeView() {
     isLoading: isProjectsLoading,
     isError: isProjectsError,
   } = useProjectsQuery({
-    keyword: debouncedKeyword,
-    status,
-    page: page - 1, // 서버 0-based
+    keyword: list.query,
+    status: list.filter,
+    page: list.pageIndex,
     size: PAGE_SIZE,
   });
   const projects = projectData?.projects ?? [];
@@ -86,16 +83,6 @@ export default function HomeView() {
   const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
 
   // Event Handler
-  const handleStatusChange = (next: StatusFilter) => {
-    setStatus(next);
-    setPage(1);
-  };
-
-  const handleKeywordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setKeyword(e.target.value);
-    setPage(1);
-  };
-
   // 프로젝트 클릭 → 해당 프로젝트 개요 탭으로 이동
   const handleSelectProject = (projectId: string) => {
     router.push(`/projects/${projectId}/overview`);
@@ -149,15 +136,14 @@ export default function HomeView() {
           </div>
         </div>
 
-        {isRequestsLoading ? (
-          <p className={styles.stateText}>요청을 불러오는 중이에요…</p>
-        ) : isRequestsError ? (
-          <p className={`${styles.stateText} ${styles.stateError}`}>
-            요청을 불러오지 못했어요.
-          </p>
-        ) : visibleRequests.length === 0 ? (
-          <p className={styles.stateText}>확인이 필요한 요청이 없어요.</p>
-        ) : (
+        <StateView
+          loading={isRequestsLoading}
+          error={isRequestsError}
+          empty={visibleRequests.length === 0}
+          loadingText="요청을 불러오는 중이에요…"
+          errorText="요청을 불러오지 못했어요."
+          emptyText="확인이 필요한 요청이 없어요."
+        >
           <div className={styles.requestList}>
             {visibleRequests.map((request) => (
               <ConfirmRequestCard
@@ -168,7 +154,7 @@ export default function HomeView() {
               />
             ))}
           </div>
-        )}
+        </StateView>
       </section>
 
       {/* 프로젝트 · 내 할 일 (2단) */}
@@ -178,7 +164,10 @@ export default function HomeView() {
           <div className={styles.panelHead}>
             <div className={styles.panelHeadLeft}>
               <h2 className={styles.panelTitle}>프로젝트</h2>
-              <ProjectStatusSelect value={status} onChange={handleStatusChange} />
+              <ProjectStatusSelect
+                value={list.filter}
+                onChange={list.changeFilter}
+              />
             </div>
             {/* 팀장 이상 또는 PM 부서만 만들 수 있다. 판정에 쓰는 직급 서열이
                 서버에만 있어 결과(canCreateProject)를 그대로 따른다. */}
@@ -196,31 +185,30 @@ export default function HomeView() {
           <div className={styles.filterbar}>
             <SearchBar
               placeholder="프로젝트 검색"
-              value={keyword}
-              onChange={handleKeywordChange}
+              value={list.keyword}
+              onChange={(e) => list.changeKeyword(e.target.value)}
             />
           </div>
 
-          {isProjectsLoading ? (
-            <p className={styles.stateText}>프로젝트를 불러오는 중이에요…</p>
-          ) : isProjectsError ? (
-            <p className={`${styles.stateText} ${styles.stateError}`}>
-              프로젝트를 불러오지 못했어요.
-            </p>
-          ) : projects.length === 0 ? (
-            <p className={styles.stateText}>표시할 프로젝트가 없어요.</p>
-          ) : (
+          <StateView
+            loading={isProjectsLoading}
+            error={isProjectsError}
+            empty={projects.length === 0}
+            loadingText="프로젝트를 불러오는 중이에요…"
+            errorText="프로젝트를 불러오지 못했어요."
+            emptyText="표시할 프로젝트가 없어요."
+          >
             <ProjectProgressList
               projects={projects}
               onSelect={(project) => handleSelectProject(project.id)}
             />
-          )}
+          </StateView>
 
           {totalPages > 1 && (
             <Pagination
-              currentPage={page}
+              currentPage={list.page}
               totalPages={totalPages}
-              onPageChange={setPage}
+              onPageChange={list.setPage}
             />
           )}
         </section>
@@ -238,21 +226,20 @@ export default function HomeView() {
             </Button>
           </div>
 
-          {isTasksLoading ? (
-            <p className={styles.stateText}>할 일을 불러오는 중이에요…</p>
-          ) : isTasksError ? (
-            <p className={`${styles.stateText} ${styles.stateError}`}>
-              할 일을 불러오지 못했어요.
-            </p>
-          ) : !hasTasks ? (
-            <p className={styles.stateText}>등록된 할 일이 없어요.</p>
-          ) : (
+          <StateView
+            loading={isTasksLoading}
+            error={isTasksError}
+            empty={!hasTasks}
+            loadingText="할 일을 불러오는 중이에요…"
+            errorText="할 일을 불러오지 못했어요."
+            emptyText="등록된 할 일이 없어요."
+          >
             <MyTaskList
               groups={taskGroups}
               onToggle={handleToggleTask}
               onSelect={handleSelectTask}
             />
-          )}
+          </StateView>
         </section>
       </div>
 
