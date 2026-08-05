@@ -2,8 +2,6 @@
 
 import { useChatStore } from "@/stores/useChatStore";
 
-// 채팅 상태는 useChatStore(모듈 스코프)에 있으므로 화면을 이동해도 유지된다.
-// 이 훅은 기존 인터페이스를 그대로 노출하는 얇은 래퍼다.
 export function useChat() {
   const conversations = useChatStore((s) => s.conversations);
   const activeId = useChatStore((s) => s.activeId);

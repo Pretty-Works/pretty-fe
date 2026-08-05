@@ -84,6 +84,21 @@ export default function ProjectOverviewView({
 
   // 이전 주차에서 넘어온 할 일은 완료하는 순간 이 주 보드에서 빠진다(서버가 미완료만 이월).
   // 아무 말 없이 행이 사라지면 잘못 지운 것처럼 보이므로 왜 사라졌는지 알린다.
+  // 순서를 어긴 토글(409). 버튼을 막아둬도 다른 사람이 먼저 바꾸면 화면 값이 낡아 여기에 닿는다.
+  // 훅이 실패 후에도 목록을 다시 불러오므로, 문구만 알리면 버튼 상태는 알아서 맞춰진다.
+  const notifyToggleFailure = (error: unknown) => {
+    const code = getErrorCode(error);
+
+    showToast(
+      code === "PROJECT_023"
+        ? "앞선 마일스톤을 먼저 완료해 주세요"
+        : code === "PROJECT_024"
+          ? "뒤의 마일스톤을 먼저 취소해 주세요"
+          : "마일스톤을 변경하지 못했어요",
+      "danger",
+    );
+  };
+
   const notifyIfCarriedOver = (taskId: number, done: boolean) => {
     if (!done || !board) return;
 
@@ -198,7 +213,12 @@ export default function ProjectOverviewView({
               board={milestoneBoard}
               editable={isOpenForContent && canManage}
               onToggle={(milestoneId, done) =>
-                toggleMilestone({ milestoneId, done })
+               
+              toggleMilestone(
+                { milestoneId, done },
+                { onError: notifyToggleFailure },
+              )
+            
               }
             />
           )}

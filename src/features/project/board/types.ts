@@ -41,12 +41,18 @@ export interface BoardPost {
   createdAt: string;
 }
 
+export interface PostAuthor {
+  userId: number;
+  name: string;
+  dept: string;
+}
+
 export interface PostDetail {
   id: string;
   title: string;
   importance: PostImportance;
-  author: string;
-  dept: string;
-  date: string;
   content: string;
+  author: PostAuthor;
+  createdAt: string;
+  modifiedAt: string;
 }

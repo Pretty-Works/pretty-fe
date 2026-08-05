@@ -68,6 +68,8 @@ export default function PeoplePicker({
   searching = false,
 }: PeoplePickerProps) {
   const [query, setQuery] = useState("");
+  // 포커스만으로도 후보를 다 볼 수 있어야 해서, 열림 여부를 검색어 유무와 분리해 둔다.
+  const [isOpen, setIsOpen] = useState(false);
 
   // 검색어는 두 곳이 봐야 한다 — 목록을 거르는 이 컴포넌트와, 서버에 물어보는 부모.
   const changeQuery = useCallback(
@@ -79,8 +81,11 @@ export default function PeoplePicker({
   );
 
   const searchRef = useRef<HTMLDivElement>(null);
-  const closeSuggest = useCallback(() => changeQuery(""), [changeQuery]);
-  useClickOutside(searchRef, closeSuggest, query.trim().length > 0);
+  const closeSuggest = useCallback(() => {
+    setIsOpen(false);
+    changeQuery("");
+  }, [changeQuery]);
+  useClickOutside(searchRef, closeSuggest, isOpen);
 
   // 서버 검색을 쓰면 후보 목록이 검색어마다 통째로 갈린다.
   // 고른 사람을 따로 기억해 두지 않으면 다음 글자를 치는 순간 칩이 사라진다.
@@ -125,9 +130,9 @@ export default function PeoplePicker({
   // 모달 안에서 쓰일 때 ESC가 모달까지 올라가 입력하던 내용째로 닫히는 걸 막는다.
   // Enter는 검색 결과 첫 번째 인원을 바로 추가한다.
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape" && query.trim()) {
+    if (e.key === "Escape" && isOpen) {
       e.stopPropagation();
-      changeQuery("");
+      closeSuggest();
       return;
     }
 
@@ -146,10 +151,11 @@ export default function PeoplePicker({
           placeholder={placeholder}
           value={query}
           onChange={(e) => changeQuery(e.target.value)}
+          onFocus={() => setIsOpen(true)}
           right={hint}
         />
 
-        {query.trim() && (
+        {isOpen && (
           <SuggestList
             items={suggestions.map(labelOf)}
             onSelect={add}

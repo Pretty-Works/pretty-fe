@@ -1,77 +1,89 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-import Button from "@/components/Button/Button";
-import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
-import type { PostDetail } from "@/features/project/board/types";
+import Result from "@/components/Result/Result";
+import DeletePostModal from "@/features/project/board/components/modal/DeletePostModal/DeletePostModal";
+import PostDetailContent from "@/features/project/board/components/PostDetailContent/PostDetailContent";
+import PostForm from "@/features/project/board/components/PostForm/PostForm";
+import { usePostDetailPage } from "@/features/project/board/hooks/usePostDetailPage";
 
 import styles from "./PostDetailView.module.css";
 
-const POST: PostDetail = {
-  id: "1",
-  title: "검색 인덱스 v2 전환 리스크 공유",
-  importance: "HIGH",
-  author: "이하늘",
-  dept: "백엔드팀",
-  date: "2026-02-26 (목)",
-  content: `이번 스프린트에서 진행한 검색 인덱스 v2 전환 관련 주요 리스크를 공유드립니다.
-
-1. 데이터 마이그레이션
-기존 인덱스(약 1,200만 건)를 v2 스키마로 재색인해야 하며, 전환 중 약 2시간의 검색 지연이 예상됩니다.
-
-2. 롤백 플랜
-전환 실패 시 v1 인덱스로 즉시 롤백 가능하도록 이중 색인 구조를 유지합니다.
-
-3. 일정
-3월 2일(월) 새벽 트래픽이 낮은 시간대에 전환을 진행할 예정이며, QA팀과 사전 점검을 완료했습니다.
-
-관련 문의는 댓글로 남겨주세요.`,
-};
-
 interface PostDetailViewProps {
-  projectId?: string;
+  projectId: string;
+  postId: string;
 }
 
-export default function PostDetailView({ projectId }: PostDetailViewProps) {
-  const router = useRouter();
+export default function PostDetailView({
+  projectId,
+  postId,
+}: PostDetailViewProps) {
+  const page = usePostDetailPage(projectId, postId);
+
+  if (page.isLoading) {
+    return (
+      <Result
+        figure={<Result.Figure>📋</Result.Figure>}
+        title="게시글을 불러오는 중이에요"
+        description="잠시만 기다려 주세요."
+      />
+    );
+  }
+
+  if (page.isError || !page.post) {
+    return (
+      <Result
+        figure={<Result.Figure tone="error">❗</Result.Figure>}
+        title="게시글을 불러오지 못했어요"
+        description="게시글이 없거나 조회 권한이 없을 수 있어요."
+        button={
+          <Result.Button
+            type="light"
+            buttonStyle="weak"
+            onClick={() => void page.retry()}
+          >
+            ↻ 다시 시도
+          </Result.Button>
+        }
+      />
+    );
+  }
+
+  if (page.editing) {
+    return (
+      <div className={styles.page}>
+        <PostForm
+          mode="edit"
+          initial={{
+            title: page.post.title,
+            importance: page.post.importance,
+            content: page.post.content,
+          }}
+          isSaving={page.isSaving}
+          onSave={page.saveEdit}
+          onExit={page.stopEdit}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
-      <div className={styles.head}>
-        <div className={styles.headText}>
-          <div className={styles.titleRow}>
-            <h2 className={styles.title}>{POST.title}</h2>
-            <ImportanceDot importance={POST.importance} size={10} round />
-          </div>
-          <div className={styles.meta}>
-            <span className={styles.author}>{POST.author}</span>
-            <span className={styles.dept}>· {POST.dept}</span>
-            <span className={styles.date}>{POST.date}</span>
-          </div>
-        </div>
+      <PostDetailContent
+        post={page.post}
+        canEdit={page.canEdit}
+        canDelete={page.canDelete}
+        onList={page.goList}
+        onDelete={page.openDelete}
+        onEdit={page.startEdit}
+      />
 
-        <div className={styles.actions}>
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={() => router.push(`/projects/${projectId}/board`)}
-          >
-            목록
-          </Button>
-          <Button
-            size="medium"
-            onClick={() => router.push(`/projects/${projectId}/board/write`)}
-          >
-            수정
-          </Button>
-        </div>
-      </div>
-
-      <section className={styles.card}>
-        <p className={styles.content}>{POST.content}</p>
-      </section>
+      <DeletePostModal
+        open={page.deleteOpen}
+        postTitle={page.post.title}
+        isDeleting={page.isDeleting}
+        onClose={page.closeDelete}
+        onConfirm={page.confirmDelete}
+      />
     </div>
   );
 }

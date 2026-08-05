@@ -86,7 +86,7 @@ export default function ProjectMeetingView({
 
         <div className={styles.filterbar}>
           <SearchBar
-            placeholder="제목 · 참석자로 검색"
+            placeholder="제목으로 검색"
             value={page.keyword}
             onChange={(e) => page.changeKeyword(e.target.value)}
           />

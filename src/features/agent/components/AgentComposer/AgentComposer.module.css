@@ -4,56 +4,6 @@
   background: var(--white);
 }
 
-.attachment {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  max-width: 100%;
-  margin-bottom: 8px;
-  padding: 6px 8px 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  font-size: 13px;
-  color: var(--text);
-}
-
-.attachmentIcon {
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 7px;
-  background: var(--primary);
-}
-
-.attachmentName {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 240px;
-  font-size: 12px;
-}
-
-.attachmentRemove {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  border: none;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--text-sub);
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.attachmentRemove:hover {
-  background: #e8e8e8;
-}
-
 .composer {
   display: flex;
   flex-direction: column;
@@ -178,22 +128,6 @@
 
 .input::placeholder {
   color: var(--text-placeholder);
-}
-
-.iconButton {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border: none;
-  background: transparent;
-  border-radius: 50%;
-  cursor: pointer;
-}
-
-.iconButton:hover {
-  background: #f5f5f5;
 }
 
 .sendButton {

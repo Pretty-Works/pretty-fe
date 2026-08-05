@@ -12,7 +12,7 @@ interface PostDetailPageProps {
 }
 
 export default async function Page({ params }: PostDetailPageProps) {
-  const { projectId } = await params;
+  const { projectId, postId } = await params;
 
-  return <PostDetailView projectId={projectId} />;
+  return <PostDetailView projectId={projectId} postId={postId} />;
 }

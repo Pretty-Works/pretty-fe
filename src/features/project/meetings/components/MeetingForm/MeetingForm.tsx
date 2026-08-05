@@ -165,10 +165,10 @@ export default function MeetingForm({
           <Button
             buttonStyle="weak"
             size="medium"
-            leftAccessory={<span aria-hidden="true">🎙️</span>}
+            leftAccessory={<span aria-hidden="true">📄</span>}
             onClick={() => setUploadOpen(true)}
           >
-            {transcript ? "녹취록 재업로드" : "녹취록 업로드"}
+            {transcript ? "텍스트 파일 재업로드" : "텍스트 파일 업로드"}
           </Button>
           {/* 작성은 목록으로, 수정은 보던 회의록으로 돌아간다 */}
           <Button
@@ -190,21 +190,21 @@ export default function MeetingForm({
         </div>
       </div>
 
-      {/* 녹취록 업로드 완료 확인 */}
+      {/* 텍스트 파일 업로드 완료 확인 */}
       {transcript && (
         <div className={styles.uploadedCard}>
           <span className={styles.uploadedIcon} aria-hidden="true">
             ✓
           </span>
           <div className={styles.uploadedText}>
-            <span className={styles.uploadedTitle}>녹취록이 업로드되었어요</span>
-            <span className={styles.uploadedName}>🎙️ {transcript}</span>
+            <span className={styles.uploadedTitle}>텍스트 파일이 업로드되었어요</span>
+            <span className={styles.uploadedName}>📄 {transcript}</span>
           </div>
           <button
             type="button"
             className={styles.uploadedRemove}
             onClick={() => setTranscript(null)}
-            aria-label="녹취록 제거"
+            aria-label="텍스트 파일 제거"
           >
             ✕
           </button>
@@ -229,7 +229,6 @@ export default function MeetingForm({
             <DatePicker
               label="일시"
               required
-              labelSlot={period ? "프로젝트 기간 내에서만 선택" : undefined}
               value={date}
               onChange={setPickedDate}
               /* 아직 열리지 않은 회의는 기록할 게 없다 */
@@ -284,7 +283,7 @@ export default function MeetingForm({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder={
-            "안건, 논의 내용, 결정 사항, 보류 사항, 이슈 등 회의에서 오간 주요 내용을 자유롭게 작성하세요.\n\n녹취록을 업로드하면 이 영역이 AI 초안으로 채워지며, 이후 자유롭게 수정할 수 있습니다."
+            "안건, 논의 내용, 결정 사항, 보류 사항, 이슈 등 회의에서 오간 주요 내용을 자유롭게 작성하세요.\n\n텍스트 파일을 업로드하면 이 영역이 AI 초안으로 채워지며, 이후 자유롭게 수정할 수 있습니다."
           }
         />
         <FormTextArea
@@ -294,12 +293,12 @@ export default function MeetingForm({
           value={followup}
           onChange={(e) => setFollowup(e.target.value)}
           placeholder={
-            "실행 항목·담당자·기한, 다음 회의 일정 등 회의 이후 처리할 내용을 자유롭게 작성하세요.\n\n녹취록을 업로드하면 이 영역이 AI 초안으로 채워지며, 이후 자유롭게 수정할 수 있습니다."
+            "실행 항목·담당자·기한, 다음 회의 일정 등 회의 이후 처리할 내용을 자유롭게 작성하세요.\n\n텍스트 파일을 업로드하면 이 영역이 AI 초안으로 채워지며, 이후 자유롭게 수정할 수 있습니다."
           }
         />
       </section>
 
-      {/* 녹취록 업로드 모달 */}
+      {/* 텍스트 파일 업로드 모달 */}
       <TranscriptUploadModal
         open={uploadOpen}
         onClose={() => setUploadOpen(false)}

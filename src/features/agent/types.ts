@@ -17,16 +17,11 @@ export const AGENT_LABELS: Record<AgentKind, string> = {
   task: "업무 에이전트",
 };
 
-export interface ChatAttachment {
-  name: string;
-}
-
 export interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
   createdAt: string;
-  attachment?: ChatAttachment;
   agent?: AgentKind;
 }
 

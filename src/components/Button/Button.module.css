@@ -27,7 +27,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2em;
+  font-size: 1em;
   line-height: 1;
 }
 
@@ -50,6 +50,7 @@
   width: 100%;
 }
 
+/* 기본 버튼 — 보라 배경 채움. 화면·모달마다 하나뿐인 주 동작(작성·수정·저장·로그인 등)에 쓴다. */
 .primary.fill {
   background: var(--primary);
   color: var(--white);
@@ -151,10 +152,10 @@
 }
 
 .medium {
-  height: 36px;
-  padding: 0 16px;
+  height: 30px;
+  padding: 0 10px;
   border-radius: 9px;
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .tiny {

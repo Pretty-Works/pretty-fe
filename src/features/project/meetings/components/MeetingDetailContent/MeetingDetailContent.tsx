@@ -98,7 +98,7 @@ export default function MeetingDetailContent({
 
         {meeting.recording && (
           <div className={styles.transcript}>
-            <span aria-hidden="true">🎙️</span>
+            <span aria-hidden="true">📄</span>
             <span>녹취록 기반 AI 생성 : {meeting.recording}</span>
           </div>
         )}

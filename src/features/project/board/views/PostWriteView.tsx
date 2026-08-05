@@ -1,14 +1,15 @@
 "use client";
 
-import Button from "@/components/Button/Button";
-import FormField from "@/components/FormField/FormField";
-import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
-import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
+import { useState } from "react";
+
+import { useRouter } from "next/navigation";
+
+import PostForm from "@/features/project/board/components/PostForm/PostForm";
 import PostSavedModal from "@/features/project/board/components/modal/PostSavedModal/PostSavedModal";
-import { usePostWriteForm } from "@/features/project/board/hooks/usePostWriteForm";
-import { IMPORTANCE_OPTIONS } from "@/features/project/board/types";
-import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
-import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
+import { useCreatePostMutation } from "@/features/project/board/hooks/mutations/useCreatePostMutation";
+import type { CreatePostRequest } from "@/features/project/board/api/postApi";
+import { getErrorCode } from "@/lib/api/errorCode";
+import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./PostWriteView.module.css";
 
@@ -16,89 +17,58 @@ interface PostWriteViewProps {
   projectId?: string;
 }
 
+// 등록이 막히는 이유를 그대로 알려준다 — 참여 여부·프로젝트 상태는 화면이 미리 알 수 없다.
+// 서버 검증 순서: 재직 상태(403) → 프로젝트 존재(404) → 참여중 멤버(403) → 프로젝트 상태(400)
+const CREATE_ERROR_MESSAGE: Record<string, string> = {
+  MEMBER_001: "이 프로젝트에 참여 중일 때만 글을 쓸 수 있어요",
+  PROJECT_004: "프로젝트를 찾을 수 없어요",
+  PROJECT_020: "완료·삭제된 프로젝트에는 글을 쓸 수 없어요",
+  USER_003: "퇴사한 사용자는 글을 쓸 수 없어요",
+  REQUEST_001: "입력값을 다시 확인해 주세요",
+  REQUEST_028: "같은 요청이 이미 접수됐어요. 잠시 후 다시 시도해 주세요",
+};
+
 export default function PostWriteView({ projectId }: PostWriteViewProps) {
-  const form = usePostWriteForm(projectId);
+  const router = useRouter();
+  const showToast = useToastStore((state) => state.showToast);
+
+  const [savedOpen, setSavedOpen] = useState(false);
+
+  const createMutation = useCreatePostMutation(projectId ?? "");
+
+  const goList = () => router.push(`/projects/${projectId}/board`);
+
+  const handleSave = (body: CreatePostRequest) => {
+    createMutation.mutate(body, {
+      onSuccess: () => setSavedOpen(true),
+
+      // 실패하면 이 화면에 남는다. 입력값을 그대로 두어야 고쳐서 다시 낼 수 있다.
+      onError: (error) => {
+        const code = getErrorCode(error);
+        showToast(
+          (code && CREATE_ERROR_MESSAGE[code]) || "게시글을 등록하지 못했어요",
+          "danger",
+        );
+      },
+    });
+  };
 
   return (
     <div className={styles.page}>
-      <div className={styles.pageHead}>
-        <div className={styles.pageHeadText}>
-          <h2 className={styles.pageTitle}>게시글 작성</h2>
-          <div className={styles.pageSub}>
-            <OpenAgentButton>
-              AI와 함께 빠르고 간편하게 작성해 보세요 →
-            </OpenAgentButton>
-          </div>
-        </div>
-        <div className={styles.actions}>
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={form.handleLeave}
-          >
-            목록
-          </Button>
-          <Button
-            size="medium"
-            loading={form.isSaving}
-            disabled={!form.canSubmit}
-            onClick={form.handleSubmit}
-          >
-            등록
-          </Button>
-        </div>
-      </div>
-
-      <section className={styles.card}>
-        <h3 className={styles.cardTitle}>기본 정보</h3>
-
-        <div className={styles.row}>
-          <div className={styles.titleCol}>
-            <FormField
-              label="제목"
-              required
-              placeholder="제목을 입력하세요"
-              value={form.title}
-              onChange={(e) => form.setTitle(e.target.value)}
-            />
-          </div>
-
-          <div className={styles.riskCol}>
-            <SegmentedTabs
-              label="중요도"
-              required
-              size="md"
-              options={IMPORTANCE_OPTIONS}
-              value={form.importance}
-              onChange={form.setImportance}
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.card}>
-        <h3 className={styles.cardTitle}>내용</h3>
-
-        <FormTextArea
-          label="내용"
-          required
-          minRows={8}
-          maxRows={24}
-          value={form.content}
-          onChange={(e) => form.setContent(e.target.value)}
-          placeholder="내용을 입력하세요"
-        />
-      </section>
-
-      <LeaveConfirmModal
-        open={form.warnOpen}
-        description="저장하지 않은 제목·중요도·내용이 모두 사라집니다. 그래도 나가시겠어요?"
-        onStay={form.stay}
-        onLeave={form.leave}
+      <PostForm
+        mode="create"
+        isSaving={createMutation.isPending}
+        onSave={handleSave}
+        onExit={goList}
       />
 
-      <PostSavedModal open={form.savedOpen} onConfirm={form.afterSaved} />
+      <PostSavedModal
+        open={savedOpen}
+        onConfirm={() => {
+          setSavedOpen(false);
+          goList();
+        }}
+      />
     </div>
   );
 }

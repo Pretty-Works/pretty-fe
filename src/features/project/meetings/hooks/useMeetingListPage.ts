@@ -12,10 +12,10 @@ export const useMeetingListPage = (projectId: string) => {
 
   const list = useListParams();
 
-  // 검색어 하나로 제목·참석자를 함께 찾는다 (서버가 OR로 본다)
+  // 제목으로만 찾는다. title·attendeeName을 같이 보내면 서버가 AND로 묶어
+  // (attendeeName은 완전 일치) 둘 다 만족해야 해서 제목 검색이 사실상 항상 0건이 됐다.
   const { data, isLoading, isError, refetch } = useMeetingsQuery(projectId, {
     title: list.query,
-    attendeeName: list.query,
     page: list.pageIndex,
     size: PAGE_SIZE,
   });

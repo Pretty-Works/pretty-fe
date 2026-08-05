@@ -4,10 +4,7 @@ import { useRef, useState } from "react";
 
 import Image from "next/image";
 
-import { FaRegFile } from "react-icons/fa";
-
 import SendIcon from "@/assets/icons/agent/send.png";
-import type { ChatAttachment } from "@/features/agent/types";
 
 import styles from "./AgentComposer.module.css";
 
@@ -19,11 +16,11 @@ interface AgentComposerProps {
   blocked: boolean;
   autoApprove: boolean;
   onChangeAutoApprove: (on: boolean) => void;
-  onSend: (text: string, attachment?: ChatAttachment) => void;
+  onSend: (text: string) => void;
 }
 
 /**
- * 메시지 입력창. 쓰고 있는 내용과 붙인 파일은 여기서만 들고 있다가
+ * 메시지 입력창. 쓰고 있는 내용은 여기서만 들고 있다가
  * 보낼 때 한 번 밖으로 넘긴다 (보내고 나면 남길 이유가 없다).
  */
 export default function AgentComposer({
@@ -33,9 +30,7 @@ export default function AgentComposer({
   onSend,
 }: AgentComposerProps) {
   const [message, setMessage] = useState("");
-  const [file, setFile] = useState<File | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 줄이 늘면 입력칸도 같이 늘린다
@@ -51,12 +46,11 @@ export default function AgentComposer({
 
   const handleSend = () => {
     if (blocked) return;
-    if (!message.trim() && !file) return;
+    if (!message.trim()) return;
 
-    onSend(message, file ? { name: file.name } : undefined);
+    onSend(message);
 
     setMessage("");
-    setFile(null);
     // 인라인 높이를 지워 CSS의 한 줄 높이로 되돌린다
     if (textareaRef.current) textareaRef.current.style.height = "";
   };
@@ -69,34 +63,8 @@ export default function AgentComposer({
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selected = e.target.files?.[0];
-    if (!selected) return;
-
-    setFile(selected);
-    // 같은 파일을 다시 골라도 change가 나도록 비운다
-    e.target.value = "";
-  };
-
   return (
     <footer className={styles.area}>
-      {file && (
-        <div className={styles.attachment}>
-          <div className={styles.attachmentIcon}>
-            <FaRegFile width={13} height={13} />
-          </div>
-          <span className={styles.attachmentName}>{file.name}</span>
-          <button
-            type="button"
-            className={styles.attachmentRemove}
-            onClick={() => setFile(null)}
-            aria-label="첨부 파일 삭제"
-          >
-            ✕
-          </button>
-        </div>
-      )}
-
       <div
         className={[styles.composer, blocked && styles.composerBlocked]
           .filter(Boolean)
@@ -117,23 +85,6 @@ export default function AgentComposer({
 
         <div className={styles.bar}>
           <div className={styles.tools}>
-            <button
-              type="button"
-              className={styles.iconButton}
-              onClick={() => fileInputRef.current?.click()}
-              disabled={blocked}
-              aria-label="파일 첨부"
-            >
-              📎
-            </button>
-
-            <input
-              ref={fileInputRef}
-              hidden
-              type="file"
-              onChange={handleFileSelect}
-            />
-
             <div
               className={styles.modeToggle}
               role="group"
