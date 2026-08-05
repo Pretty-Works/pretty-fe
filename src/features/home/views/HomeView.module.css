@@ -81,8 +81,6 @@
   flex-shrink: 0;
 }
 
-/* 한 박스로 묶고 높이 고정 → 항목이 늘어나도 박스 크기는 그대로, 안에서 스크롤.
-   스크롤바는 숨기고, 마지막 행이 살짝 걸치게 해서 더 있다는 걸 알린다. */
 /* 카드를 가로로 늘어놓고 옆으로 넘겨 본다.
    테두리는 카드마다 갖는다 — 바깥에 두면 스크롤되는 내용이 테두리를 뚫고 지나간다.
    스크롤 스냅이 있어 넘길 때마다 카드가 왼쪽에 딱 맞춰 선다. */
@@ -91,16 +89,30 @@
   align-items: stretch;
   gap: 12px;
   margin-bottom: 12px;
-  /* 스냅 때문에 카드가 왼쪽 끝에 붙으므로 패널 안쪽 여백만큼 띄운다 */
-  padding-bottom: 4px;
+  /* 스크롤바가 카드 밑에 앉을 자리 */
+  padding-bottom: 10px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE · 구 Edge */
+  /* 카드 폭이 고정이라 몇 장이 더 있는지 보이지 않는다. 막대를 남겨 길이를 알린다 */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: var(--border) transparent;
 }
 
 .requestList::-webkit-scrollbar {
-  display: none; /* Chrome · Safari */
+  height: 6px;
+}
+
+.requestList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.requestList::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--border);
+}
+
+.requestList::-webkit-scrollbar-thumb:hover {
+  background: var(--text-placeholder);
 }
 
 .stateText {

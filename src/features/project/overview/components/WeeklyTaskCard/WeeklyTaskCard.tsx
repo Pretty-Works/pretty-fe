@@ -62,7 +62,6 @@ export default function WeeklyTaskCard({
         {onAddTask && (
           <Button
             size="tiny"
-            buttonStyle="weak"
             leftAccessory="+"
             onClick={onAddTask}
           >

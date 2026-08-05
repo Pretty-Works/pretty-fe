@@ -20,16 +20,6 @@ export default function MilestoneProgressCard({
 }: MilestoneProgressCardProps) {
   const { totalCount, completedCount, pendingCount, completionRate } = board;
 
-  // 파이프라인이라 순서대로만 움직인다.
-  //   완료 처리 → 다음 차례(첫 미완료) 하나
-  //   완료 취소 → 마지막으로 완료한 것 하나
-  // 그 사이에 낀 항목은 건드릴 수 없다.
-  const lastDoneIndex = board.milestones.reduce(
-    (last, ms, index) => (ms.done ? index : last),
-    -1,
-  );
-  const firstPendingIndex = board.milestones.findIndex((ms) => !ms.done);
-
   return (
     <section className={styles.card}>
       <h2 className={styles.title}>마일스톤 완료율</h2>
@@ -76,11 +66,10 @@ export default function MilestoneProgressCard({
       {/* 타임라인 — 원을 눌러 완료를 토글한다 */}
       {totalCount > 0 && (
         <ol className={styles.timeline}>
-          {board.milestones.map((ms, index) => {
-            // 파이프라인 순서상 건드릴 수 있고, 프로젝트도 열려 있어야 한다
-            const canToggle =
-              editable &&
-              (index === lastDoneIndex || index === firstPendingIndex);
+          {board.milestones.map((ms) => {
+            // 순서 판정(toggleable)은 서버 몫이고, 권한·프로젝트 상태(editable)는 화면 몫이다.
+            // 둘 다 만족해야 누를 수 있다.
+            const canToggle = editable && ms.toggleable;
 
             return (
             <li
