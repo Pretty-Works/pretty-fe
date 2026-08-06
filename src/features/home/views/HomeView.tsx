@@ -110,6 +110,8 @@ export default function HomeView() {
       content: task.title,
       projectId,
       dueDate: task.dueDate,
+      canDelete: task.canDelete,
+      // 이 목록은 전부 내가 담당자라 담당자 줄을 따로 보여주지 않는다
     });
     setTaskModalOpen(true);
   };

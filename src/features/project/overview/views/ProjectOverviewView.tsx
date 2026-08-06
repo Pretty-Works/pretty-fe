@@ -252,6 +252,9 @@ export default function ProjectOverviewView({
                   content: task.content,
                   projectId: project.projectId,
                   dueDate: task.dueDate,
+                  // 남의 할 일도 작성자면 고칠 수 있다. 삭제 가능 여부는 별개라 서버 값을 그대로 넘긴다.
+                  canDelete: task.canDelete,
+                  assignee: task.assignee,
                 });
                 setTaskModalOpen(true);
               }}

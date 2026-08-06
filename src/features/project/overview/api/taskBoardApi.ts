@@ -53,6 +53,17 @@ export interface TaskItem {
   // 오늘~마감 (내림). 음수면 지남.
   dDay: number;
   overdue: boolean;
+
+  /*
+   * 서버가 판정한 권한. 화면이 다시 계산하지 않는다 —
+   * 규칙이 어긋나면 버튼은 열려 있는데 요청은 403이 난다.
+   */
+  // 담당자 또는 작성자
+  canEdit: boolean;
+  // 담당자만
+  canToggle: boolean;
+  // 작성자만. 담당자는 지울 수 없다(재배정이 없어 삭제 후 재생성으로 처리)
+  canDelete: boolean;
 }
 
 export interface TeamGroup {

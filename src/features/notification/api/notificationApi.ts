@@ -25,7 +25,11 @@ export type NotificationType =
   | "PROJECT_STATUS_CHANGED"
   | "PROJECT_PERIOD_CHANGED"
   | "MILESTONE_COMPLETED"
-  | "EXPENSE_CREATED";
+  | "EXPENSE_CREATED"
+  // 할 일 — 남에게 배정한 경우에만 간다. 본인이 자기에게 만든 건 알리지 않는다.
+  | "TASK_ASSIGNED"
+  | "TASK_DELETED"
+  | "TASK_DUE_DATE_CHANGED";
 
 // 지금은 PROJECT 하나뿐이다. 마일스톤·지출은 단독 화면이 없고 프로젝트 상세의 탭이라
 // 그쪽 알림도 PROJECT로 내려온다.

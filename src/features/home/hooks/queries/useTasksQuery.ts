@@ -19,6 +19,7 @@ export const useTasksQuery = () => {
             dday: task.dDay,
             done: task.done,
             dueDate: task.dueDate,
+            canDelete: task.canDelete,
           })),
         }),
       ),

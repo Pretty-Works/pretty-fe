@@ -163,11 +163,21 @@ const MOCK_REQUESTS: ServerRequest[] = [
 ];
 
 // --- 할 일 생성 (POST /api/v1/tasks) ------------------------------
-// 담당자는 항상 작성자 본인이라 요청에 없다. projectId가 null이면 개인 할 일.
+// projectId가 null이면 개인 할 일.
 export interface CreateTaskBody {
   content: string;
   projectId: number | null;
   dueDate: string; // 필수
+  /**
+   * 담당자. 비우면 작성자 본인이 담당한다.
+   *
+   * 남을 지정하려면 그 프로젝트의 오너이거나 역할이 PM이어야 하고(TASK_008),
+   * 대상도 참여중 멤버여야 한다(TASK_009). 개인 할 일에는 지정할 수 없다(TASK_010).
+   *
+   * ⚠️ 수정(PUT)에는 넣지 않는다. 담당자는 재배정할 수 없고, 잘못 배정했으면
+   *    삭제 후 다시 만든다.
+   */
+  assigneeId?: number | null;
 }
 
 export interface CreateTaskResponse {
@@ -225,6 +235,8 @@ export interface MyTask {
   done: boolean;
   // 수정 폼을 채우는 데 쓴다
   dueDate: string;
+  // 작성자만 지울 수 있다. 여기 나오는 건 전부 내가 담당자라 수정·토글은 항상 된다.
+  canDelete: boolean;
 }
 
 export interface MyTaskGroup {
@@ -240,6 +252,7 @@ interface ServerTask {
   done: boolean;
   dueDate: string;
   dDay: number;
+  canDelete: boolean;
 }
 
 interface ServerTaskGroup {

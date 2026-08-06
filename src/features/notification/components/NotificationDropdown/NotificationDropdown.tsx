@@ -74,9 +74,6 @@ export default function NotificationDropdown({
         {notifications?.length === 0 && (
           <div className={styles.empty}>
             <p className={styles.emptyTitle}>받은 알림이 없습니다</p>
-            <p className={styles.emptyHint}>
-              프로젝트에 변화가 생기면 여기에 쌓입니다
-            </p>
           </div>
         )}
 

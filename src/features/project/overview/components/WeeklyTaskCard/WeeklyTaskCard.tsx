@@ -129,11 +129,13 @@ export default function WeeklyTaskCard({
                   dday={task.dDay}
                   done={task.done}
                   meta={task.assignee.name}
-                  /* 다른 팀 할 일은 완료 처리도 수정도 할 수 없다 */
-                  disabled={!group.isMine}
+                  /* 권한은 서버가 준 값만 쓴다. 화면이 팀·담당자로 다시 계산하면
+                     서버 규칙과 어긋나 버튼은 열려 있는데 요청은 403이 난다.
+                     완료는 담당자만(canToggle), 수정은 담당자 또는 작성자(canEdit). */
+                  canToggle={task.canToggle}
                   onToggle={() => onToggleTask?.(task.taskId, !task.done)}
                   onSelect={
-                    group.isMine && onSelectTask
+                    task.canEdit && onSelectTask
                       ? () => onSelectTask(task)
                       : undefined
                   }
