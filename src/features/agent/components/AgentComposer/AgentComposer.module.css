@@ -91,6 +91,10 @@
   color: var(--text-sub);
 }
 
+.modeOption:disabled {
+  cursor: wait;
+}
+
 .modeOptionOnManual {
   color: var(--text);
 }
@@ -149,7 +153,24 @@
   background: var(--primary-light);
 }
 
+/* 보낼 내용이 없을 때 — 사라지지는 않고 색만 연해진다 */
 .sendButton:disabled {
-  opacity: 0.5;
+  background: #cebef6;
   cursor: not-allowed;
+}
+
+/* 답변을 만드는 중일 때의 중지 버튼 */
+.stopButton {
+  background: var(--text);
+}
+
+.stopButton:hover {
+  background: var(--text-sub);
+}
+
+.stopIcon {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  background: var(--white);
 }
