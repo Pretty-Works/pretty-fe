@@ -9,10 +9,10 @@ interface TaskRowProps {
   done: boolean;
   // 담당자·팀 등 제목과 D-day 사이에 들어갈 보조 정보 (선택)
   meta?: React.ReactNode;
-  // 완료 토글 권한이 없을 때. 체크박스가 잠기고 행 전체가 흐려진다.
-  disabled?: boolean;
+  // 완료를 바꿀 수 있는지 (서버가 준 canToggle). 없으면 체크박스가 잠긴다.
+  canToggle?: boolean;
   onToggle?: () => void;
-  // 제목을 누르면 실행 (수정 화면 열기 등)
+  // 제목을 누르면 실행 (수정 화면 열기 등). 수정 권한이 없으면 넘기지 않는다.
   onSelect?: () => void;
 }
 
@@ -22,20 +22,24 @@ export default function TaskRow({
   dday,
   done,
   meta,
-  disabled = false,
+  canToggle = true,
   onToggle,
   onSelect,
 }: TaskRowProps) {
+  // 완료도 수정도 못 하는 줄만 흐리게 둔다.
+  // 토글만 막힌 경우(작성자지만 담당자가 아님)까지 흐리면 고칠 수 있는데 잠긴 것처럼 보인다.
+  const dimmed = !canToggle && !onSelect;
+
   return (
     <div
-      className={[styles.row, disabled && styles.rowDisabled]
+      className={[styles.row, dimmed && styles.rowDisabled]
         .filter(Boolean)
         .join(" ")}
     >
       {/* 체크박스는 완료 토글 전용 */}
       <Checkbox
         checked={done}
-        disabled={disabled}
+        disabled={!canToggle}
         onChange={() => onToggle?.()}
       />
 

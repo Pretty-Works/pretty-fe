@@ -20,6 +20,9 @@ export const getNotificationHref = (
   // 제외된 프로젝트는 더 이상 볼 수 없다. 이동해봐야 권한 오류만 뜬다.
   if (notification.type === "PROJECT_MEMBER_REMOVED") return null;
 
+  // 이미 지워진 할 일이라 열어 봐야 없다. 알림 문구가 곧 전체 내용이다.
+  if (notification.type === "TASK_DELETED") return null;
+
   const target = notification.target;
   if (!target || target.type !== "PROJECT") return null;
 

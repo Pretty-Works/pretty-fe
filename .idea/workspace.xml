@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="feat : 알림 배지 구현 및 시각적 보정(#31)">
+    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/Button/Button.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Button/Button.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/FormField/FormField.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/home/components/ConfirmRequestCard/ConfirmRequestCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/ConfirmRequestCard/ConfirmRequestCard.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/create/api/projectApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/api/projectApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/milestoneApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/milestoneApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/notification/api/notificationApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/api/notificationApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/notification/components/NotificationDropdown/NotificationDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/components/NotificationDropdown/NotificationDropdown.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/notification/utils/notificationLink.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/utils/notificationLink.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/hooks/mutations/useToggleMilestoneMutation.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/hooks/mutations/useToggleMilestoneMutation.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -51,7 +51,7 @@
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;feat/#31&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;fix/#34&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/tnals/Desktop/PrettyWorks_FE&quot;,
@@ -141,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1785857339525</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)">
+      <option name="closed" value="true" />
+      <created>1785893487083</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1785893487083</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -155,6 +163,7 @@
     <MESSAGE value="fix : 내 정보 API 연동 및 예외처리 토스트 구현(#19)" />
     <MESSAGE value="feat : 알림 배지 구현(#31)" />
     <MESSAGE value="feat : 알림 배지 구현 및 시각적 보정(#31)" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat : 알림 배지 구현 및 시각적 보정(#31)" />
+    <MESSAGE value="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)" />
   </component>
 </project>
