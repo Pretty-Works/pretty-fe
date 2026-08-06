@@ -30,6 +30,30 @@ const refreshAccessToken = async (): Promise<string> => {
   return token;
 };
 
+// 401을 받은 요청이 재발급을 부탁하는 통로입니다. 여러 요청이 동시에 불러도 재발급은 한 번만 돕니다.
+// 에이전트 SSE처럼 axios 인스턴스를 타지 않는 요청도 같은 경로를 쓰게 하려고 열어 둡니다.
+export const refreshAccessTokenOnce = (): Promise<string> => {
+  refreshPromise ??= refreshAccessToken().finally(() => {
+    refreshPromise = null;
+  });
+  return refreshPromise;
+};
+
+// refreshToken도 만료/무효 → 세션 정리 후 로그인 화면으로.
+// 캐시에 남은 응답은 전부 이전 사용자 것이라 토큰과 함께 버린다.
+// (지금은 아래 전체 리로드로도 지워지지만, 소프트 내비게이션으로 바뀌면 살아남는다)
+export const handleSessionExpired = () => {
+  useAuthStore.getState().clear();
+  clearQueryCache();
+  if (typeof window !== "undefined") {
+    // 보던 화면을 returnTo로 달아 로그인 후 그 자리로 돌아오게 한다
+    window.location.href = loginPathFor(
+      window.location.pathname,
+      window.location.search,
+    );
+  }
+};
+
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -45,25 +69,11 @@ api.interceptors.response.use(
     if (status === 401 && original && !original._retry && !isAuthCall) {
       original._retry = true;
       try {
-        refreshPromise ??= refreshAccessToken().finally(() => {
-          refreshPromise = null;
-        });
-        const token = await refreshPromise;
+        const token = await refreshAccessTokenOnce();
         original.headers.Authorization = `Bearer ${token}`;
         return api(original);
       } catch (refreshError) {
-        // refreshToken도 만료/무효 → 세션 정리 후 로그인 화면으로.
-        // 캐시에 남은 응답은 전부 이전 사용자 것이라 토큰과 함께 버린다.
-        // (지금은 아래 전체 리로드로도 지워지지만, 소프트 내비게이션으로 바뀌면 살아남는다)
-        useAuthStore.getState().clear();
-        clearQueryCache();
-        if (typeof window !== "undefined") {
-          // 보던 화면을 returnTo로 달아 로그인 후 그 자리로 돌아오게 한다
-          window.location.href = loginPathFor(
-            window.location.pathname,
-            window.location.search,
-          );
-        }
+        handleSessionExpired();
         return Promise.reject(refreshError);
       }
     }

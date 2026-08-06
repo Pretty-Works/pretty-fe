@@ -30,6 +30,9 @@ export default function PostDetailView({
   }
 
   if (page.isError || !page.post) {
+    // 삭제하고 목록으로 넘어가는 중이라면 없는 게 정상이다 — 에러 화면을 띄우지 않는다
+    if (page.isDeleting) return null;
+
     return (
       <Result
         figure={<Result.Figure tone="error">❗</Result.Figure>}

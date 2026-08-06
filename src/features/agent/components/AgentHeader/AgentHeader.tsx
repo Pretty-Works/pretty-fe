@@ -11,9 +11,7 @@ import AgentChatIcon from "@/assets/icons/agent/agent-chat.png";
 import styles from "./AgentHeader.module.css";
 
 interface AgentHeaderProps {
-  /** 최근 대화 목록이 펼쳐져 있는지 */
   menuOpen: boolean;
-  /** 패널이 전체 화면으로 넓혀져 있는지 */
   expanded: boolean;
   onToggleMenu: () => void;
   onNewChat: () => void;
@@ -47,7 +45,7 @@ function IconButton({
   );
 }
 
-// 에이전트 패널 상단 — 제목과 패널 조작 버튼만 담당한다 (대화 내용은 모른다)
+// 에이전트 패널 상단
 export default function AgentHeader({
   menuOpen,
   expanded,
@@ -59,7 +57,6 @@ export default function AgentHeader({
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        {/* 옆의 "에이전트" 글자가 같은 뜻이라 스크린리더에는 읽히지 않게 둔다 */}
         <Image className={styles.logo} src={AgentChatIcon} alt="" />
         <div className={styles.title}>에이전트</div>
       </div>

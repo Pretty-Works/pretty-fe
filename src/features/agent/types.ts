@@ -1,21 +1,73 @@
-export type ChatRole = "user" | "agent";
+// BE 의 AgentRole 과 같은 값. 말풍선 좌/우와 색이 이 값으로 갈린다.
+export type ChatRole = "USER" | "AGENT";
 
+// BE 의 AgentRunStatus. 대화 목록의 배지가 이 값을 그대로 쓴다.
+export type AgentRunStatus =
+  | "RUNNING"
+  | "WAITING_APPROVAL"
+  | "WAITING_INPUT"
+  | "COMPLETED"
+  | "FAILED"
+  | "EXPIRED";
+
+// 화면에 있는 기능만 다룬다 (없는 기능을 아는 척하면 안 된다)
 export type AgentKind =
   | "general"
   | "meeting"
-  | "approval"
-  | "reservation"
+  | "board"
+  | "expense"
+  | "schedule"
   | "leave"
   | "task";
 
 export const AGENT_LABELS: Record<AgentKind, string> = {
   general: "일반 도우미",
   meeting: "회의 에이전트",
-  approval: "결재 에이전트",
-  reservation: "예약 에이전트",
+  board: "게시판 에이전트",
+  expense: "지출 에이전트",
+  schedule: "일정 에이전트",
   leave: "휴가 에이전트",
-  task: "업무 에이전트",
+  task: "할 일 에이전트",
 };
+
+/**
+ * done 이벤트의 action. 일을 끝낸 뒤 "어느 화면으로 보낼지"를 가리킨다.
+ * NAVIGATE 는 그냥 이동, FILL_FORM 은 이동한 화면의 폼을 formData 로 채운다.
+ */
+export interface AgentAction {
+  type: "NAVIGATE" | "FILL_FORM";
+  /** 버튼 문구 (예: "회의록 보러가기") */
+  label: string;
+  /** screenRegistry 의 ScreenKey */
+  targetScreen: string;
+  params?: Record<string, unknown>;
+  formData?: Record<string, unknown>;
+}
+
+/** approval_request — 실행 전에 사용자 승인이 필요한 요청 */
+export interface AgentApproval {
+  id: string;
+  /** 한 줄 요약 (예: "회의록 저장 · 그룹웨어 AI 고도화") */
+  summary: string;
+  /** 무엇을 저장/수정하는지 펼쳐 보여줄 본문 */
+  previewText?: string;
+  /** 승인 후 붙일 안내 문구 */
+  successMessage?: string;
+  /** 승인 후 이어서 제안할 이동 */
+  action?: AgentAction;
+}
+
+/** question — 선택지 (옵션 + 직접 입력) */
+export interface AgentChoice {
+  id: string;
+  /** 짧은 머리말 (예: "작성 방식", "다른 방법") */
+  label?: string;
+  question: string;
+  options?: string[];
+  placeholder?: string;
+  /** 직접 입력을 받을지. 정해진 것 중에서만 골라야 하면 false */
+  allowFreeText?: boolean;
+}
 
 export interface ChatMessage {
   id: string;
@@ -23,56 +75,26 @@ export interface ChatMessage {
   content: string;
   createdAt: string;
   agent?: AgentKind;
-}
-
-// done 이벤트의 action
-export interface AgentAction {
-  type: string;
-  requiresApproval: boolean;
-  summary?: string;
-  successMessage?: string;
-  targetScreen?: string;
-  params?: Record<string, unknown>;
-  formData?: Record<string, unknown>;
-}
-
-// 선택지 (select + 직접 입력)
-export interface AgentChoice {
-  id: string;
-  question: string;
-  options?: string[];
-  placeholder?: string;
+  /** AGENT 행만 쓴다. false 면 실패 안내 말풍선 */
+  success?: boolean;
+  /** 사용자가 중지시켜 도중에 끊긴 응답 */
+  canceled?: boolean;
+  /** "참고한 내용 N건" 으로 접어 두는 진행 로그 */
+  steps?: string[];
+  /** 이 답변에 딸린 이동 제안 */
+  action?: AgentAction;
 }
 
 export interface Conversation {
+  /** 서버 대화 id(conversationId)를 문자열로 들고 있는다 */
   id: string;
   title: string;
-  pending?: boolean;
+  /** 목록 정렬 기준 (최근 대화가 위) */
+  lastMessageAt: string;
+  /** 이 대화에서 실행 요청을 자동 승인하는지 */
+  autoApprove: boolean;
+  /** 아직 안 끝난 대화의 상태. 끝났으면 없다 */
+  status?: AgentRunStatus;
+  /** 아직 살아 있는 실행의 X-Run-Id. 끝났으면 없다 */
+  activeRunId?: string;
 }
-
-export const SEED_MESSAGES: ChatMessage[] = [
-  {
-    id: "1",
-    role: "user",
-    content: "내일 오후 3시에 팀 회의 잡아줘",
-    createdAt: "2026-07-21T06:00:00.000Z",
-  },
-  {
-    id: "2",
-    role: "agent",
-    content: "네! 내일(7/22) 15:00 팀 회의로 잡을게요.\n참석자는 누구로 할까요?",
-    createdAt: "2026-07-21T06:00:05.000Z",
-  },
-  {
-    id: "3",
-    role: "user",
-    content: "개발팀 전체",
-    createdAt: "2026-07-21T06:01:00.000Z",
-  },
-  {
-    id: "4",
-    role: "agent",
-    content: "개발팀 전체에게 초대를 보냈어요. 회의실도 예약해둘까요?",
-    createdAt: "2026-07-21T06:01:03.000Z",
-  },
-];

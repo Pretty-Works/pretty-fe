@@ -40,8 +40,54 @@
   border-bottom-left-radius: 4px;
 }
 
+/* 사용자가 중지시켜 끊긴 답변 */
+.bubbleCanceled {
+  background: var(--surface);
+  color: var(--text-placeholder);
+  font-style: italic;
+}
+
 .time {
   font-size: 11px;
+  color: var(--text-sub);
+}
+
+/* 참고한 내용 — 기본은 접혀 있고, 펼치면 무엇을 보고 답했는지 나온다 */
+.steps {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.stepsSummary {
+  padding: 7px 11px;
+  font-size: 12px;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  list-style: none;
+}
+
+.stepsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.stepsSummary::before {
+  content: "▸ ";
+}
+
+.steps[open] .stepsSummary::before {
+  content: "▾ ";
+}
+
+.stepsList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 11px 9px 24px;
+  font-size: 12px;
+  line-height: 1.5;
   color: var(--text-sub);
 }
 

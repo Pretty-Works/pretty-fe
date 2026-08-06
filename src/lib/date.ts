@@ -47,6 +47,16 @@ export function formatDayLabel(dateTime: string): string {
   return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
 }
 
+// 두 시각이 같은 날인지. 말풍선 사이에 날짜 구분선을 넣을지 판단하는 데 쓴다.
+export function isSameDay(a: string, b: string): boolean {
+  const first = new Date(a);
+  const second = new Date(b);
+  if (Number.isNaN(first.getTime()) || Number.isNaN(second.getTime()))
+    return false;
+
+  return toISO(first) === toISO(second);
+}
+
 // "2026-08-04T14:22:10" → "14:22" (24시간제)
 // toLocaleTimeString은 환경마다 결과가 달라 직접 만든다.
 export function formatTimeOfDay(dateTime: string): string {

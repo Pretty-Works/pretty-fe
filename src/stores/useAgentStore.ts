@@ -6,12 +6,10 @@ import { persist } from "zustand/middleware";
 interface AgentStore {
   folded: boolean;
   expanded: boolean;
-  autoApprove: boolean;
 
   toggleFolded: () => void;
   toggleExpanded: () => void;
   openAgent: () => void;
-  setAutoApprove: (on: boolean) => void;
 }
 
 export const useAgentStore = create<AgentStore>()(
@@ -19,7 +17,6 @@ export const useAgentStore = create<AgentStore>()(
     (set) => ({
       folded: false,
       expanded: false,
-      autoApprove: false,
 
       toggleFolded: () =>
         set((state) => ({
@@ -35,15 +32,12 @@ export const useAgentStore = create<AgentStore>()(
         set({
           folded: false,
         }),
-
-      setAutoApprove: (on) => set({ autoApprove: on }),
     }),
     {
       name: "agent-layout",
 
       partialize: (state) => ({
         folded: state.folded,
-        autoApprove: state.autoApprove,
       }),
     },
   ),

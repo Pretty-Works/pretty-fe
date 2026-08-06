@@ -22,6 +22,7 @@
 
 .description {
   color: var(--text-sub);
+  font-size: 14px;
 }
 
 .list {
@@ -35,9 +36,9 @@
 .item {
   width: 100%;
   padding: 11px 14px;
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 12px;
-  background: var(--white);
+  background: #F6F4FB;
   color: var(--text);
   font-size: 13.5px;
   text-align: left;

@@ -49,6 +49,10 @@ export const usePostDetailPage = (projectId: string, postId: string) => {
     });
   };
 
+  // 삭제에 성공해도 목록으로 넘어갈 때까지는 이 화면이 그대로 남는다.
+  // 그 사이에는 계속 '삭제 중'으로 둬야 화면이 잠깐 되살아난 것처럼 보이지 않는다.
+  const isDeleting = deleteMutation.isPending || deleteMutation.isSuccess;
+
   const confirmDelete = () => {
     deleteMutation.mutate(undefined, {
       onSuccess: () => {
@@ -86,9 +90,9 @@ export const usePostDetailPage = (projectId: string, postId: string) => {
     deleteOpen: deleteOpen && canDelete,
     openDelete: () => setDeleteOpen(canDelete),
     closeDelete: () => {
-      if (!deleteMutation.isPending) setDeleteOpen(false);
+      if (!isDeleting) setDeleteOpen(false);
     },
-    isDeleting: deleteMutation.isPending,
+    isDeleting,
     confirmDelete,
 
     goList: () => router.push(`/projects/${projectId}/board`),

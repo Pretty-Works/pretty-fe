@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
+
+import { formatDayLabel, isSameDay } from "@/lib/date";
 
 import { useAgentStore } from "@/stores/useAgentStore";
 
@@ -11,8 +13,10 @@ import AgentHeader from "@/features/agent/components/AgentHeader/AgentHeader";
 import AgentRunIndicator from "@/features/agent/components/AgentRunIndicator/AgentRunIndicator";
 import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt";
 import ConversationMenu from "@/features/agent/components/ConversationMenu/ConversationMenu";
+import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
+import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute } from "@/features/agent/screenRegistry";
@@ -21,28 +25,32 @@ import styles from "./AgentView.module.css";
 
 export default function AgentView() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
   const toggleExpanded = useAgentStore((state) => state.toggleExpanded);
   const expanded = useAgentStore((state) => state.expanded);
-  const autoApprove = useAgentStore((state) => state.autoApprove);
-  const setAutoApprove = useAgentStore((state) => state.setAutoApprove);
 
   const {
     conversations,
     activeId,
+    autoApprove,
+    isAutoApproveUpdating,
     messages,
     runAgents,
     isBusy,
     pendingChoice,
-    approvalAction,
+    pendingApproval,
+    pendingAction,
+    historyLoading,
+    historyLoadError,
     sendMessage,
+    stop,
+    changeAutoApprove,
     answerChoice,
     answerApproval,
     approve,
     reject,
-    resolveApproval,
+    dismissAction,
     selectConversation,
     startNewChat,
   } = useChat();
@@ -51,50 +59,59 @@ export default function AgentView() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // 선택지 또는 승인 대기 중이면 입력 차단
-  const isBlocked = pendingChoice !== null || approvalAction !== null;
+  const isBlocked =
+    historyLoading || pendingChoice !== null || pendingApproval !== null;
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, runAgents, pendingChoice, approvalAction]);
+  }, [messages, runAgents, pendingChoice, pendingApproval, pendingAction]);
 
   useEffect(() => {
-    if (autoApprove && approvalAction) approve();
-  }, [autoApprove, approvalAction, approve]);
+    if (autoApprove && pendingApproval) approve();
+  }, [autoApprove, pendingApproval, approve]);
 
-  const handleNavigate = () => {
-    const route = resolveRoute(
-      approvalAction?.targetScreen,
-      approvalAction?.params,
-    );
-    if (route) router.push(route);
-    resolveApproval();
-  };
+  // 이미 그 화면을 보고 있으면 이동을 물어볼 이유가 없다.
+  // 남겨 두면 나중에 다른 화면으로 옮겼을 때 뒤늦게 튀어나온다.
+  useEffect(() => {
+    if (!pendingAction) return;
+    const route = resolveRoute(pendingAction.targetScreen, pendingAction.params);
+    if (route === pathname) dismissAction();
+  }, [pendingAction, pathname, dismissAction]);
 
   // 선택지 / 승인 → 하나의 선택 UI 로 통합
   const selection = pendingChoice
     ? {
+        label: pendingChoice.label,
+        title: pendingChoice.question,
+        preview: undefined,
         options: (pendingChoice.options ?? []).map((label) => ({
           label,
           onSelect: () => answerChoice(label),
         })),
         placeholder: pendingChoice.placeholder ?? "직접 입력",
+        allowFreeText: pendingChoice.allowFreeText ?? true,
         onDirect: answerChoice,
       }
-    : approvalAction
+    : pendingApproval
       ? {
+          label: "실행 승인",
+          title: pendingApproval.summary,
+          preview: pendingApproval.previewText,
           options: [
             { label: "승인", onSelect: approve },
             { label: "거절", onSelect: reject },
-            ...(approvalAction.targetScreen
-              ? [{ label: "이동", onSelect: handleNavigate }]
-              : []),
           ],
           placeholder: "직접 입력",
+          allowFreeText: true,
           onDirect: answerApproval,
         }
       : null;
 
-  const isEmpty = messages.length === 0 && !isBusy;
+  const isEmpty =
+    messages.length === 0 &&
+    !isBusy &&
+    !historyLoading &&
+    !historyLoadError;
 
   return (
     <div className={styles.agent}>
@@ -110,16 +127,16 @@ export default function AgentView() {
         onClose={toggleFolded}
       />
 
-      {isMenuOpen && (
-        <ConversationMenu
-          conversations={conversations}
-          activeId={activeId}
-          onSelect={(id) => {
-            selectConversation(id);
-            setIsMenuOpen(false);
-          }}
-        />
-      )}
+      <ConversationMenu
+        open={isMenuOpen}
+        conversations={conversations}
+        activeId={activeId}
+        onSelect={(id) => {
+          selectConversation(id);
+          setIsMenuOpen(false);
+        }}
+        onClose={() => setIsMenuOpen(false)}
+      />
 
       <main className={styles.chat}>
         {isEmpty ? (
@@ -130,9 +147,33 @@ export default function AgentView() {
           />
         ) : (
           <div className={styles.chatContent}>
-            {messages.map((msg) => (
-              <MessageBubble key={msg.id} message={msg} />
-            ))}
+            {historyLoading && (
+              <div className={styles.historyStatus} role="status">
+                대화를 불러오는 중...
+              </div>
+            )}
+
+            {historyLoadError && (
+              <div className={styles.historyError} role="alert">
+                대화를 불러오지 못했어요. 잠시 후 다시 선택해 주세요.
+              </div>
+            )}
+
+            {messages.map((message, index) => {
+              const previous = messages[index - 1];
+              // 대화의 첫 줄과, 날이 바뀌는 자리마다 구분선을 넣는다
+              const showDate =
+                !previous || !isSameDay(previous.createdAt, message.createdAt);
+
+              return (
+                <Fragment key={message.id}>
+                  {showDate && (
+                    <DateDivider label={formatDayLabel(message.createdAt)} />
+                  )}
+                  <MessageBubble message={message} />
+                </Fragment>
+              );
+            })}
 
             {/* 실행 중 에이전트 */}
             {isBusy && runAgents && <AgentRunIndicator agents={runAgents} />}
@@ -140,10 +181,19 @@ export default function AgentView() {
             {/* 선택 UI */}
             {selection && !isBusy && (
               <ChoicePrompt
+                label={selection.label}
+                title={selection.title}
+                preview={selection.preview}
                 options={selection.options}
                 placeholder={selection.placeholder}
+                allowFreeText={selection.allowFreeText}
                 onDirect={selection.onDirect}
               />
+            )}
+
+            {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
+            {pendingAction && !isBusy && (
+              <NavigatePrompt action={pendingAction} onDismiss={dismissAction} />
             )}
 
             <div ref={bottomRef} />
@@ -153,9 +203,12 @@ export default function AgentView() {
 
       <AgentComposer
         blocked={isBlocked}
+        busy={isBusy}
         autoApprove={autoApprove}
-        onChangeAutoApprove={setAutoApprove}
+        autoApproveUpdating={isAutoApproveUpdating}
+        onChangeAutoApprove={changeAutoApprove}
         onSend={sendMessage}
+        onStop={stop}
       />
     </div>
   );
