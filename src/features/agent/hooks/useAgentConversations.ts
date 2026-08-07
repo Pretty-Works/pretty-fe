@@ -31,7 +31,19 @@ export function useAgentConversations({
   );
   const startNewChatInStore = useChatStore((state) => state.startNewChat);
 
-  const { data: conversationList } = useAgentConversationsQuery();
+  const {
+    data: conversationList,
+    isLoading: conversationsLoading,
+    isError: conversationsError,
+    isFetching: conversationsFetching,
+    refetch: refetchConversations,
+  } = useAgentConversationsQuery();
+
+  // 실패한 목록을 사용자가 직접 다시 부르는 통로.
+  // 자동 재조회는 창 포커스·재접속·다음 실행 때뿐이라, 그 사이에는 이것 말고 방법이 없다.
+  const retryConversations = useCallback(() => {
+    void refetchConversations();
+  }, [refetchConversations]);
 
   const persistAutoApprove = useCallback(
     (
@@ -68,6 +80,31 @@ export function useAgentConversations({
     [mutateAutoApprove],
   );
 
+  // 새 대화가 막 생겼을 때 프론트에서 고른 모드를 서버에 밀어 넣는다.
+  // 목록이 더는 autoApprove 를 주지 않아 서버 값과 비교할 수 없으므로 그냥 한 번 보낸다.
+  const pushAutoApprove = useCallback(
+    (conversationId: number, autoApprove: boolean) => {
+      mutateAutoApprove(
+        { conversationId, autoApprove },
+        {
+          onSuccess: (result) => {
+            useChatStore
+              .getState()
+              .setConversationAutoApprove(
+                result.conversationId,
+                result.autoApprove,
+              );
+          },
+          // 되돌릴 이전 값을 모른다. 토글은 사용자가 고른 대로 두고, 다음 전환에서 다시 맞춘다.
+          onError: (error) => {
+            agentLogError("새 대화 자동 승인 모드 동기화 실패", error);
+          },
+        },
+      );
+    },
+    [mutateAutoApprove],
+  );
+
   useEffect(() => {
     if (!conversationList) return;
 
@@ -75,7 +112,7 @@ export function useAgentConversations({
     syncConversations(conversationList);
     const afterSync = useChatStore.getState();
 
-    // 새 대화 id를 찾은 직후, 백엔드 기본값과 프론트에서 고른 모드가 다르면 맞춘다.
+    // 방금 새 대화 id를 찾았을 때만.
     if (
       beforeSync.conversationId !== null ||
       afterSync.conversationId === null
@@ -83,21 +120,8 @@ export function useAgentConversations({
       return;
     }
 
-    const createdConversation = conversationList.find(
-      (conversation) => Number(conversation.id) === afterSync.conversationId,
-    );
-
-    if (
-      createdConversation &&
-      createdConversation.autoApprove !== beforeSync.autoApprove
-    ) {
-      persistAutoApprove(
-        afterSync.conversationId,
-        beforeSync.autoApprove,
-        createdConversation.autoApprove,
-      );
-    }
-  }, [conversationList, persistAutoApprove, syncConversations]);
+    pushAutoApprove(afterSync.conversationId, beforeSync.autoApprove);
+  }, [conversationList, pushAutoApprove, syncConversations]);
 
   const changeAutoApprove = useCallback(
     (nextAutoApprove: boolean) => {
@@ -157,6 +181,10 @@ export function useAgentConversations({
   }, [disconnectRunStream, startNewChatInStore]);
 
   return {
+    conversationsLoading,
+    conversationsError,
+    conversationsFetching,
+    retryConversations,
     isAutoApproveUpdating,
     changeAutoApprove,
     selectConversation,

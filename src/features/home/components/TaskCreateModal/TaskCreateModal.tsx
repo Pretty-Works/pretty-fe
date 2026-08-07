@@ -240,14 +240,7 @@ export default function TaskCreateModal({
               {isDeleting ? "삭제 중…" : "삭제"}
             </button>
           )}
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={resetAndClose}
-          >
-            취소
-          </Button>
+          {/* 취소 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다 */}
           <Button
             size="medium"
             loading={isSaving}

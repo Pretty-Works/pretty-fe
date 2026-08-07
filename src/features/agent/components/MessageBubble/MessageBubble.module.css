@@ -47,6 +47,13 @@
   font-style: italic;
 }
 
+/* 지난 대화에서 되살린 실패. 다시 시도는 못 하니 표시만 다르게 한다 */
+.bubbleFailed {
+  border: 1px solid #ffd9d9;
+  background: #fff5f5;
+  color: var(--text-sub);
+}
+
 .time {
   font-size: 11px;
   color: var(--text-sub);

@@ -10,6 +10,17 @@ export type AgentRunStatus =
   | "FAILED"
   | "EXPIRED";
 
+// BE 의 AgentInteractionKind. 답을 기다리는 카드가 승인인지 되묻기인지.
+export type AgentInteractionKind = "APPROVAL" | "QUESTION";
+
+// BE 의 AgentInteractionStatus. PENDING 만 아직 답을 기다린다.
+export type AgentInteractionStatus =
+  | "PENDING"
+  | "APPROVED"
+  | "REJECTED"
+  | "ALTERNATIVE"
+  | "EXPIRED";
+
 // 화면에 있는 기능만 다룬다 (없는 기능을 아는 척하면 안 된다)
 export type AgentKind =
   | "general"
@@ -91,10 +102,42 @@ export interface Conversation {
   title: string;
   /** 목록 정렬 기준 (최근 대화가 위) */
   lastMessageAt: string;
-  /** 이 대화에서 실행 요청을 자동 승인하는지 */
-  autoApprove: boolean;
-  /** 아직 안 끝난 대화의 상태. 끝났으면 없다 */
+  createdAt: string;
+  /**
+   * 가장 최근 실행의 상태. 실행이 한 번도 없었으면 없다.
+   * WAITING_APPROVAL·WAITING_INPUT·RUNNING 이면 아직 살아 있는 실행이다.
+   */
   status?: AgentRunStatus;
-  /** 아직 살아 있는 실행의 X-Run-Id. 끝났으면 없다 */
-  activeRunId?: string;
+  /** 가장 최근 실행의 X-Run-Id. 끝난 실행도 남아 있다 */
+  runId?: string;
+  /** 답을 기다리는 승인 카드 id. 목록의 '확인 필요' 배지가 이걸 본다 */
+  pendingApprovalId?: number;
+}
+
+/** 승인·질문 카드에 그릴 버튼 한 개. id 는 응답 API 에 그대로 되돌려 보낸다 */
+export interface AgentInteractionOption {
+  id: string;
+  label: string;
+}
+
+/**
+ * 답을 기다리는 승인·질문 카드 한 장 (홈의 '확인이 필요한 요청').
+ * 새로 고치거나 다른 기기로 들어왔을 때 이걸로 카드를 복원한다.
+ */
+export interface PendingInteraction {
+  kind: AgentInteractionKind;
+  /** 승인·질문 응답 API 의 경로 변수로 그대로 쓴다 */
+  interactionId: number;
+  label: string;
+  options: AgentInteractionOption[];
+  /** 여러 개를 고를 수 있는지. APPROVAL 은 언제나 false */
+  multiple: boolean;
+  conversationId: number;
+  runId: string;
+  conversationTitle: string;
+  /** APPROVAL 만 있다 — 무엇을 저장·수정하는지 접어서 보여준다 */
+  previewText?: string;
+  requestedAt: string;
+  /** 이 시각이 지나면 카드가 닫히고 실행도 만료된다 (뜬 뒤 30분) */
+  expiresAt: string;
 }

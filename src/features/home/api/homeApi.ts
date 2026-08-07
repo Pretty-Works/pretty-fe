@@ -1,12 +1,10 @@
 // 홈 대시보드 API
-// 회의록(meetingApi.ts)과 동일한 구조.
-//   연동 완료: 프로젝트 목록 · 내 할 일 · 할 일 생성/토글 · 프로젝트 기간
-//   mock 유지: 확인이 필요한 요청
+// 회의록(meetingApi.ts)과 동일한 구조. mock 없이 전부 연동돼 있다.
+//
+// '확인이 필요한 요청'은 에이전트 API(GET /agent/pending-interactions)를 그대로 쓴다.
+// 홈 전용 엔드포인트가 아니라서 features/agent/api/agentApi.ts 에 있다.
 
 import { api } from "@/lib/api/client";
-
-// 서버 지연 흉내 (아직 mock인 함수용)
-const mockDelay = (ms = 400) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /* =========================================================================
  * 프로젝트 (진행률)
@@ -80,87 +78,8 @@ export const fetchProjects = async (
 };
 
 /* =========================================================================
- * 확인이 필요한 요청 (에이전트가 답변 대기 중)
+ * 할 일
  * ========================================================================= */
-
-export interface RequestOption {
-  id: string;
-  label: string;
-}
-
-export interface ConfirmRequest {
-  id: string;
-  label: string;
-  options: RequestOption[];
-}
-
-interface ServerRequest {
-  requestId: number;
-  title: string;
-  options: { optionId: number; label: string }[];
-}
-
-export interface RequestsResponse {
-  result: { content: ServerRequest[] };
-}
-
-const MOCK_REQUESTS: ServerRequest[] = [
-  {
-    requestId: 1,
-    title: "휴가 날짜 선택",
-    options: [
-      { optionId: 1, label: "3/2 (화)" },
-      { optionId: 2, label: "3/5 (금)" },
-      { optionId: 3, label: "3/9 (화)" },
-      { optionId: 4, label: "다른 날짜" },
-    ],
-  },
-  {
-    requestId: 2,
-    title: "품의서 결재선 선택",
-    options: [
-      { optionId: 5, label: "이하늘 → 정우진 → 최유나" },
-      { optionId: 6, label: "이하늘 → 정우진" },
-      { optionId: 7, label: "직접 지정" },
-    ],
-  },
-  {
-    requestId: 3,
-    title: "회의록 공유 대상 선택",
-    options: [
-      { optionId: 8, label: "참석자 5명" },
-      { optionId: 9, label: "프로젝트 전체" },
-      { optionId: 10, label: "나만 보기" },
-    ],
-  },
-  {
-    requestId: 4,
-    title: "킥오프 일정 선택",
-    options: [
-      { optionId: 11, label: "3/4 (수) 15:00" },
-      { optionId: 12, label: "3/5 (목) 10:00" },
-      { optionId: 13, label: "직접 지정" },
-    ],
-  },
-  {
-    requestId: 5,
-    title: "회의실 예약 선택",
-    options: [
-      { optionId: 14, label: "본사 3F A" },
-      { optionId: 15, label: "본사 5F 대회의실" },
-      { optionId: 16, label: "화상으로 진행" },
-    ],
-  },
-  {
-    requestId: 6,
-    title: "주간 회의 시간 확정",
-    options: [
-      { optionId: 17, label: "화 14:00" },
-      { optionId: 18, label: "수 10:00" },
-      { optionId: 19, label: "직접 지정" },
-    ],
-  },
-];
 
 // --- 할 일 생성 (POST /api/v1/tasks) ------------------------------
 // projectId가 null이면 개인 할 일.
@@ -214,13 +133,6 @@ export const deleteTask = async (
   const response = await api.delete<CreateTaskResponse>(`/tasks/${taskId}`);
 
   return response.data;
-};
-
-// 확인이 필요한 요청 조회
-export const fetchRequests = async (): Promise<RequestsResponse> => {
-  // TODO: const response = await api.get("/home/requests"); return response.data;
-  await mockDelay();
-  return { result: { content: MOCK_REQUESTS } };
 };
 
 /* =========================================================================

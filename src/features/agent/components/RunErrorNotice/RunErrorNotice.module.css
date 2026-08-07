@@ -1,0 +1,30 @@
+/* 답변 말풍선 자리에 들어가지만 말풍선처럼 보이면 안 된다 — 흐린 빨강 판에 버튼 하나 */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #ffd9d9;
+  border-radius: 12px;
+  background: #fff5f5;
+}
+
+.icon {
+  flex-shrink: 0;
+  color: var(--danger);
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-sub);
+  word-break: break-word;
+}
+
+/* 문구가 길어져도 버튼은 줄어들지 않는다 */
+.retry {
+  flex-shrink: 0;
+}

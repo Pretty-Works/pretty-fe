@@ -23,6 +23,108 @@
   opacity: 0.55;
 }
 
+/* 파일을 끌고 오는 동안 — 여기에 놓으면 된다는 표시 */
+.composerDragging {
+  border-color: var(--primary);
+  border-style: dashed;
+  background: var(--primary-bg);
+}
+
+/* 끌어온 파일이 자식 위에서 놓여도 입력칸이 가로채지 않게 한다 */
+.composerDragging * {
+  pointer-events: none;
+}
+
+.files {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.file {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 220px;
+  padding: 5px 6px 5px 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+}
+
+.fileIcon {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.fileName {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.fileSize {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--text-placeholder);
+}
+
+.fileRemove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.fileRemove:hover {
+  background: var(--border);
+  color: var(--text-sub);
+}
+
+.attachButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-placeholder);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.attachButton:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--text-sub);
+}
+
+.attachButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .bar {
   display: flex;
   align-items: center;
@@ -153,13 +255,10 @@
   background: var(--primary-light);
 }
 
-/* 보낼 내용이 없을 때 — 사라지지는 않고 색만 연해진다 */
 .sendButton:disabled {
   background: #cebef6;
-  cursor: not-allowed;
 }
 
-/* 답변을 만드는 중일 때의 중지 버튼 */
 .stopButton {
   background: var(--text);
 }

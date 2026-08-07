@@ -43,8 +43,3 @@
   flex-wrap: wrap;
   gap: 6px;
 }
-
-/* 나가기는 위험한 동작이라 확인/닫기와 떨어뜨려 왼쪽에 둔다 */
-.leaveButton {
-  margin-right: auto;
-}

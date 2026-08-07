@@ -16,7 +16,10 @@ interface StateViewProps {
   emptyText?: string;
 
   size?: StateViewSize;
-  /** 에러일 때 함께 보여줄 버튼. 있으면 문구를 키우고 세로로 쌓는다(페이지 단위 실패) */
+  /**
+   * 에러일 때 문구 아래에 쌓을 버튼.
+   * default·roomy 는 화면 단위 실패라 문구까지 키우고, compact 는 팝오버 안이라 크기를 그대로 둔다.
+   */
   action?: React.ReactNode;
 
   children?: React.ReactNode;
@@ -77,7 +80,9 @@ export default function StateView({
     if (!action) return message;
 
     return (
-      <div className={styles.block}>
+      <div
+        className={[styles.block, SIZE_CLASS[size]].filter(Boolean).join(" ")}
+      >
         {message}
         {action}
       </div>

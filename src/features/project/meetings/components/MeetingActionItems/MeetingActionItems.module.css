@@ -66,7 +66,7 @@
   grid-template-columns: minmax(140px, 1fr) 110px 140px 84px 96px;
   align-items: center;
   gap: 12px;
-  padding: 15px 2px;
+  padding: 15px 12px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -76,7 +76,7 @@
 }
 
 .taskHead {
-  padding: 6px 2px 12px;
+  padding: 6px 12px 12px;
   border-bottom: 1px solid var(--border);
 }
 

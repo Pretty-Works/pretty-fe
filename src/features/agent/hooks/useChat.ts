@@ -13,6 +13,7 @@ export function useChat() {
   const autoApprove = useChatStore((state) => state.autoApprove);
   const messages = useChatStore((state) => state.messages);
   const runAgents = useChatStore((state) => state.runAgents);
+  const runError = useChatStore((state) => state.runError);
   const pendingChoice = useChatStore((state) => state.pendingChoice);
   const pendingApproval = useChatStore((state) => state.pendingApproval);
   const pendingAction = useChatStore((state) => state.pendingAction);
@@ -20,8 +21,12 @@ export function useChat() {
   const historyLoadError = useChatStore((state) => state.historyLoadError);
   const dismissAction = useChatStore((state) => state.dismissAction);
 
-  const { sendMessage, stop, disconnectRunStream } = useAgentRun();
+  const { sendMessage, retry, stop, disconnectRunStream } = useAgentRun();
   const {
+    conversationsLoading,
+    conversationsError,
+    conversationsFetching,
+    retryConversations,
     isAutoApproveUpdating,
     changeAutoApprove,
     selectConversation,
@@ -32,11 +37,16 @@ export function useChat() {
 
   return {
     conversations,
+    conversationsLoading,
+    conversationsError,
+    conversationsFetching,
+    retryConversations,
     activeId,
     autoApprove,
     isAutoApproveUpdating,
     messages,
     runAgents,
+    runError,
     isBusy: runAgents !== null,
     pendingChoice,
     pendingApproval,
@@ -44,6 +54,7 @@ export function useChat() {
     historyLoading,
     historyLoadError,
     sendMessage,
+    retry,
     stop,
     changeAutoApprove,
     answerChoice,

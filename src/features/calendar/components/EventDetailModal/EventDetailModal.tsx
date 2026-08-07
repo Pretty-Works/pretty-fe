@@ -71,28 +71,14 @@ export default function EventDetailModal({
       onClose={onClose}
       title={event.title}
       subtitle={`${typeLabel} · ${owner?.name ?? "알 수 없음"}`}
+      // 닫기 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다.
+      // 나갈 수 없는 일정이면 footer에 남는 것이 없어 아예 넘기지 않는다.
       footer={
-        <>
-          {canLeave && (
-            <Button
-              type="danger"
-              buttonStyle="weak"
-              size="medium"
-              className={styles.leaveButton}
-              onClick={onLeave}
-            >
-              나가기
-            </Button>
-          )}
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={onClose}
-          >
-            닫기
+        canLeave ? (
+          <Button type="danger" buttonStyle="weak" size="medium" onClick={onLeave}>
+            나가기
           </Button>
-        </>
+        ) : undefined
       }
     >
       <dl className={styles.rows}>

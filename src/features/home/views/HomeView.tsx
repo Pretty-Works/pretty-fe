@@ -22,10 +22,12 @@ import { useAgentStore } from "@/stores/useAgentStore";
 
 import { useListParams } from "@/hooks/useListParams";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import { agentLog } from "@/features/agent/api/agentDebug";
+import { useAgentPendingInteractionsQuery } from "@/features/agent/hooks/queries/useAgentPendingInteractionsQuery";
 import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
-import { useRequestsQuery } from "@/features/home/hooks/queries/useRequestsQuery";
 import { useTasksQuery } from "@/features/home/hooks/queries/useTasksQuery";
 import { useToggleTaskMutation } from "@/features/home/hooks/mutations/useToggleTaskMutation";
+import type { PendingInteraction } from "@/features/agent/types";
 import type { MyTask, StatusFilter } from "@/features/home/api/homeApi";
 
 import styles from "./HomeView.module.css";
@@ -44,7 +46,7 @@ export default function HomeView() {
   // 검색어·상태 필터·페이지 (기본: 진행중). 조건이 바뀌면 훅이 1페이지로 되돌린다.
   const list = useListParams<StatusFilter>({ initialFilter: "ONGOING" });
 
-  const [stoppedIds, setStoppedIds] = useState<string[]>([]); // 중단한 요청
+  const [stoppedIds, setStoppedIds] = useState<number[]>([]); // 중단한 요청
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
@@ -63,10 +65,10 @@ export default function HomeView() {
   const totalPages = projectData?.totalPages ?? 1;
 
   const {
-    data: requests = [],
+    data: interactions = [],
     isLoading: isRequestsLoading,
     isError: isRequestsError,
-  } = useRequestsQuery();
+  } = useAgentPendingInteractionsQuery();
 
   const {
     data: taskGroups = [],
@@ -76,9 +78,9 @@ export default function HomeView() {
 
   const { mutate: toggleTask } = useToggleTaskMutation(["home", "tasks"]);
 
-  // 확인이 필요한 요청은 아직 mock이라 중단 상태만 로컬로 걸러낸다
-  const visibleRequests = requests.filter(
-    (request) => !stoppedIds.includes(request.id),
+  // 중단은 아직 서버에 보내지 못해, 누른 카드만 로컬로 걸러낸다
+  const visibleInteractions = interactions.filter(
+    (interaction) => !stoppedIds.includes(interaction.interactionId),
   );
   const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
 
@@ -88,15 +90,32 @@ export default function HomeView() {
     router.push(`/projects/${projectId}/overview`);
   };
 
-  const handleSelectOption = (requestId: string, optionId: string) => {
+  const handleSelectOption = (
+    interaction: PendingInteraction,
+    optionId: string,
+  ) => {
     openAgent(); // 선택하면 에이전트 패널을 열어 답변을 이어받는다
-    // TODO: 선택 결과 전송 (requestId, optionId) — 채팅/mutation 연동
+
+    // TODO: 선택 결과 전송 — 응답 API가 종류별로 갈린다.
+    //   QUESTION  POST /agent/questions/{interactionId}  { selectedOptionIds: [optionId] }
+    //   APPROVAL  POST /agent/approvals/{interactionId}
+    //             APPROVE → { decision: "APPROVED" }
+    //             REJECT  → { decision: "REJECTED" }
+    //             그 밖    → { decision: "ALTERNATIVE", alternativeId: optionId }
+    // 둘 다 SSE로 실행이 이어지므로 채팅 패널의 스트림에 물려야 한다.
+    agentLog(`홈 카드 선택 "${optionId}" — 응답 API 미연결`, {
+      kind: interaction.kind,
+      interactionId: interaction.interactionId,
+      conversationId: interaction.conversationId,
+    });
   };
 
   // 중단: 진행 중인 에이전트 작업을 멈춘다
-  const handleStopRequest = (requestId: string) => {
-    setStoppedIds((prev) => [...prev, requestId]);
-    // TODO: 에이전트 작업 중단 요청 전송 (requestId)
+  const handleStopInteraction = (interaction: PendingInteraction) => {
+    setStoppedIds((prev) => [...prev, interaction.interactionId]);
+
+    // TODO: POST /agent/runs/{runId}/cancel
+    agentLog(`홈 카드 중단 — 취소 API 미연결`, { runId: interaction.runId });
   };
 
   const handleToggleTask = (taskId: string, done: boolean) => {
@@ -132,8 +151,10 @@ export default function HomeView() {
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>확인이 필요한 요청</h2>
-            {visibleRequests.length > 0 && (
-              <Badge type="purple" badgeStyle="weak">{visibleRequests.length}</Badge>
+            {visibleInteractions.length > 0 && (
+              <Badge type="purple" badgeStyle="weak">
+                {visibleInteractions.length}
+              </Badge>
             )}
           </div>
         </div>
@@ -141,18 +162,18 @@ export default function HomeView() {
         <StateView
           loading={isRequestsLoading}
           error={isRequestsError}
-          empty={visibleRequests.length === 0}
+          empty={visibleInteractions.length === 0}
           loadingText="요청을 불러오는 중이에요…"
           errorText="요청을 불러오지 못했어요."
           emptyText="확인이 필요한 요청이 없어요."
         >
           <div className={styles.requestList}>
-            {visibleRequests.map((request) => (
+            {visibleInteractions.map((interaction) => (
               <ConfirmRequestCard
-                key={request.id}
-                request={request}
+                key={interaction.interactionId}
+                interaction={interaction}
                 onSelectOption={handleSelectOption}
-                onStop={handleStopRequest}
+                onStop={handleStopInteraction}
               />
             ))}
           </div>

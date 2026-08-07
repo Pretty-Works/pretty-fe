@@ -103,6 +103,19 @@
   color: var(--text-placeholder);
 }
 
+/* 답을 기다리는 승인 카드. 제목을 밀어내지 않게 폭을 지킨다 */
+.badge {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #fff1f1;
+  color: var(--danger);
+  font-size: 10.5px;
+  line-height: 1.4;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 /* 아직 안 끝난 대화만 색이 찬다. 끝난 대화는 자리만 차지하고 비어 있다 */
 .dot {
   flex-shrink: 0;
