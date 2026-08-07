@@ -1,20 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)">
+    <list default="true" id="b01067c8-c2b4-42ee-87c5-e001135864fa" name="Changes" comment="fix : 할 일 정책 변경에 따른 코드 수정(#37)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/TaskRow/TaskRow.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Modal/Modal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Modal/Modal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Pagination/Pagination.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/Pagination/Pagination.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/constants/routes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/constants/routes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/login/views/LoginView.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/api/homeApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/MyTaskList/MyTaskList.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/components/TaskCreateModal/TaskCreateModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/home/hooks/queries/useProjectsQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/hooks/queries/useProjectsQuery.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/hooks/queries/useTasksQuery.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/home/views/HomeView.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/notification/api/notificationApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/api/notificationApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/notification/components/NotificationDropdown/NotificationDropdown.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/components/NotificationDropdown/NotificationDropdown.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/notification/utils/notificationLink.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/notification/utils/notificationLink.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectHeader.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectStatusMenu.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectHeader/ProjectStatusMenu.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/components/ProjectTable/ProjectTable.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/create/views/ProjectCreateView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseFormModal/ExpenseFormModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseFormModal/ExpenseFormModal.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseTable/ExpenseTable.module.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/components/ExpenseTable/ExpenseTable.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/hooks/queries/useExpensesQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/hooks/queries/useExpensesQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/finance/views/ProjectFinanceView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/hooks/useCanManageProject.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/hooks/useCanManageProject.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/overviewApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/overviewApi.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/api/taskBoardApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/hooks/queries/useProjectTasksQuery.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/hooks/queries/useProjectTasksQuery.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.module.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/project/overview/views/ProjectOverviewView.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layouts/AgentLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/AgentLayout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layouts/AuthGuard/AuthGuard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/AuthGuard/AuthGuard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/layouts/Gnb/Gnb.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/layouts/Gnb/Gnb.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/api/client.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/api/client.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/date.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/date.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/globals.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -43,24 +67,24 @@
   <component name="ProjectViewState">
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;fix/#34&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;kronk.content.tree.expanded.paths&quot;: &quot;&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/tnals/Desktop/PrettyWorks_FE&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "fix/#44",
+    "kotlin-language-version-configured": "true",
+    "kronk.content.tree.expanded.paths": "",
+    "last_opened_file_path": "C:/Users/tnals/Desktop/PrettyWorks_FE",
+    "nodejs_interpreter_path": "C:/Users/tnals/AppData/Roaming/JetBrains/IntelliJIdea2026.1/node/versions/24.18.0/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "project.propVCSSupport.DirectoryMappings",
+    "ts.external.directory.path": "C:\\Users\\tnals\\Desktop\\PrettyWorks_FE\\node_modules\\typescript\\lib"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -149,7 +173,15 @@
       <option name="project" value="LOCAL" />
       <updated>1785893487083</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="fix : 할 일 정책 변경에 따른 코드 수정(#37)">
+      <option name="closed" value="true" />
+      <created>1785986755376</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1785986755376</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -164,6 +196,7 @@
     <MESSAGE value="feat : 알림 배지 구현(#31)" />
     <MESSAGE value="feat : 알림 배지 구현 및 시각적 보정(#31)" />
     <MESSAGE value="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix : 마일스톤 토글API 변경에 따른 FE 코드 수정(#34)" />
+    <MESSAGE value="fix : 할 일 정책 변경에 따른 코드 수정(#37)" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix : 할 일 정책 변경에 따른 코드 수정(#37)" />
   </component>
 </project>

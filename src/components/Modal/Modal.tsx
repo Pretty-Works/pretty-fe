@@ -3,6 +3,8 @@
 import { useEffect, useId, useRef } from "react";
 import { createPortal } from "react-dom";
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
+
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -21,9 +23,9 @@ interface ModalProps {
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-// 열려 있는 모달 수. 모달이 겹칠 수 있어서(일정 수정 위에 삭제 확인 등) 개수로 센다.
-// 각자 "열기 전 값"을 되돌리면, 겹쳐 열렸다가 동시에 닫힐 때 나중 모달이 hidden을 복원해 스크롤이 잠긴 채 남는다.
-let openModalCount = 0;
+// 열려 있는 모달 스택 (겹칠 수 있다 — 일정 수정 위에 삭제 확인 등).
+// Esc·Tab을 맨 위 모달만 처리하려고 순서를 기억한다.
+const modalStack: string[] = [];
 
 // 모달 껍데기. 오버레이·닫기·포커스·스크롤만 책임지고 내용은 모른다.
 export default function Modal({
@@ -43,6 +45,9 @@ export default function Modal({
     if (!open) return;
 
     const onKey = (e: KeyboardEvent) => {
+      // 겹쳐 열렸으면 맨 위 모달만 반응한다 — 아니면 Esc 한 번에 둘 다 닫힌다
+      if (modalStack[modalStack.length - 1] !== titleId) return;
+
       if (e.key === "Escape") {
         onClose();
         return;
@@ -70,20 +75,22 @@ export default function Modal({
 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+  }, [open, onClose, titleId]);
 
-  // 열려 있는 동안 뒤 화면 스크롤 잠금 (마지막 모달이 닫힐 때만 푼다)
+  // 열려 있는 동안 뒤 화면 스크롤 잠금 (에이전트 전체화면과 겹쳐도 서로 풀지 않는다)
+  useBodyScrollLock(open);
+
+  // 겹쳐 열린 순서 — Esc·Tab을 맨 위 모달만 처리하기 위해 쌓는다
   useEffect(() => {
     if (!open) return;
 
-    openModalCount += 1;
-    document.body.style.overflow = "hidden";
+    modalStack.push(titleId);
 
     return () => {
-      openModalCount -= 1;
-      if (openModalCount === 0) document.body.style.overflow = "";
+      const index = modalStack.indexOf(titleId);
+      if (index !== -1) modalStack.splice(index, 1);
     };
-  }, [open]);
+  }, [open, titleId]);
 
   // 열릴 때 모달 안으로 포커스를 옮긴다
   useEffect(() => {

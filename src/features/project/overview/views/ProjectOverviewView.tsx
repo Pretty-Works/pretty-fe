@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Button from "@/components/Button/Button";
-import Chip from "@/components/Chip/Chip";
 import StateView from "@/components/StateView/StateView";
 
 import { getErrorCode } from "@/lib/api/errorCode";
@@ -173,30 +172,18 @@ export default function ProjectOverviewView({
           </div>
           <div className={styles.infoItem}>
             <dt className={styles.infoLabel}>책임자</dt>
+            {/* 역할은 상단바 참여자 명단에서 본다 — 여기는 이름만 */}
             <dd className={styles.infoValue}>
               {project.owner.name}
-              {project.owner.ownerRole && ` · ${project.owner.ownerRole}`}
+              {project.owner.status === "ON_LEAVE" && (
+                <span className={styles.leave}>휴직</span>
+              )}
             </dd>
           </div>
         </dl>
 
-        <div className={styles.memberList}>
-          {/* 오너를 맨 앞에 두고 참여자를 잇는다 */}
-          {[
-            {
-              userId: project.owner.userId,
-              name: project.owner.name,
-              role: project.owner.ownerRole,
-            },
-            ...project.members,
-          ].map((member) => (
-            <Chip
-              key={member.userId}
-              label={member.role ? `${member.name} · ${member.role}` : member.name}
-              tone={member.userId === project.owner.userId ? "primary" : "default"}
-            />
-          ))}
-        </div>
+        {/* 참여자 목록은 상단바 '멤버 N명'으로 옮겼다 —
+            개요에만 두면 회의록·재무에서는 누가 참여 중인지 볼 방법이 없다. */}
       </section>
 
       {/* 마일스톤 완료율 · 주간 Task (2단) */}
@@ -236,6 +223,10 @@ export default function ProjectOverviewView({
               board={board}
               weekOffset={weekOffset}
               onWeekChange={setWeekOffset}
+              period={{
+                startDate: project.startDate,
+                endDate: project.endDate,
+              }}
               onAddTask={
                 isOpenForContent ? () => setTaskModalOpen(true) : undefined
               }

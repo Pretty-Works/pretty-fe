@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -19,7 +19,12 @@ import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQue
 import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
 import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
 import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
-import type { UserSearchResult } from "@/features/user/api/userApi";
+import {
+  POSITION_LABEL,
+  type StatusType,
+  type UserSearchResult,
+} from "@/features/user/api/userApi";
+import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
 import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
 import { useCreateProjectMutation } from "@/features/project/create/hooks/mutations/useCreateProjectMutation";
 import { useUpdateProjectMutation } from "@/features/project/create/hooks/mutations/useUpdateProjectMutation";
@@ -53,13 +58,19 @@ const MAX = {
   milestoneGoal: 200,
   members: 100,
   milestones: 50,
+  // 목표 예산 자릿수. 서버 상한이 아니라 자바스크립트 안전 정수(9천조 대) 안에 두려는 값이다 —
+  // 넘기면 서버로 보내는 숫자부터 어긋나고, 한글 표기도 '조' 위 단위가 없어 깨진다.
+  budgetDigits: 15,
 } as const;
 
 interface MemberRow {
   userId: number;
   name: string;
-  // 부서 라벨. 상세 조회 응답에는 부서가 없어 수정 모드에서는 비어 있다
+  // 부서·직급 라벨. 상세 조회 응답에는 없어서, 수정 모드에서는 참여자 조회로 채운다
   team: string;
+  position: string;
+  // 재직 상태. 휴직 뱃지에 쓴다 (아직 모르면 붙이지 않는다)
+  status?: StatusType;
   role: string;
 }
 
@@ -84,15 +95,15 @@ const SMALL_UNITS = ["", "일", "이", "삼", "사", "오", "육", "칠", "팔",
 const TEN_UNITS = ["", "십", "백", "천"];
 const BIG_UNITS = ["", "만", "억", "조"];
 
-// 목표 예산 한글 표기: 120000000 → 일억 이천만 원
-function koreanMoney(value: number) {
-  if (!value) return "";
-
-  const digits = String(value).split("").reverse();
+// 목표 예산 한글 표기: "120000000" → 일억 이천만 원
+// 숫자가 아니라 입력 문자열을 그대로 받는다 — Number로 바꾸면 안전 정수를 넘길 때 자릿수가
+// 어긋나고, 21자리부터는 지수 표기(1e+21)가 돼 한 글자씩 읽을 수 없다.
+function koreanMoney(digits: string) {
+  const reversed = digits.split("").reverse();
   const chunks: string[] = [];
 
-  for (let i = 0; i < digits.length; i += 4) {
-    const chunk = digits.slice(i, i + 4);
+  for (let i = 0; i < reversed.length; i += 4) {
+    const chunk = reversed.slice(i, i + 4);
     let text = "";
 
     chunk.forEach((digit, index) => {
@@ -104,15 +115,15 @@ function koreanMoney(value: number) {
     if (text) chunks.push(`${text}${BIG_UNITS[i / 4]}`);
   }
 
+  // 빈 값이거나 0만 있으면 붙일 단위가 없다
+  if (chunks.length === 0) return "";
+
   return `${chunks.reverse().join(" ")} 원`;
 }
 
 // 1234567 → 1,234,567
 const withComma = (value: string) =>
   value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-// 생성 모드 오너의 기본 역할
-const DEFAULT_OWNER_ROLE = "PM";
 
 interface FormValues {
   name: string;
@@ -153,7 +164,7 @@ const EMPTY_SNAPSHOT = snapshotOf({
   endDate: "",
   budget: "",
   noBudgetLimit: false,
-  ownerRole: DEFAULT_OWNER_ROLE,
+  ownerRole: "",
   members: [],
   milestones: [],
 });
@@ -181,7 +192,7 @@ export default function ProjectCreateView({
   const [budget, setBudget] = useState("");
   const [noBudgetLimit, setNoBudgetLimit] = useState(false); // 예산 제한 없음(0)
 
-  const [ownerRole, setOwnerRole] = useState(DEFAULT_OWNER_ROLE);
+  const [ownerRole, setOwnerRole] = useState("");
   const [members, setMembers] = useState<MemberRow[]>([]);
   const [memberKeyword, setMemberKeyword] = useState("");
 
@@ -224,8 +235,10 @@ export default function ProjectCreateView({
       members: detail.members.map((member) => ({
         userId: member.userId,
         name: member.name,
-        // 목록 응답에 팀 정보가 없다
+        // 상세 응답에는 부서·직급이 없다. 아래 참여자 조회로 채워 넣는다
         team: "",
+        position: "",
+        status: member.status,
         role: member.role ?? "",
       })),
       // milestoneId를 그대로 들고 있어야 완료 상태가 보존된다
@@ -260,9 +273,48 @@ export default function ProjectCreateView({
   const ownerUserId = detail?.owner.userId ?? me?.userId;
   const ownerName = detail?.owner.name ?? me?.name ?? "";
 
-  // 상세 응답에는 부서가 없다 — 생성 모드에서만 내 부서를 보여줄 수 있다.
-  const ownerDepartment =
-    isEdit || !me ? "" : DEPARTMENT_LABEL[me.department];
+  // 부서·직급은 상세 응답에 없어 참여자 조회에서 가져온다 (수정 모드에서만 부른다).
+  // 폼 상태에 섞지 않고 그릴 때만 참고한다 — 저장에 들어가는 값이 아니라
+  // 여기서 채우면 '수정한 것 없음' 판정(snapshot)이 흔들린다.
+  const { data: projectMembers } = useProjectMembersQuery(
+    isEdit ? (projectId ?? "") : "",
+  );
+
+  const profileById = useMemo(() => {
+    const map = new Map<
+      number,
+      { team: string; position: string; status: StatusType }
+    >();
+
+    projectMembers?.forEach((member) =>
+      map.set(member.userId, {
+        team: DEPARTMENT_LABEL[member.department],
+        position: POSITION_LABEL[member.position],
+        status: member.status,
+      }),
+    );
+
+    return map;
+  }, [projectMembers]);
+
+  // 참여자 조회가 먼저지만, 새로 고른 사람은 거기 없어 폼이 들고 있는 값을 쓴다
+  const isOnLeave = (userId: number, fallback?: MemberRow) =>
+    (profileById.get(userId)?.status ?? fallback?.status) === "ON_LEAVE";
+
+  // 이름 옆에 붙는 "· 부서 · 직급". 아직 모르는 값은 자리를 비운다.
+  const profileLabel = (userId: number, fallback?: MemberRow) => {
+    const profile = profileById.get(userId);
+    const team = profile?.team || fallback?.team || "";
+    const position = profile?.position || fallback?.position || "";
+
+    return [team, position].filter(Boolean).map((part) => `· ${part}`).join(" ");
+  };
+
+  // 생성 모드의 오너는 아직 참여자 목록에 없다 — 내 프로필에서 직접 가져온다.
+  const ownerProfileLabel =
+    isEdit || !me
+      ? profileLabel(ownerUserId ?? -1)
+      : `· ${DEPARTMENT_LABEL[me.department]} · ${POSITION_LABEL[me.position]}`;
 
   const selectableSuggestions = suggestions.filter(
     (user) =>
@@ -299,7 +351,12 @@ export default function ProjectCreateView({
   // 금액으로 0을 적어 넣으면 의도와 다른 프로젝트가 만들어진다.
   // 제한이 없다는 뜻이면 옆의 '제한 없음' 버튼으로 밝히게 한다.
   const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBudget(e.target.value.replace(/[^\d]/g, "").replace(/^0+/, ""));
+    setBudget(
+      e.target.value
+        .replace(/[^\d]/g, "")
+        .replace(/^0+/, "")
+        .slice(0, MAX.budgetDigits),
+    );
   };
 
   const addMember = (user: UserSearchResult) => {
@@ -313,6 +370,8 @@ export default function ProjectCreateView({
           userId: user.userId,
           name: user.name,
           team: DEPARTMENT_LABEL[user.department],
+          position: POSITION_LABEL[user.position],
+          status: user.status,
           role: "",
         },
       ];
@@ -540,7 +599,7 @@ export default function ProjectCreateView({
             <FormField
               label="한글 표기"
               placeholder="목표 예산을 입력하세요"
-              value={noBudgetLimit ? "제한 없음" : koreanMoney(Number(budget))}
+              value={noBudgetLimit ? "제한 없음" : koreanMoney(budget)}
               readOnly
             />
           </div>
@@ -612,12 +671,12 @@ export default function ProjectCreateView({
               다른 참여자의 제거(✕) 자리에 왕관을 둔다. 칸 구조가 같아 줄이 어긋나지 않고,
               "이 사람은 뺄 수 없다"는 것도 그 자리에서 바로 읽힌다. */}
           <div className={styles.memberCard}>
-            {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다.
-                상세 응답에 부서가 없어 수정 모드에서는 이름만 보인다. */}
+            {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다 */}
             <span className={styles.memberName}>{ownerName}</span>
-            <span className={styles.memberTeam}>
-              {ownerDepartment ? `· ${ownerDepartment}` : ""}
-            </span>
+            <span className={styles.memberTeam}>{ownerProfileLabel}</span>
+            {ownerUserId !== null && isOnLeave(ownerUserId) && (
+              <span className={styles.leave}>휴직</span>
+            )}
             <input
               className={styles.roleInput}
               placeholder="역할"
@@ -634,10 +693,13 @@ export default function ProjectCreateView({
           {members.map((member) => (
             <div key={member.userId} className={styles.memberCard}>
               <span className={styles.memberName}>{member.name}</span>
-              {/* 부서를 모르면 구분자만 남으므로 아예 그리지 않는다 */}
+              {/* 모르는 값은 구분자만 남으므로 아예 그리지 않는다 */}
               <span className={styles.memberTeam}>
-                {member.team ? `· ${member.team}` : ""}
+                {profileLabel(member.userId, member)}
               </span>
+              {isOnLeave(member.userId, member) && (
+                <span className={styles.leave}>휴직</span>
+              )}
               <input
                 className={styles.roleInput}
                 placeholder="역할"

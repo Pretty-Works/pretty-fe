@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import Button from "@/components/Button/Button";
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import Modal from "@/components/Modal/Modal";
 import FormField from "@/components/FormField/FormField";
 import SelectField from "@/components/SelectField/SelectField";
@@ -69,6 +70,7 @@ export default function ExpenseFormModal({
   const [purpose, setPurpose] = useState("");
   const [amount, setAmount] = useState("");
   const [errorText, setErrorText] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false); // 삭제 확인
 
   // 연타·재시도로 지출이 두 건 생기지 않게, 폼이 열릴 때 한 번 발급해 둔다
   const [idempotencyKey, setIdempotencyKey] = useState("");
@@ -111,6 +113,7 @@ export default function ExpenseFormModal({
     setPurpose("");
     setAmount("");
     setErrorText("");
+    setDeleteOpen(false);
     onClose();
   };
 
@@ -163,7 +166,11 @@ export default function ExpenseFormModal({
 
     deleteExpense(expense.expenseId, {
       onSuccess: resetAndClose,
-      onError: (error) => showError(error, "지출을 삭제하지 못했어요."),
+      // 확인 창을 닫아야 폼 아래의 실패 문구가 보인다
+      onError: (error) => {
+        setDeleteOpen(false);
+        showError(error, "지출을 삭제하지 못했어요.");
+      },
     });
   };
 
@@ -190,7 +197,7 @@ export default function ExpenseFormModal({
               type="button"
               className={styles.deleteButton}
               disabled={isPending}
-              onClick={handleDelete}
+              onClick={() => setDeleteOpen(true)}
             >
               {isDeleting ? "삭제 중…" : "삭제"}
             </button>
@@ -261,6 +268,22 @@ export default function ExpenseFormModal({
 
         {errorText && <p className={styles.error}>{errorText}</p>}
       </div>
+
+      {/* 삭제 확인 — Modal은 body로 포털돼 이 폼 위에 겹쳐 뜬다 */}
+      <ConfirmDialog
+        open={deleteOpen}
+        title="지출을 삭제할까요?"
+        description={
+          expense
+            ? `삭제 후에는 복구가 어렵습니다.`
+            : undefined
+        }
+        confirmLabel="삭제"
+        tone="danger"
+        loading={isDeleting}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+      />
     </Modal>
   );
 }

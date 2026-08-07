@@ -8,12 +8,24 @@ interface PaginationProps {
   onPageChange?: (page: number) => void;
 }
 
+// 한 번에 보여줄 페이지 번호 개수. 전부 그리면 패널 폭을 넘긴다.
+// 슬라이딩 대신 10개 묶음(1~10, 11~20)으로 끊어 번호가 제자리를 지키게 한다.
+const PAGE_BLOCK = 10;
+
 export default function Pagination({
   currentPage,
   totalPages,
   onPageChange,
 }: PaginationProps) {
-  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  // 현재 페이지가 속한 묶음만 그린다. 화살표는 묶음 단위로 건너뛴다 (1 → 11 → 21).
+  const blockStart =
+    Math.floor((currentPage - 1) / PAGE_BLOCK) * PAGE_BLOCK + 1;
+  const blockEnd = Math.min(blockStart + PAGE_BLOCK - 1, totalPages);
+
+  const pages = Array.from(
+    { length: Math.max(0, blockEnd - blockStart + 1) },
+    (_, i) => blockStart + i,
+  );
 
   const goTo = (page: number) => {
     if (page < 1 || page > totalPages || page === currentPage) return;
@@ -29,9 +41,9 @@ export default function Pagination({
       <button
         type="button"
         className={`${styles.item} ${styles.arrow}`}
-        onClick={() => goTo(currentPage - 1)}
-        disabled={currentPage <= 1}
-        aria-label="이전 페이지"
+        onClick={() => goTo(blockStart - PAGE_BLOCK)}
+        disabled={blockStart === 1}
+        aria-label={`이전 ${PAGE_BLOCK}페이지`}
       >
         ‹
       </button>
@@ -55,9 +67,9 @@ export default function Pagination({
       <button
         type="button"
         className={`${styles.item} ${styles.arrow}`}
-        onClick={() => goTo(currentPage + 1)}
-        disabled={currentPage >= totalPages}
-        aria-label="다음 페이지"
+        onClick={() => goTo(blockStart + PAGE_BLOCK)}
+        disabled={blockEnd >= totalPages}
+        aria-label={`다음 ${PAGE_BLOCK}페이지`}
       >
         ›
       </button>

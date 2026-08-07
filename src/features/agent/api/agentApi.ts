@@ -431,3 +431,32 @@ export const updateAgentAutoApprove = async ({
 
   return response.data.result;
 };
+
+export interface AgentCancelResult {
+  runId: string;
+  status: AgentRunStatus;
+  /** 이미 끝난 실행이면 false. 에러가 아니라 그때의 상태를 돌려준 것이다 */
+  canceled: boolean;
+}
+
+interface AgentCancelApiResponse {
+  errorCode: string | null;
+  message: string;
+  result: AgentCancelResult;
+}
+
+/**
+ * 진행 중인 실행 중단.
+ *
+ * 대기 중이던 승인·질문 카드도 함께 닫히고 스트림에는 error 이벤트가 나간다.
+ * 브라우저 스트림만 끊으면 서버 실행은 계속 도므로 두 곳(패널 정지·홈 카드 중단)이 이걸 부른다.
+ */
+export const cancelAgentRun = async (
+  runId: string,
+): Promise<AgentCancelResult> => {
+  const response = await api.post<AgentCancelApiResponse>(
+    `/agent/runs/${runId}/cancel`,
+  );
+
+  return response.data.result;
+};

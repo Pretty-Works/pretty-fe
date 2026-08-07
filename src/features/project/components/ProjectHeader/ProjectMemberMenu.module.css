@@ -1,0 +1,115 @@
+.menu {
+  width: 300px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(69, 41, 120, 0.16);
+  overflow: hidden;
+}
+
+/* 참여자가 많은 프로젝트도 있어 높이를 묶고 안에서 스크롤한다 */
+.list {
+  display: flex;
+  flex-direction: column;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 부서 머리글 — 알림 드롭다운의 날짜 머리글과 같은 방식(회색 띠 + 고정) */
+.department {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  /* 위쪽 선은 그림자로 그린다 — border로 두면 위에 붙어 설 때 패널 테두리와 겹쳐 이중선이 된다 */
+  box-shadow: 0 -1px 0 var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-sub);
+}
+
+.departmentCount {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+.member {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px;
+}
+
+.member + .member {
+  border-top: 1px solid var(--line);
+}
+
+.name {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.position {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-placeholder);
+}
+
+/* 프로젝트 안에서의 역할 — 회사 직급과 다른 값이라 배지로 구분한다 */
+.role {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--primary-bright);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.leave {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+/* 남는 폭을 밀어내 왕관을 오른쪽 끝에 세운다 */
+.owner {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  padding-left: 4px;
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.owner svg {
+  width: 14px;
+  height: 14px;
+}
+
+.state {
+  padding: 26px 12px;
+  text-align: center;
+  font-size: 12.5px;
+  color: var(--text-placeholder);
+}

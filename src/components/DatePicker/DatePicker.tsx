@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FiCalendar } from "react-icons/fi";
 
+import { useClickOutside } from "@/hooks/useClickOutside";
+
 import styles from "./DatePicker.module.css";
 
 export interface DateRange {
@@ -91,17 +93,9 @@ export default function DatePicker(props: DatePickerProps) {
 
   const rootRef = useRef<HTMLDivElement>(null);
 
-  // 바깥 클릭 시 닫기 (임시 선택은 버린다)
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  // 바깥 클릭 시 닫기 (임시 선택은 버린다).
+  // 훅이 그 클릭을 여기서 끝내 준다 — 모달 안이면 오버레이까지 닿아 모달째 닫힌다.
+  useClickOutside(rootRef, () => setOpen(false), open);
 
   // 달력이 열려 있을 때 ESC는 달력만 닫는다.
   // 모달 안에서 쓰일 때 ESC가 모달까지 올라가 닫히는 걸 막는다.

@@ -1,10 +1,8 @@
 "use client";
 
-import { Fragment, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 import { useRouter } from "next/navigation";
-
-import { formatDayLabel } from "@/lib/date";
 
 import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
 import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
@@ -77,24 +75,14 @@ export default function NotificationDropdown({
           </div>
         )}
 
-        {/* 최신순으로 내려오므로 날짜가 바뀌는 지점에만 머리글을 끼운다 */}
-        {notifications?.map((notification, index) => {
-          const dayLabel = formatDayLabel(notification.createdAt);
-          const isNewDay =
-            index === 0 ||
-            dayLabel !== formatDayLabel(notifications[index - 1].createdAt);
-
-          return (
-            <Fragment key={notification.id}>
-              {isNewDay && <p className={styles.day}>{dayLabel}</p>}
-
-              <NotificationItem
-                notification={notification}
-                onSelect={handleSelect}
-              />
-            </Fragment>
-          );
-        })}
+        {/* 언제 온 알림인지는 항목마다 시각 자리에서 읽힌다 — 날짜 머리글을 두지 않는다 */}
+        {notifications?.map((notification) => (
+          <NotificationItem
+            key={notification.id}
+            notification={notification}
+            onSelect={handleSelect}
+          />
+        ))}
 
         {hasNextPage && <div ref={sentinelRef} className={styles.sentinel} />}
 

@@ -24,28 +24,6 @@
   overflow-y: auto;
 }
 
-/* 오늘 / 어제 / 8월 2일 (일)
-   스크롤 중에도 지금 보는 게 언제 알림인지 남아 있게 위에 붙인다 */
-.day {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  padding: 6px 12px;
-  /* 항목 사이 구분선(--line)과 같은 선을 쓰면 머리글이 그냥 또 하나의 항목처럼 보인다.
-     회색 띠 + 한 톤 진한 선으로 층을 나눈다 */
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  /* 위쪽 선을 border가 아니라 그림자로 그린다.
-     border로 그리면 (1) 머리글이 위에 붙어 설 때 패널 테두리와 겹쳐 이중선이 되고,
-     (2) 그걸 top:-1px로 피하면 고정되는 순간 머리글이 1px 튄다.
-     그림자는 상자 밖에 그려져서 위에 붙는 순간 스크롤 영역 밖으로 잘리고,
-     자리를 차지하지 않아 튀지도 않는다 */
-  box-shadow: 0 -1px 0 var(--border);
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-sub);
-}
-
 .state {
   padding: 18px 10px;
   font-size: 11.5px;

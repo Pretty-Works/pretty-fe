@@ -11,12 +11,47 @@
 }
 
 .groupHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 8px 12px;
   border-radius: 8px;
   background: var(--surface);
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
+}
+
+/* 이름이 길면 줄이고, 상태 점은 오른쪽 끝에 붙여 둔다 */
+.groupName {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
+  border-radius: 50%;
+}
+
+.green {
+  background: var(--success);
+}
+
+.orange {
+  background: var(--warning);
+}
+
+.purple {
+  background: var(--primary);
+}
+
+.gray {
+  background: var(--text-placeholder);
 }
 
 .items {

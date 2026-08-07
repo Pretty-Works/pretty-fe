@@ -197,6 +197,17 @@
   color: var(--text-sub);
 }
 
+/* 휴직 뱃지 — 상단바 참여자 명단(ProjectMemberMenu .leave)과 같은 모양 */
+.leave {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
 /* 역할 — 직접 입력 (예: PM, TL) */
 .roleInput {
   flex-shrink: 0;

@@ -109,11 +109,59 @@
   background-repeat: no-repeat;
 }
 
+/* 멤버 버튼 자리 — 헤더 오른쪽 끝. 명단 드롭다운의 기준점이 된다 */
+.memberArea {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* 누르면 참여자 명단 */
+.memberButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  height: 26px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.memberButton:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.memberButton:disabled {
+  color: var(--text-placeholder);
+  cursor: default;
+}
+
+.memberCount {
+  font-weight: 600;
+}
+
 /* 드롭다운 */
 .popupLeft,
-.popupRight {
+.popupRight,
+.popupMembers {
   position: absolute;
   top: calc(100% + 8px);
   left: 0;
   z-index: 30;
+}
+
+/* 멤버 명단은 오른쪽 맞춤 — 왼쪽 기준이면 폭 300px이 화면 밖으로 나간다 */
+.popupMembers {
+  left: auto;
+  right: 0;
 }

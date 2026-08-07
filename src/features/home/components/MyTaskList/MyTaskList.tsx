@@ -2,6 +2,7 @@
 
 import TaskRow from "@/components/TaskRow/TaskRow";
 
+import { PROJECT_STATUS_META } from "@/features/home/constants/projectStatus";
 import type { MyTask, MyTaskGroup } from "@/features/home/api/homeApi";
 
 import styles from "./MyTaskList.module.css";
@@ -26,9 +27,18 @@ export default function MyTaskList({
           key={group.projectId ?? "personal"}
           className={styles.group}
         >
-          {/* projectId가 없으면 개인 할 일 그룹 */}
+          {/* projectId가 없으면 개인 할 일 그룹 — 상태 점도 없다 */}
           <div className={styles.groupHead}>
-            {group.projectName ?? "개인 할 일"}
+            <span className={styles.groupName}>
+              {group.projectName ?? "개인 할 일"}
+            </span>
+
+            {group.status && (
+              <span
+                className={`${styles.dot} ${styles[PROJECT_STATUS_META[group.status].tone]}`}
+                title={PROJECT_STATUS_META[group.status].label}
+              />
+            )}
           </div>
 
           <ul className={styles.items}>

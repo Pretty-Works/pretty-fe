@@ -17,6 +17,8 @@ interface ProjectTableProps<T> {
   rows: T[];
   rowKey: (row: T) => string;
   onRowClick?: (row: T) => void;
+  /** 줄마다 누를 수 있는지 다를 때 (예: 본인이 등록한 지출만). 없으면 전부 누를 수 있다 */
+  canClickRow?: (row: T) => boolean;
 }
 
 // 폭을 지정하지 않은 칸(제목)이 이보다 좁아지면 글자가 남지 않는다
@@ -40,6 +42,7 @@ export default function ProjectTable<T>({
   rows,
   rowKey,
   onRowClick,
+  canClickRow,
 }: ProjectTableProps<T>) {
   const cellStyle = (col: ProjectTableColumn<T>) => ({
     ...(col.width
@@ -89,30 +92,35 @@ export default function ProjectTable<T>({
         ))}
       </div>
 
-      {rows.map((row) => (
-        <div
-          key={rowKey(row)}
-          className={styles.row}
-          role="row"
-          onClick={() => onRowClick?.(row)}
-        >
-          {columns.map((col) => (
-            <div
-              key={col.key}
-              className={`${styles.cell} ${toneClass(col.tone)} ${foldClass(col.fold)}`}
-              style={cellStyle(col)}
-            >
-              {col.render ? (
-                col.render(row)
-              ) : (
-                <span className={styles.clip}>
-                  {String((row as Record<string, unknown>)[col.key] ?? "")}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      ))}
+      {rows.map((row) => {
+        // 누를 수 없는 줄은 커서·hover도 주지 않는다 — 눌러도 할 수 있는 게 없다
+        const clickable = !!onRowClick && (canClickRow?.(row) ?? true);
+
+        return (
+          <div
+            key={rowKey(row)}
+            className={`${styles.row} ${clickable ? styles.rowClickable : ""}`}
+            role="row"
+            onClick={clickable ? () => onRowClick(row) : undefined}
+          >
+            {columns.map((col) => (
+              <div
+                key={col.key}
+                className={`${styles.cell} ${toneClass(col.tone)} ${foldClass(col.fold)}`}
+                style={cellStyle(col)}
+              >
+                {col.render ? (
+                  col.render(row)
+                ) : (
+                  <span className={styles.clip}>
+                    {String((row as Record<string, unknown>)[col.key] ?? "")}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        );
+      })}
     </div>
   );
 }

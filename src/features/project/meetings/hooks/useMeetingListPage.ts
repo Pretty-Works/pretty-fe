@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
 import { useMeetingsQuery } from "@/features/project/meetings/hooks/queries/useMeetingsQuery";
+import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
 
 const PAGE_SIZE = 10;
@@ -23,6 +24,9 @@ export const useMeetingListPage = (projectId: string) => {
       size: PAGE_SIZE,
     },
   );
+
+  // 마지막 회의록을 지워 그 페이지가 사라지면 마지막 페이지로 당긴다
+  useClampPage(list.page, data?.totalPages, list.setPage);
 
   // 완료·보관 프로젝트에는 회의록을 쓸 수 없다 (BE MeetingErrorCode.PROJECT_CLOSED)
   const canWrite = useIsProjectOpenForContent(projectId);

@@ -7,7 +7,10 @@ import { useQueryClient } from "@tanstack/react-query";
 
 import { agentLogError } from "@/features/agent/api/agentDebug";
 import { AgentStreamError } from "@/features/agent/api/agentStream";
-import { useSendAgentMessageMutation } from "@/features/agent/hooks/mutations/useAgentMutations";
+import {
+  useCancelAgentRunMutation,
+  useSendAgentMessageMutation,
+} from "@/features/agent/hooks/mutations/useAgentMutations";
 import { buildScreenContext } from "@/features/agent/screenRegistry";
 
 import { useChatStore } from "@/stores/useChatStore";
@@ -20,6 +23,7 @@ export function useAgentRun() {
   const pathname = usePathname();
   const queryClient = useQueryClient();
   const { mutate } = useSendAgentMessageMutation();
+  const { mutate: cancelRun } = useCancelAgentRunMutation();
   const abortRef = useRef<AbortController | null>(null);
 
   const disconnectRunStream = useCallback(() => {
@@ -125,11 +129,16 @@ export function useAgentRun() {
     openRunStream(goal);
   }, [openRunStream]);
 
-  // TODO: 취소 API를 붙이면 브라우저 스트림뿐 아니라 서버 실행도 함께 중지한다.
+  // 스트림만 끊으면 서버 실행은 계속 돈다 — 취소까지 보내야 대기 중이던 승인·질문도 닫힌다.
+  // 화면은 응답을 기다리지 않는다. 눌렀는데 멈추지 않으면 연타하게 된다.
   const stop = useCallback(() => {
+    const { runId } = useChatStore.getState();
+
     disconnectRunStream();
     useChatStore.getState().cancelRun();
-  }, [disconnectRunStream]);
+
+    if (runId) cancelRun(runId);
+  }, [disconnectRunStream, cancelRun]);
 
   return { sendMessage, retry, stop, disconnectRunStream };
 }

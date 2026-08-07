@@ -155,3 +155,43 @@
   font-size: 13px;
   color: var(--text-placeholder);
 }
+
+/* 연도 선택 — 기간이 길면 목록이 길어져 높이를 묶고 안에서 스크롤한다 */
+.yearMenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 96px;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  list-style: none;
+}
+
+.yearItem {
+  width: 100%;
+  padding: 7px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.yearItem:hover {
+  background: var(--primary-bright);
+}
+
+/* 지금 보고 있는 주가 속한 해 */
+.yearItemOn {
+  background: var(--primary-bright);
+  color: var(--primary);
+  font-weight: 600;
+}
