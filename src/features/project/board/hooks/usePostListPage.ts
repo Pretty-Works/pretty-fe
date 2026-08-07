@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePostsQuery } from "@/features/project/board/hooks/queries/usePostsQuery";
 import type { ImportanceFilterValue } from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
 import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
+import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
 
 const PAGE_SIZE = 10;
@@ -24,6 +25,9 @@ export const usePostListPage = (projectId: string) => {
       size: PAGE_SIZE,
     },
   );
+
+  // 마지막 글을 지워 그 페이지가 사라지면 마지막 페이지로 당긴다
+  useClampPage(list.page, data?.totalPages, list.setPage);
 
   // 완료·보관 프로젝트에는 글을 쓸 수 없다 (BE PostErrorCode.PROJECT_CLOSED)
   const canWrite = useIsProjectOpenForContent(projectId);

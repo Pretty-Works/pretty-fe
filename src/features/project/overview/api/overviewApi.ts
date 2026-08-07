@@ -4,17 +4,21 @@
 import { api } from "@/lib/api/client";
 
 import type { ProjectStatus } from "@/features/home/api/homeApi";
+import type { StatusType } from "@/features/user/api/userApi";
 import type { Milestone } from "./milestoneApi";
 
 export interface ProjectOwner {
   userId: number;
   name: string;
+  // 재직 상태. 휴직 뱃지에 쓴다 (퇴사자는 참여자로 남지 않는다)
+  status: StatusType;
   ownerRole: string | null;
 }
 
 export interface ProjectMember {
   userId: number;
   name: string;
+  status: StatusType;
   role: string | null;
 }
 
@@ -45,7 +49,7 @@ export interface ProjectDetailResponse {
 }
 
 // --- 프로젝트 상태 변경 (PATCH /api/v1/projects/{projectId}/status) ---
-// 오너 또는 역할이 PM인 참여자만 (PROJECT_005).
+// 오너 또는 부서가 PM인 참여자만 (PROJECT_005).
 // COMPLETED·ARCHIVED는 종료 상태라 진입 후 되돌릴 수 없다 (PROJECT_019).
 export interface ChangeStatusResponse {
   errorCode: string | null;

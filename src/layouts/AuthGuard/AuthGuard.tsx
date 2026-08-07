@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 
 import Logo from "@/assets/brand/logo.png";
-import { isPublicPath, loginPathFor } from "@/constants/routes";
+import { isPublicPath, LOGIN_PATH } from "@/constants/routes";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 import styles from "./AuthGuard.module.css";
@@ -44,12 +44,8 @@ export default function AuthGuard({
   const shouldRedirect = hydrated && !accessToken && !publicPath;
 
   useEffect(() => {
-    // 로그인 후 원래 보려던 화면으로 돌려보내려고 현재 주소를 넘긴다.
-    // 이 effect는 브라우저에서만 도므로 window를 봐도 안전하다.
-    if (shouldRedirect) {
-      router.replace(loginPathFor(pathname, window.location.search));
-    }
-  }, [shouldRedirect, pathname, router]);
+    if (shouldRedirect) router.replace(LOGIN_PATH);
+  }, [shouldRedirect, router]);
 
   // 공개 경로는 인증 상태와 관계없이 바로 보여준다.
   // 반대 경우(로그인한 채로 로그인 화면에 들어옴)는 LoginView가 맡는다.

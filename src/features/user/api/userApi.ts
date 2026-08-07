@@ -29,6 +29,9 @@ export const POSITION_LABEL: Record<PositionType, string> = {
 export interface MyProfile {
   userId: number;
   name: string;
+  // 본인 것만 내려온다 (프로필 메뉴 표시용)
+  employeeNo: string;
+  email: string;
   department: DepartmentType;
   position: PositionType;
   // 프로젝트 생성 버튼 노출 여부. 판정에 쓰는 직급 서열이 서버에만 있어 결과만 내려온다.

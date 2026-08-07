@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FiChevronDown } from "react-icons/fi";
 
+import { useClickOutside } from "@/hooks/useClickOutside";
+
 import styles from "./TimeSelect.module.css";
 
 interface TimeSelectProps {
@@ -45,17 +47,9 @@ export default function TimeSelect({
     return list;
   }, [step]);
 
-  // 바깥 클릭 시 닫기
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  // 바깥 클릭 시 닫기.
+  // 훅이 그 클릭을 여기서 끝내 준다 — 모달 안이면 오버레이까지 닿아 모달째 닫힌다.
+  useClickOutside(rootRef, () => setOpen(false), open);
 
   // 열 때 선택된 시각이 보이도록 스크롤
   useEffect(() => {

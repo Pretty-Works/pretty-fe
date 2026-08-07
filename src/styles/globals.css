@@ -87,7 +87,8 @@ body {
 .agent {
   position: fixed;
   top: 0;
-  right: 0;
+  /* 고정 요소는 body 여백을 받지 않는다 — 모달이 잰 스크롤바 폭만큼 직접 물러난다 */
+  right: var(--scrollbar-gap, 0);
   width: var(--agent-w);
   height: 100vh;
   overflow: hidden;
@@ -108,8 +109,10 @@ body {
   margin-right: 0;
 }
 
+/* 전체화면일 땐 패널이 화면을 다 덮으므로 스크롤바 자리를 비워 두지 않는다 */
 .layout.expanded .agent {
   width: 100vw;
+  right: 0;
 }
 
 /* 패널(420px)과 본문을 나란히 두기엔 화면이 좁은 구간 — 자리를 비워 봐야

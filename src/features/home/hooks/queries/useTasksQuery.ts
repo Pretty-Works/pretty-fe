@@ -13,6 +13,7 @@ export const useTasksQuery = () => {
         (group): MyTaskGroup => ({
           projectId: group.projectId,
           projectName: group.projectName,
+          status: group.status,
           tasks: group.tasks.map((task) => ({
             id: String(task.taskId),
             title: task.content,

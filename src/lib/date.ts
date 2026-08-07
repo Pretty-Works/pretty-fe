@@ -18,6 +18,28 @@ export function startOfDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
+// "YYYY-MM-DD" → 로컬 자정 Date. new Date(iso)는 UTC로 읽어 하루씩 밀린다.
+export function fromISO(iso: string): Date {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+// 그 날짜가 속한 주의 월요일 (BE WeekRange와 같은 정의)
+export function startOfWeek(date: Date): Date {
+  const monday = startOfDay(date);
+  monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+
+  return monday;
+}
+
+// "YYYY-MM-DD"가 이번 주에서 몇 주 떨어져 있는지 — 주간 보드의 weekOffset이 된다
+export function weekOffsetOf(iso: string): number {
+  const target = startOfWeek(fromISO(iso)).getTime();
+  const current = startOfWeek(new Date()).getTime();
+
+  return Math.round((target - current) / (7 * 86400000));
+}
+
 // "YYYY-MM-DD"를 [min, max] 안으로 당긴다 — 범위 밖이면 가장 가까운 끝날.
 // 기본값(오늘)이 프로젝트 기간을 벗어난 화면에서 쓴다.
 // 빈 값은 아직 고르지 않은 것이라 그대로 둔다.
@@ -29,12 +51,14 @@ export function clampDate(iso: string, min: string, max: string): string {
   return iso;
 }
 
-// 타임존이 없는 벽시계 값. 서버가 두 가지 모양으로 준다.
+// 타임존이 없는 벽시계 값. 서버가 세 가지 모양으로 준다.
 //   "2026-08-02 14:31:02"  — 대화 목록·대기 카드 (@JsonFormat)
 //   "2026-08-06T14:05:00"  — 대화 메시지 (LocalDateTime 기본 직렬화)
+//   "2026-08-06"           — 시각 없이 날짜만
+// 날짜만 있는 값을 new Date()에 넘기면 UTC 자정으로 읽혀 KST에서 09:00이 된다. 여기서 받아 낸다.
 // 끝에 Z나 ±09:00이 붙은 값은 걸리지 않고 아래 new Date()로 넘어간다.
 const LOCAL_DATE_TIME =
-  /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?$/;
+  /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?)?$/;
 
 // 서버 시각 문자열 → Date.
 // 공백으로 끊은 모양은 표준이 아니라 new Date()의 결과가 브라우저마다 갈린다.
@@ -49,8 +73,8 @@ export function parseServerDateTime(dateTime: string): Date {
     Number(year),
     Number(month) - 1,
     Number(day),
-    Number(hours),
-    Number(minutes),
+    Number(hours ?? 0),
+    Number(minutes ?? 0),
     Number(seconds ?? 0),
   );
 }
@@ -70,6 +94,37 @@ export function formatDayLabel(dateTime: string): string {
   if (days === 1) return "어제";
 
   return `${date.getMonth() + 1}월 ${date.getDate()}일 (${WEEKDAYS[date.getDay()]})`;
+}
+
+// "N일 전"으로 읽어 줄 최대 일수. 이보다 오래되면 세어 봐야 언제인지 알 수 있어 날짜로 적는다.
+const RELATIVE_DAYS = 3;
+
+// 올해면 "8월 2일", 다른 해면 "2024년 1월 15일" — 해가 다르면 월·일만으로는 언제인지 알 수 없다.
+function formatShortDate(date: Date): string {
+  const monthDay = `${date.getMonth() + 1}월 ${date.getDate()}일`;
+
+  return date.getFullYear() === new Date().getFullYear()
+    ? monthDay
+    : `${date.getFullYear()}년 ${monthDay}`;
+}
+
+// 알림 목록의 시각 표기 — 오늘 "14:32" · 1~3일 "2일 전" · 그 밖은 날짜.
+// 날짜 머리글 없이 한 자리에서 언제인지 읽히게 한다.
+export function formatNotifiedAt(dateTime: string): string {
+  const date = parseServerDateTime(dateTime);
+
+  // 읽지 못한 값은 빈칸으로 두지 않는다 — 자리가 비면 무엇이 잘못됐는지조차 알 수 없다
+  if (Number.isNaN(date.getTime())) return String(dateTime ?? "");
+
+  const days = Math.round(
+    (startOfDay(new Date()).getTime() - startOfDay(date).getTime()) / 86400000,
+  );
+
+  // 오늘만 시각으로 읽는다. 앞선 날짜(days < 0)까지 여기 넣으면 미래 알림이 전부 시각으로 보인다.
+  if (days === 0) return formatTimeOfDay(dateTime);
+  if (days >= 1 && days <= RELATIVE_DAYS) return `${days}일 전`;
+
+  return formatShortDate(date);
 }
 
 // 두 시각이 같은 날인지. 말풍선 사이에 날짜 구분선을 넣을지 판단하는 데 쓴다.

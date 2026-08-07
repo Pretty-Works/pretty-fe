@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
+
 import { getErrorCode } from "@/lib/api/errorCode";
 import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 import { useToastStore, type ToastTone } from "@/stores/useToastStore";
@@ -18,10 +20,11 @@ import type { ProjectStatus } from "@/features/home/api/homeApi";
 
 import ProjectStatusMenu from "./ProjectStatusMenu";
 import ProjectSwitchMenu from "./ProjectSwitchMenu";
+import ProjectMemberMenu from "./ProjectMemberMenu";
 
 import styles from "./ProjectHeader.module.css";
 
-type OpenMenu = "status" | "switch" | null;
+type OpenMenu = "status" | "switch" | "members" | null;
 
 // 무엇이 바뀌었는지 문구와 색으로 함께 알린다. 색은 상태 점(ProjectStatusMenu)과 같은 토큰.
 const STATUS_TOAST: Record<ProjectStatus, { message: string; tone: ToastTone }> =
@@ -42,6 +45,35 @@ const STATUS_ERROR_MESSAGE: Record<string, string> = {
   USER_003: "퇴사한 사용자는 상태를 바꿀 수 없어요",
 };
 
+// 되돌릴 수 없는 상태(PROJECT_019)라 고르면 바로 바꾸지 않고 한 번 묻는다.
+// 완료는 정상적인 마무리라 보라, 삭제만 빨강으로 무게를 준다.
+const CONFIRM_STATUS: Partial<
+  Record<
+    ProjectStatus,
+    {
+      title: string;
+      description: string;
+      label: string;
+      tone: "primary" | "danger";
+    }
+  >
+> = {
+  COMPLETED: {
+    title: "프로젝트를 완료할까요?",
+    description:
+      "완료한 프로젝트는 다시 진행중으로 되돌릴 수 없어요. 회의록·게시글·할 일도 더 이상 추가할 수 없어요.",
+    label: "완료",
+    tone: "primary",
+  },
+  ARCHIVED: {
+    title: "프로젝트를 삭제할까요?",
+    description:
+      "삭제한 프로젝트는 목록에서 사라지고 되돌릴 수 없어요. 안에 쌓인 회의록·지출·할 일도 함께 볼 수 없게 돼요.",
+    label: "삭제",
+    tone: "danger",
+  },
+};
+
 export default function ProjectHeader() {
   // 프로젝트 하위 모든 화면에서 쓰이므로 경로에서 직접 id를 읽는다.
   const params = useParams<{ projectId: string }>();
@@ -59,9 +91,13 @@ export default function ProjectHeader() {
 
   // 개요 화면과 같은 쿼리 키라 캐시를 공유한다 (요청이 두 번 나가지 않음).
   const { data: project, isError } = useProjectDetailQuery(projectId);
-  const { mutate: changeStatus } = useChangeProjectStatusMutation(projectId);
+  const { mutate: changeStatus, isPending: isChangingStatus } =
+    useChangeProjectStatusMutation(projectId);
 
-  // 수정(PROJECT_005)과 상태 변경(PROJECT_017)의 판정 기준이 같다 — 오너이거나 역할이 PM
+  // 확인을 기다리는 상태 (완료·삭제)
+  const [pendingStatus, setPendingStatus] = useState<ProjectStatus | null>(null);
+
+  // 수정(PROJECT_005)과 상태 변경(PROJECT_017)의 판정 기준이 같다 — 오너이거나 부서가 PM
   const canManage = useCanManageProject(projectId);
 
   // 프로젝트 수정처럼 작성 중인 화면에서 다른 프로젝트로 넘어가려 하면 먼저 확인을 받는다
@@ -73,11 +109,10 @@ export default function ProjectHeader() {
     unavailable: isError,
   });
 
-  // 완료·보관 프로젝트는 수정할 수 없다 (BE ProjectPolicy.isOpenForContent → PROJECT_020)
-  const isOpenForContent =
-    !!project &&
-    project.status !== "COMPLETED" &&
-    project.status !== "ARCHIVED";
+  // 보관은 갈 수 있는 상태가 없고, 완료는 삭제만 남는다 (PROJECT_019).
+  // 바꿀 수 있는 사람은 오너·PM뿐이다 (PROJECT_017 = ProjectPolicy.canUpdate).
+  const canChangeStatus =
+    !!project && project.status !== "ARCHIVED" && canManage;
 
   // 바깥 클릭 시 닫기 (DatePicker와 동일 패턴)
   useEffect(() => {
@@ -96,22 +131,63 @@ export default function ProjectHeader() {
   const toggle = (menu: OpenMenu) =>
     setOpenMenu((prev) => (prev === menu ? null : menu));
 
+  const applyStatus = (status: ProjectStatus) => {
+    changeStatus(status, {
+      onSuccess: () => {
+        setOpenMenu(null);
+        setPendingStatus(null);
+
+        const { message, tone } = STATUS_TOAST[status];
+        showToast(message, tone);
+
+        // 삭제(보관)는 이 화면에 남아 있을 수 없어 홈으로 내보낸다.
+        // 토스트는 layout에 있어 이동해도 그대로 떠 있다.
+        if (status === "ARCHIVED") router.push("/");
+      },
+
+      onError: (error) => {
+        setOpenMenu(null);
+        setPendingStatus(null);
+
+        const code = getErrorCode(error);
+        showToast(
+          (code && STATUS_ERROR_MESSAGE[code]) ||
+            "프로젝트 상태를 변경하지 못했어요",
+          "danger",
+        );
+      },
+    });
+  };
+
+  // 되돌릴 수 없는 상태는 바로 바꾸지 않고 확인을 먼저 받는다
+  const selectStatus = (status: ProjectStatus) => {
+    if (!CONFIRM_STATUS[status]) {
+      applyStatus(status);
+      return;
+    }
+
+    setOpenMenu(null);
+    setPendingStatus(status);
+  };
+
+  const confirm = pendingStatus ? CONFIRM_STATUS[pendingStatus] : undefined;
+
   // 보관은 목록에서 사라지므로 화면에 남겨두지 않고 홈으로 보낸다
   const statusTone =
     project && project.status !== "ARCHIVED"
       ? PROJECT_STATUS_META[project.status].tone
       : null;
 
+  // 바깥 클릭 감지는 헤더 전체를 기준으로 한다 — 멤버 버튼이 selector 밖으로 나가 있다
   return (
-    <div className={styles.header}>
-      <div className={styles.selector} ref={rootRef}>
+    <div className={styles.header} ref={rootRef}>
+      <div className={styles.selector}>
         {/* 색 점 — 진행 상태 변경 */}
         <button
           type="button"
           className={styles.dotButton}
           onClick={() => toggle("status")}
-          /* 완료·보관은 되돌릴 수 없고(PROJECT_019), 오너·PM이 아니면 바꿀 수 없다(PROJECT_017) */
-          disabled={!isOpenForContent || !canManage}
+          disabled={!canChangeStatus}
           aria-haspopup="menu"
           aria-expanded={openMenu === "status"}
           aria-label="프로젝트 상태 변경"
@@ -145,30 +221,7 @@ export default function ProjectHeader() {
           <div className={styles.popupLeft}>
             <ProjectStatusMenu
               current={project.status}
-              onChange={(status) => {
-                changeStatus(status, {
-                  onSuccess: () => {
-                    setOpenMenu(null);
-
-                    const { message, tone } = STATUS_TOAST[status];
-                    showToast(message, tone);
-
-                    // 삭제(보관)는 이 화면에 남아 있을 수 없어 홈으로 내보낸다.
-                    // 토스트는 layout에 있어 이동해도 그대로 떠 있다.
-                    if (status === "ARCHIVED") router.push("/");
-                  },
-
-                  onError: (error) => {
-                    setOpenMenu(null);
-                    const code = getErrorCode(error);
-                    showToast(
-                      (code && STATUS_ERROR_MESSAGE[code]) ||
-                        "프로젝트 상태를 변경하지 못했어요",
-                      "danger",
-                    );
-                  },
-                });
-              }}
+              onChange={selectStatus}
             />
           </div>
         )}
@@ -186,8 +239,48 @@ export default function ProjectHeader() {
             />
           </div>
         )}
+
       </div>
 
+      {/* 멤버 — 네 탭 어디서나 참여자를 확인한다.
+          이름 옆이 아니라 헤더 오른쪽 끝에 세운다 (space-between) */}
+      <div className={styles.memberArea}>
+        <button
+          type="button"
+          className={styles.memberButton}
+          onClick={() => toggle("members")}
+          disabled={!project}
+          aria-haspopup="menu"
+          aria-expanded={openMenu === "members"}
+        >
+          멤버
+          {/* 명단을 열기 전에도 규모를 알 수 있게 상세 응답의 인원수를 먼저 쓴다.
+              (오너 + 참여자 — 멤버 API의 명단과 같은 사람들이다) */}
+          {project && (
+            <span className={styles.memberCount}>
+              {project.members.length + 1}명
+            </span>
+          )}
+        </button>
+
+        {openMenu === "members" && (
+          <div className={styles.popupMembers}>
+            <ProjectMemberMenu projectId={projectId} />
+          </div>
+        )}
+      </div>
+
+      {/* 완료·삭제 확인 (PROJECT_019 — 되돌릴 수 없다) */}
+      <ConfirmDialog
+        open={!!confirm}
+        title={confirm?.title ?? ""}
+        description={confirm?.description}
+        confirmLabel={confirm?.label}
+        tone={confirm?.tone}
+        loading={isChangingStatus}
+        onClose={() => setPendingStatus(null)}
+        onConfirm={() => pendingStatus && applyStatus(pendingStatus)}
+      />
     </div>
   );
 }

@@ -66,6 +66,34 @@
   font-size: 13.5px;
 }
 
+/* 라벨에 목록이 붙을 때 — 목록이 라벨 아래 가운데에 서도록 기준점이 된다 */
+.labelWrap {
+  position: relative;
+  display: flex;
+}
+
+.labelButton {
+  padding: 5px 6px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.labelButton:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+}
+
 .reset {
   /* gap이 줄어든 만큼 늘려서 '이번 주' 버튼은 원래 간격을 유지한다 */
   margin-left: 8px;

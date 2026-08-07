@@ -9,11 +9,13 @@ import {
   LuFileText,
   LuWallet,
   LuPencilLine,
+  LuFolderPlus,
 } from "react-icons/lu";
 
 import { PROJECT_TABS } from "@/features/project/constants/projectTabs";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import styles from "./ProjectLnb.module.css";
@@ -38,6 +40,11 @@ export default function ProjectLnb() {
     !!project &&
     project.status !== "COMPLETED" &&
     project.status !== "ARCHIVED";
+
+  // 생성 권한은 이 프로젝트와 무관하다 — 홈과 같은 판정(직급 팀장 이상 또는 부서 PM)을
+  // 서버가 내려준 결과 그대로 쓴다.
+  const { data: me } = useMyProfileQuery();
+  const canCreate = !!me?.canCreateProject;
 
   // 작성 중인 화면(프로젝트 수정 등)에서 메뉴를 누르면 먼저 확인을 받는다.
   // 지금 보고 있는 메뉴는 나가는 게 아니므로 막지 않는다.
@@ -76,20 +83,32 @@ export default function ProjectLnb() {
         );
       })}
 
+      {(canCreate || canEdit) && <hr className={styles.divider} />}
+
+      {/* 지금 프로젝트를 벗어나는 이동이라 작성 중이면 먼저 확인을 받는다 */}
+      {canCreate && (
+        <Link
+          href="/projects/new"
+          onClick={guard("/projects/new", false)}
+          title="프로젝트 생성"
+          className={styles.item}
+        >
+          <LuFolderPlus className={styles.icon} aria-hidden="true" />
+          <span className={styles.label}>프로젝트 생성</span>
+        </Link>
+      )}
+
       {canEdit && (
-        <>
-          <hr className={styles.divider} />
-          <Link
-            href={editHref}
-            onClick={guard(editHref, isEditActive)}
-            aria-current={isEditActive ? "page" : undefined}
-            title="프로젝트 수정"
-            className={`${styles.item} ${isEditActive ? styles.active : ""}`}
-          >
-            <LuPencilLine className={styles.icon} aria-hidden="true" />
-            <span className={styles.label}>프로젝트 수정</span>
-          </Link>
-        </>
+        <Link
+          href={editHref}
+          onClick={guard(editHref, isEditActive)}
+          aria-current={isEditActive ? "page" : undefined}
+          title="프로젝트 수정"
+          className={`${styles.item} ${isEditActive ? styles.active : ""}`}
+        >
+          <LuPencilLine className={styles.icon} aria-hidden="true" />
+          <span className={styles.label}>프로젝트 수정</span>
+        </Link>
       )}
     </nav>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { formatTimeOfDay } from "@/lib/date";
+import { formatNotifiedAt } from "@/lib/date";
 
 import type { AppNotification } from "../../api/notificationApi";
 
@@ -33,7 +33,8 @@ export default function NotificationItem({
 
           {!read && <span className={styles.dot} aria-hidden="true" />}
 
-          <span className={styles.time}>{formatTimeOfDay(createdAt)}</span>
+          {/* 오늘은 시각, 그 전은 "N일 전" — 날짜 머리글을 없애고 이 자리에서 다 읽힌다 */}
+          <span className={styles.time}>{formatNotifiedAt(createdAt)}</span>
         </span>
 
         <span className={styles.body}>{body}</span>

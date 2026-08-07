@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Button from "@/components/Button/Button";
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import Modal from "@/components/Modal/Modal";
 import FormField from "@/components/FormField/FormField";
 import SelectField from "@/components/SelectField/SelectField";
@@ -10,6 +11,10 @@ import DatePicker from "@/components/DatePicker/DatePicker";
 
 import { getErrorCode } from "@/lib/api/errorCode";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
+import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+
+import AssigneePicker from "./AssigneePicker";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useCreateTaskMutation } from "@/features/home/hooks/mutations/useCreateTaskMutation";
 import { useUpdateTaskMutation } from "@/features/home/hooks/mutations/useUpdateTaskMutation";
@@ -83,6 +88,7 @@ export default function TaskCreateModal({
   // 담당자 userId. 빈 값이면 본인이 담당한다 (요청에서 생략)
   const [assigneeId, setAssigneeId] = useState("");
   const [errorText, setErrorText] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false); // 삭제 확인
 
   // Query
   const { mutate: createTask, isPending: isCreating } = useCreateTaskMutation();
@@ -101,20 +107,28 @@ export default function TaskCreateModal({
     ? { startDate: project.startDate, targetDate: project.endDate }
     : undefined;
 
-  // 남에게 배정하려면 그 프로젝트의 오너이거나 역할이 PM이어야 한다 (TASK_008).
+  // 남에게 배정하려면 그 프로젝트의 오너이거나 부서가 PM이어야 한다 (TASK_008).
   // 개인 할 일에는 배정할 상대가 없다 (TASK_010).
   const canAssign = useCanManageProject(isPersonal ? "" : projectId);
 
-  // 배정 대상은 참여중 멤버여야 한다 (TASK_009). 오너도 참여자라 함께 넣는다.
-  const assigneeOptions = project
-    ? [
-        { value: String(project.owner.userId), label: project.owner.name },
-        ...project.members.map((member) => ({
-          value: String(member.userId),
-          label: member.name,
-        })),
-      ]
-    : [];
+  const { data: me } = useMyProfileQuery();
+  const myId = me ? String(me.userId) : "";
+
+  // 배정 대상은 참여중 멤버여야 한다 (TASK_009).
+  // 부서·직급·휴직 여부는 상세 조회에 없어 참여자 조회를 쓴다. 오너도 함께 오고 퇴사자는 빠진다.
+  const { data: projectMembers } = useProjectMembersQuery(
+    isPersonal ? "" : projectId,
+  );
+
+  // 나는 맨 앞에 세운다 — 기본값이라 목록에서 바로 찾을 수 있어야 한다
+  const assignees = useMemo(() => {
+    if (!projectMembers) return [];
+
+    return [
+      ...projectMembers.filter((member) => String(member.userId) === myId),
+      ...projectMembers.filter((member) => String(member.userId) !== myId),
+    ];
+  }, [projectMembers, myId]);
 
   // 담당자는 수정 API로 바꿀 수 없다. 새로 만들 때만 고른다.
   const showAssignee = !isEdit && !isPersonal && canAssign && !!projectId;
@@ -142,11 +156,12 @@ export default function TaskCreateModal({
     if (fixedProject) setProjectId(fixedProject.id);
   }, [open, task, fixedProject]);
 
-  // Effect — 프로젝트를 바꾸거나 개인으로 돌리면 고른 담당자를 비운다.
+  // Effect — 프로젝트를 바꾸거나 개인으로 돌리면 담당자를 나로 되돌린다.
   // 남겨 두면 새 프로젝트의 멤버가 아닌 사람이 실려 나가 TASK_009가 난다.
+  // myId는 문자열이라 프로필이 다시 조회돼도 값이 같으면 고른 사람을 덮지 않는다.
   useEffect(() => {
-    setAssigneeId("");
-  }, [projectId, isPersonal]);
+    setAssigneeId(myId);
+  }, [projectId, isPersonal, myId]);
 
   // Event Handler
   const resetAndClose = () => {
@@ -154,8 +169,9 @@ export default function TaskCreateModal({
     setProjectId(fixedProject?.id ?? "");
     setContent("");
     setDueDate("");
-    setAssigneeId("");
+    setAssigneeId(myId);
     setErrorText("");
+    setDeleteOpen(false);
     onClose();
   };
 
@@ -193,7 +209,7 @@ export default function TaskCreateModal({
     }
 
     createTask(
-      // 비우면 서버가 작성자 본인을 담당자로 둔다
+      // 기본값이 나라 대개 내 id가 실린다. 서버는 작성자와 같으면 권한을 보지 않는다.
       { ...body, assigneeId: assigneeId ? Number(assigneeId) : undefined },
       {
         onSuccess: resetAndClose,
@@ -208,7 +224,11 @@ export default function TaskCreateModal({
 
     deleteTask(task.id, {
       onSuccess: resetAndClose,
-      onError: (error) => showError(error, "할 일을 삭제하지 못했어요."),
+      // 확인 창을 닫아야 폼 아래의 실패 문구가 보인다
+      onError: (error) => {
+        setDeleteOpen(false);
+        showError(error, "할 일을 삭제하지 못했어요.");
+      },
     });
   };
 
@@ -235,7 +255,7 @@ export default function TaskCreateModal({
               type="button"
               className={styles.deleteButton}
               disabled={isPending}
-              onClick={handleDelete}
+              onClick={() => setDeleteOpen(true)}
             >
               {isDeleting ? "삭제 중…" : "삭제"}
             </button>
@@ -286,12 +306,12 @@ export default function TaskCreateModal({
         {/* 담당자 — 오너·PM만 남에게 배정할 수 있다.
             수정 모드에는 없다. 재배정이 없어 잘못 배정했으면 삭제 후 다시 만든다. */}
         {showAssignee && (
-          <SelectField
+          <AssigneePicker
             label="담당자"
+            members={assignees}
             value={assigneeId}
             onChange={setAssigneeId}
-            placeholder="나 (비워두면 본인)"
-            options={assigneeOptions}
+            myId={myId}
           />
         )}
 
@@ -325,6 +345,18 @@ export default function TaskCreateModal({
 
         {errorText && <p className={styles.error}>{errorText}</p>}
       </div>
+
+      {/* 삭제 확인 — Modal은 body로 포털돼 이 폼 위에 겹쳐 뜬다 */}
+      <ConfirmDialog
+        open={deleteOpen}
+        title="할 일을 삭제할까요?"
+        description="삭제한 할 일은 되돌릴 수 없어요."
+        confirmLabel="삭제"
+        tone="danger"
+        loading={isDeleting}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={handleDelete}
+      />
     </Modal>
   );
 }

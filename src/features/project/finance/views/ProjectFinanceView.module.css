@@ -44,3 +44,11 @@
   gap: 10px;
   padding: 6px 0 10px;
 }
+
+/* 표에서 render로 직접 그리는 칸의 말줄임 (기본 칸은 ProjectTable이 맡는다) */
+.clip {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

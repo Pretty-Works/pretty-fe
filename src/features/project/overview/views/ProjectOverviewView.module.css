@@ -48,14 +48,15 @@
 /* 기간 · 예산 · 오너 */
 .infoGrid {
   display: grid;
-  /* 좁아져도 기간·예산·책임자를 한 줄에 유지한다.
-     auto-fit + minmax(180px, ·)이면 폭이 540px 아래로 내려갈 때 2단 → 1단으로 접힌다.
-     minmax의 하한이 0이어야 긴 날짜가 자기 칸을 밀어내지 않고 안에서 줄바꿈한다 */
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px 20px;
-  padding: 16px 0;
+  /* 칸을 내용 크기에 맞추고 왼쪽으로 모은다 — 1fr로 3등분하면 책임자 이름 뒤에
+     빈 자리가 길게 남는다. 하한이 0이라 좁아지면 긴 날짜가 칸 안에서 줄바꿈한다 */
+  grid-template-columns: repeat(3, minmax(0, max-content));
+  justify-content: start;
+  gap: 14px 44px;
+  /* 아래쪽 선은 긋지 않는다 — 참여자 배지를 상단바로 옮긴 뒤로 이 줄이 박스의 끝이라
+     카드 테두리 바로 위에 선이 하나 더 그이는 꼴이 된다 */
+  padding: 16px 0 0;
   border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
 }
 
 .infoItem {
@@ -76,11 +77,17 @@
   color: var(--text);
 }
 
-/* 참여자 — 공용 Chip 사용 */
-.memberList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+/* 휴직 뱃지 — 상단바 참여자 명단(ProjectMemberMenu .leave)과 같은 모양 */
+.leave {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
 }
 
+/* 참여자 — 공용 Chip 사용 */
 /* 프로젝트를 열 수 없을 때 — 문구 + 빠져나갈 길 */

@@ -11,7 +11,6 @@ import FormField from "@/components/FormField/FormField";
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 
-import { safeReturnTo } from "@/constants/routes";
 import { useLoginMutation } from "@/features/auth/login/hooks/mutations/useLoginMutation";
 import { useAuthStore } from "@/stores/useAuthStore";
 
@@ -41,10 +40,10 @@ export default function LoginView() {
   const { mutate: login, isPending } = useLoginMutation();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
 
-  // AuthGuard가 붙여 준 ?returnTo= — 로그인 후 원래 보려던 화면으로 돌아간다.
-  // 쿼리 값을 그대로 쓰면 외부로 튕겨나갈 수 있어 safeReturnTo로 거른다.
-  const getReturnTo = () =>
-    safeReturnTo(new URLSearchParams(window.location.search).get("returnTo"));
+  // 로그인 뒤에는 언제나 홈에서 시작한다.
+  // 세션이 끊겨 보던 화면으로 되돌리는 것보다, 로그인이 늘 같은 곳에서 끝나는 편이 예측하기 쉽다.
+  // (프로젝트로 이어서 가려면 상단바 '프로젝트'가 마지막으로 보던 프로젝트를 기억한다)
+  const AFTER_LOGIN = "/";
 
   // Event Handler
   const handleSubmit = (e: React.FormEvent) => {
@@ -64,7 +63,7 @@ export default function LoginView() {
       {
         onSuccess: (data) => {
           setAccessToken(data.result.accessToken);
-          router.push(getReturnTo());
+          router.push(AFTER_LOGIN);
         },
         onError: (err) => {
           const status = axios.isAxiosError(err)
@@ -95,7 +94,7 @@ export default function LoginView() {
   // 이미 로그인한 채로 들어온 경우(뒤로가기·주소 직접 입력)엔 로그인 폼을 보여줄 이유가 없다.
   // 마운트 시점의 상태만 보므로(구독하지 않는다) 로그인 성공 직후의 이동과 겹치지 않는다.
   useEffect(() => {
-    if (useAuthStore.getState().accessToken) router.replace(getReturnTo());
+    if (useAuthStore.getState().accessToken) router.replace(AFTER_LOGIN);
   }, [router]);
 
   return (
