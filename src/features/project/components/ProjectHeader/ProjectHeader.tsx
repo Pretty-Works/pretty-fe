@@ -67,8 +67,8 @@ export default function ProjectHeader() {
   // 프로젝트 수정처럼 작성 중인 화면에서 다른 프로젝트로 넘어가려 하면 먼저 확인을 받는다
   const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
 
-  // 상단바 '프로젝트'가 여기로 되돌아온다. 이 컴포넌트가 네 탭 모두에 있어 탭을 옮길 때마다 갱신된다.
-  useRememberLastProject(projectId, currentTab, {
+  // 상단바 '프로젝트'가 이 프로젝트의 개요로 되돌아온다. 이 컴포넌트가 네 탭 모두에 있다.
+  useRememberLastProject(projectId, {
     ready: !!project,
     unavailable: isError,
   });

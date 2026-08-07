@@ -11,6 +11,9 @@ interface MessageBubbleProps {
 export default function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "USER";
   const canceled = !isUser && message.canceled === true;
+  // 지난 대화에서 되살린 실패 — 라이브 실패는 RunErrorNotice 가 맡고 여기로 오지 않는다.
+  // 답변과 같은 모양이면 실패한 줄 모르고 읽게 된다.
+  const failed = !isUser && message.success === false;
 
   return (
     <div
@@ -23,6 +26,7 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
               styles.bubble,
               isUser ? styles.bubbleUser : styles.bubbleAgent,
               canceled && styles.bubbleCanceled,
+              failed && styles.bubbleFailed,
             ]
               .filter(Boolean)
               .join(" ")}

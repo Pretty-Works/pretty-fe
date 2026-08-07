@@ -17,6 +17,7 @@ import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
+import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
 
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute } from "@/features/agent/screenRegistry";
@@ -32,11 +33,16 @@ export default function AgentView() {
 
   const {
     conversations,
+    conversationsLoading,
+    conversationsError,
+    conversationsFetching,
+    retryConversations,
     activeId,
     autoApprove,
     isAutoApproveUpdating,
     messages,
     runAgents,
+    runError,
     isBusy,
     pendingChoice,
     pendingApproval,
@@ -44,6 +50,7 @@ export default function AgentView() {
     historyLoading,
     historyLoadError,
     sendMessage,
+    retry,
     stop,
     changeAutoApprove,
     answerChoice,
@@ -64,7 +71,14 @@ export default function AgentView() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, runAgents, pendingChoice, pendingApproval, pendingAction]);
+  }, [
+    messages,
+    runAgents,
+    runError,
+    pendingChoice,
+    pendingApproval,
+    pendingAction,
+  ]);
 
   useEffect(() => {
     if (autoApprove && pendingApproval) approve();
@@ -130,6 +144,10 @@ export default function AgentView() {
       <ConversationMenu
         open={isMenuOpen}
         conversations={conversations}
+        loading={conversationsLoading}
+        error={conversationsError}
+        retrying={conversationsFetching}
+        onRetry={retryConversations}
         activeId={activeId}
         onSelect={(id) => {
           selectConversation(id);
@@ -177,6 +195,11 @@ export default function AgentView() {
 
             {/* 실행 중 에이전트 */}
             {isBusy && runAgents && <AgentRunIndicator agents={runAgents} />}
+
+            {/* 실패 — 말풍선 대신 같은 문장을 다시 보내는 버튼을 준다 */}
+            {runError && !isBusy && (
+              <RunErrorNotice message={runError} onRetry={retry} />
+            )}
 
             {/* 선택 UI */}
             {selection && !isBusy && (

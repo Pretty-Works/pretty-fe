@@ -2,7 +2,7 @@
 .field {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 8px;
 }
 
 .label {
@@ -22,11 +22,13 @@
 }
 
 /* 기본 화살표를 끄고 직접 그린다 — 위치를 제어해야 테두리에 붙지 않는다 */
+/* 높이·안쪽 여백은 FormField·DatePicker와 같아야 한다 —
+   한 폼 안에서 위아래로 나란히 놓이는 칸이라 1px만 어긋나도 눈에 띈다 */
 .select {
   flex: 1;
   min-width: 0;
-  height: 42px;
-  padding: 0 34px 0 11px;
+  height: 40px;
+  padding: 0 34px 0 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background-color: var(--white);
@@ -63,8 +65,10 @@
   border-color: var(--primary);
 }
 
+/* background 단축 속성을 쓰면 위에서 그린 화살표(background-image)까지 지워져
+   비활성일 때만 화살표가 사라진다. 색만 바꾼다. */
 .select:disabled {
-  background: var(--surface);
+  background-color: var(--surface);
   color: var(--text-placeholder);
   cursor: not-allowed;
 }

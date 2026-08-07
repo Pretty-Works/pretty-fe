@@ -3,11 +3,14 @@
   flex-direction: column;
 }
 
+/* 좌우 여백은 ProjectTable의 --row-pad와 같아야 한다 —
+   다르면 데이터가 도착하는 순간 줄이 옆으로 튄다 */
 .row {
   display: grid;
   grid-template-columns: 47% 12% 25% 16%;
   align-items: center;
   height: 48px;
+  padding: 0 12px;
   border-bottom: 1px solid var(--line);
 }
 

@@ -12,14 +12,13 @@ interface Options {
 }
 
 /**
- * 지금 보고 있는 프로젝트·탭을 기억한다. 상단바 '프로젝트'가 이 값으로 되돌아간다.
+ * 지금 보고 있는 프로젝트를 기억한다. 상단바 '프로젝트'가 이 프로젝트의 개요로 되돌아간다.
  *
  * 프로젝트 상세 화면 어디에서나 불릴 수 있게 훅으로 뒀다. 지금 호출부는 ProjectHeader 하나이며,
- * 그 컴포넌트가 네 탭 모두의 레이아웃에 있어 탭을 옮길 때마다 갱신된다.
+ * 그 컴포넌트가 네 탭 모두의 레이아웃에 있다.
  */
 export const useRememberLastProject = (
   projectId: string,
-  tab: string,
   { ready, unavailable }: Options,
 ) => {
   const remember = useLastProjectStore((state) => state.remember);
@@ -34,6 +33,6 @@ export const useRememberLastProject = (
       return;
     }
 
-    if (ready) remember(projectId, tab);
-  }, [projectId, tab, ready, unavailable, remember, forget]);
+    if (ready) remember(projectId);
+  }, [projectId, ready, unavailable, remember, forget]);
 };

@@ -5,6 +5,9 @@
   border-radius: 16px;
   background: var(--white);
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  /* 아래 @container의 기준. 화면 폭이 아니라 이 패널이 실제로 차지한 폭을 본다 —
+     오른쪽 에이전트 패널이 열리면 화면은 그대로인데 패널만 좁아지기 때문이다 */
+  container-type: inline-size;
 }
 
 .panelHead {
@@ -37,4 +40,14 @@
 .searchWrap {
   flex: 1;
   min-width: 0;
+}
+
+/* 중요도 칩 넉 줄(약 280px)은 줄어들지 않아, 좁아지면 검색창만 계속 깎여 결국 사라진다.
+   나란히 두고 둘 다 쓸 만한 폭을 넘기면 위아래로 나눈다 (검색창 → 중요도 순) */
+@container (max-width: 540px) {
+  .filterbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
 }

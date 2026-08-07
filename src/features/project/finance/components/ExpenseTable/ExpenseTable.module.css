@@ -1,8 +1,11 @@
 .table {
   --col-gap: clamp(8px, 1vw, 12px);
-  /* 컬럼 최소 폭의 합 (고정 92+72+116 · 최소 62+84+90 · 간격 12×5).
-     이보다 좁아지면 줄이 컨테이너를 넘어 금액 칸이 가로선 밖으로 삐져나온다 */
-  --row-min: 576px;
+  /* 줄 좌우 여백. 글자가 카드 안쪽 선에 딱 붙지 않게 띄운다 */
+  --row-pad: 12px;
+  /* 컬럼 최소 폭의 합 (고정 92+72+116 · 최소 62+84+90 · 간격 12×5) + 좌우 여백 12×2.
+     이보다 좁아지면 줄이 컨테이너를 넘어 금액 칸이 가로선 밖으로 삐져나온다
+     (min-width는 border-box 기준이라 여백까지 더해야 칸이 그만큼 눌리지 않는다) */
+  --row-min: 600px;
 
   display: flex;
   flex-direction: column;
@@ -19,6 +22,7 @@
   align-items: center;
   min-width: var(--row-min);
   height: 44px;
+  padding: 0 var(--row-pad);
   border-bottom: 1px solid var(--line);
 }
 
@@ -33,12 +37,14 @@
   text-overflow: ellipsis;
 }
 
+/* 좌우 여백은 줄 안쪽에 둔다 — hover 배경은 줄 끝까지 채워야 한 줄로 읽힌다 */
 .row {
   display: flex;
   gap: var(--col-gap);
   align-items: center;
   min-width: var(--row-min);
   height: 48px;
+  padding: 0 var(--row-pad);
   border-bottom: 1px solid var(--line);
   transition: background 0.15s ease;
 }

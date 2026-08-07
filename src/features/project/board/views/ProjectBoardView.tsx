@@ -52,6 +52,8 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
           { label: "High", value: "2건", tone: "danger" },
           { label: "Medium", value: "3건", tone: "warning" },
         ]}
+        updatedAt={page.summaryUpdatedAt}
+        onRefresh={page.refreshSummary}
       />
 
       <section className={styles.panel}>
@@ -62,7 +64,10 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
               <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
             )}
           </div>
-          <Button size="tiny" onClick={page.goWrite}>글쓰기</Button>
+          {/* 완료·보관 프로젝트에는 글을 쓸 수 없어 버튼 자체를 감춘다 */}
+          {page.canWrite && (
+            <Button size="tiny" onClick={page.goWrite}>글쓰기</Button>
+          )}
         </div>
 
         <div className={styles.filterbar}>
@@ -117,14 +122,21 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
           />
         ) : page.posts.length === 0 ? (
           // 등록된 게시글 없음
+          // 더 쓸 수 없는 프로젝트라면 작성을 권하지 않는다 — 문구도 버튼도 뺀다
           <Result
             figure={<Result.Figure>📋</Result.Figure>}
             title="등록된 게시글이 없습니다"
-            description="첫 글을 남기면 공지·이슈·논의 내용을 팀원과 한곳에서 나눌 수 있어요."
+            description={
+              page.canWrite
+                ? "첫 글을 남기면 공지·이슈·논의 내용을 팀원과 한곳에서 나눌 수 있어요."
+                : "완료된 프로젝트라 글을 새로 작성할 수 없어요."
+            }
             button={
-              <Result.Button leftAccessory="+" onClick={page.goWrite}>
-                글쓰기
-              </Result.Button>
+              page.canWrite ? (
+                <Result.Button leftAccessory="+" onClick={page.goWrite}>
+                  글쓰기
+                </Result.Button>
+              ) : undefined
             }
           />
         ) : (

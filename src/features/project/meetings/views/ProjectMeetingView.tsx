@@ -70,6 +70,8 @@ export default function ProjectMeetingView({
           { label: "후속 액션", value: "미정리", tone: "warning" },
           { label: "다음 안건", value: "미등록", tone: "danger" },
         ]}
+        updatedAt={page.summaryUpdatedAt}
+        onRefresh={page.refreshSummary}
       />
 
       {/* 회의록 */}
@@ -81,7 +83,10 @@ export default function ProjectMeetingView({
               <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
             )}
           </div>
-          <Button size="tiny" onClick={page.goWrite}>작성하기</Button>
+          {/* 완료·보관 프로젝트에는 회의록을 쓸 수 없어 버튼 자체를 감춘다 */}
+          {page.canWrite && (
+            <Button size="tiny" onClick={page.goWrite}>작성하기</Button>
+          )}
         </div>
 
         <div className={styles.filterbar}>
@@ -129,14 +134,21 @@ export default function ProjectMeetingView({
           />
         ) : page.meetings.length === 0 ? (
           // 등록된 회의록 없음
+          // 더 쓸 수 없는 프로젝트라면 작성을 권하지 않는다 — 문구도 버튼도 뺀다
           <Result
             figure={<Result.Figure>📄</Result.Figure>}
             title="등록된 회의록이 없습니다"
-            description="첫 회의록을 작성하면 참석자·안건·후속 액션을 한곳에서 관리하고, AI가 핵심 논의를 요약해 드려요."
+            description={
+              page.canWrite
+                ? "첫 회의록을 작성하면 참석자·안건·후속 액션을 한곳에서 관리하고, AI가 핵심 논의를 요약해 드려요."
+                : "완료된 프로젝트라 회의록을 새로 작성할 수 없어요."
+            }
             button={
-              <Result.Button leftAccessory="+" onClick={page.goWrite}>
-                회의록 작성
-              </Result.Button>
+              page.canWrite ? (
+                <Result.Button leftAccessory="+" onClick={page.goWrite}>
+                  회의록 작성
+                </Result.Button>
+              ) : undefined
             }
           />
         ) : (

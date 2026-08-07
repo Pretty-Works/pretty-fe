@@ -1,6 +1,9 @@
 .table {
   /* ProjectTable.tsx의 COLUMN_GAP과 같은 값이어야 한다 (줄 최소 폭 계산에 쓰인다) */
   --col-gap: 12px;
+  /* 줄 좌우 여백. 글자가 카드 안쪽 선에 딱 붙지 않게 띄운다.
+     ProjectTable.tsx의 ROW_PADDING과 같은 값이어야 한다 (줄 최소 폭 계산에 쓰인다) */
+  --row-pad: 12px;
 
   display: flex;
   flex-direction: column;
@@ -20,15 +23,18 @@
   align-items: center;
   min-width: var(--row-min, auto);
   height: 48px;
+  padding: 0 var(--row-pad);
   border-bottom: 1px solid var(--line);
 }
 
+/* 좌우 여백은 줄 안쪽에 둔다 — hover 배경은 줄 끝까지 채워야 한 줄로 읽힌다 */
 .row {
   display: flex;
   gap: var(--col-gap);
   align-items: center;
   min-width: var(--row-min, auto);
   height: 48px;
+  padding: 0 var(--row-pad);
   border-bottom: 1px solid var(--line);
   cursor: pointer;
   transition: background 0.15s ease;

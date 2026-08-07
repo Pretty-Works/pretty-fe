@@ -52,6 +52,11 @@ interface ChatStore {
   runAgents: AgentKind[] | null;
   /** 이번 실행에서 받은 step. 실행이 끝날 때 답변 말풍선에 접어서 붙인다 */
   runSteps: string[];
+  /**
+   * 마지막 실행이 실패한 이유. 답변이 아니라서 말풍선으로 쌓지 않고,
+   * 다시 시도 버튼과 함께 한 줄로 띄웠다가 다음 전송 때 지운다.
+   */
+  runError: string | null;
   pendingChoice: AgentChoice | null;
   pendingApproval: AgentApproval | null;
   /** 처리를 끝내고 "그 화면으로 갈까요?" 를 묻는 중 */
@@ -64,6 +69,8 @@ interface ChatStore {
 
   syncConversations: (conversations: Conversation[]) => void;
   beginRun: (goal: string) => void;
+  /** 실패한 실행을 같은 문장으로 다시 돌린다. 말풍선은 이미 있으니 새로 쌓지 않는다 */
+  beginRetry: (goal: string) => void;
   setRunId: (runId: string) => void;
   setConversationId: (conversationId: number) => void;
   setAutoApprove: (autoApprove: boolean) => void;
@@ -137,6 +144,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
     messages: [],
     runAgents: null,
     runSteps: [],
+    runError: null,
     pendingChoice: null,
     pendingApproval: null,
     pendingAction: null,
@@ -151,20 +159,15 @@ export const useChatStore = create<ChatStore>((set, get) => {
 
       // 새 대화의 id 는 서버가 만드는데 응답 헤더에는 X-Run-Id 밖에 없다.
       // 그래서 목록에서 이번 실행을 찾아 지금 보고 있는 대화에 묶는다 — 다음 전송이 이 대화를 이어간다.
-      // 끝난 실행은 activeRunId 가 없으니, 승인·질문을 기다리는 동안에만 묶인다.
+      // runId 는 가장 최근 실행 기준이라 실행이 끝난 뒤에도 남아 있어, 언제 목록이 와도 찾을 수 있다.
       const mine =
         conversationId === null && runId
-          ? next.find((c) => c.activeRunId === runId)
+          ? next.find((c) => c.runId === runId)
           : undefined;
 
-      const nextActiveId = mine?.id ?? get().activeId;
-      const activeConversation = next.find((c) => c.id === nextActiveId);
-
+      // autoApprove 는 목록에 없다. 대화를 고를 때 메시지 조회 응답에서 받아 온다.
       set({
         conversations: next,
-        ...(activeConversation
-          ? { autoApprove: activeConversation.autoApprove }
-          : {}),
         ...(mine ? { activeId: mine.id, conversationId: Number(mine.id) } : {}),
       });
     },
@@ -174,9 +177,21 @@ export const useChatStore = create<ChatStore>((set, get) => {
       set({
         runAgents: pickAgents(goal),
         runSteps: [],
+        runError: null,
         pendingAction: null,
         historyLoading: false,
         historyLoadError: false,
+      });
+      setStatus("RUNNING");
+    },
+
+    // 보낸 말풍선은 그 자리에 그대로 두고 실패 안내만 걷어낸다
+    beginRetry: (goal) => {
+      set({
+        runAgents: pickAgents(goal),
+        runSteps: [],
+        runError: null,
+        pendingAction: null,
       });
       setStatus("RUNNING");
     },
@@ -185,25 +200,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
 
     setConversationId: (conversationId) => set({ conversationId }),
 
-    setAutoApprove: (autoApprove) =>
-      set((state) => ({
-        autoApprove,
-        conversations: state.conversations.map((conversation) =>
-          conversation.id === state.activeId
-            ? { ...conversation, autoApprove }
-            : conversation,
-        ),
-      })),
+    setAutoApprove: (autoApprove) => set({ autoApprove }),
 
+    // 서버 응답이 늦게 도착해 그사이 다른 대화로 옮겼을 수 있다 — 그 대화의 값을 덮어쓰지 않는다.
     setConversationAutoApprove: (conversationId, autoApprove) =>
-      set((state) => ({
-        ...(state.conversationId === conversationId ? { autoApprove } : {}),
-        conversations: state.conversations.map((conversation) =>
-          Number(conversation.id) === conversationId
-            ? { ...conversation, autoApprove }
-            : conversation,
-        ),
-      })),
+      set((state) =>
+        state.conversationId === conversationId ? { autoApprove } : {},
+      ),
 
     appendStep: (text) =>
       set((state) => ({ runSteps: [...state.runSteps, text] })),
@@ -251,11 +254,14 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("COMPLETED");
     },
 
+    // 실패는 답변이 아니다 — 말풍선으로 쌓으면 대화에 영영 남는 것처럼 보이는데
+    // 정작 새로 고치면 사라진다. 대신 다시 시도할 수 있는 한 줄로 띄운다.
+    // (서버가 error 이벤트로 알려온 실패는 서버에도 남아, 다시 들어오면 지난 말풍선으로 보인다)
     failRun: (message) => {
-      addMessage("AGENT", message, { success: false, steps: takeSteps() });
       set({
         runAgents: null,
         runSteps: [],
+        runError: message,
         pendingChoice: null,
         pendingApproval: null,
         pendingInteractionId: null,
@@ -277,19 +283,18 @@ export const useChatStore = create<ChatStore>((set, get) => {
     selectConversation: (id) => {
       const conversationId = Number(id);
       const isValidId = !Number.isNaN(conversationId);
-      const selected = get().conversations.find(
-        (conversation) => conversation.id === id,
-      );
 
       set({
         activeId: id,
         // 목록의 id 가 곧 서버 대화 id 다 — 다음 전송이 이 대화를 이어간다
         conversationId: isValidId ? conversationId : null,
-        autoApprove: selected?.autoApprove ?? true,
+        // autoApprove 는 건드리지 않는다. 목록에 없어서 메시지 조회가 와야 알 수 있고,
+        // 미리 기본값으로 되돌리면 토글이 한 번 튀었다가 제자리로 온다.
         runId: null,
         messages: [],
         runAgents: null,
         runSteps: [],
+        runError: null,
         pendingChoice: null,
         pendingApproval: null,
         pendingAction: null,
@@ -302,17 +307,20 @@ export const useChatStore = create<ChatStore>((set, get) => {
     // 빠르게 다른 대화를 다시 골랐다면 먼저 끝난 이전 요청은 버린다.
     restoreConversationMessages: (conversationId, history) => {
       if (get().conversationId !== conversationId) return;
-      set((state) => ({
+
+      set({
         messages: history.messages,
         autoApprove: history.autoApprove,
-        conversations: state.conversations.map((conversation) =>
-          Number(conversation.id) === conversationId
-            ? { ...conversation, autoApprove: history.autoApprove }
-            : conversation,
-        ),
+        // 아직 살아 있는 실행이면 runId 를 되찾아 둔다 — 취소가 이 값을 쓴다
+        runId: history.activeRunId ?? null,
+        // 답을 기다리다 화면을 떠났던 승인 카드를 다시 띄운다
+        pendingApproval: history.pendingApproval ?? null,
+        pendingInteractionId: history.pendingApproval
+          ? Number(history.pendingApproval.id)
+          : null,
         historyLoading: false,
         historyLoadError: false,
-      }));
+      });
     },
 
     failConversationMessages: (conversationId) => {
@@ -329,6 +337,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         messages: [],
         runAgents: null,
         runSteps: [],
+        runError: null,
         pendingChoice: null,
         pendingApproval: null,
         pendingAction: null,

@@ -108,15 +108,15 @@ export default function ScheduleEditorModal({
     patch({ startDate: range.start, endDate: range.end });
   };
 
+  // 필수 항목 — 날짜(기간)는 항상, 이름은 휴가가 아닐 때만 (휴가 사유는 선택).
+  // 채우기 전에는 저장 버튼을 눌 수 없어, 여기 걸리는 값은 handleSubmit에 닿지 않는다.
+  const canSubmit =
+    !!draft.startDate && !!draft.endDate && (isLeave || !!draft.title.trim());
+
   // 저장은 부모가 서버 응답을 받은 뒤에 닫는다.
   // 여기서 미리 닫아 버리면 실패했을 때 입력하던 내용이 통째로 사라진다.
   const handleSubmit = () => {
     if (submitting) return;
-
-    if (!draft.startDate || !draft.endDate) {
-      setError(useRange ? "기간을 선택해 주세요." : "날짜를 선택해 주세요.");
-      return;
-    }
 
     // isLeave 대신 직접 비교해야 이후 draft.formType이 ScheduleType으로 좁혀진다
     if (draft.formType === "LEAVE") {
@@ -132,11 +132,6 @@ export default function ScheduleEditorModal({
           reason: draft.reason.trim() || (mode === "edit" ? "" : undefined),
         },
       });
-      return;
-    }
-
-    if (!draft.title.trim()) {
-      setError("일정 이름을 입력해 주세요.");
       return;
     }
 
@@ -191,19 +186,12 @@ export default function ScheduleEditorModal({
               삭제
             </Button>
           )}
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={onClose}
-            disabled={submitting}
-          >
-            취소
-          </Button>
+          {/* 취소 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다 */}
           <Button
             size="medium"
             onClick={handleSubmit}
             loading={submitting}
+            disabled={!canSubmit}
           >
             {submitting
               ? "저장 중…"

@@ -56,15 +56,11 @@ export default function TranscriptUploadModal({
       width={600}
       footer={
         <>
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            onClick={handleClose}
-          >
-            취소
+          {/* 취소 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다.
+              업로드는 파일을 고른 뒤에만 누를 수 있다 (건너뛰려면 ✕로 닫는다) */}
+          <Button size="medium" disabled={!file} onClick={handleUpload}>
+            업로드
           </Button>
-          <Button size="medium" onClick={handleUpload}>업로드</Button>
         </>
       }
     >

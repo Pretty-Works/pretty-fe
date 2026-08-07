@@ -69,14 +69,19 @@ body {
 
 .layout {
   --agent-w: 420px;
-  --content-min: 800px;
   min-height: 100vh;
 }
 
 .main {
   min-width: 0;
-  margin-right: clamp(0px, calc(100% - var(--content-min)), var(--agent-w));
+  /* 열려 있는 패널 폭을 통째로 비운다. 덜 비우면 본문 오른쪽이 패널 밑에 깔린다 —
+     예전엔 본문 최소 폭(800px)을 지키려고 덜 비워서, 화면이 1220px 밑으로
+     내려갈수록 딱 그만큼씩 본문 오른쪽이 패널에 가려졌다 */
+  margin-right: var(--agent-w);
   transition: margin-right 0.25s ease;
+  /* 상단바·본문이 화면 폭이 아니라 실제로 남은 폭을 보고 반응하게 한다 —
+     패널이 열리면 화면은 그대로인데 이 안쪽만 좁아지기 때문이다 */
+  container: app-main / inline-size;
 }
 
 .agent {
@@ -105,6 +110,14 @@ body {
 
 .layout.expanded .agent {
   width: 100vw;
+}
+
+/* 패널(420px)과 본문을 나란히 두기엔 화면이 좁은 구간 — 자리를 비워 봐야
+   본문이 패널보다도 좁아진다. 여기서는 패널이 본문 위에 뜬다(닫으면 온전히 보인다) */
+@media (max-width: 840px) {
+  .main {
+    margin-right: 0;
+  }
 }
 
 input:-webkit-autofill,

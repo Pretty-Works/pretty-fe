@@ -8,10 +8,15 @@ import {
 
 import type {
   AgentAction,
+  AgentApproval,
+  AgentInteractionKind,
+  AgentInteractionOption,
+  AgentInteractionStatus,
   AgentRunStatus,
   ChatMessage,
   ChatRole,
   Conversation,
+  PendingInteraction,
 } from "@/features/agent/types";
 
 /**
@@ -160,24 +165,32 @@ export const sendAgentMessage = async (
   });
 };
 
-// 대화 목록 한 줄 (서버 필드 그대로)
+// 대화 목록 한 줄 (서버 필드 그대로).
+// status·runId 는 그 대화의 "가장 최근 실행" 기준이라, 끝난 실행도 값이 남는다.
 interface ConversationApiItem {
   conversationId: number;
   /** 첫 질문을 요약한 제목. 에이전트가 못 만들면 질문 앞부분이 그대로 온다 */
   title: string;
-  /** LocalDateTime(타임존 없음) — 브라우저 로컬 시각으로 읽힌다 */
+  /** 실행이 한 번도 없었으면 null */
+  status: AgentRunStatus | null;
+  runId: string | null;
+  /** 답을 기다리는 승인 카드. 없으면 null */
+  pendingApprovalId: number | null;
+  /** "yyyy-MM-dd HH:mm:ss" (타임존 없음) — 브라우저 로컬 시각으로 읽힌다 */
   lastMessageAt: string;
-  autoApprove: boolean;
-  /** 아직 살아 있는 실행. 끝난 대화는 null */
-  activeRunId: string | null;
-  activeRunStatus: AgentRunStatus | null;
+  createdAt: string;
 }
 
 interface ConversationsApiResponse {
   errorCode: string | null;
   message: string;
   result: {
-    conversations: ConversationApiItem[];
+    content: ConversationApiItem[];
+    page: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    last: boolean;
   };
 }
 
@@ -185,27 +198,93 @@ const toConversation = (item: ConversationApiItem): Conversation => ({
   id: String(item.conversationId),
   title: item.title,
   lastMessageAt: item.lastMessageAt,
-  autoApprove: item.autoApprove,
-  // 끝난 대화는 상태가 없다 — 목록의 색점은 살아 있는 실행에만 붙는다
-  status: item.activeRunStatus ?? undefined,
-  activeRunId: item.activeRunId ?? undefined,
+  createdAt: item.createdAt,
+  status: item.status ?? undefined,
+  runId: item.runId ?? undefined,
+  pendingApprovalId: item.pendingApprovalId ?? undefined,
+});
+
+export interface FetchAgentConversationsParams {
+  /** 0부터 시작 */
+  page: number;
+  /** 1~100. 벗어나면 400(REQUEST_001) 이다 */
+  size: number;
+}
+
+/**
+ * 대화 목록 조회 (페이지 응답).
+ *
+ * 서버도 lastMessageAt 내림차순으로 주지만, 실행 중에는 말풍선이 늘 때마다 순서가
+ * 바뀌므로 정렬은 화면에서 다시 한다. 화면에 페이지 이동이 없어 content 만 넘긴다.
+ */
+export const fetchAgentConversations = async ({
+  page,
+  size,
+}: FetchAgentConversationsParams): Promise<Conversation[]> => {
+  const response = await api.get<ConversationsApiResponse>(
+    "/agent/conversations",
+    { params: { page, size } },
+  );
+
+  return response.data.result.content.map(toConversation);
+};
+
+interface PendingInteractionApiItem {
+  kind: AgentInteractionKind;
+  interactionId: number;
+  label: string;
+  options: AgentInteractionOption[];
+  multiple: boolean;
+  conversationId: number;
+  runId: string;
+  conversationTitle: string;
+  /** APPROVAL 만 값이 있다 */
+  previewText: string | null;
+  /** "yyyy-MM-dd HH:mm:ss" */
+  requestedAt: string;
+  expiresAt: string;
+}
+
+interface PendingInteractionsApiResponse {
+  errorCode: string | null;
+  message: string;
+  result: {
+    /** items 의 길이와 언제나 같다 */
+    totalCount: number;
+    items: PendingInteractionApiItem[];
+  };
+}
+
+const toPendingInteraction = (
+  item: PendingInteractionApiItem,
+): PendingInteraction => ({
+  kind: item.kind,
+  interactionId: item.interactionId,
+  label: item.label,
+  options: item.options,
+  multiple: item.multiple,
+  conversationId: item.conversationId,
+  runId: item.runId,
+  conversationTitle: item.conversationTitle,
+  previewText: item.previewText ?? undefined,
+  requestedAt: item.requestedAt,
+  expiresAt: item.expiresAt,
 });
 
 /**
- * 대화 목록 조회.
+ * 답을 기다리는 승인·질문 카드 조회.
  *
- * size 는 1~100 이고 벗어나면 400(REQUEST_001) 이다.
- * 서버도 최근순으로 주지만, 실행 중에는 말풍선이 늘 때마다 순서가 바뀌므로 정렬은 화면에서 다시 한다.
+ * 화면을 새로 고치거나 다른 기기에서 들어왔을 때 카드를 복원하는 용도다.
+ * 스트림이 열려 있는 동안에는 SSE 로 같은 내용이 오므로 이걸 다시 부를 이유가 없다.
  */
-export const fetchAgentConversations = async (
-  size: number,
-): Promise<Conversation[]> => {
-  const response = await api.get<ConversationsApiResponse>(
-    "/agent/conversations",
-    { params: { size } },
+export const fetchAgentPendingInteractions = async (): Promise<
+  PendingInteraction[]
+> => {
+  const response = await api.get<PendingInteractionsApiResponse>(
+    "/agent/pending-interactions",
   );
 
-  return response.data.result.conversations.map(toConversation);
+  return response.data.result.items.map(toPendingInteraction);
 };
 
 interface ConversationMessageActionApiItem {
@@ -221,10 +300,27 @@ interface ConversationMessageApiItem {
   role: ChatRole;
   content: string;
   success: boolean | null;
-  steps: string[] | null;
+  /** "참고한 내용 N건" 접이식. 없으면 null */
+  steps: AgentStepPayload[] | null;
   actionType: AgentAction["type"] | null;
   action: ConversationMessageActionApiItem | null;
   createdAt: string;
+}
+
+// 그 대화에서 오간 승인 카드. 이미 답한 것도 결과와 함께 남는다.
+interface ConversationApprovalApiItem {
+  approvalId: number;
+  /** 라이브로 받았던 SSE approval_request 의 id 와 같은 값. 오래된 카드는 null */
+  seq: number | null;
+  access: "READ" | "WRITE";
+  summary: string;
+  previewText: string | null;
+  alternatives: AgentAlternative[];
+  status: AgentInteractionStatus;
+  /** ALTERNATIVE 일 때 고른 대안 id */
+  chosenAlternativeId: string | null;
+  /** 답한 시각. 아직 대기 중이면 null */
+  decidedAt: string | null;
 }
 
 interface ConversationMessagesApiResponse {
@@ -237,12 +333,17 @@ interface ConversationMessagesApiResponse {
     activeRunId: string | null;
     activeRunStatus: AgentRunStatus | null;
     messages: ConversationMessageApiItem[];
+    approvals: ConversationApprovalApiItem[];
   };
 }
 
 export interface AgentConversationHistory {
   autoApprove: boolean;
+  /** 아직 살아 있는 실행. 끝났으면 없다 — 승인 응답·취소가 이 값을 쓴다 */
+  activeRunId?: string;
   messages: ChatMessage[];
+  /** 아직 답을 기다리는 승인 카드. 없으면 없다 */
+  pendingApproval?: AgentApproval;
 }
 
 const toMessageAction = (
@@ -265,11 +366,25 @@ const toChatMessage = (item: ConversationMessageApiItem): ChatMessage => ({
   content: item.content,
   createdAt: item.createdAt,
   success: item.success ?? undefined,
-  steps: item.steps ?? undefined,
+  // steps 는 {text} 객체로 온다 — 말풍선은 문장만 쓴다
+  steps: item.steps?.map((step) => step.text),
   action: toMessageAction(item),
 });
 
-/** 목록에서 선택한 대화의 전체 메시지 조회 */
+const toPendingApproval = (
+  item: ConversationApprovalApiItem,
+): AgentApproval => ({
+  id: String(item.approvalId),
+  summary: item.summary,
+  previewText: item.previewText ?? undefined,
+});
+
+/**
+ * 목록에서 선택한 대화의 전체 메시지 조회.
+ *
+ * approvals 는 messages 와 별개 배열이고 이미 답한 카드도 함께 온다.
+ * 화면이 지금 할 수 있는 건 답을 기다리는(PENDING) 카드를 다시 띄우는 것뿐이라 그것만 뽑는다.
+ */
 export const fetchAgentConversationMessages = async (
   conversationId: number,
 ): Promise<AgentConversationHistory> => {
@@ -277,9 +392,16 @@ export const fetchAgentConversationMessages = async (
     `/agent/conversations/${conversationId}/messages`,
   );
 
+  const { autoApprove, activeRunId, messages, approvals } =
+    response.data.result;
+
+  const pending = approvals.find((approval) => approval.status === "PENDING");
+
   return {
-    autoApprove: response.data.result.autoApprove,
-    messages: response.data.result.messages.map(toChatMessage),
+    autoApprove,
+    activeRunId: activeRunId ?? undefined,
+    messages: messages.map(toChatMessage),
+    pendingApproval: pending ? toPendingApproval(pending) : undefined,
   };
 };
 

@@ -32,10 +32,10 @@ export default function Gnb() {
   const { mutate: logout } = useLogoutMutation();
   const { data: me } = useMyProfileQuery();
 
-  // '프로젝트'는 마지막으로 보던 프로젝트·탭으로 되돌아간다.
+  // '프로젝트'는 마지막으로 보던 프로젝트로 되돌아가되, 항상 개요부터 연다 —
+  // 상단바는 프로젝트로 '들어가는' 입구라 보던 탭을 이어보는 자리가 아니다.
   // 프로젝트 목록 화면이 따로 없어, 기억해둔 게 없으면 목록이 있는 홈으로 보낸다.
   const lastProjectId = useLastProjectStore((state) => state.projectId);
-  const lastProjectTab = useLastProjectStore((state) => state.tab);
 
   // localStorage 값이라 서버 렌더에는 없다. 마운트 뒤에 꺼내 써야 첫 그림이 어긋나지 않는다.
   const [hydrated, setHydrated] = useState(false);
@@ -43,7 +43,7 @@ export default function Gnb() {
 
   const projectPath =
     hydrated && lastProjectId
-      ? `/projects/${lastProjectId}/${lastProjectTab ?? DEFAULT_PROJECT_TAB}`
+      ? `/projects/${lastProjectId}/${DEFAULT_PROJECT_TAB}`
       : "/";
 
   useEffect(() => {

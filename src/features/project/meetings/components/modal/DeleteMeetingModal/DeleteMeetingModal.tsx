@@ -27,15 +27,7 @@ export default function DeleteMeetingModal({
       width={440}
       footer={
         <>
-          <Button
-            type="light"
-            buttonStyle="weak"
-            size="medium"
-            disabled={isDeleting}
-            onClick={onClose}
-          >
-            취소
-          </Button>
+          {/* 취소 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다 */}
           <Button
             type="danger"
             buttonStyle="weak"

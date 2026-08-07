@@ -25,10 +25,15 @@ const FLEX_MIN_WIDTH = 140;
 // .module.css의 --col-gap과 같은 값이어야 한다
 const COLUMN_GAP = 12;
 
+// .module.css의 --row-pad와 같은 값이어야 한다
+const ROW_PADDING = 12;
+
 // 이 칸들을 다 담으려면 줄이 최소 몇 px이어야 하는지
+// (min-width는 border-box 기준이라 좌우 여백까지 더해야 칸이 그만큼 눌리지 않는다)
 const minRowWidth = <T,>(columns: ProjectTableColumn<T>[]) =>
   columns.reduce((sum, col) => sum + (col.width ?? FLEX_MIN_WIDTH), 0) +
-  COLUMN_GAP * Math.max(0, columns.length - 1);
+  COLUMN_GAP * Math.max(0, columns.length - 1) +
+  ROW_PADDING * 2;
 
 export default function ProjectTable<T>({
   columns,

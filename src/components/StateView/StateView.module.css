@@ -31,3 +31,14 @@
   font-size: 16px;
   font-weight: 700;
 }
+
+/* 팝오버 안(compact)은 화면 한 귀퉁이의 실패라 문구를 키우지 않는다 */
+.block.compact {
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.block.compact .message {
+  font-size: 13px;
+  font-weight: inherit;
+}
