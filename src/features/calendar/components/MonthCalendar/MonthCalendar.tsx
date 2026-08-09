@@ -1,23 +1,26 @@
 "use client";
 
+import { cx } from "@/lib/cx";
+
 import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
+
 import { useCalendarGridKeyboard } from "@/features/calendar/hooks/useCalendarGridKeyboard";
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
-import {
-  calendarEventColors,
-  eventMemberColor,
-} from "@/features/calendar/utils/memberColor";
 import {
   MAX_CELL_ROWS,
   WEEKDAY_LABELS,
   buildMonthWeeks,
-  formatDayLabel,
+  formatCalendarDayLabel,
   formatMonthLabel,
   getSingleDayEvents,
   isSameMonth,
   layoutWeekSpans,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
+import {
+  calendarEventColors,
+  eventMemberColor,
+} from "@/features/calendar/utils/memberColor";
 
 import styles from "./MonthCalendar.module.css";
 
@@ -37,11 +40,6 @@ interface MonthCalendarProps {
 }
 
 // 여러 날 일정 막대는 칸 위에 절대 위치로 겹쳐 그린다.
-// 칸 간격·좌우 여백은 CSS의 `--cal-gap`·`--cal-pad`(MonthCalendar.module.css)에서 읽어
-// 화면 폭에 따라 값이 바뀌어도 어긋나지 않는다.
-// 한 칸 너비 = (전체 - 간격 6개) / 7
-//
-/** col번째 칸의 바깥 경계 left */
 const columnEdge = (col: number) =>
   `calc((100% - var(--cal-gap) * 6) / 7 * ${col} + var(--cal-gap) * ${col})`;
 
@@ -182,14 +180,12 @@ export default function MonthCalendar({
 
                 const outside = !isSameMonth(date, month);
 
-                const cellClasses = [
+                const cellClasses = cx(
                   styles.cell,
                   outside && styles.outside,
                   key === selectedDate && styles.selected,
                   date.getDay() === 0 && styles.sunday,
-                ]
-                  .filter(Boolean)
-                  .join(" ");
+                );
 
                 return (
                   <button
@@ -209,7 +205,7 @@ export default function MonthCalendar({
                       }
                     }}
                     aria-selected={key === selectedDate}
-                    aria-label={formatDayLabel(key)}
+                    aria-label={formatCalendarDayLabel(key)}
                   >
                     {/* 날짜와 접힌 개수는 한 줄에 둔다. 개수를 일정 줄에 놓으면
                         일정 하나를 밀어내는 데다 제목처럼 읽힌다 */}

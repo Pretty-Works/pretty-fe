@@ -7,11 +7,7 @@ interface LeaveSummaryCardProps {
   leave?: LeaveSummary;
 }
 
-/**
- * 백엔드가 근속연수를 "N년 M개월" 문자열로 준다.
- * 다른 항목처럼 숫자를 크게 보여주려고 연차와 나머지를 나눈다.
- * "5년 0개월" → 5 년차 · "5년 3개월" → 5 년 3개월
- */
+/** 백엔드가 근속연수를 "N년 M개월" 문자열로 준다. */
 function parseTenure(tenure: string) {
   const matched = tenure.match(/(\d+)\s*년(?:\s*(\d+)\s*개월)?/);
   if (!matched) return { value: tenure, unit: "" };
@@ -54,7 +50,12 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
   const tenure = leave ? parseTenure(leave.tenureYears) : null;
 
   const stats = [
-    { label: "잔여 연차", value: leave?.remainingDays, unit: "d", highlight: true },
+    {
+      label: "잔여 연차",
+      value: leave?.remainingDays,
+      unit: "d",
+      highlight: true,
+    },
     { label: "사용연차", value: leave?.usedDays, unit: "d" },
     { label: "총 연차", value: leave?.grantedDays, unit: "d" },
     { label: "근속연수", value: tenure?.value, unit: tenure?.unit ?? "" },

@@ -28,7 +28,7 @@
   gap: 6px;
   margin-top: 10px;
   font-size: 13px;
-  color: #6b7480;
+  color: var(--text-weak);
 }
 
 .importance {
@@ -40,7 +40,7 @@
 }
 
 .dot {
-  color: #c4c9d1;
+  color: var(--text-faint);
 }
 
 .actions {
@@ -53,12 +53,12 @@
   padding: 24px;
   border-radius: 14px;
   background: var(--white);
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card-sm);
 }
 
 .content {
   font-size: 14px;
   line-height: 1.7;
-  color: #383d47;
+  color: var(--text-sub);
   white-space: pre-wrap;
 }

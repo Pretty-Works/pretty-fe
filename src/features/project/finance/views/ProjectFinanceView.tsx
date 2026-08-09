@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { useCurrentUserId } from "@/lib/auth/currentUser";
+
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
@@ -11,26 +13,24 @@ import SegmentedTabs, {
   type SegmentedOption,
 } from "@/components/SegmentedTabs/SegmentedTabs";
 import StateView from "@/components/StateView/StateView";
-
 import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
-import { useCurrentUserId } from "@/lib/auth/currentUser";
 
+import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
 import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
-import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
-import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
 import {
   CATEGORY_LABEL,
   type Expense,
   type ExpenseStatus,
 } from "@/features/project/finance/api/financeApi";
-
 import BudgetSummaryCard from "@/features/project/finance/components/BudgetSummaryCard/BudgetSummaryCard";
 import ExpenseFormModal from "@/features/project/finance/components/ExpenseFormModal/ExpenseFormModal";
-
+import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
+import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
+import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 
 import styles from "./ProjectFinanceView.module.css";
@@ -97,6 +97,8 @@ export default function ProjectFinanceView({
 
   const { data: project } = useProjectDetailQuery(projectId ?? "");
 
+  const summary = useProjectSummary(projectId ?? "", "budget");
+
   const {
     data: budget,
     isLoading: isBudgetLoading,
@@ -143,6 +145,17 @@ export default function ProjectFinanceView({
 
   return (
     <div className={styles.container}>
+      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
+      {summary.banner && (
+        <AiSummaryCard
+          headline={summary.banner.headline}
+          lines={summary.banner.detail}
+          stats={summary.banner.stats}
+          updatedAt={summary.generatedAt}
+          onRefresh={summary.refresh}
+        />
+      )}
+
       <StateView
         loading={isBudgetLoading}
         error={isBudgetError || !budget}
@@ -239,7 +252,8 @@ export default function ProjectFinanceView({
             onRowClick={handleSelectExpense}
             // 본인이 등록한 지출만 고칠 수 있다 (EXPENSE_005)
             canClickRow={(expense) =>
-              !!currentUserId && String(expense.spender.userId) === currentUserId
+              !!currentUserId &&
+              String(expense.spender.userId) === currentUserId
             }
           />
         )}
@@ -256,13 +270,17 @@ export default function ProjectFinanceView({
           )}
       </section>
 
-      <ExpenseFormModal
-        open={isFormOpen}
-        onClose={handleCloseForm}
-        projectId={projectId ?? ""}
-        period={period}
-        expense={editingExpense}
-      />
+      {/* 열 때 마운트해 초기값을 한 번만 잡는다 */}
+      {isFormOpen && (
+        <ExpenseFormModal
+          key={editingExpense?.expenseId ?? "new"}
+          open
+          onClose={handleCloseForm}
+          projectId={projectId ?? ""}
+          period={period}
+          expense={editingExpense}
+        />
+      )}
     </div>
   );
 }

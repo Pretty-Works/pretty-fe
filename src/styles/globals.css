@@ -1,48 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-
-:root {
-  /* Brand */
-  --primary: #7c3aed;
-  --primary-light: #8b5cf6;
-  --primary-bright: #F3EDFF;
-  --primary-gradient: linear-gradient(135deg, #7c3aed, #8b5cf6);
-  --primary-bg: #f1ecfe;
-
-  /* Text */
-  --text: #191f28;
-  --text-sub: #3c3f48;
-  --text-placeholder: #8b95a1;
-
-  /* Surface & Line */
-  --white: #ffffff;
-  --surface: #f6f7f9;
-  --surface-ai: #f2f4f6;
-  --border: #e2e5ea;
-  --line: #eef0f3;
-
-  /* Status */
-  --success: #00c471;
-  --warning: #ff9800;
-  --danger: #ff4d4f;
-
-  /* D-day 배지 (배경 / 글자) */
-  --dday-urgent-bg: #fdebeb;
-  --dday-urgent-text: #c93a3a;
-  --dday-soon-bg: #fff7e0;
-  --dday-soon-text: #b0780a;
-  --dday-idle-bg: #f1f3f5;
-  --dday-idle-text: #969da7;
-
-  /* Category */
-  --c-approval: #8b5cf6;
-  --c-meeting: #00c471;
-  --c-message: #7c3aed;
-
-  --icon: #565961;
-
-  --white: #ffffff;
-  --black: #111111;
-}
+@import "./tokens.css";
 
 * {
   margin: 0;
@@ -50,22 +6,11 @@
   box-sizing: border-box;
 }
 
-/* API 연결 전 하드코딩·목업 값 표시용.
-   연동이 끝나면 이 클래스를 붙인 자리를 찾아 함께 제거한다.
-   (전역 클래스라 module.css 규칙을 이기도록 !important) */
-.mock-value {
-  color: #ff2d9b !important;
-}
-
 html,
 body {
   min-height: 100%;
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: var(--font-noto-sans-kr), sans-serif;
 }
-
-/* body {
-  min-width: 1100px;
-} */
 
 .layout {
   --agent-w: 420px;
@@ -74,26 +19,20 @@ body {
 
 .main {
   min-width: 0;
-  /* 열려 있는 패널 폭을 통째로 비운다. 덜 비우면 본문 오른쪽이 패널 밑에 깔린다 —
-     예전엔 본문 최소 폭(800px)을 지키려고 덜 비워서, 화면이 1220px 밑으로
-     내려갈수록 딱 그만큼씩 본문 오른쪽이 패널에 가려졌다 */
   margin-right: var(--agent-w);
   transition: margin-right 0.25s ease;
-  /* 상단바·본문이 화면 폭이 아니라 실제로 남은 폭을 보고 반응하게 한다 —
-     패널이 열리면 화면은 그대로인데 이 안쪽만 좁아지기 때문이다 */
   container: app-main / inline-size;
 }
 
 .agent {
   position: fixed;
   top: 0;
-  /* 고정 요소는 body 여백을 받지 않는다 — 모달이 잰 스크롤바 폭만큼 직접 물러난다 */
   right: var(--scrollbar-gap, 0);
   width: var(--agent-w);
   height: 100vh;
   overflow: hidden;
   z-index: 50;
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-drawer);
   transition: transform 0.25s ease, width 0.25s ease;
 }
 
@@ -109,14 +48,11 @@ body {
   margin-right: 0;
 }
 
-/* 전체화면일 땐 패널이 화면을 다 덮으므로 스크롤바 자리를 비워 두지 않는다 */
 .layout.expanded .agent {
   width: 100vw;
   right: 0;
 }
 
-/* 패널(420px)과 본문을 나란히 두기엔 화면이 좁은 구간 — 자리를 비워 봐야
-   본문이 패널보다도 좁아진다. 여기서는 패널이 본문 위에 뜬다(닫으면 온전히 보인다) */
 @media (max-width: 840px) {
   .main {
     margin-right: 0;

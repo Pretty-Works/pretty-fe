@@ -44,7 +44,7 @@
   cursor: pointer;
   background: none;
   border: none;
-  color: #8b95a1;
+  color: var(--text-placeholder);
 }
 
 .icon:hover {

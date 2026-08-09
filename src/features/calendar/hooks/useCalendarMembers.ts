@@ -1,10 +1,11 @@
 import { useMemo } from "react";
 
+import { useCurrentUserId } from "@/lib/auth/currentUser";
+
 import type { CalendarPeople } from "@/features/calendar/hooks/queries/useCalendarPeopleQuery";
 import type { CalendarMember, CalendarProject } from "@/features/calendar/types";
 import { ME_COLOR, memberColor } from "@/features/calendar/utils/memberColor";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
-import { useCurrentUserId } from "@/lib/auth/currentUser";
 
 const NO_PROJECTS: CalendarProject[] = [];
 const NO_MEMBERS: CalendarMember[] = [];
@@ -21,17 +22,7 @@ export interface CalendarMembers {
   me: CalendarMember | null;
 }
 
-/**
- * 캘린더에 등장하는 사람들을 한곳에서 조립한다.
- *
- * 이름·색의 출처가 세 군데라 그 사정을 여기서 흡수하고 화면은 `membersById`만 보게 한다.
- *   1) `GET /users/me` — 나 (이름까지 확실하게)
- *   2) 내 프로젝트 참여자 — 레일·인원 후보의 기본 목록
- *   3) 일정 응답에 실려 온 이름 — 프로젝트 밖 사람이 만든 일정까지 덮는다
- *
- * 여기 모이는 건 "이미 화면에 등장한 사람"이다. 사내 전체에서 사람을 찾는 건
- * `GET /users/search`(useUserSearchQuery)가 맡고, 일정 참여 인원 선택에서만 쓴다.
- */
+/** 캘린더에 등장하는 사람들을 한곳에서 조립한다. */
 export const useCalendarMembers = (
   namesById: Record<string, string>,
   people: CalendarPeople | undefined,

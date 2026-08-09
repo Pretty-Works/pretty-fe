@@ -1,7 +1,7 @@
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 
-import type { Project } from "@/features/home/api/homeApi";
-import { statusTone } from "@/features/home/constants/projectStatus";
+import type { Project } from "@/features/project/api/projectListApi";
+import { statusTone } from "@/features/project/constants/projectStatus";
 
 import styles from "./ProjectProgressList.module.css";
 
@@ -26,7 +26,10 @@ export default function ProjectProgressList({
 
           <div className={styles.barLine}>
             {/* 바 색 = 상태 색 (드롭다운 점과 동일 토큰) */}
-            <ProgressBar value={project.progress} tone={statusTone(project.status)} />
+            <ProgressBar
+              value={project.progress}
+              tone={statusTone(project.status)}
+            />
             <span className={styles.percent}>{project.progress}%</span>
           </div>
         </li>

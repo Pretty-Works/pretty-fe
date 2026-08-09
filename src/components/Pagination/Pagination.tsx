@@ -1,5 +1,7 @@
 "use client";
 
+import { cx } from "@/lib/cx";
+
 import styles from "./Pagination.module.css";
 
 interface PaginationProps {
@@ -40,7 +42,7 @@ export default function Pagination({
     >
       <button
         type="button"
-        className={`${styles.item} ${styles.arrow}`}
+        className={cx(styles.item, styles.arrow)}
         onClick={() => goTo(blockStart - PAGE_BLOCK)}
         disabled={blockStart === 1}
         aria-label={`이전 ${PAGE_BLOCK}페이지`}
@@ -55,7 +57,7 @@ export default function Pagination({
           <button
             key={page}
             type="button"
-            className={`${styles.item} ${isActive ? styles.active : ""}`}
+            className={cx(styles.item, isActive && styles.active)}
             onClick={() => goTo(page)}
             aria-current={isActive ? "page" : undefined}
           >
@@ -66,7 +68,7 @@ export default function Pagination({
 
       <button
         type="button"
-        className={`${styles.item} ${styles.arrow}`}
+        className={cx(styles.item, styles.arrow)}
         onClick={() => goTo(blockStart + PAGE_BLOCK)}
         disabled={blockEnd >= totalPages}
         aria-label={`다음 ${PAGE_BLOCK}페이지`}

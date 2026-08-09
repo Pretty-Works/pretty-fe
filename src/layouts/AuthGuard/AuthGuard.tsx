@@ -1,23 +1,18 @@
 "use client";
 
-import { useEffect, useSyncExternalStore } from "react";
+import { useEffect } from "react";
 
-import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 
 import Logo from "@/assets/brand/logo.png";
+
 import { isPublicPath, LOGIN_PATH } from "@/constants/routes";
+
+import { useHydrated } from "@/hooks/useHydrated";
 import { useAuthStore } from "@/stores/useAuthStore";
 
 import styles from "./AuthGuard.module.css";
-
-const emptySubscribe = () => () => {};
-const useHydrated = () =>
-  useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false,
-  );
 
 function AuthLoadingScreen() {
   return (
@@ -30,11 +25,7 @@ function AuthLoadingScreen() {
   );
 }
 
-export default function AuthGuard({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const accessToken = useAuthStore((state) => state.accessToken);

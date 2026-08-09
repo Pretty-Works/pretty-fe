@@ -2,19 +2,20 @@
 
 import { useMemo } from "react";
 
+import { weekOffsetOf } from "@/lib/date";
+
 import Button from "@/components/Button/Button";
 import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import StateView from "@/components/StateView/StateView";
-import TaskRow from "@/components/TaskRow/TaskRow";
-import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
 
-import { weekOffsetOf } from "@/lib/date";
-import {
-  DEPARTMENT_LABEL,
-  type TaskBoard,
-  type TaskItem,
+import type {
+  TaskBoard,
+  TaskItem,
 } from "@/features/project/overview/api/taskBoardApi";
+import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
+import TaskRow from "@/features/task/components/TaskRow/TaskRow";
+import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
 
 import styles from "./WeeklyTaskCard.module.css";
 
@@ -134,11 +135,7 @@ export default function WeeklyTaskCard({
 
         {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
         {onAddTask && (
-          <Button
-            size="tiny"
-            leftAccessory="+"
-            onClick={onAddTask}
-          >
+          <Button size="tiny" leftAccessory="+" onClick={onAddTask}>
             할일 추가
           </Button>
         )}

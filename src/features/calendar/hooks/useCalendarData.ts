@@ -18,12 +18,7 @@ interface UseCalendarDataArgs {
   extraUserIds?: string[];
 }
 
-/**
- * 캘린더 한 화면이 필요로 하는 서버 데이터를 모아 준다.
- *
- * 조회 순서에 의존 관계가 있어서 한곳에 둔다.
- *   프로젝트 참여자(+레일에 올린 사람) → 그 id들을 `userIds`로 일정 조회 → 일정 응답의 이름으로 사람 맵 완성
- */
+/** 캘린더 한 화면이 필요로 하는 서버 데이터를 모아 준다. */
 export const useCalendarData = ({
   from,
   to,
@@ -32,10 +27,6 @@ export const useCalendarData = ({
   const { data: people } = useCalendarPeopleQuery();
 
   // 조회 대상 = 내 프로젝트 참여자 + 레일에 직접 올린 사람.
-  //
-  // 일정 응답에 등장한 id는 여기에 넣지 않는다. 넣으면 그 사람 일정에서 또 새 사람이 나오고,
-  // 그 사람 때문에 다시 조회가 도는 식으로 회사 전체까지 번진다.
-  // 레일에 직접 올린 사람만 넣는 건 사용자가 명시적으로 고른 것이라 그 자리에서 멈추기 때문이다.
   const lookupIds = useMemo(() => {
     const ids = new Set(people?.members.map((member) => member.id) ?? NO_IDS);
     extraUserIds.forEach((id) => ids.add(id));

@@ -1,4 +1,21 @@
 .dot {
   display: inline-block;
   flex-shrink: 0;
+  border-radius: 4px;
+}
+
+.round {
+  border-radius: 999px;
+}
+
+.high {
+  background: var(--importance-high);
+}
+
+.mid {
+  background: var(--importance-mid);
+}
+
+.low {
+  background: var(--importance-low);
 }

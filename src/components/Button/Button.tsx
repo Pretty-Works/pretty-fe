@@ -1,3 +1,5 @@
+import { cx } from "@/lib/cx";
+
 import styles from "./Button.module.css";
 
 export type ButtonType = "primary" | "danger" | "light" | "dark";
@@ -5,8 +7,10 @@ export type ButtonStyle = "fill" | "weak";
 export type ButtonSize = "big" | "large" | "medium" | "tiny";
 export type ButtonDisplay = "block" | "full";
 
-export interface ButtonProps
-  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "type"> {
+export interface ButtonProps extends Omit<
+  React.ButtonHTMLAttributes<HTMLButtonElement>,
+  "type"
+> {
   children?: React.ReactNode;
   type?: ButtonType;
   buttonStyle?: ButtonStyle;
@@ -30,16 +34,14 @@ export default function Button({
   disabled,
   ...rest
 }: ButtonProps) {
-  const classes = [
+  const classes = cx(
     styles.button,
     styles[type],
     styles[buttonStyle],
     styles[size],
     display === "full" && styles.full,
     className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  );
 
   return (
     <button

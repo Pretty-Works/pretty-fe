@@ -6,10 +6,9 @@
   border: none;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 2px 10px rgba(69, 41, 120, 0.05);
+  box-shadow: var(--shadow-panel);
 }
 
-/* 한 단으로 접히면 레일이 가로로 길어져 여백이 과하게 보인다 */
 @media (max-width: 1000px) {
   .rail {
     padding: 22px 20px;
@@ -30,7 +29,6 @@
   cursor: pointer;
 }
 
-/* 체크박스: 네이티브 input은 숨기고 옆의 span으로 표시 */
 .checkboxInput {
   position: absolute;
   width: 1px;
@@ -46,7 +44,7 @@
   flex-shrink: 0;
   width: 18px;
   height: 18px;
-  border: 1.4px solid #dcdce4;
+  border: 1.4px solid var(--border-strong);
   border-radius: 5px;
   background: var(--white);
   color: transparent;
@@ -81,13 +79,11 @@
   color: var(--text-sub);
 }
 
-/* 자동완성 목록의 기준 위치 */
 .search {
   position: relative;
   margin: 0 -8px;
 }
 
-/* 체크된 프로젝트에서 모인 인원 목록 */
 .members {
   display: flex;
   flex-direction: column;
@@ -102,13 +98,10 @@
   border-bottom: 1px solid var(--line);
 }
 
-/* 마지막 줄 아래는 목록의 끝이라 나눌 대상이 없다 */
 .member:last-child {
   border-bottom: none;
 }
 
-/* 검색창 위에 고정으로 놓이는 본인 줄. 뺄 수 없어서 ✕가 없다.
-   아래 인원 목록과 점·이름 간격을 맞춰 같은 줄 규격으로 읽히게 한다 */
 .meRow {
   display: flex;
   align-items: center;
@@ -116,7 +109,6 @@
   padding: 2px 0;
 }
 
-/* 프로젝트 목록과 가르는 선. 프로젝트가 없으면 위에 아무것도 없어 선만 뜨므로 그때는 안 붙인다 */
 .meRowDivided {
   padding-top: 16px;
   border-top: 1px solid var(--border);
@@ -126,8 +118,6 @@
   color: var(--text-sub);
 }
 
-/* 색은 인라인으로 들어온다 (그리드 배너와 같은 연한 톤).
-   연한 색은 작을수록 구분이 어려워 배너 높이에 맞춰 조금 키웠다. */
 .dot {
   flex-shrink: 0;
   width: 13px;

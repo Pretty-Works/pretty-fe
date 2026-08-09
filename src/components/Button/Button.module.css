@@ -3,8 +3,6 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  /* flex 안에서 눌리면 <button>은 글자를 잘라내고 네모만 남긴다.
-     좁아질 때 줄어들어야 하는 건 버튼이 아니라 옆의 내용이다 */
   flex-shrink: 0;
   border-radius: 10px;
   border: 1px solid transparent;
@@ -50,7 +48,6 @@
   width: 100%;
 }
 
-/* 기본 버튼 — 보라 배경 채움. 화면·모달마다 하나뿐인 주 동작(작성·수정·저장·로그인 등)에 쓴다. */
 .primary.fill {
   background: var(--primary);
   color: var(--white);
@@ -65,11 +62,11 @@
 .primary.weak {
   background: var(--primary-bg);
   color: var(--primary);
-  border-color: #cebef6;
+  border-color: var(--primary-border-focus);
 }
 
 .primary.weak:hover:not(:disabled) {
-  background: #e7ddfb;
+  background: var(--primary-pressed);
 }
 
 .danger.fill {
@@ -79,8 +76,8 @@
 }
 
 .danger.fill:hover:not(:disabled) {
-  background: #f23739;
-  border-color: #f23739;
+  background: var(--danger-strong);
+  border-color: var(--danger-strong);
 }
 
 .danger.weak {
@@ -90,7 +87,7 @@
 }
 
 .danger.weak:hover:not(:disabled) {
-  background: #fff5f5;
+  background: var(--danger-bg-weak);
 }
 
 .light.fill {
@@ -100,7 +97,7 @@
 }
 
 .light.fill:hover:not(:disabled) {
-  background: #eceef1;
+  background: var(--surface-muted);
   color: var(--text);
 }
 
@@ -123,8 +120,8 @@
 }
 
 .dark.fill:hover:not(:disabled) {
-  background: #2d323a;
-  border-color: #2d323a;
+  background: var(--text-strong);
+  border-color: var(--text-strong);
 }
 
 .dark.weak {

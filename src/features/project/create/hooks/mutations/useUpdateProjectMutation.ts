@@ -24,7 +24,7 @@ export const useUpdateProjectMutation = (projectId: string) => {
       queryClient.invalidateQueries({
         queryKey: ["project", "milestones", projectId],
       });
-      queryClient.invalidateQueries({ queryKey: ["home", "projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", "list"] });
     },
   });
 };

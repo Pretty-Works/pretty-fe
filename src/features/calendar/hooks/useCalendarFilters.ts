@@ -2,12 +2,7 @@ import { useMemo, useReducer, type Dispatch } from "react";
 
 import type { CalendarMember, CalendarProject } from "@/features/calendar/types";
 
-/**
- * 레일 필터 상태.
- * - `checkedProjectIds`   : 사용자가 체크한 프로젝트. 첫 진입은 모두 해제 상태다.
- * - `hiddenMemberIds`     : ✕로 뺀 사람 (프로젝트 소속과 무관하게 전역)
- * - `addedMemberIds`      : 검색으로 직접 넣은 사람
- */
+/** 레일 필터 상태. */
 interface FilterState {
   checkedProjectIds: string[];
   hiddenMemberIds: string[];
@@ -74,13 +69,7 @@ export interface CalendarFilterState {
   addedMemberIds: string[];
 }
 
-/**
- * 레일 상태만 담당한다. 파생값(레일 목록·후보)은 사람 정보가 있어야 만들 수 있어 `useCalendarRail`이 맡는다.
- *
- * 굳이 둘로 나눈 이유: 일정을 **조회할 사람**을 정하려면 이 상태가 조회보다 먼저 있어야 한다.
- *   상태(여기) → 일정 조회(useCalendarData) → 사람 정보 → 레일 파생값(useCalendarRail)
- * 한 훅에 두면 "조회 결과가 있어야 상태를 만들고, 상태가 있어야 조회한다"가 되어 서로를 기다리게 된다.
- */
+/** 레일 상태만 담당한다. 파생값(레일 목록·후보)은 사람 정보가 있어야 만들 수 있어 `useCalendarRail`이 맡는다. */
 export const useCalendarFilterState = (): CalendarFilterState => {
   const [state, dispatch] = useReducer(reducer, INITIAL);
 

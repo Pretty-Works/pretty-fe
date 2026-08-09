@@ -4,10 +4,10 @@
   gap: 2px;
   width: 200px;
   padding: 8px;
-  border: 1px solid #e5e8ed;
+  border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--white);
-  box-shadow: 0 8px 24px rgba(26, 26, 38, 0.14);
+  box-shadow: var(--shadow-menu-neutral);
 }
 
 .item {
@@ -34,7 +34,6 @@
   cursor: default;
 }
 
-/* 현재 상태 */
 .itemOn {
   background: var(--primary-bright);
   color: var(--primary);
@@ -84,7 +83,6 @@
   background: var(--line);
 }
 
-/* 되돌릴 수 없는 종료 처리 */
 .complete {
   color: var(--primary);
   font-weight: 500;

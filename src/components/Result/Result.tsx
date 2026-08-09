@@ -1,3 +1,5 @@
+import { cx } from "@/lib/cx";
+
 import Button, { type ButtonProps } from "@/components/Button/Button";
 
 import styles from "./Result.module.css";
@@ -19,7 +21,7 @@ function ResultRoot({
 }: ResultProps) {
   return (
     <div
-      className={`${styles.result} ${size === "page" ? styles.page : ""}`}
+      className={cx(styles.result, size === "page" && styles.page)}
       role="status"
     >
       {figure}
@@ -40,9 +42,7 @@ function ResultFigure({
   children: React.ReactNode;
 }) {
   return (
-    <div
-      className={`${styles.figure} ${tone === "error" ? styles.figureError : ""}`}
-    >
+    <div className={cx(styles.figure, tone === "error" && styles.figureError)}>
       <span className={styles.figureMark} aria-hidden="true">
         {children}
       </span>

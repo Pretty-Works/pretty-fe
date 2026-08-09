@@ -4,10 +4,10 @@ import { useMemo } from "react";
 
 import { LuCrown } from "react-icons/lu";
 
-import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
-import { POSITION_LABEL } from "@/features/user/api/userApi";
-import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
 import type { ProjectMember } from "@/features/project/api/projectMemberApi";
+import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
+import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
+import { POSITION_LABEL } from "@/features/user/constants/organization";
 
 import styles from "./ProjectMemberMenu.module.css";
 
@@ -23,7 +23,11 @@ interface DepartmentGroup {
 export default function ProjectMemberMenu({
   projectId,
 }: ProjectMemberMenuProps) {
-  const { data: members, isPending, isError } = useProjectMembersQuery(projectId);
+  const {
+    data: members,
+    isPending,
+    isError,
+  } = useProjectMembersQuery(projectId);
 
   // 부서로 묶는다. 서버가 정렬을 보장하지 않아 화면에서 모은다.
   // 부서 순서는 처음 등장한 순서를 따른다 — 오너가 먼저 오면 그 부서가 위에 선다.

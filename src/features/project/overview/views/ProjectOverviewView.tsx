@@ -4,25 +4,25 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { getErrorCode } from "@/lib/api/errorCode";
+
 import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
-
-import { getErrorCode } from "@/lib/api/errorCode";
 import { useToastStore } from "@/stores/useToastStore";
 
-import TaskCreateModal, {
-  type EditingTask,
-} from "@/features/home/components/TaskCreateModal/TaskCreateModal";
-
+import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
+import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 import MilestoneProgressCard from "@/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard";
 import WeeklyTaskCard from "@/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard";
-
-import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
+import { useToggleMilestoneMutation } from "@/features/project/overview/hooks/mutations/useToggleMilestoneMutation";
+import { useMilestonesQuery } from "@/features/project/overview/hooks/queries/useMilestonesQuery";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useProjectTasksQuery } from "@/features/project/overview/hooks/queries/useProjectTasksQuery";
-import { useMilestonesQuery } from "@/features/project/overview/hooks/queries/useMilestonesQuery";
-import { useToggleMilestoneMutation } from "@/features/project/overview/hooks/mutations/useToggleMilestoneMutation";
-import { useToggleTaskMutation } from "@/features/home/hooks/mutations/useToggleTaskMutation";
+import TaskCreateModal, {
+  type EditingTask,
+} from "@/features/task/components/TaskCreateModal/TaskCreateModal";
+import { useToggleTaskMutation } from "@/features/task/hooks/mutations/useToggleTaskMutation";
 
 import styles from "./ProjectOverviewView.module.css";
 
@@ -68,7 +68,11 @@ export default function ProjectOverviewView({
     isError: isMilestoneError,
   } = useMilestonesQuery(projectId ?? "");
 
-  const { mutate: toggleMilestone } = useToggleMilestoneMutation(projectId ?? "");
+  const { mutate: toggleMilestone } = useToggleMilestoneMutation(
+    projectId ?? "",
+  );
+
+  const summary = useProjectSummary(projectId ?? "", "overview");
 
   // 마일스톤 토글도 수정과 같은 권한을 본다 (BE ProjectPolicy.canUpdate → PROJECT_005)
   const canManage = useCanManageProject(projectId ?? "");
@@ -150,6 +154,17 @@ export default function ProjectOverviewView({
 
   return (
     <div className={styles.container}>
+      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
+      {summary.banner && (
+        <AiSummaryCard
+          headline={summary.banner.headline}
+          lines={summary.banner.detail}
+          stats={summary.banner.stats}
+          updatedAt={summary.generatedAt}
+          onRefresh={summary.refresh}
+        />
+      )}
+
       {/* 기본 정보 */}
       <section className={styles.panel}>
         <div className={styles.panelHead}>
@@ -200,12 +215,10 @@ export default function ProjectOverviewView({
               board={milestoneBoard}
               editable={isOpenForContent && canManage}
               onToggle={(milestoneId, done) =>
-               
-              toggleMilestone(
-                { milestoneId, done },
-                { onError: notifyToggleFailure },
-              )
-            
+                toggleMilestone(
+                  { milestoneId, done },
+                  { onError: notifyToggleFailure },
+                )
               }
             />
           )}
@@ -254,20 +267,23 @@ export default function ProjectOverviewView({
         </StateView>
       </div>
 
-      {/* 할 일 추가 — 이 화면은 프로젝트가 정해져 있어 고정으로 연다 */}
-      <TaskCreateModal
-        open={taskModalOpen}
-        onClose={() => {
-          setTaskModalOpen(false);
-          setEditingTask(undefined);
-        }}
-        projects={[]}
-        fixedProject={{
-          id: String(project.projectId),
-          name: project.name,
-        }}
-        task={editingTask}
-      />
+      {/* 할 일 추가 — 이 화면은 프로젝트가 정해져 있어 고정으로 연다.
+          열 때 마운트해 초기값을 한 번만 잡는다 */}
+      {taskModalOpen && (
+        <TaskCreateModal
+          key={editingTask?.id ?? "new"}
+          open
+          onClose={() => {
+            setTaskModalOpen(false);
+            setEditingTask(undefined);
+          }}
+          fixedProject={{
+            id: String(project.projectId),
+            name: project.name,
+          }}
+          task={editingTask}
+        />
+      )}
     </div>
   );
 }

@@ -6,11 +6,13 @@ import Button from "@/components/Button/Button";
 import DatePicker, { type DateRange } from "@/components/DatePicker/DatePicker";
 import FormField from "@/components/FormField/FormField";
 import Modal from "@/components/Modal/Modal";
-import PeoplePicker, { type PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
+import PeoplePicker, {
+  type PeopleOption,
+} from "@/components/PeoplePicker/PeoplePicker";
 import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
+
 import TimeSelect from "@/features/calendar/components/TimeSelect/TimeSelect";
 import Toggle from "@/features/calendar/components/Toggle/Toggle";
-
 import type {
   LeaveType,
   ScheduleDraft,
@@ -190,11 +192,7 @@ export default function ScheduleEditorModal({
             loading={submitting}
             disabled={!canSubmit}
           >
-            {submitting
-              ? "저장 중…"
-              : mode === "create"
-                ? "등록"
-                : "저장"}
+            {submitting ? "저장 중…" : mode === "create" ? "등록" : "저장"}
           </Button>
         </>
       }

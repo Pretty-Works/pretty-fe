@@ -5,12 +5,14 @@ import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
 import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
+
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
-import type { Meeting } from "@/features/project/meetings/api/meetingApi";
 import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
+import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
+import type { Meeting } from "@/features/project/meetings/api/meetingApi";
 import { useMeetingListPage } from "@/features/project/meetings/hooks/useMeetingListPage";
 
 import styles from "./ProjectMeetingView.module.css";
@@ -54,25 +56,20 @@ export default function ProjectMeetingView({
   projectId,
 }: ProjectMeetingViewProps) {
   const page = useMeetingListPage(projectId ?? "");
+  const summary = useProjectSummary(projectId ?? "", "meeting");
 
   return (
     <>
-      {/* AI 요약 */}
-      <AiSummaryCard
-        headline="이번 주 회의 4건이 기록됐고, 후속 액션 정리가 필요해요"
-        lines={[
-          "2월 4주차 스프린트 리뷰(2/26) 후속 액션 정리가 필요해요",
-          "요구 재정의 킥오프·검색 인덱스 설계 논의는 완료됐어요",
-          "다음 회의 안건은 아직 등록되지 않았어요",
-        ]}
-        stats={[
-          { label: "회의", value: "4건" },
-          { label: "후속 액션", value: "미정리", tone: "warning" },
-          { label: "다음 안건", value: "미등록", tone: "danger" },
-        ]}
-        updatedAt={page.summaryUpdatedAt}
-        onRefresh={page.refreshSummary}
-      />
+      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
+      {summary.banner && (
+        <AiSummaryCard
+          headline={summary.banner.headline}
+          lines={summary.banner.detail}
+          stats={summary.banner.stats}
+          updatedAt={summary.generatedAt}
+          onRefresh={summary.refresh}
+        />
+      )}
 
       {/* 회의록 */}
       <section className={styles.panel}>
@@ -80,12 +77,16 @@ export default function ProjectMeetingView({
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>회의록</h2>
             {typeof page.totalCount === "number" && (
-              <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
+              <Badge type="elephant" badgeStyle="weak">
+                {page.totalCount}
+              </Badge>
             )}
           </div>
           {/* 완료·보관 프로젝트에는 회의록을 쓸 수 없어 버튼 자체를 감춘다 */}
           {page.canWrite && (
-            <Button size="tiny" onClick={page.goWrite}>작성하기</Button>
+            <Button size="tiny" onClick={page.goWrite}>
+              작성하기
+            </Button>
           )}
         </div>
 

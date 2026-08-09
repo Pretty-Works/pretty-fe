@@ -29,13 +29,11 @@
   border-color: var(--primary);
 }
 
-/* 에러 상태 — 빨간 테두리(포커스 시에도 유지) */
 .controlError,
 .controlError:focus-within {
   border-color: var(--danger);
 }
 
-/* 하단 도움말 — 에러일 때만 붉게 */
 .help {
   font-size: 12px;
   color: var(--text-sub);
@@ -46,13 +44,11 @@
   color: var(--danger);
 }
 
-/* maxLength에 닿았을 때 — 더 입력되지 않는 이유 */
 .warn {
   font-size: 12px;
   color: var(--danger);
 }
 
-/* 읽기 전용 — 직접 입력하지 않고 자동으로 계산되어 채워지는 칸 */
 .control:has(.input:read-only) {
   background: var(--surface);
 }
@@ -61,8 +57,6 @@
   border-color: var(--border);
 }
 
-/* 값이 채워져도 흐린 색을 유지한다 — 내가 쓴 글자가 아니라
-   다른 입력에서 계산돼 나온 값이라, 직접 쓴 칸과 같은 농도면 고칠 수 있어 보인다 */
 .input:read-only {
   color: var(--text-placeholder);
   cursor: default;
@@ -91,7 +85,6 @@
   color: var(--text-placeholder);
 }
 
-/* 비밀번호 표시/숨김 토글 */
 .reveal {
   display: flex;
   flex-shrink: 0;

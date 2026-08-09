@@ -1,35 +1,24 @@
+import type { SegmentedOption } from "@/components/SegmentedTabs/SegmentedTabs";
+
 // 서버 enum 그대로다 (Medium이 아니라 MID)
 export type PostImportance = "HIGH" | "MID" | "LOW";
 
+/** 중요도 색 이름. 실제 색은 CSS 토큰(--importance-*)이 갖는다 */
+export type ImportanceTone = "high" | "mid" | "low";
+
 export const IMPORTANCE_META: Record<
   PostImportance,
-  { label: string; dot: string }
+  { label: string; tone: ImportanceTone }
 > = {
-  HIGH: { label: "High", dot: "#de3d3d" },
-  MID: { label: "Medium", dot: "#f2991a" },
-  LOW: { label: "Low", dot: "#21b26b" },
+  HIGH: { label: "High", tone: "high" },
+  MID: { label: "Medium", tone: "mid" },
+  LOW: { label: "Low", tone: "low" },
 };
 
-export const IMPORTANCE_OPTIONS: {
-  value: PostImportance;
-  label: string;
-  activeColor: { bg: string; border: string; text: string };
-}[] = [
-  {
-    value: "HIGH",
-    label: "High",
-    activeColor: { bg: "#fdecec", border: "#f3c9c9", text: "#c93a3a" },
-  },
-  {
-    value: "MID",
-    label: "Medium",
-    activeColor: { bg: "#fff4e5", border: "#f2dcae", text: "#b4780a" },
-  },
-  {
-    value: "LOW",
-    label: "Low",
-    activeColor: { bg: "#eaf7f0", border: "#bfe6cf", text: "#1a9d5f" },
-  },
+export const IMPORTANCE_OPTIONS: SegmentedOption<PostImportance>[] = [
+  { value: "HIGH", label: "High", activeTone: "danger" },
+  { value: "MID", label: "Medium", activeTone: "warning" },
+  { value: "LOW", label: "Low", activeTone: "success" },
 ];
 
 export interface BoardPost {

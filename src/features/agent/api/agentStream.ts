@@ -1,24 +1,20 @@
 import { handleSessionExpired, refreshAccessTokenOnce } from "@/lib/api/client";
 import { API_BASE_URL } from "@/lib/config";
 
-import { agentLog, agentLogError } from "@/features/agent/api/agentDebug";
-
 import { useAuthStore } from "@/stores/useAuthStore";
 
-//에이전트 API의 기본 주소
+import { agentLog, agentLogError } from "@/features/agent/api/agentDebug";
+
 const AGENT_BASE_URL = `${API_BASE_URL}/api/v1`;
 
-// 응답 헤더에서 실행(run) ID를 읽기 위한 키
 const RUN_ID_HEADER = "X-Run-Id";
 
-// SSE 이벤트 1개의 형태(id, event, data)
 export interface AgentSseMessage {
   id: string;
   event: string;
   data: string;
 }
 
-// SSE 요청 실패 시 사용하는 커스텀 에러
 export class AgentStreamError extends Error {
   constructor(
     readonly status: number,
@@ -30,7 +26,6 @@ export class AgentStreamError extends Error {
   }
 }
 
-// 스트림을 열 때 필요한 옵션(onMessage, onRunId, signal)
 export interface AgentStreamOptions {
   onRunId?: (runId: string) => void;
   onMessage: (message: AgentSseMessage) => void;
@@ -38,15 +33,26 @@ export interface AgentStreamOptions {
   signal?: AbortSignal;
 }
 
-// SSE 연결을 시작하고 들어오는 이벤트를 읽는 메인 함수
 export const openAgentStream = async (
+  path: string,
+  body: unknown,
+  options: AgentStreamOptions,
+): Promise<void> => openStream("POST", path, body, options);
+
+export const reopenAgentStream = async (
+  path: string,
+  options: AgentStreamOptions,
+): Promise<void> => openStream("GET", path, undefined, options);
+
+const openStream = async (
+  method: "GET" | "POST",
   path: string,
   body: unknown,
   { onRunId, onMessage, signal }: AgentStreamOptions,
 ): Promise<void> => {
-  agentLog(`요청 POST ${path}`, body);
+  agentLog(`요청 ${method} ${path}`, body);
 
-  const response = await postStreamWithRetry(path, body, signal);
+  const response = await requestStreamWithRetry(method, path, body, signal);
 
   const runId = response.headers.get(RUN_ID_HEADER);
   agentLog(`응답 ${response.status} ${path}`, { [RUN_ID_HEADER]: runId });
@@ -57,30 +63,42 @@ export const openAgentStream = async (
   agentLog(`스트림 닫힘 ${path}`, { [RUN_ID_HEADER]: runId });
 };
 
-// fetch로 POST 요청을 보내 SSE 연결을 연다.
-const postStream = (path: string, body: unknown, signal?: AbortSignal) => {
-  const token = useAuthStore.getState().accessToken;
+const toRequestBody = (body: unknown): BodyInit | undefined => {
+  if (body === undefined) return undefined;
+  if (body instanceof FormData) return body;
 
-  return fetch(`${AGENT_BASE_URL}${path}`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "text/event-stream",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify(body),
-    signal,
-  });
+  return JSON.stringify(body);
 };
 
-// 401이면 토큰을 재발급받고 한 번만 다시 요청한다.
-const postStreamWithRetry = async (
+const requestStream = (
+  method: "GET" | "POST",
   path: string,
   body: unknown,
   signal?: AbortSignal,
 ) => {
-  let response = await postStream(path, body, signal);
+  const token = useAuthStore.getState().accessToken;
+  const isJson = body !== undefined && !(body instanceof FormData);
+
+  return fetch(`${AGENT_BASE_URL}${path}`, {
+    method,
+    credentials: "include",
+    headers: {
+      ...(isJson ? { "Content-Type": "application/json" } : {}),
+      Accept: "text/event-stream",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: toRequestBody(body),
+    signal,
+  });
+};
+
+const requestStreamWithRetry = async (
+  method: "GET" | "POST",
+  path: string,
+  body: unknown,
+  signal?: AbortSignal,
+) => {
+  let response = await requestStream(method, path, body, signal);
 
   // accessToken 만료(401) → 재발급 후 한 번만 재시도.
   if (response.status === 401) {
@@ -91,7 +109,7 @@ const postStreamWithRetry = async (
       handleSessionExpired();
       throw refreshError;
     }
-    response = await postStream(path, body, signal);
+    response = await requestStream(method, path, body, signal);
   }
 
   if (!response.ok) {
@@ -109,7 +127,6 @@ const postStreamWithRetry = async (
   return response as Response & { body: ReadableStream<Uint8Array> };
 };
 
-// 실패 응답(JSON)을 AgentStreamError로 변환한다.
 const toStreamError = async (response: Response) => {
   const body = (await response.json().catch(() => null)) as {
     errorCode?: string | null;
@@ -123,7 +140,6 @@ const toStreamError = async (response: Response) => {
   );
 };
 
-// 서버가 보내는 SSE 데이터를 계속 읽어 프레임 단위로 분리한다.
 const readSse = async (
   stream: ReadableStream<Uint8Array>,
   onMessage: (message: AgentSseMessage) => void,
@@ -152,7 +168,6 @@ const readSse = async (
   }
 };
 
-// SSE 문자열을 { id, event, data } 객체로 변환한다.
 const parseFrame = (frame: string): AgentSseMessage | null => {
   let id = "";
   let event = "";

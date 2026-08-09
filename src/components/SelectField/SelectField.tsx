@@ -2,6 +2,8 @@
 
 import { useId } from "react";
 
+import { cx } from "@/lib/cx";
+
 import styles from "./SelectField.module.css";
 
 export interface SelectOption {
@@ -42,7 +44,7 @@ export default function SelectField({
       <div className={styles.row}>
         <select
           id={id}
-          className={`${styles.select} ${!value ? styles.selectEmpty : ""}`}
+          className={cx(styles.select, !value && styles.selectEmpty)}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}

@@ -10,7 +10,7 @@ export const useCreateProjectMutation = () => {
 
     onSuccess: () => {
       // 홈 프로젝트 목록 갱신
-      queryClient.invalidateQueries({ queryKey: ["home", "projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", "list"] });
     },
   });
 };

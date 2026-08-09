@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FiChevronDown } from "react-icons/fi";
 
+import { cx } from "@/lib/cx";
+
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./TimeSelect.module.css";
@@ -109,13 +111,11 @@ export default function TimeSelect({
                   type="button"
                   role="option"
                   aria-selected={time === value}
-                  className={[
+                  className={cx(
                     styles.option,
                     time === value ? styles.selected : "",
                     tooEarly ? styles.optionDisabled : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+                  )}
                   disabled={tooEarly}
                   onClick={() => pick(time)}
                 >

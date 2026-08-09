@@ -4,12 +4,14 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import PostForm from "@/features/project/board/components/PostForm/PostForm";
-import PostSavedModal from "@/features/project/board/components/modal/PostSavedModal/PostSavedModal";
-import { useCreatePostMutation } from "@/features/project/board/hooks/mutations/useCreatePostMutation";
-import type { CreatePostRequest } from "@/features/project/board/api/postApi";
 import { getErrorCode } from "@/lib/api/errorCode";
+
 import { useToastStore } from "@/stores/useToastStore";
+
+import type { CreatePostRequest } from "@/features/project/board/api/postApi";
+import PostSavedModal from "@/features/project/board/components/modal/PostSavedModal/PostSavedModal";
+import PostForm from "@/features/project/board/components/PostForm/PostForm";
+import { useCreatePostMutation } from "@/features/project/board/hooks/mutations/useCreatePostMutation";
 
 import styles from "./PostWriteView.module.css";
 

@@ -1,15 +1,17 @@
 "use client";
 
+import { ReactNode, useEffect, useState } from "react";
+
 import {
   MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { ReactNode, useEffect, useState } from "react";
 
 import { getApiErrorMessage, isClientError } from "@/lib/api/errorCode";
 import { registerQueryClient } from "@/lib/api/queryCache";
+
 import { useToastStore } from "@/stores/useToastStore";
 
 const toastError = (message: string) =>
@@ -45,6 +47,7 @@ const createQueryClient = () =>
       queries: {
         retry: (failureCount, error) =>
           !isClientError(error) && failureCount < 1,
+        staleTime: 30 * 1000,
       },
     },
   });

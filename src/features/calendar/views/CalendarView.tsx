@@ -2,16 +2,19 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
-import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmModal";
-import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
+import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
+import { useToastStore } from "@/stores/useToastStore";
+
+import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
 import CalendarRail from "@/features/calendar/components/CalendarRail/CalendarRail";
 import DayDetailCard from "@/features/calendar/components/DayDetailCard/DayDetailCard";
 import EventDetailModal from "@/features/calendar/components/EventDetailModal/EventDetailModal";
 import LeaveSummaryCard from "@/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard";
 import MonthCalendar from "@/features/calendar/components/MonthCalendar/MonthCalendar";
-
-import { getApiErrorMessage } from "@/lib/api/errorCode";
+import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
 import { useRemoveScheduleMutation } from "@/features/calendar/hooks/mutations/useRemoveScheduleMutation";
 import { useSaveScheduleMutation } from "@/features/calendar/hooks/mutations/useSaveScheduleMutation";
 import { useCalendarData } from "@/features/calendar/hooks/useCalendarData";
@@ -20,6 +23,7 @@ import {
   useCalendarRail,
 } from "@/features/calendar/hooks/useCalendarFilters";
 import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs";
+import type { ScheduleSubmit } from "@/features/calendar/types";
 import {
   addMonths,
   buildMonthWeeks,
@@ -27,12 +31,8 @@ import {
   coversDate,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
-import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
-import type { ScheduleSubmit } from "@/features/calendar/types";
-import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
-import { POSITION_LABEL } from "@/features/user/api/userApi";
+import { describeAffiliation } from "@/features/user/constants/organization";
 import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
-import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./CalendarView.module.css";
 
@@ -118,9 +118,16 @@ export default function CalendarView() {
 
       if (visibleMemberIds.has(event.memberId)) return true;
 
-      return (event.participantIds ?? []).some((id) => visibleMemberIds.has(id));
+      return (event.participantIds ?? []).some((id) =>
+        visibleMemberIds.has(id),
+      );
     });
-  }, [events, visibleMemberIds, removeSchedule.isPending, removeSchedule.variables]);
+  }, [
+    events,
+    visibleMemberIds,
+    removeSchedule.isPending,
+    removeSchedule.variables,
+  ]);
 
   // 그리드 칩과 같은 기준으로 늘어놓는다 (compareEvents 한 곳에서 정한다)
   const selectedEvents = useMemo(() => {
@@ -147,9 +154,7 @@ export default function CalendarView() {
       byId.set(String(user.userId), {
         id: String(user.userId),
         name: user.name,
-        description: `${DEPARTMENT_LABEL[user.department]} · ${
-          POSITION_LABEL[user.position]
-        }${onLeave}`,
+        description: `${describeAffiliation(user)}${onLeave}`,
       });
     });
 
@@ -223,7 +228,8 @@ export default function CalendarView() {
 
   // 렌더에서 좁힌 타입이 콜백 안까지 이어지지 않아 미리 꺼내 둔다
   const editor = dialogs.dialog?.kind === "editor" ? dialogs.dialog : null;
-  const detail = dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
+  const detail =
+    dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
 
   const confirmText = dialogs.confirmation
     ? CONFIRM_TEXT[
@@ -345,7 +351,7 @@ export default function CalendarView() {
         />
       )}
 
-      <ConfirmModal
+      <ConfirmDialog
         open={!!dialogs.confirmation}
         onClose={dialogs.cancelConfirmation}
         onConfirm={handleConfirm}
@@ -353,6 +359,7 @@ export default function CalendarView() {
         description={confirmText.description}
         confirmLabel={confirmText.confirmLabel}
         tone="danger"
+        closeOnConfirm
       />
     </div>
   );

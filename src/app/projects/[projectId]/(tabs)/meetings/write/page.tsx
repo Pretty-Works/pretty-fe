@@ -1,49 +1,26 @@
 import type { Metadata } from "next";
 
-import ogImage from "@/assets/icons/agent/agent-chat.png";
+import { buildPageMetadata, projectPath } from "@/lib/metadata";
+
 import MeetingWriteView from "@/features/project/meetings/views/MeetingWriteView";
 
-const title = "회의록 작성";
-const description = "회의록 작성 페이지입니다.";
-const siteUrl = new URL(
-  process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-);
-
-interface MeetingWritePageProps {
+interface PageProps {
   params: Promise<{ projectId: string }>;
 }
 
 export async function generateMetadata({
   params,
-}: MeetingWritePageProps): Promise<Metadata> {
+}: PageProps): Promise<Metadata> {
   const { projectId } = await params;
 
-  return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      url: new URL(
-        `/projects/${encodeURIComponent(projectId)}/meetings/write`,
-        siteUrl,
-      ),
-      siteName: "Pretty Works",
-      images: [
-        {
-          url: new URL(ogImage.src, siteUrl),
-          width: ogImage.width,
-          height: ogImage.height,
-          alt: "Pretty Works AI 에이전트",
-        },
-      ],
-      locale: "ko_KR",
-      type: "website",
-    },
-  };
+  return buildPageMetadata({
+    title: "회의록 작성",
+    description: "회의록 작성 페이지입니다.",
+    path: projectPath(projectId, "/meetings/write"),
+  });
 }
 
-export default async function Page({ params }: MeetingWritePageProps) {
+export default async function Page({ params }: PageProps) {
   const { projectId } = await params;
 
   return <MeetingWriteView projectId={projectId} />;

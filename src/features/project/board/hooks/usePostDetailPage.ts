@@ -4,13 +4,15 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+
+import { useToastStore } from "@/stores/useToastStore";
+
 import type { CreatePostRequest } from "@/features/project/board/api/postApi";
 import { useDeletePostMutation } from "@/features/project/board/hooks/mutations/useDeletePostMutation";
 import { useUpdatePostMutation } from "@/features/project/board/hooks/mutations/useUpdatePostMutation";
 import { usePostDetailQuery } from "@/features/project/board/hooks/queries/usePostDetailQuery";
 import { usePostPermission } from "@/features/project/board/hooks/usePostPermission";
-import { getApiErrorMessage } from "@/lib/api/errorCode";
-import { useToastStore } from "@/stores/useToastStore";
 
 export const usePostDetailPage = (projectId: string, postId: string) => {
   const router = useRouter();

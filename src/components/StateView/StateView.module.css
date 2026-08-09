@@ -17,7 +17,6 @@
   color: var(--danger);
 }
 
-/* 다시 시도할 버튼이 붙는 경우 — 화면 전체가 실패한 상황이라 문구를 키운다 */
 .block {
   display: flex;
   flex-direction: column;
@@ -32,7 +31,6 @@
   font-weight: 700;
 }
 
-/* 팝오버 안(compact)은 화면 한 귀퉁이의 실패라 문구를 키우지 않는다 */
 .block.compact {
   gap: 12px;
   padding: 24px 0;

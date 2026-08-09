@@ -1,14 +1,17 @@
 "use client";
 
 import { useId, useState } from "react";
+
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
 import { withJosa } from "@/lib/text";
 
 import styles from "./FormField.module.css";
 
-interface FormFieldProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
+interface FormFieldProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "className"
+> {
   label: string;
   required?: boolean;
   right?: React.ReactNode;

@@ -4,7 +4,6 @@
   gap: 16px;
 }
 
-/* 마일스톤 · 주간 Task 2단 */
 .columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -12,7 +11,6 @@
   align-items: start;
 }
 
-/* 그리드 아이템 기본값(min-width: auto)이면 내용이 칸을 밀어내 가로 스크롤이 생긴다 */
 .columns > * {
   min-width: 0;
 }
@@ -30,7 +28,7 @@
   padding: 22px 24px;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .panelHead {
@@ -45,16 +43,11 @@
   color: var(--text);
 }
 
-/* 기간 · 예산 · 오너 */
 .infoGrid {
   display: grid;
-  /* 칸을 내용 크기에 맞추고 왼쪽으로 모은다 — 1fr로 3등분하면 책임자 이름 뒤에
-     빈 자리가 길게 남는다. 하한이 0이라 좁아지면 긴 날짜가 칸 안에서 줄바꿈한다 */
   grid-template-columns: repeat(3, minmax(0, max-content));
   justify-content: start;
   gap: 14px 44px;
-  /* 아래쪽 선은 긋지 않는다 — 참여자 배지를 상단바로 옮긴 뒤로 이 줄이 박스의 끝이라
-     카드 테두리 바로 위에 선이 하나 더 그이는 꼴이 된다 */
   padding: 16px 0 0;
   border-top: 1px solid var(--line);
 }
@@ -77,7 +70,6 @@
   color: var(--text);
 }
 
-/* 휴직 뱃지 — 상단바 참여자 명단(ProjectMemberMenu .leave)과 같은 모양 */
 .leave {
   display: inline-block;
   margin-left: 6px;
@@ -89,5 +81,3 @@
   color: var(--text-placeholder);
 }
 
-/* 참여자 — 공용 Chip 사용 */
-/* 프로젝트를 열 수 없을 때 — 문구 + 빠져나갈 길 */

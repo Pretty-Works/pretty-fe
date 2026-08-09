@@ -3,10 +3,12 @@
 import { usePathname } from "next/navigation";
 
 import { isPublicPath } from "@/constants/routes";
-import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
-import { useAgentStore } from "@/stores/useAgentStore";
+import { cx } from "@/lib/cx";
 
+import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import Gnb from "@/layouts/Gnb/Gnb";
+
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import AgentView from "@/features/agent/views/AgentView";
 
 export default function AgentLayout({
@@ -21,7 +23,7 @@ export default function AgentLayout({
 
   const isAuthPage = isPublicPath(pathname);
 
-  // 패널이 화면을 다 덮는 동안만 뒤 스크롤을 잠근다 (모달과 같은 장치를 쓴다)
+  // 패널이 화면을 다 덮는 동안만 뒤 스크롤을 잠근다
   useBodyScrollLock(expanded && !folded && !isAuthPage);
 
   if (isAuthPage) {
@@ -29,15 +31,11 @@ export default function AgentLayout({
   }
 
   return (
-    <div
-      className={`layout ${folded ? "folded" : ""} ${
-        expanded ? "expanded" : ""
-      }`}
-    >
-      <main className="main">
+    <div className={cx("layout", folded && "folded", expanded && "expanded")}>
+      <div className="main">
         <Gnb />
         {children}
-      </main>
+      </div>
 
       <aside className="agent">
         <AgentView />

@@ -1,8 +1,7 @@
 "use client";
 
-import { PROJECT_STATUS_META } from "@/features/home/constants/projectStatus";
-
-import type { ProjectStatus } from "@/features/home/api/homeApi";
+import type { ProjectStatus } from "@/features/project/api/projectListApi";
+import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
 
 import styles from "./ProjectStatusMenu.module.css";
 

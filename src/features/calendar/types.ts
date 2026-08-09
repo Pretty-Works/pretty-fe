@@ -1,8 +1,14 @@
+/**
+ * 구성원 색 번호. 실제 색은 CSS 토큰(--member-*)이 갖고,
+ * 번호를 배정하는 규칙은 utils/memberColor 가 갖는다.
+ */
+export type MemberColorId = `member-${number}` | "member-me";
+
 // 캘린더 구성원 (색상은 캘린더 칩·레일 점·상세 이름에 공통으로 쓰임)
 export interface CalendarMember {
   id: string;
   name: string;
-  color: string;
+  color: MemberColorId;
   isMe?: boolean;
 }
 

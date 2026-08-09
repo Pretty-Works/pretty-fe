@@ -6,17 +6,18 @@ import {
   fetchNotifications,
   toAppNotification,
   type AppNotification,
+  type NotificationsResponse,
 } from "../../api/notificationApi";
 
 export const NOTIFICATIONS_QUERY_KEY = ["notifications", "list"];
 
-/**
- * 드롭다운 목록. 드롭다운이 열려 있는 동안에만 마운트되므로 조회 시점이 곧 여는 시점이다
- * (뱃지 폴링과 별개 — 30초마다 부르는 건 unseen 쪽이다).
- *
- * 커서 페이지네이션이라 pageParam이 페이지 번호가 아니라 "마지막으로 본 알림 id"다.
- * 첫 페이지는 cursor를 생략하므로 initialPageParam이 undefined다.
- */
+// 모듈 스코프에 둬야 react-query가 select 결과를 재사용한다 (인라인이면 매 렌더 재계산)
+const selectNotifications = (data: {
+  pages: NotificationsResponse[];
+}): AppNotification[] =>
+  data.pages.flatMap((page) => page.result.items.map(toAppNotification));
+
+/** 드롭다운 목록. 드롭다운이 열려 있는 동안에만 마운트되므로 조회 시점이 곧 여는 시점이다 */
 export const useNotificationsQuery = () => {
   return useInfiniteQuery({
     queryKey: NOTIFICATIONS_QUERY_KEY,
@@ -30,7 +31,6 @@ export const useNotificationsQuery = () => {
     gcTime: 0,
     retry: false,
 
-    select: (data): AppNotification[] =>
-      data.pages.flatMap((page) => page.result.items.map(toAppNotification)),
+    select: selectNotifications,
   });
 };
