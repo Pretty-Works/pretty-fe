@@ -230,14 +230,6 @@ export default function ProjectFinanceView({
                 : "등록된 지출이 없습니다"
             }
             description="지출을 등록하면 예산 대비 집행 현황이 위 카드에 함께 반영돼요."
-            button={
-              <Result.Button
-                leftAccessory="+"
-                onClick={() => setIsFormOpen(true)}
-              >
-                지출 추가
-              </Result.Button>
-            }
           />
         ) : (
           <ProjectTable

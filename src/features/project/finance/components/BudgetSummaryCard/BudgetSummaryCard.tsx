@@ -6,6 +6,7 @@ import Badge from "@/components/Badge/Badge";
 import SegmentedTabs, {
   type SegmentedOption,
 } from "@/components/SegmentedTabs/SegmentedTabs";
+import StateView from "@/components/StateView/StateView";
 
 import {
   CATEGORY_LABEL,
@@ -145,9 +146,10 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
 
         {/* 오른쪽 — 비중 도넛 + 범례 */}
         <div className={styles.shareArea}>
-          {shares.length === 0 ? (
-            <p className={styles.emptyText}>집계할 사용 내역이 없어요.</p>
-          ) : (
+          <StateView
+            empty={shares.length === 0}
+            emptyText="집계할 사용 내역이 없어요."
+          >
             <>
               <div className={styles.donut}>
                 <svg width={SIZE} height={SIZE} viewBox={`0 0 ${SIZE} ${SIZE}`}>
@@ -196,7 +198,7 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
                 ))}
               </ul>
             </>
-          )}
+          </StateView>
         </div>
       </div>
     </section>

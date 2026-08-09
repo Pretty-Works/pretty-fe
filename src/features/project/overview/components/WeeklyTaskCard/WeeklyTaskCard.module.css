@@ -43,9 +43,11 @@
   padding: 12px 0;
 }
 
+/* 짧고 고정된 값이라 줄어들지 않는다 — 눌리면 "완료 0개"가 글자 단위로 쪼개진다 */
 .counts {
   display: flex;
   flex-direction: column;
+  flex-shrink: 0;
   gap: 10px;
 }
 
@@ -53,6 +55,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  white-space: nowrap;
 }
 
 .countLabel {
@@ -149,12 +152,6 @@
   background: var(--primary-bg);
 }
 
-.emptyText {
-  padding: 28px 0;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-placeholder);
-}
 
 /* 연도 선택 — 기간이 길면 목록이 길어져 높이를 묶고 안에서 스크롤한다 */
 .yearMenu {
