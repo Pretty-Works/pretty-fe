@@ -6,9 +6,9 @@ import type {
   PostImportance,
 } from "@/features/project/board/types";
 import {
-  DEPARTMENT_LABEL,
+  departmentLabel,
   type DepartmentType,
-} from "@/features/project/overview/api/taskBoardApi";
+} from "@/features/user/constants/organization";
 
 // 목록 응답 한 줄 (서버 필드 그대로)
 interface PostApiItem {
@@ -51,8 +51,7 @@ const toBoardPost = (post: PostApiItem): BoardPost => ({
   title: post.title,
   importance: post.priority,
   author: post.authorName,
-  // 서버는 코드로 준다. 모르는 부서가 새로 생겨도 코드라도 보이게 둔다.
-  dept: DEPARTMENT_LABEL[post.department] ?? post.department,
+  dept: departmentLabel(post.department),
   // 목록에서는 초까지 볼 이유가 없다 — "2026-07-28 10:00"
   createdAt: post.createdAt?.slice(0, 16) ?? "",
 });
@@ -146,7 +145,7 @@ const toPostDetail = (post: PostDetailApiItem): PostDetail => ({
   author: {
     userId: post.author.userId,
     name: post.author.name,
-    dept: DEPARTMENT_LABEL[post.author.department] ?? post.author.department,
+    dept: departmentLabel(post.author.department),
   },
   createdAt: post.createdAt,
   modifiedAt: post.modifiedAt,

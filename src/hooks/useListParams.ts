@@ -11,13 +11,7 @@ interface UseListParamsOptions<TFilter> {
   delay?: number;
 }
 
-/**
- * 목록 화면의 "검색어 + 필터 + 페이지" 한 세트.
- *
- * 검색어나 필터가 바뀌면 항상 1페이지로 되돌린다.
- * 3페이지를 보다가 조건을 좁히면 결과가 3페이지보다 짧아져 빈 화면이 나오기 때문인데,
- * 화면마다 손으로 지키던 규칙이라 한 번 빠뜨리면 조용히 어긋난다. 여기 가둬 둔다.
- */
+/** 목록 화면의 "검색어 + 필터 + 페이지" 한 세트. */
 export function useListParams<TFilter = undefined>(
   options: UseListParamsOptions<TFilter> = {},
 ) {

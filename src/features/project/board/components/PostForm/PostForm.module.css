@@ -34,7 +34,7 @@
   padding: 24px;
   border-radius: 14px;
   background: var(--white);
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card-sm);
 }
 
 .cardTitle {

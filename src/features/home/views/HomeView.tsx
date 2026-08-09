@@ -5,32 +5,31 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 import Badge from "@/components/Badge/Badge";
-
 import Button from "@/components/Button/Button";
-import SearchBar from "@/components/SearchBar/SearchBar";
 import Pagination from "@/components/Pagination/Pagination";
+import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
-import ConfirmRequestCard from "@/features/home/components/ConfirmRequestCard/ConfirmRequestCard";
-import MyTaskList from "@/features/home/components/MyTaskList/MyTaskList";
-import ProjectStatusSelect from "@/features/home/components/ProjectStatusSelect/ProjectStatusSelect";
-import ProjectProgressList from "@/features/home/components/ProjectProgressList/ProjectProgressList";
-import TaskCreateModal, {
-  type EditingTask,
-} from "@/features/home/components/TaskCreateModal/TaskCreateModal";
-
-import { useAgentStore } from "@/stores/useAgentStore";
-
 import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
-import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
-import { agentLog } from "@/features/agent/api/agentDebug";
-import { useAgentPendingInteractionsQuery } from "@/features/agent/hooks/queries/useAgentPendingInteractionsQuery";
+
+import PendingInteractionCard from "@/features/agent/components/PendingInteractionCard/PendingInteractionCard";
 import { useCancelAgentRunMutation } from "@/features/agent/hooks/mutations/useAgentMutations";
-import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
-import { useTasksQuery } from "@/features/home/hooks/queries/useTasksQuery";
-import { useToggleTaskMutation } from "@/features/home/hooks/mutations/useToggleTaskMutation";
+import { useAgentPendingInteractionsQuery } from "@/features/agent/hooks/queries/useAgentPendingInteractionsQuery";
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore";
 import type { PendingInteraction } from "@/features/agent/types";
-import type { MyTask, StatusFilter } from "@/features/home/api/homeApi";
+import MyTaskList from "@/features/home/components/MyTaskList/MyTaskList";
+import ProjectProgressList from "@/features/home/components/ProjectProgressList/ProjectProgressList";
+import ProjectStatusSelect from "@/features/home/components/ProjectStatusSelect/ProjectStatusSelect";
+import type { StatusFilter } from "@/features/project/api/projectListApi";
+import { useProjectsQuery } from "@/features/project/hooks/queries/useProjectsQuery";
+import type { MyTask } from "@/features/task/api/taskApi";
+import TaskCreateModal, {
+  type EditingTask,
+} from "@/features/task/components/TaskCreateModal/TaskCreateModal";
+import { useToggleTaskMutation } from "@/features/task/hooks/mutations/useToggleTaskMutation";
+import { useTasksQuery } from "@/features/task/hooks/queries/useTasksQuery";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
 import styles from "./HomeView.module.css";
 
@@ -40,6 +39,7 @@ export default function HomeView() {
   const router = useRouter();
 
   const openAgent = useAgentStore((state) => state.openAgent);
+  const requestInteraction = useChatStore((state) => state.requestInteraction);
 
   // 인사말·프로젝트 생성 버튼 노출에 쓴다 (앱 진입 시 1회 조회 후 캐시)
   const { data: me } = useMyProfileQuery();
@@ -48,7 +48,7 @@ export default function HomeView() {
   // 검색어·상태 필터·페이지 (기본: 진행중). 조건이 바뀌면 훅이 1페이지로 되돌린다.
   const list = useListParams<StatusFilter>({ initialFilter: "ONGOING" });
 
-  const [stoppedIds, setStoppedIds] = useState<number[]>([]); // 중단한 요청
+  const [handledIds, setHandledIds] = useState<number[]>([]); // 답하거나 중단한 요청
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
@@ -78,12 +78,12 @@ export default function HomeView() {
     isError: isTasksError,
   } = useTasksQuery();
 
-  const { mutate: toggleTask } = useToggleTaskMutation(["home", "tasks"]);
+  const { mutate: toggleTask } = useToggleTaskMutation(["task", "list"]);
   const { mutate: cancelRun } = useCancelAgentRunMutation();
 
-  // 중단은 아직 서버에 보내지 못해, 누른 카드만 로컬로 걸러낸다
+  // 중단·응답한 카드는 목록을 다시 읽어야 빠진다 — 그동안은 로컬로 걸러낸다
   const visibleInteractions = interactions.filter(
-    (interaction) => !stoppedIds.includes(interaction.interactionId),
+    (interaction) => !handledIds.includes(interaction.interactionId),
   );
   const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
 
@@ -97,23 +97,22 @@ export default function HomeView() {
     router.push(`/projects/${projectId}/overview`);
   };
 
+  // 응답은 SSE로 실행이 이어지므로 보내는 일은 채팅 패널에 맡긴다 —
+  // 그 대화로 옮겨 놓아야 이어지는 답변이 엉뚱한 자리에 쌓이지 않는다.
   const handleSelectOption = (
     interaction: PendingInteraction,
     optionId: string,
   ) => {
     openAgent(); // 선택하면 에이전트 패널을 열어 답변을 이어받는다
 
-    // TODO: 선택 결과 전송 — 응답 API가 종류별로 갈린다.
-    //   QUESTION  POST /agent/questions/{interactionId}  { selectedOptionIds: [optionId] }
-    //   APPROVAL  POST /agent/approvals/{interactionId}
-    //             APPROVE → { decision: "APPROVED" }
-    //             REJECT  → { decision: "REJECTED" }
-    //             그 밖    → { decision: "ALTERNATIVE", alternativeId: optionId }
-    // 둘 다 SSE로 실행이 이어지므로 채팅 패널의 스트림에 물려야 한다.
-    agentLog(`홈 카드 선택 "${optionId}" — 응답 API 미연결`, {
+    // 답한 카드를 남겨 두면 한 번 더 눌러 409를 받는다
+    setHandledIds((prev) => [...prev, interaction.interactionId]);
+
+    requestInteraction({
       kind: interaction.kind,
       interactionId: interaction.interactionId,
       conversationId: interaction.conversationId,
+      optionId,
     });
   };
 
@@ -121,11 +120,11 @@ export default function HomeView() {
   // 서버가 대기 카드까지 닫아 목록을 다시 읽으면 빠지지만, 그 사이 카드가 남아 있으면
   // 눌러도 안 먹은 줄 알고 다시 누른다 — 먼저 감추고 실패하면 되돌린다.
   const handleStopInteraction = (interaction: PendingInteraction) => {
-    setStoppedIds((prev) => [...prev, interaction.interactionId]);
+    setHandledIds((prev) => [...prev, interaction.interactionId]);
 
     cancelRun(interaction.runId, {
       onError: () =>
-        setStoppedIds((prev) =>
+        setHandledIds((prev) =>
           prev.filter((id) => id !== interaction.interactionId),
         ),
     });
@@ -180,7 +179,7 @@ export default function HomeView() {
           >
             <div className={styles.requestList}>
               {visibleInteractions.map((interaction) => (
-                <ConfirmRequestCard
+                <PendingInteractionCard
                   key={interaction.interactionId}
                   interaction={interaction}
                   onSelectOption={handleSelectOption}
@@ -277,13 +276,15 @@ export default function HomeView() {
         </section>
       </div>
 
-      {/* 할 일 추가 팝업 */}
-      <TaskCreateModal
-        open={taskModalOpen}
-        onClose={handleCloseTaskModal}
-        projects={projects}
-        task={editingTask}
-      />
+      {/* 할 일 추가 팝업 — 열 때 마운트해 초기값을 한 번만 잡는다 */}
+      {taskModalOpen && (
+        <TaskCreateModal
+          key={editingTask?.id ?? "new"}
+          open
+          onClose={handleCloseTaskModal}
+          task={editingTask}
+        />
+      )}
     </main>
   );
 }

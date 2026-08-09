@@ -2,6 +2,8 @@
 
 import { useCallback, useRef, useState } from "react";
 
+import { cx } from "@/lib/cx";
+
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./PeriodNavigator.module.css";
@@ -72,7 +74,7 @@ export default function PeriodNavigator({
     setOpen(true);
   };
 
-  const labelClass = `${styles.label} ${labelSize === "md" ? styles.labelMd : ""}`;
+  const labelClass = cx(styles.label, labelSize === "md" && styles.labelMd);
 
   return (
     <div className={styles.navigator}>
@@ -80,7 +82,7 @@ export default function PeriodNavigator({
           읽어주는 이름은 aria-label이 갖는다 */}
       <button
         type="button"
-        className={`${styles.arrow} ${styles.prev}`}
+        className={cx(styles.arrow, styles.prev)}
         onClick={onPrevious}
         aria-label={previousLabel}
       />
@@ -99,7 +101,7 @@ export default function PeriodNavigator({
         >
           <button
             type="button"
-            className={`${labelClass} ${styles.labelButton}`}
+            className={cx(labelClass, styles.labelButton)}
             onClick={toggle}
             aria-haspopup={menu ? "menu" : "dialog"}
             aria-expanded={open}
@@ -123,14 +125,14 @@ export default function PeriodNavigator({
                   <div className={styles.popHead}>
                     <button
                       type="button"
-                      className={`${styles.arrow} ${styles.prev}`}
+                      className={cx(styles.arrow, styles.prev)}
                       onClick={() => setDraftYear((year) => year - 1)}
                       aria-label="이전 해"
                     />
                     <span className={styles.popYear}>{draftYear}년</span>
                     <button
                       type="button"
-                      className={`${styles.arrow} ${styles.next}`}
+                      className={cx(styles.arrow, styles.next)}
                       onClick={() => setDraftYear((year) => year + 1)}
                       aria-label="다음 해"
                     />
@@ -146,7 +148,10 @@ export default function PeriodNavigator({
                         <button
                           key={month}
                           type="button"
-                          className={`${styles.popMonth} ${current ? styles.popMonthCurrent : ""}`}
+                          className={cx(
+                            styles.popMonth,
+                            current && styles.popMonthCurrent,
+                          )}
                           onClick={() => {
                             monthPicker.onChange(draftYear, month);
                             close();
@@ -168,11 +173,16 @@ export default function PeriodNavigator({
 
       <button
         type="button"
-        className={`${styles.arrow} ${styles.next}`}
+        className={cx(styles.arrow, styles.next)}
         onClick={onNext}
         aria-label={nextLabel}
       />
-      <button type="button" className={styles.reset} onClick={onReset} disabled={isCurrent}>
+      <button
+        type="button"
+        className={styles.reset}
+        onClick={onReset}
+        disabled={isCurrent}
+      >
         {resetLabel}
       </button>
     </div>

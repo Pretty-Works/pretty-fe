@@ -4,17 +4,20 @@ import { useCallback, useRef, useState } from "react";
 
 import SearchBar from "@/components/SearchBar/SearchBar";
 import SuggestList from "@/components/SuggestList/SuggestList";
-
 import { useClickOutside } from "@/hooks/useClickOutside";
 
-import type { CalendarMember, CalendarProject } from "@/features/calendar/types";
+import type {
+  CalendarMember,
+  CalendarProject,
+  MemberColorId,
+} from "@/features/calendar/types";
 import { calendarEventColors } from "@/features/calendar/utils/memberColor";
 
 import styles from "./CalendarRail.module.css";
 
 // 점은 월간 그리드의 일정 배너와 같은 연한 색으로 찍는다.
 // 테두리를 두르면 그 선 색이 색을 덮어 사람마다 다른 색이 안 보인다.
-const dotStyle = (color: string) => ({
+const dotStyle = (color: MemberColorId) => ({
   background: calendarEventColors(color).background,
 });
 
@@ -54,9 +57,8 @@ export default function CalendarRail({
     member.name.includes(query.trim()),
   );
 
-  const handleSelect = (name: string) => {
-    const picked = suggestions.find((member) => member.name === name);
-    if (picked) onAddMember(picked.id);
+  const handleSelect = (id: string) => {
+    onAddMember(id);
     setQuery("");
   };
 
@@ -91,7 +93,6 @@ export default function CalendarRail({
               );
             })}
           </ul>
-
         </>
       )}
 
@@ -118,7 +119,10 @@ export default function CalendarRail({
         />
         {query.trim() && (
           <SuggestList
-            items={suggestions.map((member) => member.name)}
+            items={suggestions.map((member) => ({
+              id: member.id,
+              label: member.name,
+            }))}
             onSelect={handleSelect}
             emptyText="추가할 사람이 없어요"
           />

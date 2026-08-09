@@ -4,10 +4,10 @@ import { useState } from "react";
 
 import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
-
 import { useDebounce } from "@/hooks/useDebounce";
-import { useProjectsQuery } from "@/features/home/hooks/queries/useProjectsQuery";
-import { PROJECT_STATUS_META } from "@/features/home/constants/projectStatus";
+
+import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
+import { useProjectsQuery } from "@/features/project/hooks/queries/useProjectsQuery";
 
 import styles from "./ProjectSwitchMenu.module.css";
 

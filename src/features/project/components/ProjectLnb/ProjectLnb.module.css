@@ -40,7 +40,7 @@
 }
 
 .item:active {
-  background: #eceef1;
+  background: var(--surface-muted);
 }
 
 .icon {
@@ -84,12 +84,10 @@
     padding: 10px 8px;
     border-radius: 16px;
   }
-
   .caption,
   .label {
     display: none;
   }
-
   .item {
     justify-content: center;
     gap: 0;

@@ -2,9 +2,15 @@
 
 import styles from "./SuggestList.module.css";
 
+export interface SuggestItem {
+  /** 고른 값을 되찾는 열쇠. 동명이인이 있어도 서로 섞이지 않는다 */
+  id: string;
+  label: string;
+}
+
 interface SuggestListProps {
-  items: string[];
-  onSelect: (item: string) => void;
+  items: SuggestItem[];
+  onSelect: (id: string) => void;
   emptyText?: string;
 }
 
@@ -15,23 +21,27 @@ export default function SuggestList({
   onSelect,
   emptyText = "검색 결과가 없어요",
 }: SuggestListProps) {
+  if (items.length === 0) {
+    return (
+      <ul className={styles.suggest}>
+        <li className={styles.empty}>{emptyText}</li>
+      </ul>
+    );
+  }
+
   return (
     <ul className={styles.suggest}>
-      {items.length > 0 ? (
-        items.map((item) => (
-          <li key={item}>
-            <button
-              type="button"
-              className={styles.item}
-              onClick={() => onSelect(item)}
-            >
-              {item}
-            </button>
-          </li>
-        ))
-      ) : (
-        <li className={styles.empty}>{emptyText}</li>
-      )}
+      {items.map((item) => (
+        <li key={item.id}>
+          <button
+            type="button"
+            className={styles.item}
+            onClick={() => onSelect(item.id)}
+          >
+            {item.label}
+          </button>
+        </li>
+      ))}
     </ul>
   );
 }

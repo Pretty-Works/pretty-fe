@@ -73,9 +73,7 @@ export default function ProjectTable<T>({
     "--row-min-narrow": `${minRowWidth(
       columns.filter((col) => col.fold !== "narrow"),
     )}px`,
-    "--row-min-compact": `${minRowWidth(
-      columns.filter((col) => !col.fold),
-    )}px`,
+    "--row-min-compact": `${minRowWidth(columns.filter((col) => !col.fold))}px`,
   } as React.CSSProperties;
 
   return (

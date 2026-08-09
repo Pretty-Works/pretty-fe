@@ -6,13 +6,16 @@ import Pagination from "@/components/Pagination/Pagination";
 import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
-import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
-import ProjectTable, { type ProjectTableColumn } from "@/features/project/components/ProjectTable/ProjectTable";
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
 import ImportanceFilter from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
 import { usePostListPage } from "@/features/project/board/hooks/usePostListPage";
-import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 import type { BoardPost } from "@/features/project/board/types";
+import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import ProjectTable, {
+  type ProjectTableColumn,
+} from "@/features/project/components/ProjectTable/ProjectTable";
+import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
+import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 
 import styles from "./ProjectBoardView.module.css";
 
@@ -37,36 +40,36 @@ interface ProjectBoardViewProps {
 
 export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
   const page = usePostListPage(projectId ?? "");
+  const summary = useProjectSummary(projectId ?? "", "board");
 
   return (
     <>
-      <AiSummaryCard
-        headline="게시판에 High 리스크 글 2건, 우선 확인이 필요해요"
-        lines={[
-          "전체 58건 중 부하 테스트 지연·배포 논의가 High 리스크예요",
-          "LLM 스펙 합의, QA 세팅 등 Medium 리스크 글이 3건 있어요",
-          "High 리스크 글부터 먼저 확인하는 걸 추천해요",
-        ]}
-        stats={[
-          { label: "전체", value: "58건" },
-          { label: "High", value: "2건", tone: "danger" },
-          { label: "Medium", value: "3건", tone: "warning" },
-        ]}
-        updatedAt={page.summaryUpdatedAt}
-        onRefresh={page.refreshSummary}
-      />
+      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
+      {summary.banner && (
+        <AiSummaryCard
+          headline={summary.banner.headline}
+          lines={summary.banner.detail}
+          stats={summary.banner.stats}
+          updatedAt={summary.generatedAt}
+          onRefresh={summary.refresh}
+        />
+      )}
 
       <section className={styles.panel}>
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
             <h2 className={styles.panelTitle}>게시판</h2>
             {typeof page.totalCount === "number" && (
-              <Badge type="elephant" badgeStyle="weak">{page.totalCount}</Badge>
+              <Badge type="elephant" badgeStyle="weak">
+                {page.totalCount}
+              </Badge>
             )}
           </div>
           {/* 완료·보관 프로젝트에는 글을 쓸 수 없어 버튼 자체를 감춘다 */}
           {page.canWrite && (
-            <Button size="tiny" onClick={page.goWrite}>글쓰기</Button>
+            <Button size="tiny" onClick={page.goWrite}>
+              글쓰기
+            </Button>
           )}
         </div>
 

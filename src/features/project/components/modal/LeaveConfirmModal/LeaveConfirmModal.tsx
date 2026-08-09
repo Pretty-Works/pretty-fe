@@ -1,5 +1,6 @@
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
+
 import DialogNotice from "@/features/project/components/modal/DialogNotice/DialogNotice";
 
 interface LeaveConfirmModalProps {
@@ -24,8 +25,12 @@ export default function LeaveConfirmModal({
       width={440}
       footer={
         <>
-          <Button type="light" size="medium" onClick={onLeave}>나가기</Button>
-          <Button size="medium" onClick={onStay}>계속 작성</Button>
+          <Button type="light" size="medium" onClick={onLeave}>
+            나가기
+          </Button>
+          <Button size="medium" onClick={onStay}>
+            계속 작성
+          </Button>
         </>
       }
     >

@@ -16,15 +16,12 @@
   max-width: 90vw;
   padding: 15px 24px 15px 20px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(22, 24, 31, 0.8);
-  box-shadow:
-    0 14px 34px rgba(16, 18, 24, 0.34),
-    0 3px 8px rgba(16, 18, 24, 0.2);
+  border: 1px solid var(--toast-border);
+  background: var(--toast-bg);
+  box-shadow: var(--toast-shadow);
   animation: drop 0.28s cubic-bezier(0.2, 1.15, 0.35, 1);
 }
 
-/* 위에서 떨어져 살짝 자리를 잡는 느낌 — 등장 방향이 배치와 맞아야 자연스럽다 */
 @keyframes drop {
   from {
     opacity: 0;
@@ -51,27 +48,27 @@
 
 .green {
   background: var(--success);
-  box-shadow: 0 0 0 5px rgba(0, 196, 113, 0.22);
+  box-shadow: var(--toast-ring-green);
 }
 
 .orange {
   background: var(--warning);
-  box-shadow: 0 0 0 5px rgba(255, 152, 0, 0.22);
+  box-shadow: var(--toast-ring-orange);
 }
 
 .purple {
   background: var(--primary-light);
-  box-shadow: 0 0 0 5px rgba(139, 92, 246, 0.24);
+  box-shadow: var(--toast-ring-purple);
 }
 
 .gray {
-  background: #9aa3ae;
-  box-shadow: 0 0 0 5px rgba(154, 163, 174, 0.22);
+  background: var(--toast-dot-gray);
+  box-shadow: var(--toast-ring-gray);
 }
 
 .danger {
   background: var(--danger);
-  box-shadow: 0 0 0 5px rgba(255, 77, 79, 0.24);
+  box-shadow: var(--toast-ring-danger);
 }
 
 .text {
@@ -79,5 +76,5 @@
   font-weight: 600;
   letter-spacing: -0.1px;
   white-space: nowrap;
-  color: #f4f5f7;
+  color: var(--text-on-invert);
 }

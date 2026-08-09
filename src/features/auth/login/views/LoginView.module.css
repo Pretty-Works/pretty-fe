@@ -3,7 +3,6 @@
   min-height: 100vh;
 }
 
-/* 왼쪽 브랜드 패널 */
 .brand {
   flex: 756 1 0;
   display: flex;
@@ -11,9 +10,9 @@
   justify-content: center;
   background: linear-gradient(
     127.648deg,
-    #7c3aed 24.752%,
-    #6b4df0 61.528%,
-    #8b5cf6 95.474%
+    var(--primary) 24.752%,
+    var(--primary-deep) 61.528%,
+    var(--primary-light) 95.474%
   );
 }
 
@@ -22,7 +21,6 @@
   height: auto;
 }
 
-/* 오른쪽 로그인 패널 */
 .side {
   flex: 684 1 0;
   display: flex;
@@ -58,7 +56,6 @@
   font-size: 15px;
 }
 
-/* 모바일: 브랜드 패널 숨기고 폼만 */
 @media (max-width: 768px) {
   .brand {
     display: none;

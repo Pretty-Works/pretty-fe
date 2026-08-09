@@ -6,8 +6,8 @@ import { LuBell } from "react-icons/lu";
 
 import { useClickOutside } from "@/hooks/useClickOutside";
 
-import { useUnseenQuery } from "../../hooks/queries/useUnseenQuery";
 import { useMarkSeenMutation } from "../../hooks/mutations/useMarkSeenMutation";
+import { useUnseenQuery } from "../../hooks/queries/useUnseenQuery";
 import NotificationDropdown from "../NotificationDropdown/NotificationDropdown";
 
 import styles from "./NotificationBell.module.css";

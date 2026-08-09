@@ -15,8 +15,8 @@ import {
 import { PROJECT_TABS } from "@/features/project/constants/projectTabs";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useLeaveGuardStore } from "@/features/project/stores/useLeaveGuardStore";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
-import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import styles from "./ProjectLnb.module.css";
 

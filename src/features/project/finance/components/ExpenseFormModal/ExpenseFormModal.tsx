@@ -1,25 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+
+import { getErrorCode } from "@/lib/api/errorCode";
 
 import Button from "@/components/Button/Button";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
-import Modal from "@/components/Modal/Modal";
-import FormField from "@/components/FormField/FormField";
-import SelectField from "@/components/SelectField/SelectField";
 import DatePicker from "@/components/DatePicker/DatePicker";
+import FormField from "@/components/FormField/FormField";
+import Modal from "@/components/Modal/Modal";
+import SelectField from "@/components/SelectField/SelectField";
 
-import { getErrorCode } from "@/lib/api/errorCode";
-import {
-  useCreateExpenseMutation,
-  useUpdateExpenseMutation,
-  useDeleteExpenseMutation,
-} from "@/features/project/finance/hooks/mutations/useExpenseMutations";
 import {
   CATEGORY_LABEL,
   type Expense,
   type ExpenseCategory,
 } from "@/features/project/finance/api/financeApi";
+import {
+  useCreateExpenseMutation,
+  useUpdateExpenseMutation,
+  useDeleteExpenseMutation,
+} from "@/features/project/finance/hooks/mutations/useExpenseMutations";
 
 import styles from "./ExpenseFormModal.module.css";
 
@@ -27,9 +28,9 @@ import styles from "./ExpenseFormModal.module.css";
 const MAX_MERCHANT = 100;
 const MAX_PURPOSE = 255;
 
-const CATEGORY_OPTIONS = (
-  Object.keys(CATEGORY_LABEL) as ExpenseCategory[]
-).map((category) => ({ value: category, label: CATEGORY_LABEL[category] }));
+const CATEGORY_OPTIONS = (Object.keys(CATEGORY_LABEL) as ExpenseCategory[]).map(
+  (category) => ({ value: category, label: CATEGORY_LABEL[category] }),
+);
 
 // 원인별로 다르게 알려준다 — 사용일 범위와 권한은 사용자가 고칠 수 있는 문제라 구분이 필요하다.
 const ERROR_MESSAGE: Record<string, string> = {
@@ -63,17 +64,23 @@ export default function ExpenseFormModal({
 }: ExpenseFormModalProps) {
   const isEdit = !!expense;
 
-  // State
-  const [expenseDate, setExpenseDate] = useState("");
-  const [category, setCategory] = useState("");
-  const [merchant, setMerchant] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [amount, setAmount] = useState("");
+  // State — 열 때 마운트되므로 초기값은 여기서 한 번만 잡는다
+  const [expenseDate, setExpenseDate] = useState(
+    () => expense?.expenseDate ?? "",
+  );
+  const [category, setCategory] = useState<string>(
+    () => expense?.category ?? "",
+  );
+  const [merchant, setMerchant] = useState(() => expense?.merchant ?? "");
+  const [purpose, setPurpose] = useState(() => expense?.purpose ?? "");
+  const [amount, setAmount] = useState(() =>
+    expense ? String(expense.amount) : "",
+  );
   const [errorText, setErrorText] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false); // 삭제 확인
 
-  // 연타·재시도로 지출이 두 건 생기지 않게, 폼이 열릴 때 한 번 발급해 둔다
-  const [idempotencyKey, setIdempotencyKey] = useState("");
+  // 연타·재시도로 지출이 두 건 생기지 않게 한 번 발급한다. 수정은 PUT(멱등)이라 필요 없다.
+  const [idempotencyKey] = useState(() => crypto.randomUUID());
 
   // Query
   const { mutate: createExpense, isPending: isCreating } =
@@ -86,36 +93,6 @@ export default function ExpenseFormModal({
   // 저장(추가·수정)과 삭제를 나눠 둔다 — 삭제 중에 저장 버튼이 진행 상태로 보이면 안 된다.
   const isSaving = isCreating || isUpdating;
   const isPending = isSaving || isDeleting;
-
-  // Effect — 열릴 때 초기값을 채운다 (수정 모드면 기존 값, 아니면 빈 폼 + 새 멱등 키)
-  useEffect(() => {
-    if (!open) return;
-
-    if (expense) {
-      setExpenseDate(expense.expenseDate);
-      setCategory(expense.category);
-      setMerchant(expense.merchant);
-      setPurpose(expense.purpose);
-      setAmount(String(expense.amount));
-      return;
-    }
-
-    // 연타·재시도로 지출이 두 건 생기지 않게 한 번 발급한다.
-    // 수정은 PUT(멱등)이라 키가 필요 없다.
-    setIdempotencyKey(crypto.randomUUID());
-  }, [open, expense]);
-
-  // Event Handler
-  const resetAndClose = () => {
-    setExpenseDate("");
-    setCategory("");
-    setMerchant("");
-    setPurpose("");
-    setAmount("");
-    setErrorText("");
-    setDeleteOpen(false);
-    onClose();
-  };
 
   // 서버가 돌려준 실패 원인을 문구로 바꾼다
   const showError = (error: unknown, fallback: string) => {
@@ -144,7 +121,7 @@ export default function ExpenseFormModal({
       updateExpense(
         { expenseId: expense.expenseId, body },
         {
-          onSuccess: resetAndClose,
+          onSuccess: onClose,
           onError: (error) => showError(error, "지출을 수정하지 못했어요."),
         },
       );
@@ -154,7 +131,7 @@ export default function ExpenseFormModal({
     createExpense(
       { body, idempotencyKey },
       {
-        onSuccess: resetAndClose,
+        onSuccess: onClose,
         onError: (error) => showError(error, "지출을 등록하지 못했어요."),
       },
     );
@@ -165,7 +142,7 @@ export default function ExpenseFormModal({
     setErrorText("");
 
     deleteExpense(expense.expenseId, {
-      onSuccess: resetAndClose,
+      onSuccess: onClose,
       // 확인 창을 닫아야 폼 아래의 실패 문구가 보인다
       onError: (error) => {
         setDeleteOpen(false);
@@ -186,7 +163,7 @@ export default function ExpenseFormModal({
   return (
     <Modal
       open={open}
-      onClose={resetAndClose}
+      onClose={onClose}
       title={isEdit ? "지출 수정" : "지출 추가"}
       width={520}
       footer={
@@ -273,11 +250,7 @@ export default function ExpenseFormModal({
       <ConfirmDialog
         open={deleteOpen}
         title="지출을 삭제할까요?"
-        description={
-          expense
-            ? `삭제 후에는 복구가 어렵습니다.`
-            : undefined
-        }
+        description={expense ? `삭제 후에는 복구가 어렵습니다.` : undefined}
         confirmLabel="삭제"
         tone="danger"
         loading={isDeleting}

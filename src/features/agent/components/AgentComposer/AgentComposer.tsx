@@ -6,22 +6,28 @@ import Image from "next/image";
 
 import SendIcon from "@/assets/icons/agent/send.png";
 
+import { cx } from "@/lib/cx";
+import { formatFileSize } from "@/lib/text";
+
 import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./AgentComposer.module.css";
 
-const MAX_FILES = 5;
-const MAX_FILE_SIZE_MB = 10;
+// 서버 한도와 같은 값이다 (AGENT_029·030·031). 넘겨 보내면 대화도 만들어지지 않는다.
+const ACCEPT = ".txt,text/plain";
+const MAX_FILES = 3;
+const MAX_FILE_SIZE_MB = 1;
 const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
+const MAX_TOTAL_SIZE_MB = 2;
+const MAX_TOTAL_SIZE = MAX_TOTAL_SIZE_MB * 1024 * 1024;
 
 /** 같은 파일을 두 번 고르면 하나만 남긴다 — 이름·크기·수정시각이 같으면 같은 파일로 본다 */
 const keyOf = (file: File) => `${file.name}:${file.size}:${file.lastModified}`;
 
-/** 1MB가 안 되는 파일이 대부분이라 MB로만 적으면 전부 0.0MB가 된다 */
-const formatSize = (bytes: number) =>
-  bytes < 1024 * 1024
-    ? `${Math.max(1, Math.round(bytes / 1024))}KB`
-    : `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+const isText = (file: File) => file.name.toLowerCase().endsWith(".txt");
+
+const totalSizeOf = (files: File[]) =>
+  files.reduce((sum, file) => sum + file.size, 0);
 
 interface AgentComposerProps {
   /** 선택·승인 대기 중 — 먼저 위에서 답해야 하므로 입력을 막는다 */
@@ -59,32 +65,51 @@ export default function AgentComposer({
 
   const showToast = useToastStore((state) => state.showToast);
 
-  const isEmpty = message.trim().length === 0;
+  // 파일만 보내는 것도 서버가 받는다 — 둘 다 비었을 때만 막는다
+  const isEmpty = message.trim().length === 0 && files.length === 0;
 
   const addFiles = (incoming: FileList | null) => {
     const picked = Array.from(incoming ?? []);
     if (picked.length === 0) return;
 
-    // 끌어다 놓을 때는 input 의 multiple·용량 제한이 안 먹으므로 여기서 다시 거른다.
+    // 끌어다 놓을 때는 input 의 accept·multiple 이 안 먹으므로 여기서 다시 거른다.
     // 이미 붙은 것뿐 아니라 이번에 온 것끼리도 겹치면 하나만 남긴다
     const seen = new Set(files.map(keyOf));
     const fitting = picked.filter((file) => {
       const key = keyOf(file);
-      if (file.size > MAX_FILE_SIZE || seen.has(key)) return false;
+      if (!isText(file) || file.size > MAX_FILE_SIZE || seen.has(key))
+        return false;
 
       seen.add(key);
       return true;
     });
-    const added = fitting.slice(0, Math.max(0, MAX_FILES - files.length));
 
-    // 한 번에 하나만 알린다 — 둘 다 걸렸으면 먼저 손대야 하는 쪽이 용량이다
-    if (picked.some((file) => file.size > MAX_FILE_SIZE))
+    // 합계 한도까지만 담는다 — 하나씩은 작아도 다 붙이면 넘길 수 있다
+    let total = totalSizeOf(files);
+    const added: File[] = [];
+    for (const file of fitting) {
+      if (added.length >= MAX_FILES - files.length) break;
+      if (total + file.size > MAX_TOTAL_SIZE) break;
+
+      total += file.size;
+      added.push(file);
+    }
+
+    // 한 번에 하나만 알린다 — 여럿 걸렸으면 먼저 손대야 하는 쪽부터
+    if (picked.some((file) => !isText(file)))
+      showToast("txt 파일만 붙일 수 있어요.", "danger");
+    else if (picked.some((file) => file.size > MAX_FILE_SIZE))
       showToast(
         `파일 하나는 ${MAX_FILE_SIZE_MB}MB까지 붙일 수 있어요.`,
         "danger",
       );
     else if (added.length < fitting.length)
-      showToast(`파일은 ${MAX_FILES}개까지 붙일 수 있어요.`, "danger");
+      showToast(
+        files.length + fitting.length > MAX_FILES
+          ? `파일은 ${MAX_FILES}개까지 붙일 수 있어요.`
+          : `파일은 모두 합쳐 ${MAX_TOTAL_SIZE_MB}MB까지 붙일 수 있어요.`,
+        "danger",
+      );
 
     if (added.length > 0) setFiles([...files, ...added]);
   };
@@ -131,13 +156,11 @@ export default function AgentComposer({
   return (
     <footer className={styles.area}>
       <div
-        className={[
+        className={cx(
           styles.composer,
           blocked && styles.composerBlocked,
           dragging && styles.composerDragging,
-        ]
-          .filter(Boolean)
-          .join(" ")}
+        )}
         onDragEnter={(e) => {
           // 파일이 아닌 것(글자·이미지 링크)을 끌어오면 받을 게 없다
           if (blocked || !e.dataTransfer.types.includes("Files")) return;
@@ -167,6 +190,7 @@ export default function AgentComposer({
         <input
           ref={fileInputRef}
           type="file"
+          accept={ACCEPT}
           multiple
           hidden
           onChange={(e) => {
@@ -186,7 +210,9 @@ export default function AgentComposer({
                 <span className={styles.fileName} title={file.name}>
                   {file.name}
                 </span>
-                <span className={styles.fileSize}>{formatSize(file.size)}</span>
+                <span className={styles.fileSize}>
+                  {formatFileSize(file.size)}
+                </span>
                 <button
                   type="button"
                   className={styles.fileRemove}
@@ -228,7 +254,7 @@ export default function AgentComposer({
               title={
                 files.length >= MAX_FILES
                   ? `파일은 ${MAX_FILES}개까지 붙일 수 있어요`
-                  : "파일 첨부"
+                  : "txt 파일 첨부"
               }
             >
               <svg
@@ -252,20 +278,19 @@ export default function AgentComposer({
               aria-label="에이전트 실행 승인 방식"
             >
               <span
-                className={[styles.modeThumb, autoApprove && styles.modeThumbOn]
-                  .filter(Boolean)
-                  .join(" ")}
+                className={cx(
+                  styles.modeThumb,
+                  autoApprove && styles.modeThumbOn,
+                )}
                 aria-hidden="true"
               />
 
               <button
                 type="button"
-                className={[
+                className={cx(
                   styles.modeOption,
                   !autoApprove && styles.modeOptionOnManual,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+                )}
                 aria-pressed={!autoApprove}
                 title="실행 요청을 매번 확인한 뒤 승인해요"
                 disabled={autoApproveUpdating}
@@ -275,12 +300,10 @@ export default function AgentComposer({
               </button>
               <button
                 type="button"
-                className={[
+                className={cx(
                   styles.modeOption,
                   autoApprove && styles.modeOptionOnAuto,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+                )}
                 aria-pressed={autoApprove}
                 title="실행 요청을 자동으로 승인해요"
                 disabled={autoApproveUpdating}

@@ -4,12 +4,9 @@
   gap: 12px;
 }
 
-/* 검색 입력 + 결과 드롭다운 */
 .search {
   position: relative;
 }
-
-/* 드롭다운은 SuggestList로 이동 (components/SuggestList) */
 
 .chips {
   display: flex;

@@ -2,21 +2,21 @@
 
 import { create } from "zustand";
 
-// 프로젝트 상태 색(green·orange·purple·gray)을 그대로 쓰고, 되돌릴 수 없는 일과 실패에만 danger.
-export type ToastTone = "green" | "orange" | "purple" | "gray" | "danger";
+import type { Tone } from "@/constants/tone";
 
 const DEFAULT_DURATION = 4;
 
 export interface Toast {
   id: string;
   text: string;
-  tone: ToastTone;
+  /** 프로젝트 상태 색을 그대로 쓰고, 되돌릴 수 없는 일과 실패에만 danger */
+  tone: Tone;
   duration: number;
 }
 
 interface ToastStore {
   toast: Toast | null;
-  showToast: (text: string, tone?: ToastTone, duration?: number) => void;
+  showToast: (text: string, tone?: Tone, duration?: number) => void;
   dismissToast: (id: string) => void;
 }
 

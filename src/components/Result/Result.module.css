@@ -23,7 +23,7 @@
 }
 
 .figureError {
-  background: #fdecec;
+  background: var(--danger-bg);
 }
 
 .figureMark {

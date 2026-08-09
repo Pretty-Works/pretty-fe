@@ -6,11 +6,7 @@ const createIdempotencyKey = () =>
   globalThis.crypto?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-/**
- * 일정 하나를 여는 방식은 권한에 따라 갈린다.
- * - 내가 작성자 → 수정 모달(`editor`)
- * - 남이 만든 일정 → 보기 전용 상세(`detail`). 참가자면 거기서 나가기만 가능
- */
+/** 일정 하나를 여는 방식은 권한에 따라 갈린다. */
 type Dialog =
   | {
       kind: "editor";

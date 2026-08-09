@@ -24,7 +24,7 @@
   width: 36px;
   height: 20px;
   border-radius: 999px;
-  background: #dcdce4;
+  background: var(--border-strong);
   transition: background 0.15s ease;
 }
 

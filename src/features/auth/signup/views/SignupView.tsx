@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 // import
+
 import styles from "./SignupView.module.css";
 
 export default function SignupView() {

@@ -15,6 +15,11 @@ interface ConfirmDialogProps {
   tone?: "primary" | "danger";
   /** 확인 후 요청이 도는 동안 true — 다이얼로그는 호출부가 닫는다 */
   loading?: boolean;
+  /**
+   * 확인을 누르면 곧바로 닫는다. 요청 결과를 기다릴 필요가 없을 때만 켠다
+   * (기다려야 하면 loading 을 쓰고 호출부가 닫는다).
+   */
+  closeOnConfirm?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -29,9 +34,15 @@ export default function ConfirmDialog({
   cancelLabel = "취소",
   tone = "primary",
   loading = false,
+  closeOnConfirm = false,
   onClose,
   onConfirm,
 }: ConfirmDialogProps) {
+  const confirm = () => {
+    onConfirm();
+    if (closeOnConfirm) onClose();
+  };
+
   return (
     <Modal
       open={open}
@@ -55,7 +66,7 @@ export default function ConfirmDialog({
             buttonStyle="weak"
             size="medium"
             loading={loading}
-            onClick={onConfirm}
+            onClick={confirm}
           >
             {confirmLabel}
           </Button>

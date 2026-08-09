@@ -3,18 +3,14 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--white);
-  box-shadow: 0 8px 24px rgba(69, 41, 120, 0.16);
+  box-shadow: var(--shadow-menu);
   overflow: hidden;
 }
 
-/* 아래 여백이 검색창과 목록 사이 간격이다. 목록의 padding-top으로 주면
-   스크롤할 때 같이 밀려 올라가 항목이 검색창에 붙는다 */
 .searchArea {
   padding: 11px 11px 10px;
 }
 
-/* 좌우 여백을 검색창(.searchArea)과 같게 맞춘다.
-   여기가 6px이면 선택된 항목의 보라 칸이 검색창보다 양쪽으로 5px씩 넓어져 어긋나 보인다 */
 .list {
   display: flex;
   flex-direction: column;
@@ -29,8 +25,6 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  /* 13px = 검색창 안쪽 여백 12px + 테두리 1px. 항목엔 테두리가 없어 그만큼 더 준다.
-     그래야 동그라미와 글자가 검색창 글자와 같은 선에서 시작한다 */
   padding: 11px 13px;
   border: none;
   border-radius: 10px;
@@ -46,7 +40,6 @@
   background: var(--surface);
 }
 
-/* 지금 보고 있는 프로젝트 */
 .itemOn {
   background: var(--primary-bright);
   color: var(--primary);

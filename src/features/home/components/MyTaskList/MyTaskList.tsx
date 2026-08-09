@@ -1,9 +1,8 @@
 "use client";
 
-import TaskRow from "@/components/TaskRow/TaskRow";
-
-import { PROJECT_STATUS_META } from "@/features/home/constants/projectStatus";
-import type { MyTask, MyTaskGroup } from "@/features/home/api/homeApi";
+import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
+import type { MyTask, MyTaskGroup } from "@/features/task/api/taskApi";
+import TaskRow from "@/features/task/components/TaskRow/TaskRow";
 
 import styles from "./MyTaskList.module.css";
 
@@ -23,10 +22,7 @@ export default function MyTaskList({
   return (
     <div className={styles.list}>
       {groups.map((group) => (
-        <div
-          key={group.projectId ?? "personal"}
-          className={styles.group}
-        >
+        <div key={group.projectId ?? "personal"} className={styles.group}>
           {/* projectId가 없으면 개인 할 일 그룹 — 상태 점도 없다 */}
           <div className={styles.groupHead}>
             <span className={styles.groupName}>

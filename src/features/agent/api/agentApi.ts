@@ -3,9 +3,9 @@ import { api } from "@/lib/api/client";
 import { agentLog, agentLogError } from "@/features/agent/api/agentDebug";
 import {
   openAgentStream,
+  reopenAgentStream,
   type AgentSseMessage,
 } from "@/features/agent/api/agentStream";
-
 import type {
   AgentAction,
   AgentApproval,
@@ -19,11 +19,6 @@ import type {
   PendingInteraction,
 } from "@/features/agent/types";
 
-/**
- * 사용자가 보고 있는 화면. 서버는 열어보지 않고 그대로 에이전트 서버에 넘긴다.
- * 다만 screen(문자열) 하나는 필수라 빠지면 400 이다 — screenRegistry 의 ScreenKey 를 넣는다.
- * 나머지 키는 화면마다 다르고 규격은 LLM 팀과 맞춘다.
- */
 export interface AgentScreenContext {
   screen: string;
   [key: string]: unknown;
@@ -32,7 +27,6 @@ export interface AgentScreenContext {
 export interface SendAgentMessageRequest {
   /** 이어갈 대화. 새 대화면 null 을 보낸다 — 서버가 만들어 준다 */
   conversationId: number | null;
-  /** 사용자가 보낸 텍스트. 2~2000자 */
   goal: string;
   screenContext: AgentScreenContext;
 }
@@ -48,13 +42,13 @@ export interface AgentAlternative {
 }
 
 export interface AgentApprovalPayload {
-  /** 응답을 보낼 곳: POST /agent/approvals/{approvalId} */
   approvalId: number;
   toolCallId: string;
   tool: string;
   access: "READ" | "WRITE";
   summary: string;
-  previewText: string;
+  /** 서버가 렌더한 미리보기. 만들지 못했으면 null */
+  previewText: string | null;
   params: Record<string, unknown>;
   /** 서버가 "항상 허용"(id: "ALWAYS")을 붙여서 내려준다 */
   alternatives: AgentAlternative[];
@@ -69,7 +63,6 @@ export interface AgentQuestionOption {
 }
 
 export interface AgentQuestionPayload {
-  /** 응답을 보낼 곳: POST /agent/questions/{questionId} */
   questionId: number;
   label: string;
   text: string;
@@ -133,36 +126,98 @@ const toAgentEvent = (message: AgentSseMessage): AgentEvent | null => {
   }
 };
 
-export interface SendAgentMessageOptions {
+export interface AgentStreamHandlers {
   /** X-Run-Id. 재연결과 취소에 쓰므로 받는 즉시 들고 있어야 한다 */
   onRunId?: (runId: string) => void;
   onEvent: (event: AgentEvent) => void;
-  /** 중지 버튼 */
   signal?: AbortSignal;
 }
 
-/**
- * 에이전트 실행 시작.
- *
- * 프라미스가 끝나는 시점은 실행의 끝이 아니라 이번 SSE 구간의 끝이다.
- * 마지막 이벤트가 done·error 면 실행이 끝난 것이고, approval_request·question 이면
- * 사용자의 응답(POST /agent/approvals·questions)으로 이어서 다시 스트림이 열린다.
- */
+export interface SendAgentMessageOptions extends AgentStreamHandlers {
+  files?: File[];
+}
+
+const toStreamOptions = ({ onRunId, onEvent, signal }: AgentStreamHandlers) => ({
+  onRunId,
+  onMessage: (message: AgentSseMessage) => {
+    const event = toAgentEvent(message);
+    if (!event) return;
+
+    agentLog(`이벤트 ${event.type} (seq ${event.seq})`, event.data);
+    onEvent(event);
+  },
+  signal,
+});
+
+const toMessageForm = (body: SendAgentMessageRequest, files: File[]) => {
+  const form = new FormData();
+
+  form.append(
+    "request",
+    new Blob([JSON.stringify(body)], { type: "application/json" }),
+  );
+  files.forEach((file) => form.append("files", file));
+
+  return form;
+};
+
+// 첨부가 없어도 multipart 로 보낸다 — 서버가 이 경로에서 JSON 본문을 더는 받지 않는다(415).
 export const sendAgentMessage = async (
   body: SendAgentMessageRequest,
-  { onRunId, onEvent, signal }: SendAgentMessageOptions,
+  { files, ...handlers }: SendAgentMessageOptions,
 ): Promise<void> => {
-  await openAgentStream("/agent/messages", body, {
-    onRunId,
-    onMessage: (message) => {
-      const event = toAgentEvent(message);
-      if (!event) return;
+  await openAgentStream(
+    "/agent/messages",
+    toMessageForm(body, files ?? []),
+    toStreamOptions(handlers),
+  );
+};
 
-      agentLog(`이벤트 ${event.type} (seq ${event.seq})`, event.data);
-      onEvent(event);
-    },
-    signal,
-  });
+export type AgentDecision = "APPROVED" | "REJECTED" | "ALTERNATIVE";
+
+export interface ResolveAgentApprovalRequest {
+  decision: AgentDecision;
+  alternativeId?: string;
+  reason?: string;
+}
+
+export const resolveAgentApproval = async (
+  approvalId: number,
+  body: ResolveAgentApprovalRequest,
+  handlers: AgentStreamHandlers,
+): Promise<void> => {
+  await openAgentStream(
+    `/agent/approvals/${approvalId}`,
+    body,
+    toStreamOptions(handlers),
+  );
+};
+
+export interface AnswerAgentQuestionRequest {
+  selectedOptionIds: string[];
+  freeText?: string;
+}
+
+export const answerAgentQuestion = async (
+  questionId: number,
+  body: AnswerAgentQuestionRequest,
+  handlers: AgentStreamHandlers,
+): Promise<void> => {
+  await openAgentStream(
+    `/agent/questions/${questionId}`,
+    body,
+    toStreamOptions(handlers),
+  );
+};
+
+export const reconnectAgentRun = async (
+  runId: string,
+  handlers: AgentStreamHandlers,
+): Promise<void> => {
+  await reopenAgentStream(
+    `/agent/runs/${runId}/stream`,
+    toStreamOptions(handlers),
+  );
 };
 
 // 대화 목록 한 줄 (서버 필드 그대로).
@@ -176,7 +231,7 @@ interface ConversationApiItem {
   runId: string | null;
   /** 답을 기다리는 승인 카드. 없으면 null */
   pendingApprovalId: number | null;
-  /** "yyyy-MM-dd HH:mm:ss" (타임존 없음) — 브라우저 로컬 시각으로 읽힌다 */
+  unread: boolean;
   lastMessageAt: string;
   createdAt: string;
 }
@@ -202,21 +257,14 @@ const toConversation = (item: ConversationApiItem): Conversation => ({
   status: item.status ?? undefined,
   runId: item.runId ?? undefined,
   pendingApprovalId: item.pendingApprovalId ?? undefined,
+  unread: item.unread,
 });
 
 export interface FetchAgentConversationsParams {
-  /** 0부터 시작 */
   page: number;
-  /** 1~100. 벗어나면 400(REQUEST_001) 이다 */
   size: number;
 }
 
-/**
- * 대화 목록 조회 (페이지 응답).
- *
- * 서버도 lastMessageAt 내림차순으로 주지만, 실행 중에는 말풍선이 늘 때마다 순서가
- * 바뀌므로 정렬은 화면에서 다시 한다. 화면에 페이지 이동이 없어 content 만 넘긴다.
- */
 export const fetchAgentConversations = async ({
   page,
   size,
@@ -240,7 +288,6 @@ interface PendingInteractionApiItem {
   conversationTitle: string;
   /** APPROVAL 만 값이 있다 */
   previewText: string | null;
-  /** "yyyy-MM-dd HH:mm:ss" */
   requestedAt: string;
   expiresAt: string;
 }
@@ -271,12 +318,6 @@ const toPendingInteraction = (
   expiresAt: item.expiresAt,
 });
 
-/**
- * 답을 기다리는 승인·질문 카드 조회.
- *
- * 화면을 새로 고치거나 다른 기기에서 들어왔을 때 카드를 복원하는 용도다.
- * 스트림이 열려 있는 동안에는 SSE 로 같은 내용이 오므로 이걸 다시 부를 이유가 없다.
- */
 export const fetchAgentPendingInteractions = async (): Promise<
   PendingInteraction[]
 > => {
@@ -300,11 +341,22 @@ interface ConversationMessageApiItem {
   role: ChatRole;
   content: string;
   success: boolean | null;
-  /** "참고한 내용 N건" 접이식. 없으면 null */
+  /**
+   * 실행 중 보냈던 step 을 서버가 그대로 돌려준다. 화면에서는 쓰지 않는다 —
+   * 진행 상황은 도는 동안 스피너 옆에 실시간으로 보여주고 끝낸다.
+   */
   steps: AgentStepPayload[] | null;
   actionType: AgentAction["type"] | null;
   action: ConversationMessageActionApiItem | null;
+  /** USER 행에만 값이 있다. 없으면 빈 배열 */
+  attachments: ConversationAttachmentApiItem[];
   createdAt: string;
+}
+
+interface ConversationAttachmentApiItem {
+  filename: string;
+  contentType: string;
+  sizeBytes: number;
 }
 
 // 그 대화에서 오간 승인 카드. 이미 답한 것도 결과와 함께 남는다.
@@ -341,6 +393,7 @@ export interface AgentConversationHistory {
   autoApprove: boolean;
   /** 아직 살아 있는 실행. 끝났으면 없다 — 승인 응답·취소가 이 값을 쓴다 */
   activeRunId?: string;
+  activeRunStatus?: AgentRunStatus;
   messages: ChatMessage[];
   /** 아직 답을 기다리는 승인 카드. 없으면 없다 */
   pendingApproval?: AgentApproval;
@@ -366,9 +419,11 @@ const toChatMessage = (item: ConversationMessageApiItem): ChatMessage => ({
   content: item.content,
   createdAt: item.createdAt,
   success: item.success ?? undefined,
-  // steps 는 {text} 객체로 온다 — 말풍선은 문장만 쓴다
-  steps: item.steps?.map((step) => step.text),
   action: toMessageAction(item),
+  attachments: item.attachments?.map((attachment) => ({
+    filename: attachment.filename,
+    sizeBytes: attachment.sizeBytes,
+  })),
 });
 
 const toPendingApproval = (
@@ -377,14 +432,9 @@ const toPendingApproval = (
   id: String(item.approvalId),
   summary: item.summary,
   previewText: item.previewText ?? undefined,
+  alternatives: item.alternatives,
 });
 
-/**
- * 목록에서 선택한 대화의 전체 메시지 조회.
- *
- * approvals 는 messages 와 별개 배열이고 이미 답한 카드도 함께 온다.
- * 화면이 지금 할 수 있는 건 답을 기다리는(PENDING) 카드를 다시 띄우는 것뿐이라 그것만 뽑는다.
- */
 export const fetchAgentConversationMessages = async (
   conversationId: number,
 ): Promise<AgentConversationHistory> => {
@@ -392,7 +442,7 @@ export const fetchAgentConversationMessages = async (
     `/agent/conversations/${conversationId}/messages`,
   );
 
-  const { autoApprove, activeRunId, messages, approvals } =
+  const { autoApprove, activeRunId, activeRunStatus, messages, approvals } =
     response.data.result;
 
   const pending = approvals.find((approval) => approval.status === "PENDING");
@@ -400,9 +450,27 @@ export const fetchAgentConversationMessages = async (
   return {
     autoApprove,
     activeRunId: activeRunId ?? undefined,
+    activeRunStatus: activeRunStatus ?? undefined,
     messages: messages.map(toChatMessage),
     pendingApproval: pending ? toPendingApproval(pending) : undefined,
   };
+};
+
+interface MarkAgentConversationReadResponse {
+  errorCode: string | null;
+  message: string;
+  result: {
+    conversationId: number;
+    lastReadMessageId: number | null;
+  };
+}
+
+export const markAgentConversationRead = async (conversationId: number) => {
+  const response = await api.patch<MarkAgentConversationReadResponse>(
+    `/agent/conversations/${conversationId}/read`,
+  );
+
+  return response.data.result;
 };
 
 interface UpdateAgentAutoApproveResponse {
@@ -419,7 +487,6 @@ export interface UpdateAgentAutoApproveRequest {
   autoApprove: boolean;
 }
 
-/** 대화별 자동 승인 모드 전환 */
 export const updateAgentAutoApprove = async ({
   conversationId,
   autoApprove,
@@ -445,12 +512,6 @@ interface AgentCancelApiResponse {
   result: AgentCancelResult;
 }
 
-/**
- * 진행 중인 실행 중단.
- *
- * 대기 중이던 승인·질문 카드도 함께 닫히고 스트림에는 error 이벤트가 나간다.
- * 브라우저 스트림만 끊으면 서버 실행은 계속 도므로 두 곳(패널 정지·홈 카드 중단)이 이걸 부른다.
- */
 export const cancelAgentRun = async (
   runId: string,
 ): Promise<AgentCancelResult> => {

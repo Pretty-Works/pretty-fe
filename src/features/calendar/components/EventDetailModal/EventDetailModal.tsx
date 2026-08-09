@@ -10,7 +10,8 @@ import type {
   LeaveType,
   ScheduleType,
 } from "@/features/calendar/types";
-import { formatDayLabel } from "@/features/calendar/utils/calendar";
+import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar";
+import { memberColorVar } from "@/features/calendar/utils/memberColor";
 
 import styles from "./EventDetailModal.module.css";
 
@@ -53,13 +54,13 @@ export default function EventDetailModal({
 
   const period =
     event.start === event.end
-      ? formatDayLabel(event.start)
-      : `${formatDayLabel(event.start)} ~ ${formatDayLabel(event.end)}`;
+      ? formatCalendarDayLabel(event.start)
+      : `${formatCalendarDayLabel(event.start)} ~ ${formatCalendarDayLabel(event.end)}`;
 
   const time =
     event.time && event.endTime
       ? `${event.time} ~ ${event.endTime}`
-      : event.time ?? "종일";
+      : (event.time ?? "종일");
 
   const participants = (event.participantIds ?? [])
     .map((id) => membersById[id])
@@ -75,7 +76,12 @@ export default function EventDetailModal({
       // 나갈 수 없는 일정이면 footer에 남는 것이 없어 아예 넘기지 않는다.
       footer={
         canLeave ? (
-          <Button type="danger" buttonStyle="weak" size="medium" onClick={onLeave}>
+          <Button
+            type="danger"
+            buttonStyle="weak"
+            size="medium"
+            onClick={onLeave}
+          >
             나가기
           </Button>
         ) : undefined
@@ -93,7 +99,10 @@ export default function EventDetailModal({
         <div className={styles.row}>
           <dt className={styles.label}>작성자</dt>
           <dd className={styles.value}>
-            <span className={styles.owner} style={{ color: owner?.color }}>
+            <span
+              className={styles.owner}
+              style={owner && { color: memberColorVar(owner.color) }}
+            >
               {owner?.name ?? "알 수 없음"}
             </span>
           </dd>
@@ -124,7 +133,6 @@ export default function EventDetailModal({
           </div>
         )}
       </dl>
-
     </Modal>
   );
 }

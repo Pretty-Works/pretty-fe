@@ -1,13 +1,8 @@
 // 재무 — 예산 현황 · 지출 내역
-//   조회: GET    /api/v1/projects/{projectId}/budget
-//         GET    /api/v1/projects/{projectId}/expenses
-//   쓰기: POST   /api/v1/projects/{projectId}/expenses
-//         PUT    /api/v1/projects/{projectId}/expenses/{expenseId}
-//         DELETE /api/v1/projects/{projectId}/expenses/{expenseId}
 
 import { api } from "@/lib/api/client";
 
-import type { DepartmentType } from "@/features/project/overview/api/taskBoardApi";
+import type { DepartmentType } from "@/features/user/constants/organization";
 
 /* =========================================================================
  * 공통

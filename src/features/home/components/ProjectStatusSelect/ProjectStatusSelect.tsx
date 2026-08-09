@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-import type { StatusFilter } from "@/features/home/api/homeApi";
+import { cx } from "@/lib/cx";
+
+import { useClickOutside } from "@/hooks/useClickOutside";
+
+import type { StatusFilter } from "@/features/project/api/projectListApi";
 import {
   PROJECT_STATUS_META,
   STATUS_FILTER_OPTIONS,
-} from "@/features/home/constants/projectStatus";
+} from "@/features/project/constants/projectStatus";
 
 import styles from "./ProjectStatusSelect.module.css";
 
@@ -30,17 +34,7 @@ export default function ProjectStatusSelect({
 
   const current = optionMeta(value);
 
-  // 바깥 클릭 시 닫기 (DatePicker와 동일 패턴)
-  useEffect(() => {
-    if (!open) return;
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [open]);
+  useClickOutside(rootRef, () => setOpen(false), open);
 
   const pick = (next: StatusFilter) => {
     onChange(next);
@@ -56,7 +50,10 @@ export default function ProjectStatusSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
       >
-        <span className={`${styles.dot} ${styles[current.tone]}`} aria-hidden="true" />
+        <span
+          className={cx(styles.dot, styles[current.tone])}
+          aria-hidden="true"
+        />
         <span className={styles.label}>{current.label}</span>
       </button>
 
@@ -76,7 +73,7 @@ export default function ProjectStatusSelect({
                   aria-selected={isSelected}
                 >
                   <span
-                    className={`${styles.dot} ${styles[meta.tone]}`}
+                    className={cx(styles.dot, styles[meta.tone])}
                     aria-hidden="true"
                   />
                   <span className={styles.optionLabel}>{meta.label}</span>

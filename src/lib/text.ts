@@ -1,8 +1,10 @@
-/**
- * 받침 유무에 따라 조사를 고른다. ("설명" → 설명은 · "사용처" → 사용처는)
- *
- * 문구를 코드로 조립할 때만 쓴다. 고정 문구는 그냥 직접 쓰는 게 읽기 좋다.
- */
+/** 1MB가 안 되는 파일이 대부분이라 MB로만 적으면 전부 0.0MB가 된다 */
+export const formatFileSize = (bytes: number) =>
+  bytes < 1024 * 1024
+    ? `${Math.max(1, Math.round(bytes / 1024))}KB`
+    : `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
+
+/** 받침 유무에 따라 조사를 고른다. ("설명" → 설명은 · "사용처" → 사용처는) */
 export const withJosa = (
   word: string,
   withFinal: string,

@@ -1,10 +1,13 @@
 "use client";
 
 import { useState } from "react";
+
 import { LuRefreshCw } from "react-icons/lu";
 
-import { useNow } from "@/hooks/useNow";
+import { cx } from "@/lib/cx";
 import { formatRelativeTime } from "@/lib/date";
+
+import { useNow } from "@/hooks/useNow";
 
 import styles from "./AiSummaryCard.module.css";
 
@@ -65,9 +68,7 @@ export default function AiSummaryCard({
 
   return (
     <section
-      className={[styles.card, refreshing && styles.refreshing]
-        .filter(Boolean)
-        .join(" ")}
+      className={cx(styles.card, refreshing && styles.refreshing)}
       aria-label="AI 회의 요약"
       aria-busy={refreshing || undefined}
     >
@@ -119,13 +120,11 @@ export default function AiSummaryCard({
           <span key={stat.label} className={styles.stat}>
             <span className={styles.statLabel}>{stat.label}</span>
             <span
-              className={[
+              className={cx(
                 styles.statValue,
                 stat.tone === "warning" && styles.warning,
                 stat.tone === "danger" && styles.danger,
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              )}
             >
               {stat.value}
             </span>

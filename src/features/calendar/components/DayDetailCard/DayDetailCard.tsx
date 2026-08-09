@@ -4,17 +4,12 @@ import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
 
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
-import { formatDayLabel } from "@/features/calendar/utils/calendar";
+import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar";
 import { eventMemberColor } from "@/features/calendar/utils/memberColor";
 
 import styles from "./DayDetailCard.module.css";
 
-/**
- * 일정에 얽힌 사람들 — 작성자, 나, 나머지 참가자 순.
- *
- * 작성자 이름만 찍으면 여럿이 함께하는 일정도 그 사람 개인 일정처럼 읽힌다.
- * 내가 참가자라서 이 일정이 보이는 경우엔 그 사실이 드러나야 해서 나를 작성자 바로 뒤에 붙인다.
- */
+/** 일정에 얽힌 사람들 — 작성자, 나, 나머지 참가자 순. */
 function involvedNames(
   event: CalendarEvent,
   membersById: Record<string, CalendarMember>,
@@ -35,7 +30,9 @@ function involvedNames(
     ? [owner, ...rest.filter((p) => p.isMe), ...rest.filter((p) => !p.isMe)]
     : [];
 
-  return ordered.map((person) => (person.isMe ? `${person.name} (나)` : person.name));
+  return ordered.map((person) =>
+    person.isMe ? `${person.name} (나)` : person.name,
+  );
 }
 
 interface DayDetailCardProps {
@@ -62,7 +59,7 @@ export default function DayDetailCard({
   return (
     <section className={styles.card} aria-label="선택한 날짜 일정">
       <div className={styles.head}>
-        <h2 className={styles.title}>{formatDayLabel(date)}</h2>
+        <h2 className={styles.title}>{formatCalendarDayLabel(date)}</h2>
         {/* 목록을 보면 몇 건인지 바로 아니까 수치는 두지 않는다 (불러오는 중만 알린다) */}
         <span className={styles.count}>{loading ? "불러오는 중" : ""}</span>
 

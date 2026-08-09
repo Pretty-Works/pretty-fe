@@ -4,7 +4,7 @@
   padding: 20px 22px 8px;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .panelHead {
@@ -31,7 +31,6 @@
   padding: 6px 0;
 }
 
-/* 참석자 셀 — 이름은 말줄임, 초과분("외 N명")은 흐리게 */
 .attendeeClip {
   min-width: 0;
   overflow: hidden;
@@ -43,4 +42,3 @@
   flex-shrink: 0;
   color: var(--text-placeholder);
 }
-

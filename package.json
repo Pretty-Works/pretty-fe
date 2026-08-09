@@ -7,17 +7,15 @@
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test src/features/calendar/**/*.test.mjs"
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/register-alias.mjs --test \"src/**/*.test.mjs\""
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.4",
     "axios": "^1.18.1",
-    "lucide-react": "^1.25.0",
     "next": "16.2.10",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-icons": "^5.7.0",
-    "uuid": "^14.0.1",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

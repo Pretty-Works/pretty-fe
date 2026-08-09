@@ -1,30 +1,22 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
 import styles from "./AgentRunIndicator.module.css";
 
-import { AGENT_LABELS, type AgentKind } from "@/features/agent/types";
+// 첫 step 이 오기 전까지의 빈자리. 서버 문구와 말투를 맞춘다.
+const WAITING_TEXT = "요청을 읽는 중...";
 
 interface AgentRunIndicatorProps {
-  agents: AgentKind[];
+  /** 이번 실행에서 지금까지 받은 step. 마지막 한 줄만 띄운다 */
+  steps: string[];
 }
 
-export default function AgentRunIndicator({ agents }: AgentRunIndicatorProps) {
-  const [tick, setTick] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  const agent = agents[tick % agents.length] ?? agents[0];
+export default function AgentRunIndicator({ steps }: AgentRunIndicatorProps) {
+  const current = steps.at(-1) ?? WAITING_TEXT;
 
   return (
     <div className={styles.wrap}>
       <span className={styles.spinner} />
-      <span key={tick} className={styles.label}>
-        {AGENT_LABELS[agent]}
+      {/* key 를 문구로 두면 step 이 바뀔 때마다 올라오는 연출이 다시 돈다 */}
+      <span key={current} className={styles.label}>
+        {current}
       </span>
     </div>
   );

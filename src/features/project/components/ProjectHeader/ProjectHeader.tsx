@@ -1,40 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 import { useParams, usePathname, useRouter } from "next/navigation";
 
-import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
-
+import type { Tone } from "@/constants/tone";
 import { getErrorCode } from "@/lib/api/errorCode";
-import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
-import { useToastStore, type ToastTone } from "@/stores/useToastStore";
+import { cx } from "@/lib/cx";
+
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useToastStore } from "@/stores/useToastStore";
+
+import type { ProjectStatus } from "@/features/project/api/projectListApi";
+import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
+import { getProjectTabSegment } from "@/features/project/constants/projectTabs";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useRememberLastProject } from "@/features/project/hooks/useRememberLastProject";
-import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 import { useChangeProjectStatusMutation } from "@/features/project/overview/hooks/mutations/useChangeProjectStatusMutation";
-import { getProjectTabSegment } from "@/features/project/constants/projectTabs";
-import { PROJECT_STATUS_META } from "@/features/home/constants/projectStatus";
+import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useLeaveGuardStore } from "@/features/project/stores/useLeaveGuardStore";
 
-import type { ProjectStatus } from "@/features/home/api/homeApi";
-
+import ProjectMemberMenu from "./ProjectMemberMenu";
 import ProjectStatusMenu from "./ProjectStatusMenu";
 import ProjectSwitchMenu from "./ProjectSwitchMenu";
-import ProjectMemberMenu from "./ProjectMemberMenu";
 
 import styles from "./ProjectHeader.module.css";
 
 type OpenMenu = "status" | "switch" | "members" | null;
 
 // 무엇이 바뀌었는지 문구와 색으로 함께 알린다. 색은 상태 점(ProjectStatusMenu)과 같은 토큰.
-const STATUS_TOAST: Record<ProjectStatus, { message: string; tone: ToastTone }> =
-  {
-    ONGOING: { message: "프로젝트가 다시 진행되었습니다", tone: "green" },
-    HOLDING: { message: "프로젝트가 보류되었습니다", tone: "orange" },
-    DROPPED: { message: "프로젝트가 중단되었습니다", tone: "gray" },
-    COMPLETED: { message: "프로젝트가 완료되었습니다", tone: "purple" },
-    ARCHIVED: { message: "프로젝트가 삭제되었습니다", tone: "danger" },
-  };
+const STATUS_TOAST: Record<ProjectStatus, { message: string; tone: Tone }> = {
+  ONGOING: { message: "프로젝트가 다시 진행되었습니다", tone: "green" },
+  HOLDING: { message: "프로젝트가 보류되었습니다", tone: "orange" },
+  DROPPED: { message: "프로젝트가 중단되었습니다", tone: "gray" },
+  COMPLETED: { message: "프로젝트가 완료되었습니다", tone: "purple" },
+  ARCHIVED: { message: "프로젝트가 삭제되었습니다", tone: "danger" },
+};
 
 // 상태 변경이 막히는 이유를 그대로 알려준다 — 실패가 조용히 지나가면 버튼이 고장 난 것처럼 보인다.
 const STATUS_ERROR_MESSAGE: Record<string, string> = {
@@ -95,7 +97,9 @@ export default function ProjectHeader() {
     useChangeProjectStatusMutation(projectId);
 
   // 확인을 기다리는 상태 (완료·삭제)
-  const [pendingStatus, setPendingStatus] = useState<ProjectStatus | null>(null);
+  const [pendingStatus, setPendingStatus] = useState<ProjectStatus | null>(
+    null,
+  );
 
   // 수정(PROJECT_005)과 상태 변경(PROJECT_017)의 판정 기준이 같다 — 오너이거나 부서가 PM
   const canManage = useCanManageProject(projectId);
@@ -114,19 +118,7 @@ export default function ProjectHeader() {
   const canChangeStatus =
     !!project && project.status !== "ARCHIVED" && canManage;
 
-  // 바깥 클릭 시 닫기 (DatePicker와 동일 패턴)
-  useEffect(() => {
-    if (!openMenu) return;
-
-    const onDown = (e: MouseEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
-        setOpenMenu(null);
-      }
-    };
-
-    document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
-  }, [openMenu]);
+  useClickOutside(rootRef, () => setOpenMenu(null), openMenu !== null);
 
   const toggle = (menu: OpenMenu) =>
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -192,9 +184,7 @@ export default function ProjectHeader() {
           aria-expanded={openMenu === "status"}
           aria-label="프로젝트 상태 변경"
         >
-          <span
-            className={`${styles.dot} ${statusTone ? styles[statusTone] : ""}`}
-          />
+          <span className={cx(styles.dot, statusTone && styles[statusTone])} />
         </button>
 
         {/* 이름 + 화살표 — 통째로 눌러 다른 프로젝트로 이동.
@@ -208,10 +198,9 @@ export default function ProjectHeader() {
           aria-expanded={openMenu === "switch"}
         >
           {/* 열 수 없는 프로젝트면 이름 자리를 비워두지 않고 상태를 알린다 */}
-          <span
-            className={`${styles.name} ${!project ? styles.namePlaceholder : ""}`}
-          >
-            {project?.name ?? (isError ? "열 수 없는 프로젝트" : "불러오는 중…")}
+          <span className={cx(styles.name, !project && styles.namePlaceholder)}>
+            {project?.name ??
+              (isError ? "열 수 없는 프로젝트" : "불러오는 중…")}
           </span>
 
           <span className={styles.caret} aria-hidden="true" />
@@ -239,7 +228,6 @@ export default function ProjectHeader() {
             />
           </div>
         )}
-
       </div>
 
       {/* 멤버 — 네 탭 어디서나 참여자를 확인한다.

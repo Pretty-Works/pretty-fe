@@ -5,7 +5,7 @@
   padding: 20px;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 2px 10px rgba(69, 41, 120, 0.05);
+  box-shadow: var(--shadow-panel);
 }
 
 .head {
@@ -15,25 +15,12 @@
 }
 
 .grid {
-  /* 칸 사이 간격과 칸 좌우 여백.
-     여러 날 일정 막대의 left/width를 JS가 계산할 때도 이 값을 읽으므로
-     (MonthCalendar.tsx의 columnLeft/columnWidth) 숫자를 직접 쓰지 말 것. */
   --cal-gap: 4px;
   --cal-pad: 5px;
-  /* 칸 안의 세로 자리. 여러 날 막대는 칸 밖에서 절대 위치로 그려지므로(MonthCalendar.tsx)
-     같은 값을 봐야 칸 안 칩과 줄이 맞는다. 숫자를 직접 쓰지 말 것.
-     날짜 줄은 '오늘' 동그라미가 들어가는 높이라 글자 높이보다 크다. */
   --cal-day-h: 20px;
-  /* 칩 17 + gap 3 */
   --cal-row-h: 20px;
-  /* padding-top 5 + 날짜 줄 + gap 3 */
   --cal-row-top: calc(5px + var(--cal-day-h) + 3px);
-
-  /* 앞뒤 달 회색 띠가 칸과 같은 높이로 서야 해서 한 곳에서 정한다.
-     칸에 들어가는 줄 수는 calendar.ts의 MAX_CELL_ROWS와 함께 움직인다.
-     = 날짜 줄까지(28) + 칩 4줄(20*4 - 마지막 gap 3) + padding-bottom 5 */
   --cal-cell-h: calc(var(--cal-row-top) + var(--cal-row-h) * 4 - 3px + 5px);
-
   display: flex;
   flex-direction: column;
   gap: var(--cal-gap);
@@ -59,8 +46,6 @@
   gap: var(--cal-gap);
 }
 
-/* 앞뒤 달 날짜를 덮는 회색 띠 — 칸보다 먼저(아래에) 깔린다.
-   양 끝만 둥글어 한 줄로 이어져 보인다. */
 .outsideBand {
   position: absolute;
   top: 0;
@@ -84,7 +69,6 @@
   overflow: hidden;
   text-align: left;
   cursor: pointer;
-  /* 회색 띠 위, 일정 막대 아래에 놓는다 */
   position: relative;
   z-index: 1;
 }
@@ -93,7 +77,6 @@
   background: var(--primary-bg);
 }
 
-/* 앞뒤 달 날짜 — 회색은 아래 깔린 띠가 담당한다. 칸은 비워 둬야 띠가 그대로 비친다 */
 .outside {
   background: transparent;
 }
@@ -103,16 +86,14 @@
 }
 
 .selected {
-  background: #f7f4ff;
-  /* 1.5px 테두리를 레이아웃 이동 없이 표현 */
+  background: var(--primary-bg-tint);
   box-shadow: inset 0 0 0 0.5px var(--primary);
 }
 
 .selected:hover {
-  background: #f2ecff;
+  background: var(--primary-bg-strong);
 }
 
-/* 날짜와 접힌 개수가 함께 서는 줄 */
 .dayHead {
   display: flex;
   align-items: center;
@@ -122,8 +103,6 @@
   height: var(--cal-day-h);
 }
 
-/* '오늘'이면 동그라미가 되므로 평소에도 그 높이를 잡아 둔다.
-   글자 높이(15px)만 잡으면 22px 동그라미가 아래 일정 배너를 덮는다. */
 .dayNumber {
   display: inline-flex;
   align-items: center;
@@ -150,7 +129,6 @@
   color: var(--text);
 }
 
-/* 위에 겹쳐 그린 여러 날 막대만큼 칸 안에 자리를 비워 둔다 */
 .laneSpacer {
   flex-shrink: 0;
   width: 100%;
@@ -175,17 +153,12 @@
   text-overflow: ellipsis;
 }
 
-/* 하루짜리 칩과 좌우 여백이 같아야 같은 칸에서 글자 시작점이 어긋나지 않는다 (.chip의 padding 유지) */
 .span {
   position: absolute;
-  /* 칸(z-index 1) 위에 겹쳐 그린다 */
   z-index: 2;
   cursor: pointer;
 }
 
-/* 칸에 다 못 그린 일정 수. 날짜 옆에 붙어 일정 줄을 쓰지 않는다 —
-   일정 줄에 두면 자리를 하나 뺏는 데다 제목처럼 읽힌다.
-   칸을 누르면 아래 목록에서 전부 볼 수 있다. */
 .more {
   flex-shrink: 0;
   font-size: 10px;
@@ -198,15 +171,10 @@
   color: var(--primary);
 }
 
-/* 한 칸이 좁아지는 구간 — 간격과 좌우 여백만 줄인다.
-   칸 안의 세로 간격(gap 3px)·padding-top(5px)·height는 건드리지 않는다.
-   일정 막대가 `20px + lane * 20px`(칩 17 + gap 3)로 찍히고,
-   칸에 들어가는 줄 수도 calendar.ts의 MAX_CELL_ROWS로 고정돼 있어 높이를 줄이면 다시 잘린다. */
 @media (max-width: 700px) {
   .card {
     padding: 16px 12px;
   }
-
   .grid {
     --cal-gap: 3px;
     --cal-pad: 3px;

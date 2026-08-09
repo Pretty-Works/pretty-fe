@@ -1,7 +1,7 @@
 "use client";
 
-import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
 /**
  * 관리 권한 — 오너이거나 부서가 PM (BE ProjectPolicy.canUpdate).

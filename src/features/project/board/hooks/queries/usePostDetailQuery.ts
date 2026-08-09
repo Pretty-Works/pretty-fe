@@ -9,8 +9,6 @@ export const usePostDetailQuery = (projectId: string, postId: string) => {
 
     enabled: !!projectId && !!postId,
 
-    staleTime: 30 * 1000,
-
     select: (data) => data.result,
 
     retry: false,

@@ -12,12 +12,7 @@ import {
 
 const NO_RESULTS: UserSearchResult[] = [];
 
-/**
- * 사내 사용자 이름 자동완성.
- *
- * 입력할 때마다 부르지 않도록 디바운스하고, 서버가 거절할 검색어(숫자·특수문자·20자 초과)는
- * 아예 보내지 않는다 — 규칙은 `isSearchableKeyword`가 BE와 같게 들고 있다.
- */
+/** 사내 사용자 이름 자동완성. */
 export const useUserSearchQuery = (keyword: string) => {
   const typed = keyword.trim();
   const debounced = useDebounce(typed, 250);

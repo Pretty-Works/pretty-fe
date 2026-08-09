@@ -1,9 +1,10 @@
 "use client";
 
 import Result from "@/components/Result/Result";
+
+import DeleteConfirmModal from "@/features/project/components/modal/DeleteConfirmModal/DeleteConfirmModal";
 import MeetingDetailContent from "@/features/project/meetings/components/MeetingDetailContent/MeetingDetailContent";
 import MeetingForm from "@/features/project/meetings/components/MeetingForm/MeetingForm";
-import DeleteMeetingModal from "@/features/project/meetings/components/modal/DeleteMeetingModal/DeleteMeetingModal";
 import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
 import { useMeetingDetailPage } from "@/features/project/meetings/hooks/useMeetingDetailPage";
 import { toMeetingFormData } from "@/features/project/meetings/utils/format";
@@ -88,9 +89,10 @@ export default function MeetingDetailView({
         onEdit={page.startEdit}
       />
 
-      <DeleteMeetingModal
+      <DeleteConfirmModal
         open={page.deleteOpen}
-        meetingTitle={page.meeting.title}
+        noun="회의록"
+        title={page.meeting.title}
         isDeleting={page.isDeleting}
         onClose={page.closeDelete}
         onConfirm={page.confirmDelete}

@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useCurrentUserId } from "@/lib/auth/currentUser";
+
 import {
   fetchMyProjects,
   fetchProjectPeople,
@@ -9,7 +11,6 @@ import type {
   CalendarProject,
 } from "@/features/calendar/types";
 import { memberColor } from "@/features/calendar/utils/memberColor";
-import { useCurrentUserId } from "@/lib/auth/currentUser";
 
 export interface CalendarPeople {
   /** 레일 체크박스 (진행 중인 내 프로젝트) */
@@ -20,11 +21,7 @@ export interface CalendarPeople {
   myName: string | null;
 }
 
-/**
- * 레일·참여 인원 선택에 쓸 프로젝트와 사람 목록.
- * 사내 사용자 검색 API가 없어서 "내 프로젝트의 참여자"를 후보로 삼는다.
- * 프로젝트 목록엔 인원이 없어 상세를 프로젝트 수만큼 함께 부른다(보통 한 자릿수).
- */
+/** 레일·참여 인원 선택에 쓸 프로젝트와 사람 목록. */
 export const useCalendarPeopleQuery = () => {
   const myId = useCurrentUserId();
 

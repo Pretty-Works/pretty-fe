@@ -17,12 +17,12 @@
 }
 
 .warn {
-  background: #fdecec;
+  background: var(--danger-bg);
   color: var(--danger);
 }
 
 .ok {
-  background: #e6f7ef;
+  background: var(--success-bg);
   color: var(--success);
 }
 

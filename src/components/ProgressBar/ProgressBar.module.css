@@ -14,19 +14,19 @@
   transition: width 0.3s ease;
 }
 
-/* 상태 색 — ProjectStatusSelect의 점 색과 동일 토큰 */
+/* 클래스 이름이 Tone 타입과 1:1이다 — 새 톤을 늘리면 양쪽을 함께 늘린다 */
 .green {
-  background: var(--success);
+  background: var(--tone-green);
 }
 
 .orange {
-  background: var(--warning);
+  background: var(--tone-orange);
 }
 
 .purple {
-  background: var(--primary);
+  background: var(--tone-purple);
 }
 
 .gray {
-  background: var(--text-placeholder);
+  background: var(--tone-gray);
 }

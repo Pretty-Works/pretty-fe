@@ -8,6 +8,9 @@ export default function NotFound() {
   const router = useRouter();
 
   return (
-    <ErrorPage statusCode={404} onRightButtonClick={() => router.replace("/")} />
+    <ErrorPage
+      statusCode={404}
+      onRightButtonClick={() => router.replace("/")}
+    />
   );
 }

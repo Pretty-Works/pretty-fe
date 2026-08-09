@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
+import { useLeaveGuardStore } from "@/features/project/stores/useLeaveGuardStore";
 
 // 저장하지 않은 변경이 있는 화면에서 쓴다.
 // 이탈 경로가 화면 안(취소 버튼)과 밖(좌측 메뉴·프로젝트 전환) 양쪽이라

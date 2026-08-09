@@ -38,7 +38,7 @@
   padding: 11px 14px;
   border: none;
   border-radius: 12px;
-  background: #F6F4FB;
+  background: var(--primary-bg-weak);
   color: var(--text);
   font-size: 13.5px;
   text-align: left;

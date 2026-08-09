@@ -1,10 +1,11 @@
 "use client";
 
 import Result from "@/components/Result/Result";
-import DeletePostModal from "@/features/project/board/components/modal/DeletePostModal/DeletePostModal";
+
 import PostDetailContent from "@/features/project/board/components/PostDetailContent/PostDetailContent";
 import PostForm from "@/features/project/board/components/PostForm/PostForm";
 import { usePostDetailPage } from "@/features/project/board/hooks/usePostDetailPage";
+import DeleteConfirmModal from "@/features/project/components/modal/DeleteConfirmModal/DeleteConfirmModal";
 
 import styles from "./PostDetailView.module.css";
 
@@ -80,9 +81,10 @@ export default function PostDetailView({
         onEdit={page.startEdit}
       />
 
-      <DeletePostModal
+      <DeleteConfirmModal
         open={page.deleteOpen}
-        postTitle={page.post.title}
+        noun="게시글"
+        title={page.post.title}
         isDeleting={page.isDeleting}
         onClose={page.closeDelete}
         onConfirm={page.confirmDelete}

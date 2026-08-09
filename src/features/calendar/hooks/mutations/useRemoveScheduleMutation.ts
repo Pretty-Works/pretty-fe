@@ -15,15 +15,7 @@ interface RemoveVariables {
 
 const SCHEDULES_KEY = ["calendar", "schedules"];
 
-/**
- * 일정을 지운다. 대상에 따라 호출이 다르다.
- * - 휴가: 휴가 취소(연결된 일정까지 함께 사라진다)
- * - 내가 만든 일정: 하드 삭제
- * - 남이 만든 일정: 나가기(내 참여만 빠진다)
- *
- * 되돌리기 없는 동작이라 확인 모달을 이미 거쳤다. 화면에서는 즉시 지우고(낙관적 반영),
- * 실패하면 원래 목록으로 되돌린다.
- */
+/** 일정을 지운다. 대상에 따라 호출이 다르다. */
 export const useRemoveScheduleMutation = () => {
   const queryClient = useQueryClient();
 

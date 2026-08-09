@@ -48,7 +48,10 @@ export default function DonutChart({
       </svg>
 
       {/* 지름에 비례한 글자 크기 — 어느 크기에서도 비율이 유지된다 */}
-      <span className={styles.label} style={{ fontSize: Math.round(size * 0.2) }}>
+      <span
+        className={styles.label}
+        style={{ fontSize: Math.round(size * 0.2) }}
+      >
         {clamped}%
       </span>
     </div>

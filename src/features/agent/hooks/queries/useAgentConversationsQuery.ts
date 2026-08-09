@@ -12,10 +12,6 @@ export const useAgentConversationsQuery = (
 ) => {
   return useQuery({
     queryKey: ["agent", "conversations", size],
-    queryFn: () => fetchAgentConversations({ page: 0, size }),
-
-    // 실행이 끝날 때마다 뮤테이션이 무효화한다(useAgentMutations).
-    // 그사이 화면을 옮겨 다닐 때마다 다시 부를 이유는 없다.
-    staleTime: 30 * 1000,
+    queryFn: () => fetchAgentConversations({ page: 0, size }),
   });
 };

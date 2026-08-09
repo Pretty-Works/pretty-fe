@@ -6,7 +6,6 @@
   cursor: pointer;
 }
 
-/* 비활성 — 회색 테두리(브라우저 기본)로 잠긴 상태를 보여준다 */
 .checkbox:disabled {
   accent-color: var(--text-placeholder);
   cursor: not-allowed;

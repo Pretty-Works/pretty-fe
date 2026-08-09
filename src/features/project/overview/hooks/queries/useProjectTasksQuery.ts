@@ -1,21 +1,15 @@
+import { useCallback } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 
 import {
   fetchProjectTasks,
   type TaskBoard,
+  type TaskBoardResponse,
   type TeamRate,
 } from "../../api/taskBoardApi";
 
-/**
- * 앞으로의 주에서는 지난 주에서 넘어온 할 일을 뺀다.
- *
- * 서버는 미완료 할 일을 이번 주 보드로 이월해 주는데, 그 이월분이 다음 주·두 달 뒤 보드까지
- * 따라온다. 아직 오지 않은 주를 볼 때 밀린 일이 섞여 있으면 그 주의 계획을 읽을 수 없다.
- * 이번 주(0)와 지난 주(음수)는 밀린 일을 봐야 하는 자리라 그대로 둔다.
- *
- * 집계도 함께 다시 센다 — 줄만 걷어내면 도넛과 팀별 완료율이 보이지 않는 할 일까지
- * 세고 있어 화면 안에서 숫자가 맞지 않는다.
- */
+/** 앞으로의 주에서는 지난 주에서 넘어온 할 일을 뺀다. */
 const withoutCarriedOver = (board: TaskBoard): TaskBoard => {
   const groups = board.groups
     .map((group) => ({
@@ -53,12 +47,18 @@ const withoutCarriedOver = (board: TaskBoard): TaskBoard => {
 };
 
 export const useProjectTasksQuery = (projectId: string, weekOffset: number) => {
+  // weekOffset이 그대로면 참조도 그대로여야 react-query가 select 결과를 재사용한다
+  const select = useCallback(
+    (data: TaskBoardResponse) =>
+      weekOffset > 0 ? withoutCarriedOver(data.result) : data.result,
+    [weekOffset],
+  );
+
   return useQuery({
     queryKey: ["project", "tasks", projectId, weekOffset],
     queryFn: () => fetchProjectTasks(projectId, weekOffset),
     enabled: !!projectId,
 
-    select: (data) =>
-      weekOffset > 0 ? withoutCarriedOver(data.result) : data.result,
+    select,
   });
 };

@@ -1,9 +1,10 @@
 "use client";
 
+import { cx } from "@/lib/cx";
+import { formatDayLabel } from "@/lib/date";
+
 import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
-
-import { formatDayLabel } from "@/lib/date";
 
 import type { AgentRunStatus, Conversation } from "@/features/agent/types";
 
@@ -25,26 +26,22 @@ interface ConversationMenuProps {
 }
 
 /**
- * 아직 안 끝난 대화만 색점을 단다 — 대부분은 끝난 대화라, 전부 찍으면 아무것도 안 보인다.
- * status 는 가장 최근 실행 기준이라 COMPLETED·FAILED 처럼 끝난 값도 오는데, 그건 점을 달지 않는다.
- * 빨강은 사용자가 손대야 하는 것, 파랑은 에이전트가 일하는 중.
+ * 아직 안 끝난 대화와 안 읽은 답장만 색점을 단다 — 전부 찍으면 아무것도 안 보인다.
+ * 셋이 겹치면 급한 것부터 — 답장을 안 봤어도 지금 손댈 일이 있으면 그쪽이 먼저다.
  */
-const dotFor = (status?: AgentRunStatus) => {
+const dotFor = (status?: AgentRunStatus, unread?: boolean) => {
   if (status === "RUNNING")
     return { label: "실행 중", className: "running" as const };
 
   if (status === "WAITING_APPROVAL" || status === "WAITING_INPUT")
     return { label: "확인 대기 중", className: "waiting" as const };
 
+  if (unread) return { label: "새 답장", className: "unread" as const };
+
   return null;
 };
 
-/**
- * 최근 대화 목록. 고르는 것까지만 하고, 고른 뒤 무슨 일이 생기는지는 모른다.
- *
- * 채팅 화면을 밀어내지 않고 그 위에 덮는다. 닫힐 때도 접히는 걸 보여줘야 해서
- * 열림 여부와 무관하게 항상 그려 두고 클래스로만 여닫는다.
- */
+/** 최근 대화 목록. 고르는 것까지만 하고, 고른 뒤 무슨 일이 생기는지는 모른다. */
 export default function ConversationMenu({
   open,
   conversations,
@@ -62,17 +59,13 @@ export default function ConversationMenu({
     <>
       {/* 목록 밖을 누르면 닫힌다 */}
       <div
-        className={[styles.backdrop, open && styles.backdropOpen]
-          .filter(Boolean)
-          .join(" ")}
+        className={cx(styles.backdrop, open && styles.backdropOpen)}
         onClick={onClose}
         aria-hidden="true"
       />
 
       <div
-        className={[styles.menu, open && styles.menuOpen]
-          .filter(Boolean)
-          .join(" ")}
+        className={cx(styles.menu, open && styles.menuOpen)}
         /* 안내 문구만 있을 때는 고를 것이 없어 목록(listbox)이 아니다 */
         role={hasConversations ? "listbox" : undefined}
         aria-label="최근 대화"
@@ -104,7 +97,7 @@ export default function ConversationMenu({
           }
         >
           {conversations.map((conversation) => {
-            const dot = dotFor(conversation.status);
+            const dot = dotFor(conversation.status, conversation.unread);
 
             return (
               <button
@@ -112,12 +105,10 @@ export default function ConversationMenu({
                 type="button"
                 role="option"
                 aria-selected={conversation.id === activeId}
-                className={[
+                className={cx(
                   styles.item,
                   conversation.id === activeId && styles.itemActive,
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
+                )}
                 /* 닫히는 동안에는 눌리지 않게 한다 */
                 tabIndex={open ? 0 : -1}
                 onClick={() => onSelect(conversation.id)}

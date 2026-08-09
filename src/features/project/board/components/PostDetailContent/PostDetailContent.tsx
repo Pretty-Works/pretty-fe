@@ -1,6 +1,10 @@
 import Button from "@/components/Button/Button";
+
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
-import { IMPORTANCE_META, type PostDetail } from "@/features/project/board/types";
+import {
+  IMPORTANCE_META,
+  type PostDetail,
+} from "@/features/project/board/types";
 
 import styles from "./PostDetailContent.module.css";
 
@@ -65,7 +69,9 @@ export default function PostDetailContent({
             </Button>
           )}
           {canEdit && (
-            <Button size="medium" onClick={onEdit}>수정</Button>
+            <Button size="medium" onClick={onEdit}>
+              수정
+            </Button>
           )}
         </div>
       </div>

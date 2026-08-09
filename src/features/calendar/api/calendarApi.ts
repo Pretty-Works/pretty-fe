@@ -5,7 +5,6 @@ import axios from "axios";
 
 import { api } from "@/lib/api/client";
 
-import type { ProjectStatus } from "@/features/home/api/homeApi";
 import type {
   LeavePayload,
   LeaveSummary,
@@ -13,6 +12,7 @@ import type {
   SchedulePayload,
   ScheduleType,
 } from "@/features/calendar/types";
+import type { ProjectStatus } from "@/features/project/api/projectListApi";
 
 interface BaseResponse<T> {
   errorCode: string | null;

@@ -4,10 +4,10 @@ import { useEffect, useRef } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
-import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
-import { getNotificationHref } from "../../utils/notificationLink";
 import type { AppNotification } from "../../api/notificationApi";
+import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
+import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
+import { getNotificationHref } from "../../utils/notificationLink";
 import NotificationItem from "../NotificationItem/NotificationItem";
 
 import styles from "./NotificationDropdown.module.css";
