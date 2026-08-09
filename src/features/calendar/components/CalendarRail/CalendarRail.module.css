@@ -107,10 +107,31 @@
   border-bottom: none;
 }
 
+/* 검색창 위에 고정으로 놓이는 본인 줄. 뺄 수 없어서 ✕가 없다.
+   아래 인원 목록과 점·이름 간격을 맞춰 같은 줄 규격으로 읽히게 한다 */
+.meRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0;
+}
+
+/* 프로젝트 목록과 가르는 선. 프로젝트가 없으면 위에 아무것도 없어 선만 뜨므로 그때는 안 붙인다 */
+.meRowDivided {
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.meRow .memberName {
+  color: var(--text-sub);
+}
+
+/* 색은 인라인으로 들어온다 (그리드 배너와 같은 연한 톤).
+   연한 색은 작을수록 구분이 어려워 배너 높이에 맞춰 조금 키웠다. */
 .dot {
   flex-shrink: 0;
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   border-radius: 50%;
 }
 

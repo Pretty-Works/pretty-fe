@@ -71,7 +71,7 @@ export default function EventDetailModal({
       onClose={onClose}
       title={event.title}
       subtitle={`${typeLabel} · ${owner?.name ?? "알 수 없음"}`}
-      // 닫기 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 한다.
+      // 닫기 버튼은 두지 않는다 — 헤더의 ✕가 같은 일을 하고 오버레이·ESC로도 닫힌다.
       // 나갈 수 없는 일정이면 footer에 남는 것이 없어 아예 넘기지 않는다.
       footer={
         canLeave ? (

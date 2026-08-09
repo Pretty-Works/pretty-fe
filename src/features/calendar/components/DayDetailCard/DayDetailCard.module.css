@@ -91,7 +91,9 @@
 
 .owner {
   flex-shrink: 0;
-  max-width: 160px;
+  max-width: 200px;
+  /* 여러 명이면 인라인 색을 안 주므로 여기가 기본값이 된다 */
+  color: var(--text-sub);
   font-size: 13px;
   font-weight: 500;
   text-align: right;

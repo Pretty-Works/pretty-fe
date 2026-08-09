@@ -203,21 +203,6 @@ export default function DatePicker(props: DatePickerProps) {
     setPendingEnd(null);
   };
 
-  const todayBlocked = isBlocked(today);
-
-  const pickToday = () => {
-    if (todayBlocked) return;
-    const iso = toISO(today);
-    setView({ year: today.getFullYear(), month: today.getMonth() });
-    if (!isRange) {
-      props.onChange?.(iso);
-      setOpen(false);
-      return;
-    }
-    setPendingStart(iso);
-    setPendingEnd(null);
-  };
-
   const canConfirm = isRange ? !!pendingStart && !!pendingEnd : !!pendingStart;
 
   const confirm = () => {
@@ -235,14 +220,6 @@ export default function DatePicker(props: DatePickerProps) {
       ? `${rangeValue.start} ~ ${rangeValue.end}`
       : ""
     : singleValue ?? "";
-
-  // 기간 모드에서만 쓴다. 하루 선택은 고른 날이 칸에 칠해져 있어 아래에 또 적을 이유가 없다.
-  const summary =
-    pendingStart && pendingEnd
-      ? `${pendingStart} ~ ${pendingEnd}`
-      : pendingStart
-        ? `${pendingStart} ~ 종료일을 선택하세요`
-        : "시작일을 선택하세요";
 
   return (
     <div className={styles.field}>
@@ -356,19 +333,9 @@ export default function DatePicker(props: DatePickerProps) {
               })}
             </div>
 
-            {isRange && <p className={styles.summary}>{summary}</p>}
-
-            <div className={`${styles.foot} ${!isRange ? styles.singleFoot : ""}`}>
-              <button
-                type="button"
-                className={styles.todayBtn}
-                onClick={pickToday}
-                disabled={todayBlocked}
-              >
-                오늘
-              </button>
-
-              {isRange && <div className={styles.footActions}>
+            {/* 하루 선택은 누르는 즉시 확정돼 푸터가 필요 없다 */}
+            {isRange && (
+              <div className={styles.foot}>
                 <button
                   type="button"
                   className={styles.cancelBtn}
@@ -384,8 +351,8 @@ export default function DatePicker(props: DatePickerProps) {
                 >
                   확인
                 </button>
-              </div>}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>

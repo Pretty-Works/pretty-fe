@@ -674,7 +674,8 @@ export default function ProjectCreateView({
             {/* 수정 모드는 서버가 준 오너를, 생성 모드는 로그인 사용자를 쓴다 */}
             <span className={styles.memberName}>{ownerName}</span>
             <span className={styles.memberTeam}>{ownerProfileLabel}</span>
-            {ownerUserId !== null && isOnLeave(ownerUserId) && (
+            {/* ownerUserId는 `?? me?.userId`라 null이 아니라 undefined가 된다 */}
+            {ownerUserId !== undefined && isOnLeave(ownerUserId) && (
               <span className={styles.leave}>휴직</span>
             )}
             <input
