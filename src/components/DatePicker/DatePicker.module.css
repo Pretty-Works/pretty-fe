@@ -202,46 +202,13 @@
   color: #3b82f6;
 }
 
-/* 확인 전 임시 선택을 글로도 보여 준다 */
-.summary {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary);
-  text-align: center;
-}
-
+/* 기간 모드에만 있다 (하루 선택은 누르는 즉시 확정된다) */
 .foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.footActions {
-  display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-}
-
-.todayBtn {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary);
-  background: var(--primary-bg);
-  cursor: pointer;
-  border: none;
-  outline: none;
-}
-
-.todayBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  margin-top: 8px;
 }
 
 .cancelBtn,
@@ -281,8 +248,4 @@
 .confirmBtn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.singleFoot {
-  justify-content: flex-start;
 }

@@ -89,12 +89,14 @@ export default function ScheduleEditorModal({
   // 휴가는 항상 날짜 단위라 종일 토글이 없다
   const useRange = isLeave || draft.allDay;
 
-  const handleAllDay = (allDay: boolean) => {
-    if (mode === "create" && allDay) {
-      patch({ allDay, startDate: "", endDate: "" });
-      return;
-    }
+  // 필수 항목 — 날짜(기간)는 항상, 이름은 휴가가 아닐 때만 (사유·참여 인원은 선택).
+  // 채우기 전에는 저장 버튼을 누를 수 없어 여기 걸리는 값은 handleSubmit에 닿지 않는다.
+  // 시작·종료 시각 순서처럼 값이 있어야 따질 수 있는 건 handleSubmit에 남겨 둔다.
+  const canSubmit =
+    !!draft.startDate && !!draft.endDate && (isLeave || !!draft.title.trim());
 
+  // 종일을 켜도 고른 날짜는 그대로 둔다 (날짜를 눌러서 연 모달이라 비우면 다시 골라야 한다)
+  const handleAllDay = (allDay: boolean) => {
     const date = draft.startDate || initial.startDate;
     patch({ allDay, startDate: date, endDate: date });
   };
@@ -107,11 +109,6 @@ export default function ScheduleEditorModal({
   const handlePeriod = (range: DateRange) => {
     patch({ startDate: range.start, endDate: range.end });
   };
-
-  // 필수 항목 — 날짜(기간)는 항상, 이름은 휴가가 아닐 때만 (휴가 사유는 선택).
-  // 채우기 전에는 저장 버튼을 눌 수 없어, 여기 걸리는 값은 handleSubmit에 닿지 않는다.
-  const canSubmit =
-    !!draft.startDate && !!draft.endDate && (isLeave || !!draft.title.trim());
 
   // 저장은 부모가 서버 응답을 받은 뒤에 닫는다.
   // 여기서 미리 닫아 버리면 실패했을 때 입력하던 내용이 통째로 사라진다.
@@ -219,6 +216,7 @@ export default function ScheduleEditorModal({
       ) : (
         <FormField
           label="이름"
+          required
           placeholder="예: 고객사 미팅"
           // 서버 제한과 맞춘다 (초과하면 400)
           maxLength={200}
@@ -234,6 +232,7 @@ export default function ScheduleEditorModal({
       {useRange ? (
         <DatePicker
           label="기간"
+          required
           mode="range"
           value={
             draft.startDate && draft.endDate
@@ -247,13 +246,14 @@ export default function ScheduleEditorModal({
           <div className={styles.dateCol}>
             <DatePicker
               label="날짜"
+              required
               value={draft.startDate}
               onChange={handleStartDate}
             />
           </div>
 
           <div className={styles.dateTimeField}>
-            <span className={styles.label}>일시</span>
+            <span className={styles.label}>시간</span>
             <div className={styles.timeRangeRow}>
               <div className={styles.timeCol}>
                 <TimeSelect
@@ -288,7 +288,8 @@ export default function ScheduleEditorModal({
         <PeoplePicker
           label="참여 인원"
           options={people}
-          pinned={me ? [{ ...me, description: "나" }] : []}
+          // 고정 인원 칩은 ✕ 없이 다른 톤으로 그려져 이미 구분된다 ("· 나"는 군더더기)
+          pinned={me ? [me] : []}
           value={draft.participantIds}
           onChange={(participantIds) => patch({ participantIds })}
           onQueryChange={onSearchPeople}

@@ -29,11 +29,28 @@ function parseTenure(tenure: string) {
   };
 }
 
+/**
+ * 진행률 문구. 부여 연차를 넘겨 쓰면 "120%를 사용했습니다"가 나와 이상하게 읽힌다.
+ * (공가는 사용일수에 안 잡히지만 연차는 잔여가 음수까지 갈 수 있다)
+ */
+function leaveCaption(leave: LeaveSummary, percent: number) {
+  const over = leave.usedDays - leave.grantedDays;
+
+  if (leave.grantedDays <= 0) return "올해 부여된 연차가 없습니다";
+  if (over > 0) return `올해 연차를 모두 쓰고 ${over}일을 더 사용했습니다`;
+  if (percent === 0) return "올해 사용한 연차가 없습니다";
+
+  return `올해 연차의 ${percent}%를 사용했습니다`;
+}
+
 export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
   const percent =
     leave && leave.grantedDays > 0
       ? Math.round((leave.usedDays / leave.grantedDays) * 100)
       : 0;
+  // 막대는 100%에서 멈춘다 (넘기면 트랙 밖으로 삐져나간다)
+  const barPercent = Math.min(percent, 100);
+  const exceeded = Boolean(leave && leave.usedDays > leave.grantedDays);
   const tenure = leave ? parseTenure(leave.tenureYears) : null;
 
   const stats = [
@@ -48,17 +65,18 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
       <div className={styles.progressArea}>
         <div className={styles.progressHead}>
           <h2 className={styles.title}>연차 현황</h2>
-          <p className={styles.caption}>
+          <p className={`${styles.caption} ${exceeded ? styles.exceeded : ""}`}>
             {leave
-              ? percent === 0
-                ? "올해 사용한 연차가 없습니다"
-                : `올해 연차의 ${percent}%를 사용했습니다`
+              ? leaveCaption(leave, percent)
               : "연차 현황을 불러오는 중입니다"}
           </p>
         </div>
 
         <div className={styles.track}>
-          <div className={styles.fill} style={{ width: `${percent}%` }} />
+          <div
+            className={`${styles.fill} ${exceeded ? styles.fillExceeded : ""}`}
+            style={{ width: `${barPercent}%` }}
+          />
         </div>
       </div>
 
@@ -67,7 +85,16 @@ export default function LeaveSummaryCard({ leave }: LeaveSummaryCardProps) {
           <div key={stat.label} className={styles.stat}>
             <span className={styles.statLabel}>{stat.label}</span>
             <span className={styles.statValue}>
-              <strong className={stat.highlight ? styles.highlight : ""}>
+              {/* 잔여가 음수인데 강조색(보라)이면 정상 수치처럼 읽힌다 */}
+              <strong
+                className={
+                  stat.highlight
+                    ? exceeded
+                      ? styles.exceeded
+                      : styles.highlight
+                    : ""
+                }
+              >
                 {stat.value ?? "—"}
               </strong>
               <span className={styles.statUnit}>{stat.unit}</span>

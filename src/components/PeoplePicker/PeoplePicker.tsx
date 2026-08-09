@@ -119,7 +119,8 @@ export default function PeoplePicker({
       onChange([...value, picked.id]);
     }
 
-    changeQuery("");
+    // 고르고 나면 목록을 닫는다. 열어 둔 채로는 방금 담은 칩이 목록에 가려 보이지 않는다.
+    closeSuggest();
   };
 
   const remove = (id: string) => {
