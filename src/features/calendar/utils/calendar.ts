@@ -89,9 +89,26 @@ export function coversDate(event: CalendarEvent, key: string) {
   return event.start <= key && key <= event.end;
 }
 
+/**
+ * 캘린더에 늘어놓는 순서 — 종일 먼저 → 시작 시각 → 제목.
+ *
+ * 종일이 위인 건 시각이 없어 시간 축에 놓을 자리가 없고 그 날 전체에 걸리는 일이라서다.
+ * 제목까지 보는 건 같은 시각 일정의 순서를 고정하기 위해서다. 서버 응답 순서에 기대면
+ * 재조회 때 자리가 바뀌고, 그리드와 선택일 목록의 순서도 서로 어긋난다.
+ */
+export function compareEvents(a: CalendarEvent, b: CalendarEvent) {
+  if (!a.time !== !b.time) return a.time ? 1 : -1;
+
+  return (
+    (a.time ?? "").localeCompare(b.time ?? "") || a.title.localeCompare(b.title)
+  );
+}
+
 /** 하루짜리 일정만 (여러 날 일정은 주 단위 막대로 따로 그림) */
 export function getSingleDayEvents(events: CalendarEvent[], key: string) {
-  return events.filter((event) => !isMultiDay(event) && event.start === key);
+  return events
+    .filter((event) => !isMultiDay(event) && event.start === key)
+    .sort(compareEvents);
 }
 
 /** 주 안에서 여러 날 일정이 차지하는 칸 범위와 레인(세로 줄) */
@@ -103,8 +120,24 @@ export interface WeekSpan {
 }
 
 /**
+ * 한 칸에 그릴 수 있는 줄 수. 칸 높이 108px 기준
+ * (padding 5*2 + 날짜 15 + gap 3 + (칩 17 + gap 3) * 4 = 108)
+ * — MonthCalendar.module.css의 `--cal-cell-h`와 함께 움직인다.
+ */
+export const MAX_CELL_ROWS = 4;
+
+/**
+ * 여러 날 막대가 쓸 수 있는 최대 레인.
+ * 칸 높이를 넘긴 막대는 `.week`가 잘라 주지 않아 아래 주까지 넘어가므로 여기서 막는다.
+ * ("+N"은 날짜 숫자 옆에 붙어 일정 줄을 쓰지 않으니 줄을 남겨 둘 필요는 없다)
+ */
+export const MAX_SPAN_LANES = MAX_CELL_ROWS;
+
+/**
  * 한 주에 걸친 여러 날 일정을 겹치지 않는 레인에 배치한다.
- * laneCountByCol[i] = i번째 칸을 덮고 있는 막대 수 (그만큼 칸 안에 자리를 비워 둔다)
+ *
+ * laneRowsByCol[i] = i번째 칸에서 막대가 차지하는 줄 수 (그만큼 칸 안에 자리를 비워 둔다)
+ * hiddenCountByCol[i] = 레인이 모자라 못 그린 막대 수 (칸의 "+N"에 더한다)
  */
 export function layoutWeekSpans(week: Date[], events: CalendarEvent[]) {
   const weekStart = toDateKey(week[0]);
@@ -140,10 +173,26 @@ export function layoutWeekSpans(week: Date[], events: CalendarEvent[]) {
     spans.push(span);
   });
 
-  const laneCountByCol = week.map(
-    (_, col) =>
-      spans.filter((span) => span.startCol <= col && col <= span.endCol).length,
+  const covers = (span: WeekSpan, col: number) =>
+    span.startCol <= col && col <= span.endCol;
+
+  // 레인이 넘치는 막대는 그리지 않고 칸의 "+N"으로 넘긴다
+  const visible = spans.filter((span) => span.lane < MAX_SPAN_LANES);
+  const overflowed = spans.filter((span) => span.lane >= MAX_SPAN_LANES);
+
+  // 막대는 개수가 아니라 레인 번호로 위치가 정해진다.
+  // 레인 0은 비고 레인 1에만 걸친 칸에서 "1줄"만 비우면 하루짜리 칩이 막대 밑으로 들어간다.
+  const laneRowsByCol = week.map((_, col) => {
+    const covering = visible.filter((span) => covers(span, col));
+
+    return covering.length
+      ? Math.max(...covering.map((span) => span.lane)) + 1
+      : 0;
+  });
+
+  const hiddenCountByCol = week.map(
+    (_, col) => overflowed.filter((span) => covers(span, col)).length,
   );
 
-  return { spans, laneCountByCol };
+  return { spans: visible, laneRowsByCol, hiddenCountByCol };
 }

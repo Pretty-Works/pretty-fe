@@ -46,6 +46,9 @@ export const useCalendarPeopleQuery = () => {
       const myNames: string[] = [];
 
       const projects = details.map((detail, index): CalendarProject | null => {
+        // 상세 조회가 실패한 프로젝트는 선택해도 표시할 인원을 알 수 없으므로 레일에서 제외한다.
+        if (!detail) return null;
+
         const people = [detail?.owner, ...(detail?.members ?? [])].filter(
           (person): person is { userId: number; name: string } =>
             person != null,
@@ -69,7 +72,7 @@ export const useCalendarPeopleQuery = () => {
         });
 
         // 본인 외 참여자가 없는 개인 프로젝트는 캘린더 필터에 노출하지 않는다.
-        if (detail && memberIds.length === 0) return null;
+        if (memberIds.length === 0) return null;
 
         return {
           id: String(summaries[index].projectId),

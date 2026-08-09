@@ -23,6 +23,7 @@ import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs
 import {
   addMonths,
   buildMonthWeeks,
+  compareEvents,
   coversDate,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
@@ -108,16 +109,24 @@ export default function CalendarView() {
   // 작성자가 아니어도 보이는 사람이 참가자면 남긴다 (그 사람 일정에 잡힌 시간이라 보여야 한다).
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
+      if (
+        removeSchedule.isPending &&
+        removeSchedule.variables?.event.id === event.id
+      ) {
+        return false;
+      }
+
       if (visibleMemberIds.has(event.memberId)) return true;
 
       return (event.participantIds ?? []).some((id) => visibleMemberIds.has(id));
     });
-  }, [events, visibleMemberIds]);
+  }, [events, visibleMemberIds, removeSchedule.isPending, removeSchedule.variables]);
 
+  // 그리드 칩과 같은 기준으로 늘어놓는다 (compareEvents 한 곳에서 정한다)
   const selectedEvents = useMemo(() => {
     return visibleEvents
       .filter((event) => coversDate(event, selectedDate))
-      .sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+      .sort(compareEvents);
   }, [visibleEvents, selectedDate]);
 
   // 참여 인원 후보 — 이미 아는 사람 + 사내 검색 결과
@@ -165,11 +174,13 @@ export default function CalendarView() {
         // 서버가 받아준 걸 확인하고 닫는다.
         // 미리 닫으면 실패했을 때 입력하던 내용을 되살릴 방법이 없다.
         onSuccess: closeEditor,
-        onError: (error) =>
+        onError: (error) => {
+          dialogs.renewIdempotencyKey();
           showToast(
             getApiErrorMessage(error, "일정을 저장하지 못했어요"),
             "danger",
-          ),
+          );
+        },
       },
     );
   };
@@ -255,6 +266,7 @@ export default function CalendarView() {
         <CalendarRail
           projects={members.projects}
           checkedProjectIds={rail.checkedProjectIds}
+          me={members.me}
           members={rail.railMembers}
           candidates={rail.railCandidates}
           onToggleProject={rail.toggleProject}
@@ -267,12 +279,16 @@ export default function CalendarView() {
             month={month}
             events={visibleEvents}
             membersById={members.membersById}
+            myId={members.myId}
             selectedDate={selectedDate}
             todayDate={today}
             onChangeMonth={(diff) =>
               setMonth((current) => addMonths(current, diff))
             }
             onResetMonth={handleResetMonth}
+            onPickMonth={(year, monthIndex) =>
+              setMonth(new Date(year, monthIndex, 1))
+            }
             onSelectDate={handleSelectDate}
           />
 
@@ -282,6 +298,7 @@ export default function CalendarView() {
               date={selectedDate}
               events={selectedEvents}
               membersById={members.membersById}
+              myId={members.myId}
               loading={loading}
               onAddEvent={() => dialogs.openCreate(selectedDate)}
               onSelectEvent={(eventId) => {

@@ -55,6 +55,15 @@
   white-space: nowrap;
 }
 
+/* 부여 연차를 넘겨 쓴 상태 — 막대는 꽉 찬 채로 멈추므로 색으로 알린다 */
+.fillExceeded {
+  background: var(--danger);
+}
+
+.exceeded {
+  color: var(--danger);
+}
+
 .stats {
   display: flex;
   flex: 1;
@@ -96,7 +105,7 @@
 }
 
 .statUnit {
-  font-size: 15px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-placeholder);
   white-space: nowrap;

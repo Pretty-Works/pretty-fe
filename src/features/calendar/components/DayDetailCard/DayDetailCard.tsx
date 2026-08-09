@@ -5,13 +5,45 @@ import StateView from "@/components/StateView/StateView";
 
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
 import { formatDayLabel } from "@/features/calendar/utils/calendar";
+import { eventMemberColor } from "@/features/calendar/utils/memberColor";
 
 import styles from "./DayDetailCard.module.css";
+
+/**
+ * 일정에 얽힌 사람들 — 작성자, 나, 나머지 참가자 순.
+ *
+ * 작성자 이름만 찍으면 여럿이 함께하는 일정도 그 사람 개인 일정처럼 읽힌다.
+ * 내가 참가자라서 이 일정이 보이는 경우엔 그 사실이 드러나야 해서 나를 작성자 바로 뒤에 붙인다.
+ */
+function involvedNames(
+  event: CalendarEvent,
+  membersById: Record<string, CalendarMember>,
+) {
+  const seen = new Set<string>();
+  const people: CalendarMember[] = [];
+
+  [event.memberId, ...(event.participantIds ?? [])].forEach((id) => {
+    const member = membersById[id];
+    if (!member || seen.has(id)) return;
+
+    seen.add(id);
+    people.push(member);
+  });
+
+  const [owner, ...rest] = people;
+  const ordered = owner
+    ? [owner, ...rest.filter((p) => p.isMe), ...rest.filter((p) => !p.isMe)]
+    : [];
+
+  return ordered.map((person) => (person.isMe ? `${person.name} (나)` : person.name));
+}
 
 interface DayDetailCardProps {
   date: string;
   events: CalendarEvent[];
   membersById: Record<string, CalendarMember>;
+  /** 내가 낀 일정을 내 색으로 그리기 위한 기준 */
+  myId: string | null;
   /** 첫 조회 중 — "일정 없음"과 구분해서 보여준다 */
   loading?: boolean;
   onAddEvent?: () => void;
@@ -22,6 +54,7 @@ export default function DayDetailCard({
   date,
   events,
   membersById,
+  myId,
   loading = false,
   onAddEvent,
   onSelectEvent,
@@ -30,9 +63,8 @@ export default function DayDetailCard({
     <section className={styles.card} aria-label="선택한 날짜 일정">
       <div className={styles.head}>
         <h2 className={styles.title}>{formatDayLabel(date)}</h2>
-        <span className={styles.count}>
-          {loading ? "불러오는 중" : events.length > 0 ? `일정 ${events.length}건` : ""}
-        </span>
+        {/* 목록을 보면 몇 건인지 바로 아니까 수치는 두지 않는다 (불러오는 중만 알린다) */}
+        <span className={styles.count}>{loading ? "불러오는 중" : ""}</span>
 
         <Button
           size="tiny"
@@ -54,13 +86,22 @@ export default function DayDetailCard({
       >
         <ul className={styles.list}>
           {events.map((event) => {
-            const member = membersById[event.memberId];
+            const color = eventMemberColor(event, membersById, myId);
+            const names = involvedNames(event, membersById);
+
+            // 셋 이상이면 앞의 둘만 적고 나머지는 수로 줄인다 (전체는 title로 확인)
+            const label =
+              names.length === 0
+                ? "알 수 없음"
+                : names.length <= 2
+                  ? names.join(", ")
+                  : `${names[0]}, ${names[1]} 외 ${names.length - 2}명`;
 
             return (
               <li key={event.id} className={styles.row}>
                 <span
                   className={styles.bar}
-                  style={{ background: member?.color }}
+                  style={{ background: color }}
                   aria-hidden="true"
                 />
                 <span className={styles.time}>{event.time ?? "종일"}</span>
@@ -71,9 +112,13 @@ export default function DayDetailCard({
                 >
                   {event.title}
                 </button>
-                <span className={styles.owner} style={{ color: member?.color }}>
-                  {member?.name}
-                  {member?.isMe ? " (나)" : ""}
+                {/* 색은 막대와 같게. 여럿이면 중립색으로 둬야 한 사람 일정으로 안 읽힌다 */}
+                <span
+                  className={styles.owner}
+                  style={names.length > 1 ? undefined : { color }}
+                  title={names.join(", ")}
+                >
+                  {label}
                 </span>
               </li>
             );

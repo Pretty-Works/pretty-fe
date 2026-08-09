@@ -5,6 +5,7 @@ import axios from "axios";
 
 import { api } from "@/lib/api/client";
 
+import type { ProjectStatus } from "@/features/home/api/homeApi";
 import type {
   LeavePayload,
   LeaveSummary,
@@ -169,7 +170,13 @@ export const fetchLeaveBalance = async () => {
 export interface ServerProjectSummary {
   projectId: number;
   name: string;
+  status: ProjectStatus;
 }
+
+// 레일에 올릴 프로젝트 — 아직 굴러가는 것만.
+// 완료·중단된 프로젝트의 인원까지 올리면 목록이 계속 길어지기만 하고,
+// 지금 누구와 일정을 맞춰야 하는지가 묻힌다.
+const RAIL_STATUSES: ProjectStatus[] = ["ONGOING", "HOLDING"];
 
 export interface ServerProjectDetail {
   projectId: number;
@@ -178,13 +185,28 @@ export interface ServerProjectDetail {
 }
 
 // 내가 참여 중인 프로젝트 (레일 체크박스).
-// status=ALL — 보류·완료 프로젝트의 인원도 캘린더에서 봐야 해서 상태로 거르지 않는다(ARCHIVED는 서버가 제외).
+// status 파라미터는 값을 하나만 받아서(StatusFilter) 진행중+보류를 한 번에 부를 수 없다.
+// ALL로 받아 RAIL_STATUSES로 거른다 (ARCHIVED는 서버가 이미 제외).
 export const fetchMyProjects = async () => {
   const { data } = await api.get<
-    BaseResponse<{ content: ServerProjectSummary[] }>
+    BaseResponse<{
+      content: ServerProjectSummary[];
+      totalElements?: number;
+    }>
   >("/projects", { params: { status: "ALL", size: 100 } });
 
-  return data.result.content;
+  if (
+    data.result.content.length >= 100 ||
+    (data.result.totalElements ?? 0) > data.result.content.length
+  ) {
+    console.warn(
+      "[calendar] 프로젝트가 조회 한도(100개)를 넘어 일부가 표시되지 않을 수 있습니다.",
+    );
+  }
+
+  return data.result.content.filter((project) =>
+    RAIL_STATUSES.includes(project.status),
+  );
 };
 
 // 프로젝트 참여자 — 목록 응답엔 인원이 없어 상세로 받아온다

@@ -66,12 +66,13 @@
   font-size: 13.5px;
 }
 
-/* 라벨에 목록이 붙을 때 — 목록이 라벨 아래 가운데에 서도록 기준점이 된다 */
+/* 라벨에 목록·팝오버가 붙을 때 — 아래 가운데에 서도록 기준점이 된다 */
 .labelWrap {
   position: relative;
   display: flex;
 }
 
+/* 라벨과 같은 모양을 유지한 채 누를 수 있게만 한다 */
 .labelButton {
   padding: 5px 6px;
   border: none;
@@ -86,12 +87,78 @@
   color: var(--primary);
 }
 
+/* 넘겨받은 목록의 자리만 잡아 준다 (내용은 호출부가 그린다) */
 .menu {
   position: absolute;
   top: calc(100% + 6px);
   left: 50%;
   z-index: 20;
   transform: translateX(-50%);
+}
+
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 216px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: 0 6px 20px rgba(69, 41, 120, 0.12);
+}
+
+.popHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.popYear {
+  font-size: 13.5px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.popMonths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.popMonth {
+  padding: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.popMonth:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.popMonthCurrent {
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.popMonthCurrent:hover {
+  background: var(--primary);
+  color: var(--white);
 }
 
 .reset {
