@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import Button from "@/components/Button/Button";
 import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
+import StateView from "@/components/StateView/StateView";
 import TaskRow from "@/components/TaskRow/TaskRow";
 import DonutChart from "@/features/project/overview/components/DonutChart/DonutChart";
 
@@ -143,48 +144,55 @@ export default function WeeklyTaskCard({
         )}
       </div>
 
-      {/* 집계 */}
-      <div className={styles.summary}>
-        {/* 마일스톤 카드와 같은 치수 */}
-        <DonutChart value={summary.rate} size={132} stroke={18} />
+      {/* 하나도 없으면 집계·팀 목록이 모두 빈 껍데기라 안내만 남긴다 */}
+      <StateView
+        empty={summary.total === 0}
+        emptyText="이 주에 등록된 할 일이 없어요."
+      >
+        <div className={styles.summary}>
+          {/* 마일스톤 카드와 같은 치수 */}
+          <DonutChart value={summary.rate} size={132} stroke={18} />
 
-        <dl className={styles.counts}>
-          <div className={styles.countRow}>
-            <dt className={styles.countLabel}>
-              <span className={`${styles.dot} ${styles.dotDone}`} aria-hidden="true" />
-              완료
-            </dt>
-            <dd className={styles.countValue}>{summary.done}개</dd>
-          </div>
-          <div className={styles.countRow}>
-            <dt className={styles.countLabel}>
-              <span className={`${styles.dot} ${styles.dotWait}`} aria-hidden="true" />
-              진행
-            </dt>
-            <dd className={styles.countValue}>{undone}개</dd>
-          </div>
-        </dl>
-
-        {/* 팀별 완료율 */}
-        <div className={styles.teamRates}>
-          {summary.teams.map((team) => (
-            <div key={team.team} className={styles.teamRow}>
-              <span className={styles.teamName}>
-                {DEPARTMENT_LABEL[team.team]}
-              </span>
-              <ProgressBar value={team.rate} tone="purple" />
-              <span className={styles.teamCount}>
-                {team.done}/{team.total}
-              </span>
+          <dl className={styles.counts}>
+            <div className={styles.countRow}>
+              <dt className={styles.countLabel}>
+                <span
+                  className={`${styles.dot} ${styles.dotDone}`}
+                  aria-hidden="true"
+                />
+                완료
+              </dt>
+              <dd className={styles.countValue}>{summary.done}개</dd>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className={styles.countRow}>
+              <dt className={styles.countLabel}>
+                <span
+                  className={`${styles.dot} ${styles.dotWait}`}
+                  aria-hidden="true"
+                />
+                진행
+              </dt>
+              <dd className={styles.countValue}>{undone}개</dd>
+            </div>
+          </dl>
 
-      {/* 팀별 할 일 */}
-      {summary.total === 0 ? (
-        <p className={styles.emptyText}>이 주에 등록된 할 일이 없어요.</p>
-      ) : (
+          {/* 팀별 완료율 */}
+          <div className={styles.teamRates}>
+            {summary.teams.map((team) => (
+              <div key={team.team} className={styles.teamRow}>
+                <span className={styles.teamName}>
+                  {DEPARTMENT_LABEL[team.team]}
+                </span>
+                <ProgressBar value={team.rate} tone="purple" />
+                <span className={styles.teamCount}>
+                  {team.done}/{team.total}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 팀별 할 일 */}
         <div className={styles.groups}>
           {groups.map((group) => (
             <div key={group.team} className={styles.group}>
@@ -217,7 +225,7 @@ export default function WeeklyTaskCard({
             </div>
           ))}
         </div>
-      )}
+      </StateView>
     </section>
   );
 }

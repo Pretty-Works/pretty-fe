@@ -164,10 +164,26 @@
 }
 
 /* 참여자 카드 */
+/* 두 열로 고정한다. auto-fill이면 넓은 화면에서 세 열까지 늘어나는데,
+   한 카드에 이름·부서·직급·역할 입력·제거 버튼이 다 들어가야 해서 288px로는 글자가 잘린다 */
 .memberGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(288px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px 16px;
+  /* 다섯 줄(2열이라 10명)까지 보이고 그 뒤로는 안에서 스크롤한다.
+     30명이면 15줄이라 그대로 두면 폼이 그만큼 길어져 아래 마일스톤까지 밀린다 */
+  max-height: 332px;
+  overflow-y: auto;
+  /* 스크롤바가 카드 테두리를 덮지 않게 */
+  padding-right: 4px;
+}
+
+/* 두 열로는 카드가 너무 눌리는 구간 — 한 열로 내린다.
+   기준은 화면 폭이 아니라 본문이 실제로 쓸 수 있는 폭이다 (에이전트 패널이 열리면 여기만 좁아진다) */
+@container app-main (max-width: 760px) {
+  .memberGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .memberCard {

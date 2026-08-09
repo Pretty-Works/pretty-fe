@@ -1,2 +1,3 @@
-// 임시 서버 연결
-export const API_BASE_URL = "http://localhost:8080";
+// 배포 환경
+export const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080";

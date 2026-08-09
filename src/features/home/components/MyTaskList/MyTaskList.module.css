@@ -10,13 +10,15 @@
   gap: 4px;
 }
 
+/* 프로젝트명 — 채운 띠 대신 아래 선으로 구분한다.
+   왼쪽 4px은 패널 제목('내 할 일')과 같은 값이라 두 글자가 한 선에서 시작한다.
+   오른쪽 12px은 그대로 둔다 — 상태 점이 아래 할 일 줄의 오른쪽 끝과 맞아야 한다 */
 .groupHead {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: var(--surface);
+  padding: 6px 12px 8px 4px;
+  border-bottom: 1px solid var(--line);
   font-size: 13px;
   font-weight: 600;
   color: var(--text);

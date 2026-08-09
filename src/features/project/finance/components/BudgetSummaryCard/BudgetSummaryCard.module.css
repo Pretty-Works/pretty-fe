@@ -233,13 +233,6 @@
   background: var(--text-placeholder);
 }
 
-.emptyText {
-  padding: 40px 20px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--text-placeholder);
-}
-
 /*
  * 카드가 좁아지면 좌우 배치를 위아래로 바꾼다.
  * 계속 좌우로 두면 금액 4칸과 도넛이 같이 눌려서 양쪽 다 못 읽게 된다.

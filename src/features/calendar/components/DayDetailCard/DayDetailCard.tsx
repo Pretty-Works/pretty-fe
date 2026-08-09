@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/Button/Button";
+import StateView from "@/components/StateView/StateView";
 
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
 import { formatDayLabel } from "@/features/calendar/utils/calendar";
@@ -43,11 +44,14 @@ export default function DayDetailCard({
         </Button>
       </div>
 
-      {events.length === 0 ? (
-        <p className={styles.empty}>
-          {loading ? "일정을 불러오는 중이에요." : "등록된 일정이 없어요."}
-        </p>
-      ) : (
+      <StateView
+        /* 보여줄 일정이 이미 있으면 새로 고치는 중이어도 목록을 유지한다 */
+        loading={loading && events.length === 0}
+        empty={events.length === 0}
+        size="compact"
+        loadingText="일정을 불러오는 중이에요."
+        emptyText="등록된 일정이 없어요."
+      >
         <ul className={styles.list}>
           {events.map((event) => {
             const member = membersById[event.memberId];
@@ -75,7 +79,7 @@ export default function DayDetailCard({
             );
           })}
         </ul>
-      )}
+      </StateView>
     </section>
   );
 }
