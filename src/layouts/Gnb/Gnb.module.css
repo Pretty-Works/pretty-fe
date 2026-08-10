@@ -76,6 +76,7 @@
 }
 
 .agentBtn {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -90,6 +91,18 @@
 
 .agentBtn:hover {
   background: var(--surface);
+}
+
+/* 안 읽은 답장. 알림 벨 뱃지와 같은 자리·크기지만, 대화 목록의 '새 답장' 점과 같은 색을 쓴다 */
+.agentBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--white);
+  border-radius: 50%;
+  background: var(--primary);
 }
 
 .icon {

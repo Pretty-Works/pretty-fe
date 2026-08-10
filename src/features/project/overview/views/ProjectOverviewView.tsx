@@ -10,9 +10,8 @@ import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
 import { useToastStore } from "@/stores/useToastStore";
 
-import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
-import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 import MilestoneProgressCard from "@/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard";
 import WeeklyTaskCard from "@/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard";
 import { useToggleMilestoneMutation } from "@/features/project/overview/hooks/mutations/useToggleMilestoneMutation";
@@ -71,8 +70,6 @@ export default function ProjectOverviewView({
   const { mutate: toggleMilestone } = useToggleMilestoneMutation(
     projectId ?? "",
   );
-
-  const summary = useProjectSummary(projectId ?? "", "overview");
 
   // 마일스톤 토글도 수정과 같은 권한을 본다 (BE ProjectPolicy.canUpdate → PROJECT_005)
   const canManage = useCanManageProject(projectId ?? "");
@@ -154,16 +151,8 @@ export default function ProjectOverviewView({
 
   return (
     <div className={styles.container}>
-      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
-      {summary.banner && (
-        <AiSummaryCard
-          headline={summary.banner.headline}
-          lines={summary.banner.detail}
-          stats={summary.banner.stats}
-          updatedAt={summary.generatedAt}
-          onRefresh={summary.refresh}
-        />
-      )}
+      {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
+      <ProjectAiSummary projectId={projectId ?? ""} section="overview" />
 
       {/* 기본 정보 */}
       <section className={styles.panel}>

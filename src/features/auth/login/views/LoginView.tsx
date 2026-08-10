@@ -10,6 +10,8 @@ import axios from "axios";
 import LogoWhite from "@/assets/brand/logo-white.png";
 import Logo from "@/assets/brand/logo.png";
 
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+
 import Button from "@/components/Button/Button";
 import FormField from "@/components/FormField/FormField";
 import Modal from "@/components/Modal/Modal";
@@ -69,15 +71,15 @@ export default function LoginView() {
           const status = axios.isAxiosError(err)
             ? err.response?.status
             : undefined;
-          const message = axios.isAxiosError(err)
-            ? err.response?.data?.message
-            : undefined;
 
           // 입력·자격 오류(400·401)는 필드 인라인으로 표시
           // 자격 오류는 두 필드 모두 에러 테두리, 메시지는 한 번만
           if (status === 400 || status === 401) {
             setErrors({
-              password: message ?? "사번 또는 비밀번호를 확인해 주세요.",
+              password: getApiErrorMessage(
+                err,
+                "사번 또는 비밀번호를 확인해 주세요.",
+              ),
               credential: true,
             });
             return;

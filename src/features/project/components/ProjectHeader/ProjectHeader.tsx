@@ -10,6 +10,7 @@ import { cx } from "@/lib/cx";
 
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 import { useToastStore } from "@/stores/useToastStore";
 
 import type { ProjectStatus } from "@/features/project/api/projectListApi";
@@ -19,7 +20,6 @@ import { useCanManageProject } from "@/features/project/hooks/useCanManageProjec
 import { useRememberLastProject } from "@/features/project/hooks/useRememberLastProject";
 import { useChangeProjectStatusMutation } from "@/features/project/overview/hooks/mutations/useChangeProjectStatusMutation";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
-import { useLeaveGuardStore } from "@/features/project/stores/useLeaveGuardStore";
 
 import ProjectMemberMenu from "./ProjectMemberMenu";
 import ProjectStatusMenu from "./ProjectStatusMenu";

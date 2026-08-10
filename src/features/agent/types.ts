@@ -60,6 +60,11 @@ export interface AgentChoice {
   placeholder?: string;
   /** 직접 입력을 받을지. 정해진 것 중에서만 골라야 하면 false */
   allowFreeText?: boolean;
+  /**
+   * 보기를 여러 개 고를 수 있는지 (참석자 고르기 등).
+   * true 면 체크해서 모아 보내고, false 면 누르는 즉시 하나만 보낸다.
+   */
+  multiple?: boolean;
 }
 
 /**

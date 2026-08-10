@@ -16,7 +16,7 @@ import StateView from "@/components/StateView/StateView";
 import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
 
-import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
@@ -30,7 +30,6 @@ import BudgetSummaryCard from "@/features/project/finance/components/BudgetSumma
 import ExpenseFormModal from "@/features/project/finance/components/ExpenseFormModal/ExpenseFormModal";
 import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
 import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
-import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 
 import styles from "./ProjectFinanceView.module.css";
@@ -97,8 +96,6 @@ export default function ProjectFinanceView({
 
   const { data: project } = useProjectDetailQuery(projectId ?? "");
 
-  const summary = useProjectSummary(projectId ?? "", "budget");
-
   const {
     data: budget,
     isLoading: isBudgetLoading,
@@ -145,16 +142,8 @@ export default function ProjectFinanceView({
 
   return (
     <div className={styles.container}>
-      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
-      {summary.banner && (
-        <AiSummaryCard
-          headline={summary.banner.headline}
-          lines={summary.banner.detail}
-          stats={summary.banner.stats}
-          updatedAt={summary.generatedAt}
-          onRefresh={summary.refresh}
-        />
-      )}
+      {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
+      <ProjectAiSummary projectId={projectId ?? ""} section="budget" />
 
       <StateView
         loading={isBudgetLoading}

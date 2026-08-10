@@ -3,11 +3,13 @@
 import Result from "@/components/Result/Result";
 
 import DeleteConfirmModal from "@/features/project/components/modal/DeleteConfirmModal/DeleteConfirmModal";
+import MeetingActionItems from "@/features/project/meetings/components/MeetingActionItems/MeetingActionItems";
 import MeetingDetailContent from "@/features/project/meetings/components/MeetingDetailContent/MeetingDetailContent";
 import MeetingForm from "@/features/project/meetings/components/MeetingForm/MeetingForm";
 import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
 import { useMeetingDetailPage } from "@/features/project/meetings/hooks/useMeetingDetailPage";
 import { toMeetingFormData } from "@/features/project/meetings/utils/format";
+import TaskCreateModal from "@/features/task/components/TaskCreateModal/TaskCreateModal";
 
 import styles from "./MeetingDetailView.module.css";
 
@@ -88,6 +90,26 @@ export default function MeetingDetailView({
         onDelete={page.openDelete}
         onEdit={page.startEdit}
       />
+
+      <MeetingActionItems
+        items={page.actionItems}
+        onAddTask={page.canAddTask ? page.openTaskDraft : undefined}
+      />
+
+      {/* 실행 항목을 할 일로 옮겨 담는 팝업.
+          열 때 마운트해 그 줄의 내용·목표일을 초기값으로 한 번만 잡는다 */}
+      {page.taskDraft && (
+        <TaskCreateModal
+          key={page.taskDraft.id}
+          open
+          onClose={page.closeTaskDraft}
+          fixedProject={{ id: projectId, name: page.projectName }}
+          draft={{
+            content: page.taskDraft.task,
+            dueDate: page.taskDraft.due,
+          }}
+        />
+      )}
 
       <DeleteConfirmModal
         open={page.deleteOpen}

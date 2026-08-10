@@ -43,10 +43,15 @@ export function useChat() {
     conversationsError,
     conversationsFetching,
     retryConversations,
+    hasMoreConversations,
+    isLoadingMoreConversations,
+    loadMoreConversations,
     isAutoApproveUpdating,
     changeAutoApprove,
     selectConversation,
     startNewChat,
+    isDeletingConversation,
+    deleteConversation,
   } = useAgentConversations({ disconnectRunStream, reconnectRun });
   const {
     answerChoice,
@@ -69,6 +74,9 @@ export function useChat() {
     conversationsError,
     conversationsFetching,
     retryConversations,
+    hasMoreConversations,
+    isLoadingMoreConversations,
+    loadMoreConversations,
     isAutoApproveUpdating,
 
     sendMessage,
@@ -83,5 +91,7 @@ export function useChat() {
     chooseAlternative,
     selectConversation,
     startNewChat,
+    isDeletingConversation,
+    deleteConversation,
   };
 }

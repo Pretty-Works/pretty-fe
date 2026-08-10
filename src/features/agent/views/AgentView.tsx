@@ -12,6 +12,7 @@ import AgentRunIndicator from "@/features/agent/components/AgentRunIndicator/Age
 import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt";
 import ConversationMenu from "@/features/agent/components/ConversationMenu/ConversationMenu";
 import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
+import DeleteConversationDialog from "@/features/agent/components/DeleteConversationDialog/DeleteConversationDialog";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
@@ -19,6 +20,8 @@ import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorN
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute } from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
+import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
+import type { Conversation } from "@/features/agent/types";
 
 import styles from "./AgentView.module.css";
 
@@ -35,6 +38,9 @@ export default function AgentView() {
     conversationsError,
     conversationsFetching,
     retryConversations,
+    hasMoreConversations,
+    isLoadingMoreConversations,
+    loadMoreConversations,
     activeId,
     autoApprove,
     isAutoApproveUpdating,
@@ -60,9 +66,15 @@ export default function AgentView() {
     dismissAction,
     selectConversation,
     startNewChat,
+    isDeletingConversation,
+    deleteConversation,
   } = useChat();
 
+  const hasUnread = useHasUnreadConversations();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  // 지울지 묻고 있는 대화. 목록에서 사라지면 물어볼 것도 없어 같이 닫는다
+  const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // 선택지 또는 승인 대기 중이면 입력 차단
@@ -84,8 +96,6 @@ export default function AgentView() {
     if (autoApprove && pendingApproval) approve();
   }, [autoApprove, pendingApproval, approve]);
 
-  // 이미 그 화면을 보고 있으면 이동을 물어볼 이유가 없다.
-  // 남겨 두면 나중에 다른 화면으로 옮겼을 때 뒤늦게 튀어나온다.
   useEffect(() => {
     if (!pendingAction) return;
     const route = resolveRoute(
@@ -101,31 +111,39 @@ export default function AgentView() {
         label: pendingChoice.label,
         title: pendingChoice.question,
         preview: undefined,
+        // 참석자 고르기처럼 여럿을 골라야 하는 질문은 체크해서 한 번에 보낸다
+        multiple: pendingChoice.multiple ?? false,
         options: (pendingChoice.options ?? []).map((option) => ({
+          id: option.id,
           label: option.label,
-          onSelect: () => answerChoice(option.id),
+          onSelect: () => answerChoice([option.id]),
         })),
         placeholder: pendingChoice.placeholder ?? "직접 입력",
         allowFreeText: pendingChoice.allowFreeText ?? true,
         onDirect: answerChoiceText,
+        onSubmitSelected: answerChoice,
       }
     : pendingApproval
       ? {
           label: "실행 승인",
           title: pendingApproval.summary,
           preview: pendingApproval.previewText,
+          // 승인은 하나만 고르는 결정이다
+          multiple: false,
           // 승인 → 대안 → 거절. 되돌리기 어려운 쪽을 아래에 둔다
           options: [
-            { label: "승인", onSelect: approve },
+            { id: "APPROVE", label: "승인", onSelect: approve },
             ...(pendingApproval.alternatives ?? []).map((alternative) => ({
+              id: alternative.id,
               label: alternative.label,
               onSelect: () => chooseAlternative(alternative.id),
             })),
-            { label: "거절", onSelect: reject },
+            { id: "REJECT", label: "거절", onSelect: reject },
           ],
           placeholder: "직접 입력",
           allowFreeText: true,
           onDirect: answerApproval,
+          onSubmitSelected: undefined,
         }
       : null;
 
@@ -137,6 +155,7 @@ export default function AgentView() {
       <AgentHeader
         menuOpen={isMenuOpen}
         expanded={expanded}
+        hasUnread={hasUnread}
         onToggleMenu={() => setIsMenuOpen((prev) => !prev)}
         onNewChat={() => {
           startNewChat();
@@ -153,12 +172,27 @@ export default function AgentView() {
         error={conversationsError}
         retrying={conversationsFetching}
         onRetry={retryConversations}
+        hasMore={hasMoreConversations}
+        loadingMore={isLoadingMoreConversations}
+        onLoadMore={loadMoreConversations}
         activeId={activeId}
         onSelect={(id) => {
           selectConversation(id);
           setIsMenuOpen(false);
         }}
+        /* 물어보는 동안 목록은 열어 둔다 — 취소하면 고르던 자리로 그대로 돌아온다 */
+        onDelete={setDeleteTarget}
         onClose={() => setIsMenuOpen(false)}
+      />
+
+      <DeleteConversationDialog
+        conversation={deleteTarget}
+        loading={isDeletingConversation}
+        /* 요청이 도는 중에는 닫지 않는다. 끝나면 아래 onSettled 가 닫는다 */
+        onClose={() => {
+          if (!isDeletingConversation) setDeleteTarget(null);
+        }}
+        onConfirm={(id) => deleteConversation(id, () => setDeleteTarget(null))}
       />
 
       <div className={styles.chat}>
@@ -215,6 +249,8 @@ export default function AgentView() {
                 placeholder={selection.placeholder}
                 allowFreeText={selection.allowFreeText}
                 onDirect={selection.onDirect}
+                multiple={selection.multiple}
+                onSubmitSelected={selection.onSubmitSelected}
               />
             )}
 

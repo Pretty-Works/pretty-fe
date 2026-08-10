@@ -28,6 +28,9 @@ export const createMeetingDraft = async (
     form,
   );
 
+  // 응답 JSON 확인용 임시 로그 — 형태 확인이 끝나면 지운다
+  console.log("[meeting-draft] 응답", response.data);
+
   const draft = response.data.result;
 
   return { ...draft, attendeeUserIds: draft.attendeeUserIds ?? [] };

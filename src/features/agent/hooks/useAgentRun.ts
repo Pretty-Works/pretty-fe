@@ -1,11 +1,18 @@
 "use client";
 
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { usePathname } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
+import { toUserMessage } from "@/lib/api/errorMessage";
+
+import {
+  abortRunStream,
+  openRunStreamController,
+  releaseRunStreamController,
+} from "@/features/agent/api/activeRunStream";
 import type {
   AgentStreamHandlers,
   AnswerAgentQuestionRequest,
@@ -37,18 +44,27 @@ export function useAgentRun() {
   const { mutate: reconnectStream } = useReconnectAgentRunMutation();
   const { mutate: cancelRun } = useCancelAgentRunMutation();
   const { mutate: markRead } = useMarkAgentConversationReadMutation();
-  const abortRef = useRef<AbortController | null>(null);
   const lastSendRef = useRef<{ goal: string; files: File[] } | null>(null);
 
   const disconnectRunStream = useCallback(() => {
-    abortRef.current?.abort();
-    abortRef.current = null;
+    abortRunStream();
   }, []);
+
+  // 패널이 사라져도 스트림은 살아남는다. 로그아웃으로 화면을 떠날 때가 그렇다 —
+  // 끊지 않으면 다음 사용자의 채팅에 이전 실행의 이벤트가 이어서 꽂힌다.
+  useEffect(() => abortRunStream, []);
 
   // 스트림 한 구간을 여는 데 필요한 것들. 첫 전송·재개·재연결이 같은 처리를 쓴다.
   const beginStream = useCallback(() => {
-    const controller = new AbortController();
-    abortRef.current = controller;
+    const controller = openRunStreamController();
+
+    // 홈의 '확인이 필요한 요청'은 카드가 뜨고 닫힐 때 바뀐다. 답·중단할 때만 다시 읽으면
+    // 방금 뜬 요청이 다음 조회까지 홈에 보이지 않는다.
+    const refreshPendingInteractions = () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["agent", "pending-interactions"],
+      });
+    };
 
     const handlers: AgentStreamHandlers = {
       signal: controller.signal,
@@ -68,17 +84,24 @@ export function useAgentRun() {
             break;
           case "approval_request":
             state.waitApproval(event.data);
+            refreshPendingInteractions();
             break;
           case "question":
             state.waitQuestion(event.data);
+            refreshPendingInteractions();
             break;
           case "done":
             state.completeRun(event.data);
             // 보고 있는 대화의 답변은 이미 읽은 것이다 — 목록에 안 읽음으로 남기지 않는다
             if (state.conversationId !== null) markRead(state.conversationId);
+            // 실행이 끝나면 답을 기다리던 카드도 서버에서 닫힌다
+            refreshPendingInteractions();
             break;
           case "error":
-            state.failRun(event.data.message);
+            // 서버 message 에는 에이전트 서버가 삼킨 예외가 그대로 실려 오기도 한다.
+            // 말풍선 자리에 뜨는 문장이라 코드로 찾은 문구만 내보낸다.
+            state.failRun(toUserMessage(event.data.code, FALLBACK_ERROR));
+            refreshPendingInteractions();
             break;
         }
       },
@@ -99,11 +122,13 @@ export function useAgentRun() {
           useChatStore
             .getState()
             .failRun(
-              error instanceof AgentStreamError ? error.message : FALLBACK_ERROR,
+              error instanceof AgentStreamError
+                ? toUserMessage(error.errorCode, FALLBACK_ERROR)
+                : FALLBACK_ERROR,
             );
         },
         onSettled: () => {
-          if (abortRef.current === controller) abortRef.current = null;
+          releaseRunStreamController(controller);
         },
       },
     };

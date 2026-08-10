@@ -18,6 +18,8 @@ interface ModalProps {
   width?: number;
   /** title 없이 쓸 때(확인 다이얼로그 등) 스크린리더에 읽힐 이름 */
   label?: string;
+  /** false면 ✕·Esc·바깥 클릭으로 닫을 수 없다 — 중간에 끊으면 안 되는 진행 상태에 쓴다 */
+  closable?: boolean;
 }
 
 const FOCUSABLE =
@@ -37,6 +39,7 @@ export default function Modal({
   footer,
   width = 540,
   label,
+  closable = true,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -49,7 +52,7 @@ export default function Modal({
       if (modalStack[modalStack.length - 1] !== titleId) return;
 
       if (e.key === "Escape") {
-        onClose();
+        if (closable) onClose();
         return;
       }
 
@@ -58,7 +61,11 @@ export default function Modal({
       const items = Array.from(
         panelRef.current.querySelectorAll<HTMLElement>(FOCUSABLE),
       );
-      if (items.length === 0) return;
+      // 닫기 버튼까지 숨은 모달은 잡을 곳이 없다 — 포커스가 모달 밖으로 새지 않게 막는다
+      if (items.length === 0) {
+        e.preventDefault();
+        return;
+      }
 
       const first = items[0];
       const last = items[items.length - 1];
@@ -78,7 +85,7 @@ export default function Modal({
 
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose, titleId]);
+  }, [open, onClose, titleId, closable]);
 
   // 열려 있는 동안 뒤 화면 스크롤 잠금 (에이전트 전체화면과 겹쳐도 서로 풀지 않는다)
   useBodyScrollLock(open);
@@ -111,7 +118,11 @@ export default function Modal({
   if (!open || typeof document === "undefined") return null;
 
   return createPortal(
-    <div className={styles.overlay} onClick={onClose} role="presentation">
+    <div
+      className={styles.overlay}
+      onClick={closable ? onClose : undefined}
+      role="presentation"
+    >
       <div
         ref={panelRef}
         className={styles.panel}
@@ -133,14 +144,16 @@ export default function Modal({
               )}
               {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
             </div>
-            <button
-              type="button"
-              className={styles.close}
-              onClick={onClose}
-              aria-label="닫기"
-            >
-              ✕
-            </button>
+            {closable && (
+              <button
+                type="button"
+                className={styles.close}
+                onClick={onClose}
+                aria-label="닫기"
+              >
+                ✕
+              </button>
+            )}
           </div>
         )}
 

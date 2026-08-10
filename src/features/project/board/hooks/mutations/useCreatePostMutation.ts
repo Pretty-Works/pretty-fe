@@ -6,6 +6,7 @@ import {
   createPost,
   type CreatePostRequest,
 } from "@/features/project/board/api/postApi";
+import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useCreatePostMutation = (projectId: string) => {
   const queryClient = useQueryClient();
@@ -20,6 +21,11 @@ export const useCreatePostMutation = (projectId: string) => {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["project", "posts", projectId],
+      });
+
+      // 방금 쓴 글이 board 배너의 재료다
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.summary(projectId),
       });
     },
   });

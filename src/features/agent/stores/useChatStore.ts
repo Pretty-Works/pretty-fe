@@ -2,12 +2,13 @@
 
 import { create } from "zustand";
 
-import {
-  type AgentConversationHistory,
-  type AgentApprovalPayload,
-  type AgentDonePayload,
-  type AgentQuestionPayload,
+import type {
+  AgentConversationHistory,
+  AgentApprovalPayload,
+  AgentDonePayload,
+  AgentQuestionPayload,
 } from "@/features/agent/api/agentApi";
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import {
   type AgentAction,
   type AgentApproval,
@@ -24,15 +25,41 @@ export interface AgentInteractionRequest {
   kind: AgentInteractionKind;
   interactionId: number;
   conversationId: number;
-  optionId: string;
+  optionIds: string[];
 }
 
-// 최근 대화가 위. 목록은 언제나 이 순서로만 보여준다.
+// 자동 승인 모드: default는 false
+export const NEW_CONVERSATION_AUTO_APPROVE = false;
+
+// 최근 대화 목록: 최신순
 const sortByRecent = (conversations: Conversation[]) =>
   [...conversations].sort(
     (a, b) =>
       new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime(),
   );
+
+/**
+ * 아무 대화도 열지 않은 자리. 새 대화를 시작할 때와, 보고 있던 대화가 사라졌을 때
+ * 똑같이 여기로 돌아온다 — 목록(conversations)은 대화와 상관없이 그대로 둔다.
+ */
+const emptyChatState = (): Partial<ChatStore> => ({
+  activeId: null,
+  conversationId: null,
+  autoApprove: NEW_CONVERSATION_AUTO_APPROVE,
+  runId: null,
+  messages: [],
+  running: false,
+  runSteps: [],
+  runError: null,
+  pendingChoice: null,
+  pendingApproval: null,
+  pendingAction: null,
+  pendingInteractionId: null,
+  interactionRequest: null,
+  conversationRequest: null,
+  historyLoading: false,
+  historyLoadError: false,
+});
 
 interface ChatStore {
   /** 목록 API 로 받아 온 대화들. 언제나 최근순이다 */
@@ -41,7 +68,7 @@ interface ChatStore {
   activeId: string | null;
   /** 서버가 만든 대화 id. null 이면 다음 전송이 새 대화가 된다 */
   conversationId: number | null;
-  /** 현재 대화의 자동 승인 모드. 새 대화는 프론트 기본값 true */
+  /** 현재 대화의 자동 승인 모드. 새 대화는 서버와 같은 값(NEW_CONVERSATION_AUTO_APPROVE)에서 시작한다 */
   autoApprove: boolean;
   /** 지금 실행의 X-Run-Id. 재연결·취소에 쓴다 */
   runId: string | null;
@@ -66,6 +93,8 @@ interface ChatStore {
   pendingInteractionId: number | null;
   /** 홈 카드에서 고른 답. 패널이 집어 가 그 대화의 실행을 이어간다 */
   interactionRequest: AgentInteractionRequest | null;
+  /** 홈 카드를 눌러 열어 달라고 한 대화. 패널이 집어 가 그 대화로 이동한다 */
+  conversationRequest: number | null;
   /** 목록에서 고른 대화의 지난 메시지를 불러오는 중 */
   historyLoading: boolean;
   historyLoadError: boolean;
@@ -93,6 +122,8 @@ interface ChatStore {
   resumeRun: () => void;
   requestInteraction: (request: AgentInteractionRequest) => void;
   clearInteractionRequest: () => void;
+  requestConversation: (conversationId: number) => void;
+  clearConversationRequest: () => void;
   completeRun: (payload: AgentDonePayload) => void;
   failRun: (message: string) => void;
   cancelRun: () => void;
@@ -103,12 +134,15 @@ interface ChatStore {
     history: AgentConversationHistory,
   ) => void;
   failConversationMessages: (conversationId: number) => void;
+  /** 지운 대화를 목록에서 치운다. 보고 있던 대화였으면 새 대화 자리로 돌아간다 */
+  removeConversation: (conversationId: number) => void;
   startNewChat: () => void;
+  /** 로그아웃·계정 전환. 목록까지 버려 이전 사용자의 대화를 한 조각도 남기지 않는다 */
+  reset: () => void;
 }
 
-// 채팅 상태는 화면(라우트) 이동과 무관하게 유지돼야 하므로
-// 컴포넌트 로컬 useState 가 아닌 모듈 스코프 스토어에 둔다.
-// 스트림을 열고 닫는 쪽은 useChat 이고, 여기는 그 결과만 담는다.
+// 채팅 상태
+// 대화 동기화 → Agent 실행 → 승인/질문 대기·재개 → 성공/실패/취소 → 대화 전환·복구
 export const useChatStore = create<ChatStore>((set, get) => {
   const addMessage = (
     role: ChatMessage["role"],
@@ -141,20 +175,23 @@ export const useChatStore = create<ChatStore>((set, get) => {
     }));
   };
 
-  // 보고 있는 대화의 '새 답장' 점을 바로 끈다.
-  // 읽음 처리 응답을 기다리면 방금 읽은 자리에 점이 잠깐 남는다.
-  const clearUnread = (id: string | null) =>
+  // 한 대화의 '새 답장' 점을 그 자리에서 켜고 끈다.
+  // 서버 응답을 기다리면 방금 읽은 자리에 점이 잠깐 남거나, 답이 온 자리가 잠깐 비어 있다.
+  const setUnread = (id: string | null, unread: boolean) =>
     set((state) => ({
       conversations: state.conversations.map((c) =>
-        c.id === id ? { ...c, unread: false } : c,
+        c.id === id ? { ...c, unread } : c,
       ),
     }));
+
+  // 패널이 접혀 있으면 답변이 화면에 없다 — 읽은 것으로 칠 수 없다.
+  const isPanelVisible = () => !useAgentStore.getState().folded;
 
   return {
     conversations: [],
     activeId: null,
     conversationId: null,
-    autoApprove: true,
+    autoApprove: NEW_CONVERSATION_AUTO_APPROVE,
     runId: null,
     messages: [],
     running: false,
@@ -165,12 +202,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
     pendingAction: null,
     pendingInteractionId: null,
     interactionRequest: null,
+    conversationRequest: null,
     historyLoading: false,
     historyLoadError: false,
 
-    // 목록 API 응답을 화면 목록으로 삼는다. 제목도 서버가 준 것을 그대로 쓴다.
+    // 서버에서 받은 대화 목록을 store에 동기화하고, 새 대화라면 runId를 이용해 생성된 conversationId까지 찾아 연결함
     syncConversations: (conversations) => {
-      const { conversationId, runId } = get();
+      const { conversationId, runId, activeId } = get();
       const next = sortByRecent(conversations);
 
       // 새 대화의 id 는 서버가 만드는데 응답 헤더에는 X-Run-Id 밖에 없다.
@@ -181,13 +219,20 @@ export const useChatStore = create<ChatStore>((set, get) => {
           ? next.find((c) => c.runId === runId)
           : undefined;
 
+      // 읽음 처리가 서버에 닿기 전에 목록이 오면 방금 연 대화에 점이 되살아난다.
+      // 펼쳐 놓고 보고 있는 대화는 이미 읽은 것으로 친다.
+      const readId = isPanelVisible() ? (mine?.id ?? activeId) : null;
+
       // autoApprove 는 목록에 없다. 대화를 고를 때 메시지 조회 응답에서 받아 온다.
       set({
-        conversations: next,
+        conversations: next.map((c) =>
+          c.id === readId ? { ...c, unread: false } : c,
+        ),
         ...(mine ? { activeId: mine.id, conversationId: Number(mine.id) } : {}),
       });
     },
 
+    // 사용자가 메시지를 보낼 때 말풍선을 추가하고 Agent 상태를 RUNNING으로 시작함
     beginRun: (goal, attachments) => {
       addMessage("USER", goal, {
         attachments: attachments?.length ? attachments : undefined,
@@ -203,7 +248,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("RUNNING");
     },
 
-    // 보낸 말풍선은 그 자리에 그대로 두고 실패 안내만 걷어낸다
+    // 실패했던 요청을 다시 실행할 수 있도록 에러를 지우고 다시 RUNNING 상태로 만듦
     beginRetry: () => {
       set({
         running: true,
@@ -214,23 +259,26 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("RUNNING");
     },
 
+    // 현재 실행의 runId를 저장함
     setRunId: (runId) => set({ runId }),
 
+    // 현재 채팅의 서버 conversationId를 저장함
     setConversationId: (conversationId) => set({ conversationId }),
 
+    // 현재 채팅에서 Agent Tool을 자동 승인할지 여부를 저장함
     setAutoApprove: (autoApprove) => set({ autoApprove }),
 
-    // 서버 응답이 늦게 도착해 그사이 다른 대화로 옮겼을 수 있다 — 그 대화의 값을 덮어쓰지 않는다.
+    // 특정 대화의 자동 승인 설정을 바꾸되, 현재 보고 있는 대화가 맞을 때만 반영함
     setConversationAutoApprove: (conversationId, autoApprove) =>
       set((state) =>
         state.conversationId === conversationId ? { autoApprove } : {},
       ),
 
+    // SSE로 들어온 Agent의 진행 단계(step)를 runSteps에 하나씩 추가함
     appendStep: (text) =>
       set((state) => ({ runSteps: [...state.runSteps, text] })),
 
-    // 승인 대기 — 여기서 스트림이 한 번 닫히고, 사용자가 답하면 다시 열린다.
-    // 자동 승인으로 이미 통과된 요청은 답할 것이 없다 (응답을 보내면 409 다).
+    // Agent가 Tool 실행 승인을 요구하면 실행을 멈추고 승인 대기 상태(WAITING_APPROVAL)로 바꿈
     waitApproval: (payload) => {
       if (payload.autoApproved) return;
 
@@ -249,6 +297,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("WAITING_APPROVAL");
     },
 
+    // Agent가 사용자에게 질문하면 실행을 멈추고 선택지/질문을 저장한 뒤 WAITING_INPUT 상태로 바꿈
     waitQuestion: (payload) => {
       set({
         running: false,
@@ -262,14 +311,14 @@ export const useChatStore = create<ChatStore>((set, get) => {
             label: option.label,
           })),
           allowFreeText: payload.allowFreeText,
+          multiple: payload.multiple,
         },
         pendingInteractionId: payload.questionId,
       });
       setStatus("WAITING_INPUT");
     },
 
-    // 되묻기를 기다리다 화면을 떠났던 질문 카드를 대기 목록으로 되살린다.
-    // 늦게 도착했다면 이미 다른 대화를 보고 있을 수 있다.
+    // 다른 화면에 갔다 돌아왔을 때 아직 답하지 않은 Agent 질문을 다시 복구함
     restorePendingQuestion: (conversationId, interaction) => {
       if (get().conversationId !== conversationId) return;
 
@@ -282,14 +331,14 @@ export const useChatStore = create<ChatStore>((set, get) => {
           question: interaction.label,
           options: interaction.options,
           allowFreeText: true,
+          multiple: interaction.multiple,
         },
         pendingInteractionId: interaction.interactionId,
       });
       setStatus("WAITING_INPUT");
     },
 
-    // 답을 보냈으니 카드를 걷고 다시 도는 상태로 되돌린다.
-    // runSteps 는 비우지 않는다 — 멈추기 전까지 온 진행 내역을 이어서 쌓는다.
+    // 승인이나 질문에 답한 뒤 대기 상태를 지우고 Agent를 다시 RUNNING 상태로 돌림
     resumeRun: () => {
       set({
         running: true,
@@ -301,10 +350,20 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("RUNNING");
     },
 
+    // 홈 같은 외부 화면에서 승인/질문에 답했을 때, Agent 패널이 처리하도록 그 요청을 저장함
     requestInteraction: (request) => set({ interactionRequest: request }),
 
+    // 위 interactionRequest를 처리한 뒤 비움
     clearInteractionRequest: () => set({ interactionRequest: null }),
 
+    // 외부에서 특정 Agent 대화를 열어달라는 요청을 저장함
+    requestConversation: (conversationId) =>
+      set({ conversationRequest: conversationId }),
+
+    // 위 대화 열기 요청을 처리한 뒤 비움
+    clearConversationRequest: () => set({ conversationRequest: null }),
+
+    // Agent 최종 답변을 메시지에 추가하고 실행을 COMPLETED로 끝내며 읽음/안읽음 상태도 처리함
     completeRun: (payload) => {
       addMessage("AGENT", payload.answer, { success: true });
       set({
@@ -314,13 +373,13 @@ export const useChatStore = create<ChatStore>((set, get) => {
         pendingAction: payload.action ?? null,
       });
       setStatus("COMPLETED");
-      // 화면에 떠 있는 답변이다 — 목록에 안 읽음으로 남기지 않는다
-      clearUnread(get().activeId);
+      // 펼쳐 놓았으면 화면에 떠 있는 답변이라 안 읽음으로 남기지 않는다.
+      // 접어 둔 사이에 온 답변은 반대다 — 서버가 목록을 줄 때까지 기다리지 않고 바로 점을 켜,
+      // GNB 에이전트 아이콘이 답이 왔다는 걸 알린다.
+      setUnread(get().activeId, !isPanelVisible());
     },
 
-    // 실패는 답변이 아니다 — 말풍선으로 쌓으면 대화에 영영 남는 것처럼 보이는데
-    // 정작 새로 고치면 사라진다. 대신 다시 시도할 수 있는 한 줄로 띄운다.
-    // (서버가 error 이벤트로 알려온 실패는 서버에도 남아, 다시 들어오면 지난 말풍선으로 보인다)
+    // Agent 실행 실패 시 에러를 저장하고 실행 상태를 FAILED로 변경함
     failRun: (message) => {
       set({
         running: false,
@@ -333,7 +392,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("FAILED");
     },
 
-    // 응답을 기다리다 중지 — 지금까지 온 내용은 남기고 스트림만 끊는다
+    // 사용자가 실행을 중지하면 실행 중 상태를 끝내고 "답변을 중지했어요." 메시지를 추가함
     cancelRun: () => {
       if (!get().running) return;
 
@@ -342,8 +401,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
       setStatus("COMPLETED");
     },
 
+    // Agent 작업 완료 후 뜨는 "그 화면으로 갈까요?" 같은 후속 액션을 닫음
     dismissAction: () => set({ pendingAction: null }),
 
+    // 사용자가 다른 대화를 선택하면 해당 conversationId로 전환하고 이전 채팅 화면 상태를 초기화함
     selectConversation: (id) => {
       const conversationId = Number(id);
       const isValidId = !Number.isNaN(conversationId);
@@ -367,10 +428,10 @@ export const useChatStore = create<ChatStore>((set, get) => {
         historyLoadError: false,
       });
 
-      clearUnread(id);
+      setUnread(id, false);
     },
 
-    // 빠르게 다른 대화를 다시 골랐다면 먼저 끝난 이전 요청은 버린다.
+    // 선택한 과거 대화의 메시지·실행 상태·승인 대기 상태 등을 서버 응답으로 복원함
     restoreConversationMessages: (conversationId, history) => {
       if (get().conversationId !== conversationId) return;
 
@@ -394,28 +455,37 @@ export const useChatStore = create<ChatStore>((set, get) => {
       });
     },
 
+    // 과거 대화 메시지 조회가 실패했다는 상태를 저장함
     failConversationMessages: (conversationId) => {
       if (get().conversationId !== conversationId) return;
       set({ historyLoading: false, historyLoadError: true });
     },
 
-    startNewChat: () =>
-      set({
-        activeId: null,
-        conversationId: null,
-        autoApprove: true,
-        runId: null,
-        messages: [],
-        running: false,
-        runSteps: [],
-        runError: null,
-        pendingChoice: null,
-        pendingApproval: null,
-        pendingAction: null,
-        pendingInteractionId: null,
-        interactionRequest: null,
-        historyLoading: false,
-        historyLoadError: false,
+    // 서버에서 지워진 대화를 목록에서도 뺀다. 여기서는 화면만 맞추는 일이라
+    // 삭제가 성공했다고 확인된 뒤에만 부른다 (거절당하면 그 대화는 그대로 남아야 한다).
+    //
+    // 보고 있던 대화를 지웠으면 돌아갈 자리가 없다 — 목록만 남기고 새 대화로 옮긴다.
+    removeConversation: (conversationId) =>
+      set((state) => {
+        const id = String(conversationId);
+        const conversations = state.conversations.filter((c) => c.id !== id);
+
+        return state.activeId === id
+          ? { ...emptyChatState(), conversations }
+          : { conversations };
       }),
+
+    // 현재 대화 관련 상태를 전부 초기화해서 새 채팅을 시작할 준비를 함
+    startNewChat: () => set(emptyChatState()),
+
+    // 이 스토어는 모듈에 남아 로그아웃(소프트 이동)에서도 살아남는다.
+    // 목록은 서버에서 다시 받아 오지만, 그 전까지 이전 사용자의 대화가 화면에 그대로 보인다.
+    reset: () => set({ ...emptyChatState(), conversations: [] }),
   };
 });
+
+// 대화 목록 중 안 읽은 대화가 하나라도 있는지 true/false로 반환
+export const useHasUnreadConversations = () =>
+  useChatStore((state) =>
+    state.conversations.some((conversation) => conversation.unread),
+  );

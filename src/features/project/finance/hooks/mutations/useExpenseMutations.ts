@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { projectQueryKeys } from "@/features/project/queryKeys";
+
 import {
   createExpense,
   deleteExpense,
@@ -18,6 +20,10 @@ const useInvalidateFinance = (projectId: string) => {
     });
     queryClient.invalidateQueries({
       queryKey: ["project", "budget", projectId],
+    });
+    // 바뀐 지출이 budget 배너의 재료다
+    queryClient.invalidateQueries({
+      queryKey: projectQueryKeys.summary(projectId),
     });
   };
 };

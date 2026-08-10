@@ -434,7 +434,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
             type="light"
             buttonStyle="weak"
             size="medium"
-            onClick={leaveGuard.requestBack}
+            onClick={leaveGuard.requestExit}
           >
             취소
           </Button>

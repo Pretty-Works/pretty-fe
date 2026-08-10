@@ -14,6 +14,7 @@ import {
 } from "@/features/project/board/types";
 import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
 import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
+import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
 
 import styles from "./PostForm.module.css";
 
@@ -47,7 +48,6 @@ export default function PostForm({
     initial?.importance ?? DEFAULT_IMPORTANCE,
   );
   const [content, setContent] = useState(initial?.content ?? "");
-  const [warnOpen, setWarnOpen] = useState(false); // 이탈 경고
 
   // 초기값 스냅샷
   const snapshot = useMemo(
@@ -65,15 +65,12 @@ export default function PostForm({
     importance !== snapshot.importance ||
     content !== snapshot.content;
 
+  // 목록·취소 버튼만이 아니라 좌측 메뉴·GNB·새로고침으로 나가도 먼저 묻는다
+  const leaveGuard = useLeaveGuard(isDirty, onExit);
+
   // 제목·내용은 필수다. 다 채우기 전에는 저장할 수 없다 —
   // 눌러 놓고 무엇이 빠졌는지 되묻는 것보다 버튼으로 미리 알려 주는 편이 낫다.
   const canSubmit = !!title.trim() && !!content.trim() && !isSaving;
-
-  // 목록·취소로 나가기 (변경 있으면 경고)
-  const handleBack = () => {
-    if (isDirty) setWarnOpen(true);
-    else onExit();
-  };
 
   const handleSave = () => {
     onSave?.({
@@ -102,7 +99,7 @@ export default function PostForm({
             type="light"
             buttonStyle="weak"
             size="medium"
-            onClick={handleBack}
+            onClick={leaveGuard.requestExit}
           >
             {mode === "create" ? "목록" : "취소"}
           </Button>
@@ -158,15 +155,12 @@ export default function PostForm({
         />
       </section>
 
-      {/* 이탈 경고 모달 */}
+      {/* 이탈 경고 모달 — 화면 안(목록·취소)과 밖(좌측 메뉴·GNB·알림) 이탈이 함께 걸린다 */}
       <LeaveConfirmModal
-        open={warnOpen}
+        open={leaveGuard.confirmOpen}
         description="저장하지 않은 제목·중요도·내용이 모두 사라집니다. 그래도 나가시겠어요?"
-        onStay={() => setWarnOpen(false)}
-        onLeave={() => {
-          setWarnOpen(false);
-          onExit();
-        }}
+        onStay={leaveGuard.stay}
+        onLeave={leaveGuard.leave}
       />
     </>
   );

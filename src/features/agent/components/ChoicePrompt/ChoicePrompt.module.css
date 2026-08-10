@@ -83,8 +83,57 @@
   background: var(--surface);
 }
 
+/* 다중 선택 한 줄 — 체크박스 + 이름표 */
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.check:last-child {
+  border-bottom: none;
+}
+
+.check:hover {
+  background: var(--surface);
+}
+
+.checkbox {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
 .directRow {
-  display: block;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 다중 선택을 다 고른 뒤 한 번에 보내는 버튼 */
+.submit {
+  padding: 11px 14px;
+  border: none;
+  border-top: 1px solid var(--border);
+  background: var(--primary);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  background: var(--surface-muted);
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 
 .directInput {

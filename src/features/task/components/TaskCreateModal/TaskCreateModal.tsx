@@ -66,6 +66,9 @@ interface TaskCreateModalProps {
   fixedProject?: { id: string; name: string };
   // 값을 넘기면 수정 모드가 된다 (없으면 추가 모드)
   task?: EditingTask;
+  // 추가 모드로 열되 값을 미리 채워 둘 때 (회의록 실행 항목 → 할 일).
+  // 담당자는 채우지 않는다 — 이름만으로는 참여자를 특정할 수 없다 (TASK_009).
+  draft?: { content?: string; dueDate?: string };
 }
 
 export default function TaskCreateModal({
@@ -73,6 +76,7 @@ export default function TaskCreateModal({
   onClose,
   fixedProject,
   task,
+  draft,
 }: TaskCreateModalProps) {
   const isEdit = !!task;
 
@@ -83,8 +87,12 @@ export default function TaskCreateModal({
     if (task) return task.projectId === null ? "" : String(task.projectId);
     return fixedProject?.id ?? "";
   });
-  const [content, setContent] = useState(() => task?.content ?? "");
-  const [dueDate, setDueDate] = useState(() => task?.dueDate ?? "");
+  const [content, setContent] = useState(
+    () => task?.content ?? draft?.content?.slice(0, MAX_CONTENT) ?? "",
+  );
+  const [dueDate, setDueDate] = useState(
+    () => task?.dueDate ?? draft?.dueDate ?? "",
+  );
   // 빈 값이면 본인이 담당한다
   const [pickedAssigneeId, setPickedAssigneeId] = useState("");
   const [errorText, setErrorText] = useState("");

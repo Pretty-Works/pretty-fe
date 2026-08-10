@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { deleteMeeting } from "@/features/project/meetings/api/meetingApi";
+import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useDeleteMeetingMutation = (
   projectId: string,
@@ -16,6 +17,11 @@ export const useDeleteMeetingMutation = (
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["project", "meetings", projectId],
+      });
+
+      // 지운 회의록도 meeting 배너의 재료였다
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.summary(projectId),
       });
     },
   });

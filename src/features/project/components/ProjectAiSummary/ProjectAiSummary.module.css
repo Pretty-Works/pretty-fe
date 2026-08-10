@@ -1,0 +1,99 @@
+/* 배너가 뜨는 자리와 같은 껍데기 — 상태가 바뀌어도 아래 내용이 튀지 않는다 */
+.shell {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+  background: var(--primary-bright);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bar {
+  height: 12px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--line) 25%,
+    var(--border) 37%,
+    var(--line) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+.badge {
+  width: 58px;
+  height: 20px;
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+
+.headline {
+  width: 42%;
+  height: 14px;
+}
+
+.line {
+  width: 88%;
+}
+
+.lineShort {
+  width: 64%;
+}
+
+/* 실패 · 요약 없음 — 문구와 버튼이 한 줄에 마주 본다 */
+.notice {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.noticeText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.noticeTitle {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.noticeDesc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-sub);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* 버튼이 문구에 눌려 두 글자만 남는 것보다 아래로 내리는 편이 낫다 */
+@media (max-width: 700px) {
+  .notice {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    animation: none;
+  }
+}

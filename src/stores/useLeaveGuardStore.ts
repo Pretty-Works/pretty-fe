@@ -15,7 +15,7 @@ interface LeaveGuardStore {
 }
 
 // 작성 중인 화면을 벗어나려 할 때 한 번 물어보기 위한 신호.
-// 좌측 메뉴·상단 프로젝트 전환처럼 이탈을 일으키는 쪽이 화면 밖(layout)에 있어
+// 좌측 메뉴·상단 GNB·알림처럼 이탈을 일으키는 쪽이 화면 밖(layout)에 있어
 // 폼이 직접 막을 수 없다. 그래서 '막을지 여부'만 여기 올려 두고,
 // 눌린 주소를 폼이 되돌려 받아 모달을 띄운다.
 export const useLeaveGuardStore = create<LeaveGuardStore>((set, get) => ({

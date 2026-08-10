@@ -4,8 +4,8 @@ import { LOGIN_PATH } from "@/constants/routes";
 
 import { useAuthStore } from "@/stores/useAuthStore";
 
+import { clearSession } from "../auth/session";
 import { API_BASE_URL } from "../config";
-import { clearQueryCache } from "./queryCache";
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
@@ -42,11 +42,9 @@ export const refreshAccessTokenOnce = (): Promise<string> => {
 };
 
 // refreshToken도 만료/무효 → 세션 정리 후 로그인 화면으로.
-// 캐시에 남은 응답은 전부 이전 사용자 것이라 토큰과 함께 버린다.
-// (지금은 아래 전체 리로드로도 지워지지만, 소프트 내비게이션으로 바뀌면 살아남는다)
+// 화면에 남은 것은 전부 이전 사용자 것이라 토큰과 함께 버린다 (로그아웃과 같은 정리).
 export const handleSessionExpired = () => {
-  useAuthStore.getState().clear();
-  clearQueryCache();
+  clearSession();
   if (typeof window !== "undefined") {
     window.location.href = LOGIN_PATH;
   }

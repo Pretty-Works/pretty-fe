@@ -6,12 +6,11 @@ import Pagination from "@/components/Pagination/Pagination";
 import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
-import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
 import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
-import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 import type { Meeting } from "@/features/project/meetings/api/meetingApi";
 import { useMeetingListPage } from "@/features/project/meetings/hooks/useMeetingListPage";
 
@@ -56,20 +55,11 @@ export default function ProjectMeetingView({
   projectId,
 }: ProjectMeetingViewProps) {
   const page = useMeetingListPage(projectId ?? "");
-  const summary = useProjectSummary(projectId ?? "", "meeting");
 
   return (
     <>
-      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
-      {summary.banner && (
-        <AiSummaryCard
-          headline={summary.banner.headline}
-          lines={summary.banner.detail}
-          stats={summary.banner.stats}
-          updatedAt={summary.generatedAt}
-          onRefresh={summary.refresh}
-        />
-      )}
+      {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
+      <ProjectAiSummary projectId={projectId ?? ""} section="meeting" />
 
       {/* 회의록 */}
       <section className={styles.panel}>
