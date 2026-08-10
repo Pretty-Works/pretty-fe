@@ -37,6 +37,7 @@
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
+  text-decoration: none; /* ExternalUrlPrompt 는 button 이 아니라 <a> 로 쓴다 */
   cursor: pointer;
   transition: background 0.15s ease;
 }
