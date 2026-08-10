@@ -71,13 +71,7 @@ export interface AgentQuestionPayload {
   allowFreeText: boolean;
 }
 
-export interface AgentActionPayload {
-  type: "NAVIGATE" | "FILL_FORM";
-  label: string;
-  targetScreen: string;
-  params?: Record<string, unknown>;
-  formData?: Record<string, unknown>;
-}
+export type AgentActionPayload = AgentAction;
 
 export interface AgentDonePayload {
   answer: string;
@@ -330,9 +324,9 @@ export const fetchAgentPendingInteractions = async (): Promise<
 
 interface ConversationMessageActionApiItem {
   label: string;
-  targetScreen: string;
+  targetScreen: string | null;
   params?: Record<string, unknown>;
-  formData?: Record<string, unknown>;
+  formData?: Record<string, unknown> | null;
 }
 
 interface ConversationMessageApiItem {
@@ -404,12 +398,25 @@ const toMessageAction = (
 ): AgentAction | undefined => {
   if (!item.actionType || !item.action) return undefined;
 
+  if (item.actionType === "OPEN_EXTERNAL_URL") {
+    const url = item.action.params?.url;
+    return {
+      type: item.actionType,
+      label: item.action.label,
+      targetScreen: null,
+      params: { url: typeof url === "string" ? url : undefined },
+      formData: null,
+    };
+  }
+
+  if (!item.action.targetScreen) return undefined;
+
   return {
     type: item.actionType,
     label: item.action.label,
     targetScreen: item.action.targetScreen,
     params: item.action.params,
-    formData: item.action.formData,
+    formData: item.action.formData ?? undefined,
   };
 };
 

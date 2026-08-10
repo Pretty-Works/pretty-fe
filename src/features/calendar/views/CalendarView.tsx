@@ -31,12 +31,15 @@ import {
   coversDate,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
-import { describeAffiliation } from "@/features/user/constants/organization";
+import { describePerson } from "@/features/user/constants/organization";
 import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
 
 import styles from "./CalendarView.module.css";
 
 // 삭제·나가기 확인 문구 (휴가는 '취소', 남의 일정은 '나가기')
+// 모달이 닫혀 있을 때의 빈 참여자 목록. 매번 새 배열을 만들면 useMemo가 계속 다시 돈다.
+const NO_IDS: string[] = [];
+
 const CONFIRM_TEXT = {
   leave: {
     title: "이 일정에서 나갈까요?",
@@ -140,26 +143,38 @@ export default function CalendarView() {
   const [peopleQuery, setPeopleQuery] = useState("");
   const peopleSearch = useUserSearchQuery(peopleQuery);
 
+  // 지금 열려 있는 일정에 이미 들어 있는 참여자. 후보에서 빠지면 칩이 사라져 뺄 수도 없다.
+  const editingParticipantIds =
+    dialogs.dialog?.kind === "editor"
+      ? dialogs.dialog.draft.participantIds
+      : NO_IDS;
+
   const peopleOptions = useMemo(() => {
     const byId = new Map<string, PeopleOption>();
+    const keep = new Set(editingParticipantIds);
 
-    // 프로젝트·일정에서 이미 만난 사람 (검색어를 치기 전에도 고를 수 있다)
-    members.knownMembers.forEach(({ id, name }) => byId.set(id, { id, name }));
+    // 프로젝트·일정에서 이미 만난 사람 (검색어를 치기 전에도 고를 수 있다).
+    //
+    // 소속을 모르는 사람은 뺀다 — 일정 응답에는 이름밖에 없어서, 그대로 두면 한 목록 안에
+    // 소속이 보이는 줄과 안 보이는 줄이 섞여 무엇이 다른 건지 알 수 없게 된다.
+    // 이름을 치면 사내 검색으로 소속까지 붙어 나오므로 못 고르게 되는 건 아니다.
+    members.knownMembers.forEach(({ id, name, description }) => {
+      if (!description && !keep.has(id)) return;
 
-    // 검색 결과는 부서·직급까지 붙여 동명이인을 구분한다.
-    // 휴직자도 일정에 넣을 수 있지만(서버가 막는 건 퇴사자뿐) 모르고 넣으면 곤란하니 표시는 한다.
+      byId.set(id, { id, name, description });
+    });
+
+    // 검색 결과도 같은 문구 규칙(describePerson)을 쓴다
     peopleSearch.results.forEach((user) => {
-      const onLeave = user.status === "ON_LEAVE" ? " · 휴직" : "";
-
       byId.set(String(user.userId), {
         id: String(user.userId),
         name: user.name,
-        description: `${describeAffiliation(user)}${onLeave}`,
+        description: describePerson(user),
       });
     });
 
     return [...byId.values()];
-  }, [members.knownMembers, peopleSearch.results]);
+  }, [members.knownMembers, peopleSearch.results, editingParticipantIds]);
 
   // 모달이 닫히면 검색어도 비운다 (다음에 열었을 때 지난 검색이 남아 있지 않게)
   const closeEditor = () => {
