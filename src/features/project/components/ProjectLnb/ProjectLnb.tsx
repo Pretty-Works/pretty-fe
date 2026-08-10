@@ -12,10 +12,11 @@ import {
   LuFolderPlus,
 } from "react-icons/lu";
 
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
+
 import { PROJECT_TABS } from "@/features/project/constants/projectTabs";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
-import { useLeaveGuardStore } from "@/features/project/stores/useLeaveGuardStore";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
 import styles from "./ProjectLnb.module.css";
@@ -47,13 +48,13 @@ export default function ProjectLnb() {
   const canCreate = !!me?.canCreateProject;
 
   // 작성 중인 화면(프로젝트 수정 등)에서 메뉴를 누르면 먼저 확인을 받는다.
-  // 지금 보고 있는 메뉴는 나가는 게 아니므로 막지 않는다.
+  // 지금 주소 그대로면 나가는 게 아니므로 막지 않는다 — 활성 탭이라도
+  // 하위 화면(게시글·회의록 작성)에서는 탭 루트로 돌아가는 실제 이탈이라 막아야 한다.
   const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
 
   const guard =
-    (href: string, isActive: boolean) =>
-    (e: React.MouseEvent<HTMLAnchorElement>) => {
-      if (!isActive && requestLeave(href)) e.preventDefault();
+    (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (pathname !== href && requestLeave(href)) e.preventDefault();
     };
 
   const isEditActive = activeSegment === "edit";
@@ -72,7 +73,7 @@ export default function ProjectLnb() {
           <Link
             key={tab.segment}
             href={href}
-            onClick={guard(href, isActive)}
+            onClick={guard(href)}
             aria-current={isActive ? "page" : undefined}
             title={tab.label}
             className={`${styles.item} ${isActive ? styles.active : ""}`}
@@ -89,7 +90,7 @@ export default function ProjectLnb() {
       {canCreate && (
         <Link
           href="/projects/new"
-          onClick={guard("/projects/new", false)}
+          onClick={guard("/projects/new")}
           title="프로젝트 생성"
           className={styles.item}
         >
@@ -101,7 +102,7 @@ export default function ProjectLnb() {
       {canEdit && (
         <Link
           href={editHref}
-          onClick={guard(editHref, isEditActive)}
+          onClick={guard(editHref)}
           aria-current={isEditActive ? "page" : undefined}
           title="프로젝트 수정"
           className={`${styles.item} ${isEditActive ? styles.active : ""}`}

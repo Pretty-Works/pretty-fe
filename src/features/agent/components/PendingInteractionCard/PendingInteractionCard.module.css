@@ -10,6 +10,16 @@
   scroll-snap-align: start;
 }
 
+/* 카드 몸통을 누르면 그 대화가 열린다 — 눌리는 것임을 테두리로 알린다 */
+.cardClickable {
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.cardClickable:hover {
+  border-color: var(--primary);
+}
+
 .head {
   display: flex;
   align-items: flex-start;
@@ -109,6 +119,52 @@
 
 .option:last-child:hover {
   background: var(--surface);
+}
+
+/* 다중 선택 칩 — 누르면 담기고 다시 누르면 빠진다.
+   마지막 칩을 흐리게 두는 위 규칙(승인 카드의 '거절')을 여기서 되돌린다 */
+.option.optionToggle {
+  border-color: var(--border-strong);
+  color: var(--text-sub);
+}
+
+.option.optionToggle:hover {
+  background: var(--surface);
+}
+
+.option.optionChecked {
+  border-color: var(--primary);
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.option.optionChecked:hover {
+  background: var(--primary-bright);
+}
+
+.submit {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--white);
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1.4;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--primary-strong);
+}
+
+.submit:disabled {
+  background: var(--surface-muted);
+  color: var(--text-disabled);
+  cursor: not-allowed;
 }
 
 .stop {

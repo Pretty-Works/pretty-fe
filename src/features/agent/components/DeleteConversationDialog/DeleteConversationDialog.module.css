@@ -1,0 +1,17 @@
+/* 제목이 길어도 안내 문구가 세 줄을 넘지 않게 한 줄에서 끊는다 */
+.name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.warning {
+  display: block;
+  margin-top: 8px;
+  color: var(--danger);
+}

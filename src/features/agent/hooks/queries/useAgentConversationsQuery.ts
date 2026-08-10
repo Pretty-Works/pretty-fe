@@ -1,17 +1,23 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { fetchAgentConversations } from "@/features/agent/api/agentApi";
 
-/** 패널 햄버거(☰)의 전체 목록. "최근 대화" 3건은 같은 API 를 size 만 달리 쓴다 */
-export const CONVERSATION_LIST_SIZE = 20;
+/** 한 번에 가져올 대화 수. 스크롤이 바닥에 닿을 때마다 이만큼씩 더 받는다 */
+export const CONVERSATION_PAGE_SIZE = 20;
 
 // 대화 목록 조회.
-// 페이지 응답이지만 화면에 페이지 이동이 없어 첫 장만 본다 — 그보다 오래된 대화는 아직 못 연다.
+// 다음 장은 응답의 nextCursor 를 그대로 되돌려 보내 받는다 — 값의 생김새는 서버 사정이다.
+// 목록을 무효화하면 지금까지 받아 둔 장이 전부 다시 조회된다. 커서가 그때의 위치로 얼어 있어
+// 스크롤 도중 새 답변이 도착해도 경계가 밀리지 않는다.
 export const useAgentConversationsQuery = (
-  size: number = CONVERSATION_LIST_SIZE,
+  size: number = CONVERSATION_PAGE_SIZE,
 ) => {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: ["agent", "conversations", size],
-    queryFn: () => fetchAgentConversations({ page: 0, size }),
+    queryFn: ({ pageParam }) =>
+      fetchAgentConversations({ cursor: pageParam, size }),
+
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
   });
 };

@@ -1,8 +1,11 @@
+export type MeetingActionItemStatus = "진행중" | "예정" | "완료";
+
 export interface MeetingActionItem {
+  id: string;
   task: string;
   owner: string;
-  due: string;
-  status: "진행중" | "예정" | "완료";
+  due: string; // "YYYY-MM-DD"
+  status: MeetingActionItemStatus;
 }
 
 export interface MeetingData {

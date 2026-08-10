@@ -1,4 +1,5 @@
 import { api } from "@/lib/api/client";
+import { toSafeMessage } from "@/lib/api/errorMessage";
 
 import { agentLog, agentLogError } from "@/features/agent/api/agentDebug";
 import {
@@ -234,12 +235,10 @@ interface ConversationsApiResponse {
   errorCode: string | null;
   message: string;
   result: {
-    content: ConversationApiItem[];
-    page: number;
-    size: number;
-    totalElements: number;
-    totalPages: number;
-    last: boolean;
+    items: ConversationApiItem[];
+    /** 다음 요청에 그대로 실어 보낼 값. 생김새는 서버 사정이라 열어보지 않는다 */
+    nextCursor: string | null;
+    hasNext: boolean;
   };
 }
 
@@ -255,20 +254,40 @@ const toConversation = (item: ConversationApiItem): Conversation => ({
 });
 
 export interface FetchAgentConversationsParams {
-  page: number;
+  /** 이전 응답의 nextCursor. 첫 페이지는 보내지 않는다 */
+  cursor?: string;
+  /** 1~100. 벗어나면 400(REQUEST_001) 이다 */
   size: number;
 }
 
+export interface AgentConversationPage {
+  conversations: Conversation[];
+  /** 더 없으면 null — 이어받을 지점이 없다는 뜻이다 */
+  nextCursor: string | null;
+}
+
+/**
+ * 대화 목록 조회 (스크롤 페이지네이션).
+ *
+ * 대화는 답변이 오갈 때마다 맨 위로 올라와 page 번호로는 경계가 밀린다.
+ * 마지막 항목의 위치를 커서로 얼려 두고 그 값을 그대로 되돌려 보낸다.
+ */
 export const fetchAgentConversations = async ({
-  page,
+  cursor,
   size,
-}: FetchAgentConversationsParams): Promise<Conversation[]> => {
+}: FetchAgentConversationsParams): Promise<AgentConversationPage> => {
   const response = await api.get<ConversationsApiResponse>(
     "/agent/conversations",
-    { params: { page, size } },
+    { params: { cursor, size } },
   );
 
-  return response.data.result.content.map(toConversation);
+  const { items, nextCursor, hasNext } = response.data.result;
+
+  return {
+    conversations: items.map(toConversation),
+    // nextCursor 는 마지막 항목의 위치라 끝에서도 값이 온다 — 이어갈지는 hasNext 가 정한다
+    nextCursor: hasNext ? nextCursor : null,
+  };
 };
 
 interface PendingInteractionApiItem {
@@ -420,10 +439,18 @@ const toMessageAction = (
   };
 };
 
+// 실패한 실행은 그 사유가 답변 자리에 그대로 저장된다. 에이전트 서버가 삼킨 예외가
+// 문장에 실려 오기도 해서(예: "...: ValueError: ...") 지난 대화를 열면 그대로 보인다.
+// 코드는 함께 오지 않으므로, 사람이 읽을 문장인지 보고 아니면 뭉뚱그린 한 줄로 바꾼다.
+const FAILED_MESSAGE_FALLBACK = "요청을 처리하지 못했어요.";
+
 const toChatMessage = (item: ConversationMessageApiItem): ChatMessage => ({
   id: String(item.messageId),
   role: item.role,
-  content: item.content,
+  content:
+    item.success === false
+      ? toSafeMessage(item.content, FAILED_MESSAGE_FALLBACK)
+      : item.content,
   createdAt: item.createdAt,
   success: item.success ?? undefined,
   action: toMessageAction(item),
@@ -475,6 +502,29 @@ interface MarkAgentConversationReadResponse {
 export const markAgentConversationRead = async (conversationId: number) => {
   const response = await api.patch<MarkAgentConversationReadResponse>(
     `/agent/conversations/${conversationId}/read`,
+  );
+
+  return response.data.result;
+};
+
+interface DeleteAgentConversationResponse {
+  errorCode: string | null;
+  message: string;
+  result: {
+    conversationId: number;
+  };
+}
+
+/**
+ * 대화 하나를 지운다. 요청 본문은 없다.
+ *
+ * 소프트 삭제라 목록·메시지 조회·대기 카드에서만 사라지고 서버에는 기록이 남는다 —
+ * 되살리는 API 는 없으므로 화면에서는 되돌릴 수 없는 일로 다룬다.
+ * 진행 중인 실행(RUNNING·WAITING_APPROVAL·WAITING_INPUT)이 있으면 409(AGENT_004)로 거절당한다.
+ */
+export const deleteAgentConversation = async (conversationId: number) => {
+  const response = await api.delete<DeleteAgentConversationResponse>(
+    `/agent/conversations/${conversationId}`,
   );
 
   return response.data.result;

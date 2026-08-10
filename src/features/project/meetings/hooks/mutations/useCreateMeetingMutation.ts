@@ -6,6 +6,7 @@ import {
   createMeeting,
   type CreateMeetingRequest,
 } from "@/features/project/meetings/api/meetingApi";
+import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useCreateMeetingMutation = (projectId: string) => {
   const queryClient = useQueryClient();
@@ -20,6 +21,11 @@ export const useCreateMeetingMutation = (projectId: string) => {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["project", "meetings", projectId],
+      });
+
+      // 새 회의록이 meeting 배너의 재료다
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.summary(projectId),
       });
     },
   });

@@ -53,31 +53,28 @@ export function useAgentInteractions({
 }: UseAgentInteractionsOptions) {
   const interactionRequest = useChatStore((state) => state.interactionRequest);
 
+  // 고른 보기(하나일 수도, 여럿일 수도)와 직접 입력을 함께 보낸다.
+  // 둘 다 비어 있으면 서버가 400 이라 보내지 않는다.
   const answerChoice = useCallback(
-    (optionId: string) => {
+    (optionIds: string[], value?: string) => {
+      const freeText = value?.trim();
+      if (optionIds.length === 0 && !freeText) return;
+
       const questionId = takePendingId("choice");
       if (questionId === null) return;
 
-      resumeQuestion(questionId, { selectedOptionIds: [optionId] });
+      resumeQuestion(questionId, {
+        selectedOptionIds: optionIds,
+        ...(freeText ? { freeText: freeText.slice(0, FREE_TEXT_MAX) } : {}),
+      });
     },
     [resumeQuestion],
   );
 
   // 직접 입력. 선택지를 고르지 않았으므로 자유 입력만 보낸다.
   const answerChoiceText = useCallback(
-    (value: string) => {
-      const freeText = value.trim();
-      if (!freeText) return;
-
-      const questionId = takePendingId("choice");
-      if (questionId === null) return;
-
-      resumeQuestion(questionId, {
-        selectedOptionIds: [],
-        freeText: freeText.slice(0, FREE_TEXT_MAX),
-      });
-    },
-    [resumeQuestion],
+    (value: string) => answerChoice([], value),
+    [answerChoice],
   );
 
   const approve = useCallback(() => {
@@ -146,12 +143,16 @@ export function useAgentInteractions({
 
       if (request.kind === "QUESTION") {
         resumeQuestion(request.interactionId, {
-          selectedOptionIds: [request.optionId],
+          selectedOptionIds: request.optionIds,
         });
         return;
       }
 
-      resumeApproval(request.interactionId, toApprovalRequest(request.optionId));
+      // 승인 카드는 언제나 한 개만 고른다 — 없으면 보낼 결정이 없다
+      const [optionId] = request.optionIds;
+      if (!optionId) return;
+
+      resumeApproval(request.interactionId, toApprovalRequest(optionId));
     })();
   }, [interactionRequest, selectConversation, resumeApproval, resumeQuestion]);
 

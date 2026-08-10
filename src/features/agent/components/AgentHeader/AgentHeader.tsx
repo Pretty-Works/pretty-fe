@@ -15,6 +15,8 @@ import styles from "./AgentHeader.module.css";
 interface AgentHeaderProps {
   menuOpen: boolean;
   expanded: boolean;
+  /** 목록에 안 읽은 답장이 있는지 — '최근 대화' 버튼에 점으로 알린다 */
+  hasUnread: boolean;
   onToggleMenu: () => void;
   onNewChat: () => void;
   onToggleExpanded: () => void;
@@ -24,11 +26,14 @@ interface AgentHeaderProps {
 function IconButton({
   label,
   active = false,
+  dot = false,
   onClick,
   children,
 }: {
   label: string;
   active?: boolean;
+  /** 눌러 볼 것이 있다고 알리는 점 */
+  dot?: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
@@ -41,6 +46,7 @@ function IconButton({
       onClick={onClick}
     >
       {children}
+      {dot && <span className={styles.dot} aria-hidden="true" />}
     </button>
   );
 }
@@ -49,6 +55,7 @@ function IconButton({
 export default function AgentHeader({
   menuOpen,
   expanded,
+  hasUnread,
   onToggleMenu,
   onNewChat,
   onToggleExpanded,
@@ -62,7 +69,12 @@ export default function AgentHeader({
       </div>
 
       <div className={styles.right}>
-        <IconButton label="최근 대화" active={menuOpen} onClick={onToggleMenu}>
+        <IconButton
+          label={hasUnread ? "최근 대화 (안 읽은 답장 있음)" : "최근 대화"}
+          active={menuOpen}
+          dot={hasUnread}
+          onClick={onToggleMenu}
+        >
           <IoMenu size={20} />
         </IconButton>
 

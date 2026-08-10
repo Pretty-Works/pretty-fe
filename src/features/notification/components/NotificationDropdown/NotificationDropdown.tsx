@@ -4,6 +4,8 @@ import { useEffect, useRef } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
+
 import type { AppNotification } from "../../api/notificationApi";
 import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
 import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
@@ -52,13 +54,16 @@ export default function NotificationDropdown({
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  // 작성 중인 화면에서 알림으로 이동하면 폼이 먼저 확인을 받는다 (좌측 메뉴와 같은 규칙)
+  const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
+
   // 읽음 처리와 화면 이동을 함께 한다. 이동할 곳이 없으면 읽음 처리만 하고 드롭다운을 닫는다.
   const handleSelect = (notification: AppNotification) => {
     if (!notification.read) read(notification.id);
 
     const href = getNotificationHref(notification);
     onClose();
-    if (href) router.push(href);
+    if (href && !requestLeave(href)) router.push(href);
   };
 
   return (

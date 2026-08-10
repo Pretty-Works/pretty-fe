@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { deletePost } from "@/features/project/board/api/postApi";
+import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useDeletePostMutation = (projectId: string, postId: string) => {
   const queryClient = useQueryClient();
@@ -13,6 +14,11 @@ export const useDeletePostMutation = (projectId: string, postId: string) => {
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["project", "posts", projectId],
+      });
+
+      // 지운 글도 board 배너의 재료였다
+      void queryClient.invalidateQueries({
+        queryKey: projectQueryKeys.summary(projectId),
       });
     },
   });

@@ -8,6 +8,8 @@ interface LastProjectStore {
 
   remember: (projectId: string) => void;
   forget: (projectId: string) => void;
+  /** 로그아웃·계정 전환. 기억은 사람마다 다르니 세션이 끝나면 통째로 버린다 */
+  clear: () => void;
 }
 
 // 마지막으로 보던 프로젝트. 상단바 '프로젝트'가 이 프로젝트의 개요로 되돌아간다.
@@ -26,6 +28,8 @@ export const useLastProjectStore = create<LastProjectStore>()(
         set((state) =>
           state.projectId === projectId ? { projectId: null } : state,
         ),
+
+      clear: () => set({ projectId: null }),
     }),
     {
       name: "last-project",

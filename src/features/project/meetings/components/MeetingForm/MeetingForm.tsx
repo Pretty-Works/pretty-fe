@@ -17,9 +17,12 @@ import { useToastStore } from "@/stores/useToastStore";
 import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
 import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
 import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
+import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
 import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
 import type { MeetingDraft } from "@/features/project/meetings/api/meetingDraftApi";
-import TranscriptUploadModal from "@/features/project/meetings/components/modal/TranscriptUploadModal/TranscriptUploadModal";
+import TranscriptUploadModal, {
+  type DraftApplyMode,
+} from "@/features/project/meetings/components/modal/TranscriptUploadModal/TranscriptUploadModal";
 import { useCreateMeetingDraftMutation } from "@/features/project/meetings/hooks/mutations/useCreateMeetingDraftMutation";
 import type { MeetingData } from "@/features/project/meetings/types";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
@@ -67,7 +70,11 @@ export default function MeetingForm({
     initial?.transcript ?? null,
   );
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [warnOpen, setWarnOpen] = useState(false); // 이탈 경고
+  // 도착했지만 아직 폼에 반영하지 않은 초안 — 모달이 적용 방식을 정할 때까지 들고 있는다
+  const [pendingDraft, setPendingDraft] = useState<{
+    draft: MeetingDraft;
+    fileName: string;
+  } | null>(null);
   // 초안이 사용자가 고른 날짜를 덮지 않게 한다 (작성 화면의 기본값은 오늘이라 비어 보이지 않는다).
   // 초안은 수십 초 뒤에 도착하므로, 그리기에 쓰지 않는 값은 ref 로 둬야 그때의 최신 값을 본다.
   const dateTouchedRef = useRef(false);
@@ -134,32 +141,43 @@ export default function MeetingForm({
     attendees.length !== snapshot.attendees.length ||
     attendees.some((a, i) => a !== snapshot.attendees[i]);
 
-  // 목록·취소로 나가기 (변경 있으면 경고)
-  const handleBack = () => {
-    if (isDirty) setWarnOpen(true);
-    else onExit();
-  };
+  // 목록·취소 버튼만이 아니라 좌측 메뉴·GNB·새로고침으로 나가도 먼저 묻는다
+  const leaveGuard = useLeaveGuard(isDirty, onExit);
 
   // 회의명·일시·참석자는 서버 필수값이다. 다 채우기 전에는 저장할 수 없다 —
   // 눌러 놓고 무엇이 빠졌는지 되묻는 것보다 버튼으로 미리 알려 주는 편이 낫다.
   const canSave = !!title.trim() && !!date && attendees.length > 0 && !isSaving;
 
-  // 근거가 없는 칸은 null 로 온다. 사용자가 이미 쓴 칸은 건드리지 않고 빈 칸만 채운다.
-  // 기다리는 동안 입력한 내용을 덮지 않도록, 지금 값이 아니라 채우는 시점의 값과 견준다.
-  const applyDraft = (draft: MeetingDraft) => {
-    const fill = (value: string | null) => (previous: string) =>
+  // 근거가 없는 칸은 null 로 온다. 초안에 값이 있는 칸만 다룬다.
+  // 덮어쓰기 — 이미 작성한 칸도 초안으로 바꾼다.
+  // 이어 붙이기 — 한 줄 칸은 빈 칸만 채우고, 주요 내용·후속 조치는 기존 글 뒤에 초안을 붙인다.
+  const applyDraft = (draft: MeetingDraft, mode: DraftApplyMode) => {
+    const overwrite = (value: string | null) => (previous: string) =>
+      value ?? previous;
+    const fillEmpty = (value: string | null) => (previous: string) =>
       previous.trim() || !value ? previous : value;
+    const appendBelow = (value: string | null) => (previous: string) =>
+      !value
+        ? previous
+        : previous.trim()
+          ? `${previous.trimEnd()}\n\n${value}`
+          : value;
 
-    setTitle(fill(draft.title));
-    setPlace(fill(draft.location));
-    setPurpose(fill(draft.purpose));
-    setContent(fill(draft.content));
-    setFollowup(fill(draft.followUp));
+    const fillLine = mode === "overwrite" ? overwrite : fillEmpty;
+    const fillText = mode === "overwrite" ? overwrite : appendBelow;
 
-    if (draft.meetingDate && !dateTouchedRef.current) {
+    setTitle(fillLine(draft.title));
+    setPlace(fillLine(draft.location));
+    setPurpose(fillLine(draft.purpose));
+    setContent(fillText(draft.content));
+    setFollowup(fillText(draft.followUp));
+
+    // 날짜는 글이 아니라 이어 붙일 수 없다 — 덮어쓰기면 초안 날짜로, 아니면 안 만졌을 때만
+    if (draft.meetingDate && (mode === "overwrite" || !dateTouchedRef.current)) {
       setPickedDate(draft.meetingDate);
     }
 
+    // 참석자는 두 방식 모두 빈 명단만 채운다 — 나를 뺄 수 없다는 규칙이 깨지지 않게.
     // 후보에 없는 사람은 칩이 그려지지 않는다 — 서버가 걸러 주지만 명단이 늦게 오면 어긋난다
     if (draft.attendeeUserIds.length > 0) {
       const candidates = new Set(
@@ -175,25 +193,62 @@ export default function MeetingForm({
     }
   };
 
-  // 초안 생성은 수십 초 걸린다. 진행은 위 카드가 알리므로 여기서는 결과만 띄운다.
-  const handleUploadTranscript = (file: File) => {
-    setTranscript(file.name);
+  // 초안이 건드릴, 사용자가 이미 작성한 칸 — 있으면 모달이 덮어쓰기/이어 붙이기를 묻는다
+  const conflictFields = useMemo(() => {
+    if (!pendingDraft) return [];
+    const { draft } = pendingDraft;
+    const fields: Array<[current: string, drafted: string | null, label: string]> =
+      [
+        [title, draft.title, "회의명"],
+        [place, draft.location, "장소"],
+        [purpose, draft.purpose, "회의 목적"],
+        [content, draft.content, "주요 내용"],
+        [followup, draft.followUp, "후속 조치"],
+      ];
+    return fields
+      .filter(([current, drafted]) => current.trim() && drafted)
+      .map(([, , label]) => label);
+  }, [pendingDraft, title, place, purpose, content, followup]);
 
+  // 초안 생성은 수십 초 걸린다 — 그동안 모달이 진행률을 보여주며 열려 있으므로
+  // 중복 요청이 생기지 않는다 (초안은 한 번에 한 건만, AGENT_024). 실패도 모달이 보여준다.
+  const handleUploadTranscript = (file: File) => {
     draftMutation.mutate(file, {
-      onSuccess: (draft) => {
-        applyDraft(draft);
-        showToast("초안을 채웠어요. 내용을 확인해 주세요.");
-      },
-      onError: (error) => {
-        showToast(
-          getApiErrorMessage(
-            error,
-            "초안을 만들지 못했어요. 파일을 확인한 뒤 다시 시도해 주세요.",
-          ),
-          "danger",
-        );
-      },
+      onSuccess: (draft) => setPendingDraft({ draft, fileName: file.name }),
     });
+  };
+
+  // 초안에서 채울 게 하나도 없으면 "채웠어요"라고 말하지 않는다
+  const isEmptyDraft = (draft: MeetingDraft) =>
+    !draft.title &&
+    !draft.meetingDate &&
+    !draft.location &&
+    !draft.purpose &&
+    !draft.content &&
+    !draft.followUp &&
+    draft.attendeeUserIds.length === 0;
+
+  const handleApplyDraft = (mode: DraftApplyMode) => {
+    if (!pendingDraft) return;
+
+    applyDraft(pendingDraft.draft, mode);
+    setTranscript(pendingDraft.fileName);
+    showToast(
+      isEmptyDraft(pendingDraft.draft)
+        ? "파일에서 채울 내용을 찾지 못했어요. 직접 작성해 주세요."
+        : "초안을 채웠어요. 내용을 확인해 주세요.",
+    );
+
+    setPendingDraft(null);
+    draftMutation.reset();
+    setUploadOpen(false);
+  };
+
+  // 적용하지 않고 닫으면 초안은 버린다 (실패 후 닫기도 여기로 온다)
+  const handleUploadClose = () => {
+    setPendingDraft(null);
+    draftMutation.reset();
+    setUploadOpen(false);
   };
 
   const handleSave = () => {
@@ -225,12 +280,10 @@ export default function MeetingForm({
         </div>
 
         <div className={styles.actions}>
-          {/* 초안은 한 번에 한 건만 만들 수 있다 (AGENT_024) */}
           <Button
             buttonStyle="weak"
             size="medium"
             leftAccessory={<span aria-hidden="true">📄</span>}
-            disabled={draftMutation.isPending}
             onClick={() => setUploadOpen(true)}
           >
             {transcript ? "텍스트 파일 재업로드" : "텍스트 파일 업로드"}
@@ -240,7 +293,7 @@ export default function MeetingForm({
             type="light"
             buttonStyle="weak"
             size="medium"
-            onClick={handleBack}
+            onClick={leaveGuard.requestExit}
           >
             {mode === "create" ? "목록" : "취소"}
           </Button>
@@ -255,46 +308,28 @@ export default function MeetingForm({
         </div>
       </div>
 
-      {/* 텍스트 파일 업로드 완료 확인 — 초안을 만드는 동안에는 진행 상태를 보여준다 */}
-      {transcript &&
-        (draftMutation.isPending ? (
-          <div
-            className={`${styles.uploadedCard} ${styles.draftingCard}`}
-            role="status"
-            aria-live="polite"
-          >
-            <span className={styles.draftingIcon} aria-hidden="true" />
-            <div className={styles.uploadedText}>
-              <span className={styles.draftingTitle}>
-                AI가 초안을 만들고 있어요
-              </span>
-              <span className={styles.draftingHint}>
-                📄 {transcript} · 수십 초 걸릴 수 있어요. 다른 칸은 먼저
-                채우셔도 됩니다
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className={styles.uploadedCard}>
-            <span className={styles.uploadedIcon} aria-hidden="true">
-              ✓
+      {/* 텍스트 파일 업로드 완료 확인 — 진행 상태는 업로드 모달이 보여준다 */}
+      {transcript && (
+        <div className={styles.uploadedCard}>
+          <span className={styles.uploadedIcon} aria-hidden="true">
+            ✓
+          </span>
+          <div className={styles.uploadedText}>
+            <span className={styles.uploadedTitle}>
+              텍스트 파일이 업로드되었어요
             </span>
-            <div className={styles.uploadedText}>
-              <span className={styles.uploadedTitle}>
-                텍스트 파일이 업로드되었어요
-              </span>
-              <span className={styles.uploadedName}>📄 {transcript}</span>
-            </div>
-            <button
-              type="button"
-              className={styles.uploadedRemove}
-              onClick={() => setTranscript(null)}
-              aria-label="텍스트 파일 제거"
-            >
-              ✕
-            </button>
+            <span className={styles.uploadedName}>📄 {transcript}</span>
           </div>
-        ))}
+          <button
+            type="button"
+            className={styles.uploadedRemove}
+            onClick={() => setTranscript(null)}
+            aria-label="텍스트 파일 제거"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* 기본 정보 */}
       <section className={styles.card}>
@@ -386,22 +421,33 @@ export default function MeetingForm({
         />
       </section>
 
-      {/* 텍스트 파일 업로드 모달 */}
-      <TranscriptUploadModal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onUpload={handleUploadTranscript}
-      />
+      {/* 텍스트 파일 업로드 모달 — 생성 진행률과 적용 방식 선택까지 이 안에서 끝난다.
+          열릴 때만 마운트해서 닫히면 선택한 파일·진행 단계가 함께 사라진다 */}
+      {uploadOpen && (
+        <TranscriptUploadModal
+          open={uploadOpen}
+          onClose={handleUploadClose}
+          onUpload={handleUploadTranscript}
+          uploadError={
+            draftMutation.error
+              ? getApiErrorMessage(
+                  draftMutation.error,
+                  "초안을 만들지 못했어요. 파일을 확인한 뒤 다시 시도해 주세요.",
+                )
+              : null
+          }
+          draftReady={!!pendingDraft}
+          conflictFields={conflictFields}
+          onApply={handleApplyDraft}
+        />
+      )}
 
-      {/* 이탈 경고 모달 */}
+      {/* 이탈 경고 모달 — 화면 안(목록·취소)과 밖(좌측 메뉴·GNB·알림) 이탈이 함께 걸린다 */}
       <LeaveConfirmModal
-        open={warnOpen}
+        open={leaveGuard.confirmOpen}
         description="저장하지 않은 회의명·참석자·회의 내용이 모두 사라집니다. 그래도 나가시겠어요?"
-        onStay={() => setWarnOpen(false)}
-        onLeave={() => {
-          setWarnOpen(false);
-          onExit();
-        }}
+        onStay={leaveGuard.stay}
+        onLeave={leaveGuard.leave}
       />
     </>
   );

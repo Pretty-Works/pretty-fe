@@ -14,8 +14,10 @@ import { cx } from "@/lib/cx";
 
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useHydrated } from "@/hooks/useHydrated";
+import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
+import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
 import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
 import NotificationBell from "@/features/notification/components/NotificationBell/NotificationBell";
 import { DEFAULT_PROJECT_TAB } from "@/features/project/constants/projectTabs";
@@ -30,6 +32,10 @@ export default function Gnb() {
   const pathname = usePathname();
   const folded = useAgentStore((state) => state.folded);
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
+
+  // 패널을 펼쳐 두면 그 안의 '최근 대화' 버튼이 같은 점을 달고 있다 — 접혀 있을 때만 여기서 알린다.
+  const hasUnread = useHasUnreadConversations();
+  const showUnread = folded && hasUnread;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -61,6 +67,15 @@ export default function Gnb() {
 
   useClickOutside(menuRef, () => setMenuOpen(false), menuOpen);
 
+  // 작성 중인 화면에서 상단 메뉴·로고로 나가면 먼저 확인을 받는다 (좌측 메뉴와 같은 규칙).
+  // 지금 주소 그대로면 나가는 게 아니므로 막지 않는다.
+  const requestLeave = useLeaveGuardStore((state) => state.requestLeave);
+
+  const guard =
+    (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      if (pathname !== href && requestLeave(href)) e.preventDefault();
+    };
+
   useEffect(() => {
     if (!menuOpen) return;
 
@@ -83,7 +98,7 @@ export default function Gnb() {
     <header className={styles.gnb}>
       <div className={styles.container}>
         <div className={styles.brand}>
-          <Link href="/">
+          <Link href="/" onClick={guard("/")}>
             <Image src={Logo} alt="Pretty Works 홈" priority />
           </Link>
         </div>
@@ -98,6 +113,7 @@ export default function Gnb() {
               <Link
                 key={menu.label}
                 href={menu.path}
+                onClick={guard(menu.path)}
                 className={cx(styles.menuItem, isActive && styles.active)}
                 aria-current={isActive ? "page" : undefined}
               >
@@ -116,13 +132,22 @@ export default function Gnb() {
               className={styles.agentBtn}
               onClick={toggleFolded}
               aria-pressed={!folded}
-              aria-label={folded ? "에이전트 패널 열기" : "에이전트 패널 닫기"}
+              aria-label={
+                showUnread
+                  ? "에이전트 패널 열기 (안 읽은 답장 있음)"
+                  : folded
+                    ? "에이전트 패널 열기"
+                    : "에이전트 패널 닫기"
+              }
             >
               {folded ? (
                 <AgentIcon className={styles.agent} aria-hidden="true" />
               ) : (
                 <AgentActiveIcon className={styles.agent} aria-hidden="true" />
               )}
+
+              {/* 개수가 아니라 있다/없다만 표시한다 (알림 벨과 같은 규칙) */}
+              {showUnread && <span className={styles.agentBadge} />}
             </button>
           </div>
 

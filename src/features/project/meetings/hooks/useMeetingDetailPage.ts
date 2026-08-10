@@ -8,11 +8,14 @@ import { getApiErrorMessage } from "@/lib/api/errorCode";
 
 import { useToastStore } from "@/stores/useToastStore";
 
+import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
 import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
+import { MOCK_ACTION_ITEMS } from "@/features/project/meetings/constants/actionItems";
 import { useDeleteMeetingMutation } from "@/features/project/meetings/hooks/mutations/useDeleteMeetingMutation";
 import { useUpdateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useUpdateMeetingMutation";
 import { useMeetingDetailQuery } from "@/features/project/meetings/hooks/queries/useMeetingDetailQuery";
 import { useMeetingPermission } from "@/features/project/meetings/hooks/useMeetingPermission";
+import type { MeetingActionItem } from "@/features/project/meetings/types";
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 
 export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
@@ -21,6 +24,8 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
 
   const [editing, setEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  // 실행 항목 줄에서 '할 일 추가'를 누른 항목. 팝업의 초기값이 된다
+  const [taskDraft, setTaskDraft] = useState<MeetingActionItem | null>(null);
 
   const {
     data: meeting,
@@ -34,6 +39,10 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
 
   // 작성자 · 참석자만 고칠 수 있고, 지우는 건 작성자만 할 수 있다
   const { canEdit, canDelete } = useMeetingPermission(meeting);
+
+  // 완료·보관 프로젝트에는 할 일을 둘 수 없다 (BE ProjectPolicy.isOpenForContent).
+  // 실행 항목은 그대로 보여주되 '할 일 추가'만 감춘다 — 눌러 봐야 PROJECT_020으로 막힌다.
+  const canAddTask = useIsProjectOpenForContent(projectId);
 
   const saveEdit = (body: CreateMeetingRequest) => {
     updateMutation.mutate(body, {
@@ -99,6 +108,13 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
     },
     isDeleting,
     confirmDelete,
+
+    // 실행 항목 — 서버가 아직 내려주지 않아 목업을 그대로 넘긴다
+    actionItems: MOCK_ACTION_ITEMS,
+    canAddTask,
+    taskDraft,
+    openTaskDraft: (item: MeetingActionItem) => setTaskDraft(item),
+    closeTaskDraft: () => setTaskDraft(null),
 
     goList: () => router.push(`/projects/${projectId}/meetings`),
   };

@@ -11,6 +11,7 @@ import {
 
 import { getApiErrorMessage, isClientError } from "@/lib/api/errorCode";
 import { registerQueryClient } from "@/lib/api/queryCache";
+import { watchSessionAcrossTabs } from "@/lib/auth/session";
 
 import { useToastStore } from "@/stores/useToastStore";
 
@@ -60,6 +61,9 @@ export default function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     registerQueryClient(queryClient);
   }, [queryClient]);
+
+  // 다른 탭에서 계정이 바뀌면 이 탭도 따라간다. window 가 필요해 마운트 후에 붙인다.
+  useEffect(() => watchSessionAcrossTabs(), []);
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>

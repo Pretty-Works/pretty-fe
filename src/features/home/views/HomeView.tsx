@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import CheckboxField from "@/components/CheckboxField/CheckboxField";
@@ -12,6 +14,7 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
 import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
+import { useToastStore } from "@/stores/useToastStore";
 
 import PendingInteractionCard from "@/features/agent/components/PendingInteractionCard/PendingInteractionCard";
 import { useCancelAgentRunMutation } from "@/features/agent/hooks/mutations/useAgentMutations";
@@ -41,6 +44,10 @@ export default function HomeView() {
 
   const openAgent = useAgentStore((state) => state.openAgent);
   const requestInteraction = useChatStore((state) => state.requestInteraction);
+  const requestConversation = useChatStore(
+    (state) => state.requestConversation,
+  );
+  const showToast = useToastStore((state) => state.showToast);
 
   // 인사말·프로젝트 생성 버튼 노출에 쓴다 (앱 진입 시 1회 조회 후 캐시)
   const { data: me } = useMyProfileQuery();
@@ -111,11 +118,18 @@ export default function HomeView() {
     router.push(`/projects/${projectId}/overview`);
   };
 
+  // 카드 몸통 클릭 → 에이전트 패널을 열고 그 요청이 온 대화로 이동한다.
+  // 답하지 않고 지난 대화 맥락부터 보고 싶을 때의 통로다.
+  const handleOpenInteraction = (interaction: PendingInteraction) => {
+    openAgent();
+    requestConversation(interaction.conversationId);
+  };
+
   // 응답은 SSE로 실행이 이어지므로 보내는 일은 채팅 패널에 맡긴다 —
   // 그 대화로 옮겨 놓아야 이어지는 답변이 엉뚱한 자리에 쌓이지 않는다.
-  const handleSelectOption = (
+  const handleSelectOptions = (
     interaction: PendingInteraction,
-    optionId: string,
+    optionIds: string[],
   ) => {
     openAgent(); // 선택하면 에이전트 패널을 열어 답변을 이어받는다
 
@@ -126,7 +140,7 @@ export default function HomeView() {
       kind: interaction.kind,
       interactionId: interaction.interactionId,
       conversationId: interaction.conversationId,
-      optionId,
+      optionIds,
     });
   };
 
@@ -137,10 +151,20 @@ export default function HomeView() {
     setHandledIds((prev) => [...prev, interaction.interactionId]);
 
     cancelRun(interaction.runId, {
-      onError: () =>
+      // 카드가 소리 없이 사라지면 눌린 건지 알 수 없다 — 결과를 한 줄로 알린다
+      onSuccess: () => showToast("요청을 중단했어요."),
+      onError: (error) => {
         setHandledIds((prev) =>
           prev.filter((id) => id !== interaction.interactionId),
-        ),
+        );
+        showToast(
+          getApiErrorMessage(
+            error,
+            "요청을 중단하지 못했어요. 다시 시도해 주세요.",
+          ),
+          "danger",
+        );
+      },
     });
   };
 
@@ -196,7 +220,8 @@ export default function HomeView() {
                 <PendingInteractionCard
                   key={interaction.interactionId}
                   interaction={interaction}
-                  onSelectOption={handleSelectOption}
+                  onOpen={handleOpenInteraction}
+                  onSelectOptions={handleSelectOptions}
                   onStop={handleStopInteraction}
                 />
               ))}

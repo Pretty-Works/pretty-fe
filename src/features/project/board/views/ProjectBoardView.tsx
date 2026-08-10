@@ -10,12 +10,11 @@ import ImportanceDot from "@/features/project/board/components/ImportanceDot/Imp
 import ImportanceFilter from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
 import { usePostListPage } from "@/features/project/board/hooks/usePostListPage";
 import type { BoardPost } from "@/features/project/board/types";
-import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
 import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
-import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
 
 import styles from "./ProjectBoardView.module.css";
 
@@ -40,20 +39,11 @@ interface ProjectBoardViewProps {
 
 export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
   const page = usePostListPage(projectId ?? "");
-  const summary = useProjectSummary(projectId ?? "", "board");
 
   return (
     <>
-      {/* AI 요약 — 아직 만들어지지 않았으면 배너를 그리지 않는다 */}
-      {summary.banner && (
-        <AiSummaryCard
-          headline={summary.banner.headline}
-          lines={summary.banner.detail}
-          stats={summary.banner.stats}
-          updatedAt={summary.generatedAt}
-          onRefresh={summary.refresh}
-        />
-      )}
+      {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
+      <ProjectAiSummary projectId={projectId ?? ""} section="board" />
 
       <section className={styles.panel}>
         <div className={styles.panelHead}>

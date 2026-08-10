@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   answerAgentQuestion,
   cancelAgentRun,
+  deleteAgentConversation,
   markAgentConversationRead,
   reconnectAgentRun,
   resolveAgentApproval,
@@ -130,6 +131,31 @@ export const useMarkAgentConversationReadMutation = () => {
     mutationFn: markAgentConversationRead,
 
     onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["agent", "conversations"],
+      });
+    },
+  });
+};
+
+// 대화 삭제 — 그 대화가 띄워 둔 대기 카드도 서버에서 함께 닫히므로 홈 카드까지 다시 읽는다
+export const useDeleteAgentConversationMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteAgentConversation,
+
+    // 거절당했을 때도 다시 읽는다 — 409 는 그 대화가 아직 돌고 있다는 뜻이라
+    // 목록에 그려 둔 상태가 이미 낡았을 수 있다.
+    onSettled: (_result, _error, conversationId) => {
+      // 지운 대화의 말풍선은 되살아나면 안 된다. 무효화는 다시 조회해 404 를 맞으므로 아예 버린다
+      queryClient.removeQueries({
+        queryKey: ["agent", "conversations", conversationId, "messages"],
+      });
+
+      void queryClient.invalidateQueries({
+        queryKey: ["agent", "pending-interactions"],
+      });
       void queryClient.invalidateQueries({
         queryKey: ["agent", "conversations"],
       });
