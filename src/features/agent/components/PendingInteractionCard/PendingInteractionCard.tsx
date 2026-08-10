@@ -38,7 +38,7 @@ export default function PendingInteractionCard({
 
       {/* 무엇을 저장·수정하는지. 승인 카드에만 온다 */}
       {interaction.previewText && (
-        <details className={styles.preview}>
+        <details className={styles.preview} open>
           <summary className={styles.previewSummary}>내용 확인</summary>
           <pre className={styles.previewBody}>{interaction.previewText}</pre>
         </details>
