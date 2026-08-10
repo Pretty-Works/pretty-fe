@@ -55,6 +55,13 @@
   gap: 10px;
 }
 
+/* 제목 반대편 묶음 — 필터와 주 동작 버튼이 함께 선다 */
+.panelHeadRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .panelTitle {
   font-size: 15.5px;
   font-weight: 700;

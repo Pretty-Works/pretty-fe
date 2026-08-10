@@ -88,7 +88,7 @@ const postStreamWithRetry = async (
     try {
       await refreshAccessTokenOnce();
     } catch (refreshError) {
-      handleSessionExpired();
+      handleSessionExpired(refreshError);
       throw refreshError;
     }
     response = await postStream(path, body, signal);

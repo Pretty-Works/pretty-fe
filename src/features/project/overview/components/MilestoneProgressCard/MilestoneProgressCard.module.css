@@ -19,6 +19,18 @@
   align-items: center;
   gap: 24px;
   padding: 12px 0;
+  flex-wrap: wrap;
+}
+
+/* 한 줄에 다 못 서면 '목표 마일스톤'이 아래로 내려온다.
+   내려오면 왼쪽 세로선이 어색하므로 위쪽 가로선으로 바꾼다 */
+@container app-main (max-width: 620px) {
+  .next {
+    width: 100%;
+    padding: 14px 0 0;
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
 }
 
 /* 완료 · 대기

@@ -17,7 +17,10 @@
   min-width: 0;
 }
 
-@media (max-width: 1100px) {
+/* 기준은 화면 폭이 아니라 본문이 실제로 쓸 수 있는 폭이다 —
+   에이전트 패널이 열리면 화면은 그대로인데 여기만 420px 좁아진다.
+   미디어 쿼리로 두면 그때 2단이 풀리지 않아 카드 안쪽(목표 마일스톤·팀별 막대)이 눌린다 */
+@container app-main (max-width: 1100px) {
   .columns {
     grid-template-columns: 1fr;
   }
