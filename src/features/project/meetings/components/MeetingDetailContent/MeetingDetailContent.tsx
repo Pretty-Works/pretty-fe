@@ -1,8 +1,10 @@
+import { formatDateLabel } from "@/lib/date";
+
 import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
+
 import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi";
 import { personLabel } from "@/features/project/meetings/utils/format";
-import { formatDateLabel } from "@/lib/date";
 
 import styles from "./MeetingDetailContent.module.css";
 
@@ -61,7 +63,9 @@ export default function MeetingDetailContent({
             </Button>
           )}
           {canEdit && (
-            <Button size="medium" onClick={onEdit}>수정</Button>
+            <Button size="medium" onClick={onEdit}>
+              수정
+            </Button>
           )}
         </div>
       </div>

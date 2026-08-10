@@ -3,8 +3,9 @@
 
 import { api } from "@/lib/api/client";
 
-import type { ProjectStatus } from "@/features/home/api/homeApi";
-import type { StatusType } from "@/features/user/api/userApi";
+import type { ProjectStatus } from "@/features/project/api/projectListApi";
+import type { StatusType } from "@/features/user/constants/organization";
+
 import type { Milestone } from "./milestoneApi";
 
 export interface ProjectOwner {

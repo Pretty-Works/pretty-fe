@@ -2,11 +2,12 @@
 
 import { useRouter } from "next/navigation";
 
-import { usePostsQuery } from "@/features/project/board/hooks/queries/usePostsQuery";
-import type { ImportanceFilterValue } from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
-import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
 import { useClampPage } from "@/hooks/useClampPage";
 import { useListParams } from "@/hooks/useListParams";
+
+import type { ImportanceFilterValue } from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
+import { usePostsQuery } from "@/features/project/board/hooks/queries/usePostsQuery";
+import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
 
 const PAGE_SIZE = 10;
 
@@ -15,7 +16,7 @@ export const usePostListPage = (projectId: string) => {
 
   const list = useListParams<ImportanceFilterValue>({ initialFilter: "ALL" });
 
-  const { data, isLoading, isError, dataUpdatedAt, refetch } = usePostsQuery(
+  const { data, isLoading, isError, refetch } = usePostsQuery(
     projectId,
     {
       title: list.query,
@@ -50,10 +51,6 @@ export const usePostListPage = (projectId: string) => {
     isLoading,
     isError,
     retry: refetch,
-
-    // AI 요약 카드의 갱신 — 목록을 다시 읽어 요약이 서 있는 기준 시각을 새로 잡는다
-    summaryUpdatedAt: dataUpdatedAt,
-    refreshSummary: refetch,
 
     canWrite,
     goWrite: () => router.push(`/projects/${projectId}/board/write`),

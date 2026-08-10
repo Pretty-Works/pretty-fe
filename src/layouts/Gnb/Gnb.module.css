@@ -1,7 +1,7 @@
 .gnb {
   width: 100%;
   height: 60px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid var(--border);
   background: var(--white);
 }
 
@@ -22,8 +22,6 @@
   padding-top: 8px;
 }
 
-/* Next Image가 폭(150px)을 고정으로 심어 둔다.
-   좁은 화면에서 줄일 수 있게 높이 기준으로 바꿔 둔다 — 비율은 그대로다 */
 .brand img {
   display: block;
   width: auto;
@@ -46,9 +44,8 @@
   height: 33px;
   padding: 0 2px;
   text-decoration: none;
-  /* 없으면 폭이 모자랄 때 '프 로 젝 트'처럼 글자마다 줄이 바뀐다 */
   white-space: nowrap;
-  color: #8B8F98;
+  color: var(--text-placeholder);
   transition: color 0.15s ease;
 }
 
@@ -78,7 +75,6 @@
   cursor: pointer;
 }
 
-/* 옆의 알림 버튼과 같은 크기·hover 를 쓴다 (둘이 나란히 있어 다르면 눈에 띈다) */
 .agentBtn {
   display: flex;
   align-items: center;
@@ -139,16 +135,14 @@
   top: calc(100% + 8px);
   right: 0;
   z-index: 60;
-  /* 부서·직급이 길다 (예: 프론트엔드개발 · 부사장) */
   min-width: 190px;
   padding: 6px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--white);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-popover);
 }
 
-/* 내 정보 — 누르는 항목이 아니라 읽는 영역이라 hover도 커서도 없다 */
 .profileInfo {
   display: flex;
   flex-direction: column;
@@ -167,7 +161,6 @@
   color: var(--text-sub);
 }
 
-/* 사번·메일 — 라벨과 값이 각자 열을 이루게 해서 눈이 따라갈 선을 만든다 */
 .facts {
   display: flex;
   flex-direction: column;
@@ -188,7 +181,6 @@
   color: var(--text-placeholder);
 }
 
-/* 메일이 길면 드롭다운이 통째로 넓어지므로 폭을 묶고 말줄임한다 (전체는 title로 본다) */
 .factValue {
   min-width: 0;
   max-width: 180px;
@@ -225,43 +217,28 @@
   background: var(--surface);
 }
 
-/*
- * 반응형 — 로고·메뉴·오른쪽 묶음이 한 줄에 다 들어가지 못하는 순서대로 대응한다.
- * 먼저 여백을 줄이고, 그래도 모자라면 메뉴만 아랫줄로 내린다.
- * 기준은 화면 폭이 아니라 상단바가 실제로 쓸 수 있는 폭(app-main)이다 —
- * 오른쪽 에이전트 패널이 열리면 화면은 그대로인데 상단바만 좁아지기 때문이다.
- */
-
-/* 아직 한 줄로 버틸 수 있는 구간 — 사이 간격과 글자만 줄인다 */
 @container app-main (max-width: 760px) {
   .container {
     padding: 0 12px;
   }
-
   .menu {
     gap: 18px;
   }
-
   .menuItem {
     font-size: 14px;
   }
-
   .right {
     gap: 12px;
   }
-
   .actions {
     gap: 10px;
   }
 }
 
-/* 한 줄로는 더 못 버티는 폭 — 로고·버튼 줄과 메뉴 줄로 나눈다.
-   항목이 셋뿐이라 햄버거로 감추는 것보다 한 줄을 더 쓰는 편이 찾기도 누르기도 쉽다 */
 @container app-main (max-width: 560px) {
   .gnb {
     height: auto;
   }
-
   .container {
     height: auto;
     grid-template-columns: auto 1fr;
@@ -271,21 +248,16 @@
     row-gap: 2px;
     padding: 8px 12px 4px;
   }
-
   .brand {
     grid-area: brand;
-    /* 한 줄일 때의 시각 보정이라 두 줄에서는 오히려 로고가 내려앉는다 */
     padding-top: 0;
   }
-
   .brand img {
     height: 16px;
   }
-
   .right {
     grid-area: right;
   }
-
   .menu {
     grid-area: menu;
     justify-content: center;

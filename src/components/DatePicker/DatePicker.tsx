@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { FiCalendar } from "react-icons/fi";
 
+import { cx } from "@/lib/cx";
+import { fromISO, startOfDay, toISO, WEEKDAYS } from "@/lib/date";
+
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./DatePicker.module.css";
@@ -41,22 +44,8 @@ interface RangeProps extends CommonProps {
 
 type DatePickerProps = SingleProps | RangeProps;
 
-const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
-
-function toISO(d: Date) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-function fromISO(iso: string) {
-  return new Date(`${iso}T00:00:00`);
-}
-
-function startOfDay(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
+const addDays = (date: Date, diff: number) =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate() + diff);
 
 export default function DatePicker(props: DatePickerProps) {
   const {
@@ -74,17 +63,26 @@ export default function DatePicker(props: DatePickerProps) {
     props.placeholder ?? (isRange ? "기간을 선택하세요" : "날짜를 선택하세요");
 
   const singleValue = props.mode === "range" ? undefined : props.value;
-  const rangeValue = props.mode === "range" ? props.value ?? null : null;
+  const rangeValue = props.mode === "range" ? (props.value ?? null) : null;
 
-  const committedStart = isRange ? rangeValue?.start ?? null : singleValue ?? null;
-  const committedEnd = isRange ? rangeValue?.end ?? null : singleValue ?? null;
+  const committedStart = isRange
+    ? (rangeValue?.start ?? null)
+    : (singleValue ?? null);
+  const committedEnd = isRange
+    ? (rangeValue?.end ?? null)
+    : (singleValue ?? null);
 
   const today = useMemo(() => startOfDay(new Date()), []);
 
   const [open, setOpen] = useState(false);
-  // 달력에서 고르는 동안의 임시 선택. 확인을 눌러야 폼에 반영된다.
-  const [pendingStart, setPendingStart] = useState<string | null>(committedStart);
+  // 달력에서 고르는 동안의 임시 선택. 기간 선택은 확인을 눌러야 폼에 반영된다.
+  const [pendingStart, setPendingStart] = useState<string | null>(
+    committedStart,
+  );
   const [pendingEnd, setPendingEnd] = useState<string | null>(committedEnd);
+
+  // 키보드 포커스가 놓인 날짜. 방향키로 옮기고 Enter/Space로 고른다.
+  const [focusedDate, setFocusedDate] = useState<string | null>(null);
 
   const [view, setView] = useState(() => {
     const base = committedStart ? fromISO(committedStart) : today;
@@ -92,48 +90,11 @@ export default function DatePicker(props: DatePickerProps) {
   });
 
   const rootRef = useRef<HTMLDivElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLButtonElement>(null);
 
-  // 바깥 클릭 시 닫기 (임시 선택은 버린다).
-  // 훅이 그 클릭을 여기서 끝내 준다 — 모달 안이면 오버레이까지 닿아 모달째 닫힌다.
+  // 바깥 클릭 시 닫기 (임시 선택은 버린다)
   useClickOutside(rootRef, () => setOpen(false), open);
-
-  // 달력이 열려 있을 때 ESC는 달력만 닫는다.
-  // 모달 안에서 쓰일 때 ESC가 모달까지 올라가 닫히는 걸 막는다.
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape" && open) {
-      e.stopPropagation();
-      setOpen(false);
-    }
-  };
-
-  const toggle = () => {
-    if (disabled) return;
-
-    if (!open) {
-      // 열 때마다 현재 확정값에서 다시 시작한다
-      setPendingStart(committedStart);
-      setPendingEnd(committedEnd);
-      const base = committedStart ? fromISO(committedStart) : today;
-      setView({ year: base.getFullYear(), month: base.getMonth() });
-    }
-    setOpen((v) => !v);
-  };
-
-  // 6주(42칸) 그리드
-  const cells = useMemo(() => {
-    const first = new Date(view.year, view.month, 1);
-    const gridStart = new Date(view.year, view.month, 1 - first.getDay());
-    return Array.from({ length: 42 }, (_, i) => {
-      const d = new Date(
-        gridStart.getFullYear(),
-        gridStart.getMonth(),
-        gridStart.getDate() + i,
-      );
-      return { date: d, inMonth: d.getMonth() === view.month };
-    });
-  }, [view]);
-
-  const isFuture = (d: Date) => startOfDay(d).getTime() > today.getTime();
 
   const min = useMemo(
     () => (minDate ? startOfDay(fromISO(minDate)) : null),
@@ -143,6 +104,8 @@ export default function DatePicker(props: DatePickerProps) {
     () => (maxDate ? startOfDay(fromISO(maxDate)) : null),
     [maxDate],
   );
+
+  const isFuture = (d: Date) => startOfDay(d).getTime() > today.getTime();
 
   // 선택 불가 판정: 미래 차단(allowFuture) + 범위(minDate·maxDate)
   const isBlocked = (d: Date) => {
@@ -154,6 +117,44 @@ export default function DatePicker(props: DatePickerProps) {
 
     return false;
   };
+
+  const toggle = () => {
+    if (disabled) return;
+
+    if (!open) {
+      // 열 때마다 현재 확정값에서 다시 시작한다
+      setPendingStart(committedStart);
+      setPendingEnd(committedEnd);
+      const base = committedStart ? fromISO(committedStart) : today;
+      setView({ year: base.getFullYear(), month: base.getMonth() });
+      setFocusedDate(committedStart ?? toISO(today));
+    }
+    setOpen((v) => !v);
+  };
+
+  const close = () => {
+    setOpen(false);
+    controlRef.current?.focus();
+  };
+
+  // 6주(42칸) 그리드
+  const cells = useMemo(() => {
+    const first = new Date(view.year, view.month, 1);
+    const gridStart = new Date(view.year, view.month, 1 - first.getDay());
+    return Array.from({ length: 42 }, (_, i) => {
+      const d = addDays(gridStart, i);
+      return { date: d, inMonth: d.getMonth() === view.month };
+    });
+  }, [view]);
+
+  // 포커스가 놓인 날짜의 버튼으로 실제 DOM 포커스를 옮긴다
+  useEffect(() => {
+    if (!open || !focusedDate || !gridRef.current) return;
+
+    gridRef.current
+      .querySelector<HTMLButtonElement>(`[data-date="${focusedDate}"]`)
+      ?.focus();
+  }, [open, focusedDate, view]);
 
   const atCurrentMonth =
     view.year === today.getFullYear() && view.month === today.getMonth();
@@ -186,7 +187,7 @@ export default function DatePicker(props: DatePickerProps) {
 
     if (!isRange) {
       props.onChange?.(iso);
-      setOpen(false);
+      close();
       return;
     }
 
@@ -203,19 +204,41 @@ export default function DatePicker(props: DatePickerProps) {
     setPendingEnd(null);
   };
 
-  const todayBlocked = isBlocked(today);
+  // 방향키로 날짜를 옮긴다. 달을 넘어가면 보이는 달도 따라 옮긴다.
+  const moveFocus = (diff: number) => {
+    const base = focusedDate ? fromISO(focusedDate) : today;
+    const next = addDays(base, diff);
 
-  const pickToday = () => {
-    if (todayBlocked) return;
-    const iso = toISO(today);
-    setView({ year: today.getFullYear(), month: today.getMonth() });
-    if (!isRange) {
-      props.onChange?.(iso);
-      setOpen(false);
+    setFocusedDate(toISO(next));
+    if (next.getMonth() !== view.month || next.getFullYear() !== view.year) {
+      setView({ year: next.getFullYear(), month: next.getMonth() });
+    }
+  };
+
+  const FOCUS_KEYS: Record<string, number> = {
+    ArrowLeft: -1,
+    ArrowRight: 1,
+    ArrowUp: -7,
+    ArrowDown: 7,
+    PageUp: -28,
+    PageDown: 28,
+  };
+
+  // 달력이 열려 있을 때 ESC는 달력만 닫는다 — 모달 안에서 모달까지 닫히는 걸 막는다.
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!open) return;
+
+    if (e.key === "Escape") {
+      e.stopPropagation();
+      close();
       return;
     }
-    setPendingStart(iso);
-    setPendingEnd(null);
+
+    const diff = FOCUS_KEYS[e.key];
+    if (diff !== undefined) {
+      e.preventDefault();
+      moveFocus(diff);
+    }
   };
 
   const canConfirm = isRange ? !!pendingStart && !!pendingEnd : !!pendingStart;
@@ -227,22 +250,16 @@ export default function DatePicker(props: DatePickerProps) {
     } else {
       props.onChange?.(pendingStart!);
     }
-    setOpen(false);
+    close();
   };
 
   const displayValue = isRange
     ? rangeValue
       ? `${rangeValue.start} ~ ${rangeValue.end}`
       : ""
-    : singleValue ?? "";
+    : (singleValue ?? "");
 
-  // 기간 모드에서만 쓴다. 하루 선택은 고른 날이 칸에 칠해져 있어 아래에 또 적을 이유가 없다.
-  const summary =
-    pendingStart && pendingEnd
-      ? `${pendingStart} ~ ${pendingEnd}`
-      : pendingStart
-        ? `${pendingStart} ~ 종료일을 선택하세요`
-        : "시작일을 선택하세요";
+  const monthLabel = `${view.year}년 ${view.month + 1}월`;
 
   return (
     <div className={styles.field}>
@@ -258,6 +275,7 @@ export default function DatePicker(props: DatePickerProps) {
 
       <div className={styles.root} ref={rootRef} onKeyDown={handleKeyDown}>
         <button
+          ref={controlRef}
           type="button"
           className={styles.control}
           onClick={toggle}
@@ -274,7 +292,11 @@ export default function DatePicker(props: DatePickerProps) {
         </button>
 
         {open && (
-          <div className={styles.popup} role="dialog">
+          <div
+            className={styles.popup}
+            role="dialog"
+            aria-label={`${label ?? "날짜"} 선택`}
+          >
             <div className={styles.head}>
               <button
                 type="button"
@@ -285,8 +307,8 @@ export default function DatePicker(props: DatePickerProps) {
               >
                 ‹
               </button>
-              <span className={styles.month}>
-                {view.year}년 {view.month + 1}월
+              <span className={styles.month} aria-live="polite">
+                {monthLabel}
               </span>
               <button
                 type="button"
@@ -303,21 +325,19 @@ export default function DatePicker(props: DatePickerProps) {
               {WEEKDAYS.map((w, i) => (
                 <span
                   key={w}
-                  className={[
+                  className={cx(
                     styles.weekday,
-                    i === 0 ? styles.sun : "",
-                    i === 6 ? styles.sat : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
+                    i === 0 && styles.sun,
+                    i === 6 && styles.sat,
+                  )}
                 >
                   {w}
                 </span>
               ))}
             </div>
 
-            <div className={styles.grid}>
-              {cells.map(({ date, inMonth }, idx) => {
+            <div className={styles.grid} ref={gridRef}>
+              {cells.map(({ date, inMonth }) => {
                 const iso = toISO(date);
                 const isToday = startOfDay(date).getTime() === today.getTime();
                 const isEdge = iso === pendingStart || iso === pendingEnd;
@@ -329,26 +349,32 @@ export default function DatePicker(props: DatePickerProps) {
                 // 기간 종료일을 고르는 단계에서는 시작일 이전 날짜를 선택할 수 없다.
                 const cellDisabled =
                   isBlocked(date) ||
-                  (isRange && !!pendingStart && !pendingEnd && iso < pendingStart);
+                  (isRange &&
+                    !!pendingStart &&
+                    !pendingEnd &&
+                    iso < pendingStart);
                 const wd = date.getDay();
+
                 return (
                   <button
-                    key={`${iso}-${idx}`}
+                    key={iso}
+                    data-date={iso}
                     type="button"
-                    className={[
+                    className={cx(
                       styles.day,
-                      !inMonth ? styles.outside : "",
-                      isEdge ? styles.selected : "",
-                      inRangeSpan ? styles.inRange : "",
-                      isToday && !isEdge ? styles.today : "",
-                      cellDisabled ? styles.dayDisabled : "",
-                      !isEdge && wd === 0 ? styles.sun : "",
-                      !isEdge && wd === 6 ? styles.sat : "",
-                    ]
-                      .filter(Boolean)
-                      .join(" ")}
+                      !inMonth && styles.outside,
+                      isEdge && styles.selected,
+                      inRangeSpan && styles.inRange,
+                      isToday && !isEdge && styles.today,
+                      cellDisabled && styles.dayDisabled,
+                      !isEdge && wd === 0 && styles.sun,
+                      !isEdge && wd === 6 && styles.sat,
+                    )}
                     onClick={() => pick(date)}
                     disabled={cellDisabled}
+                    tabIndex={iso === focusedDate ? 0 : -1}
+                    aria-label={`${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`}
+                    aria-pressed={isEdge}
                   >
                     {date.getDate()}
                   </button>
@@ -356,23 +382,13 @@ export default function DatePicker(props: DatePickerProps) {
               })}
             </div>
 
-            {isRange && <p className={styles.summary}>{summary}</p>}
-
-            <div className={`${styles.foot} ${!isRange ? styles.singleFoot : ""}`}>
-              <button
-                type="button"
-                className={styles.todayBtn}
-                onClick={pickToday}
-                disabled={todayBlocked}
-              >
-                오늘
-              </button>
-
-              {isRange && <div className={styles.footActions}>
+            {/* 하루 선택은 누르는 즉시 확정돼 푸터가 필요 없다 */}
+            {isRange && (
+              <div className={styles.foot}>
                 <button
                   type="button"
                   className={styles.cancelBtn}
-                  onClick={() => setOpen(false)}
+                  onClick={close}
                 >
                   취소
                 </button>
@@ -384,8 +400,8 @@ export default function DatePicker(props: DatePickerProps) {
                 >
                   확인
                 </button>
-              </div>}
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>

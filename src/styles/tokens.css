@@ -1,0 +1,178 @@
+/* 색·그림자·오버레이의 단 하나의 출처.
+   CSS 모듈에 리터럴을 직접 적으면 같은 회색이 화면마다 조금씩 달라진다.
+   여기에 없는 색이 필요하면 토큰을 먼저 늘린다. */
+
+:root {
+  /* ===== Brand ===== */
+  --primary: #7c3aed;
+  --primary-light: #8b5cf6;
+  --primary-strong: #6b4ad9;
+  --primary-deep: #6b4df0;
+  --primary-soft: #9678dc;
+  --primary-bright: #f3edff;
+  --primary-gradient: linear-gradient(135deg, #7c3aed, #8b5cf6);
+
+  /* primary 계열 배경 — 옅은 순서 */
+  --primary-bg: #f1ecfe;
+  --primary-bg-weak: #f6f4fb;
+  --primary-bg-tint: #f7f4ff;
+  --primary-bg-strong: #f2ecff;
+  --primary-pressed: #e7ddfb;
+
+  /* primary 계열 테두리 — 옅은 순서 */
+  --primary-border-weak: #e9e2fb;
+  --primary-border: #e3d7fd;
+  --primary-border-strong: #d1c7fa;
+  --primary-border-focus: #cebef6;
+
+  /* ===== Text ===== */
+  --text: #191f28;
+  --text-strong: #2d323a;
+  --text-sub: #3c3f48;
+  --text-muted: #4d5261;
+  --text-weak: #6b7484;
+  --text-placeholder: #8b95a1;
+  --text-disabled: #a0a6b0;
+  --text-faint: #c4c9d1;
+  --text-on-invert: #f4f5f7;
+
+  /* ===== Surface & Line ===== */
+  --white: #ffffff;
+  --black: #111111;
+  --page: #fafafc;
+  --surface: #f6f7f9;
+  --surface-ai: #f2f4f6;
+  --surface-sunken: #f1f3f5;
+  --surface-muted: #eceef1;
+  --surface-invert: #2d323a;
+
+  --border: #e2e5ea;
+  --border-strong: #dcdce4;
+  --line: #eef0f3;
+
+  /* ===== Status ===== */
+  --success: #00c471;
+  --success-strong: #0f9d63;
+  --success-bg: #e6f7ef;
+  --success-bg-weak: #effaf4;
+  --success-border: #bfe9d4;
+
+  --warning: #ff9800;
+  --warning-strong: #d19a00;
+  --warning-text: #b0780a;
+  --warning-bg: #fff7e0;
+  --warning-border: #f2dcae;
+
+  --danger: #ff4d4f;
+  --danger-strong: #f23739;
+  --danger-text: #c93a3a;
+  --danger-text-weak: #d14d4d;
+  --danger-soft: #f08a8d;
+  --danger-bg: #fdecec;
+  --danger-bg-weak: #fff5f5;
+  --danger-border: #ffd9d9;
+
+  --info: #3182f6;
+  --info-strong: #1b64da;
+  --info-bg: #e8f1fe;
+
+  --teal: #0891b2;
+  --teal-strong: #0e7490;
+  --teal-bg: #e0f5f9;
+  --cyan: #22a3e0;
+
+  --neutral: #8b95a1;
+  --neutral-mid: #b8bec9;
+
+  /* ===== 게시글 중요도 =====
+     점 색만 따로 갖는다. 선택된 칩의 배경·테두리·글자는 status 토큰을 그대로 쓴다. */
+  --importance-high: #de3d3d;
+  --importance-mid: #f2991a;
+  --importance-low: #21b26b;
+
+  /* ===== 캘린더 구성원 색 =====
+     서버가 사람별 색을 주지 않아 userId 해시로 고정 배정한다.
+     배너는 저채도 배경 위에 읽히는 전경색이 따로 필요해 세 값이 한 묶음이다. */
+  --member-1: #3b82eb;
+  --member-1-bg: #dceaff;
+  --member-1-text: #245da8;
+  --member-2: #219966;
+  --member-2-bg: #d9f3e7;
+  --member-2-text: #176b4a;
+  --member-3: #e8830c;
+  --member-3-bg: #ffedd3;
+  --member-3-text: #9a5708;
+  --member-4: #d6336c;
+  --member-4-bg: #fbe0ea;
+  --member-4-text: #9c2852;
+  --member-5: #0e9aa7;
+  --member-5-bg: #d9f2f4;
+  --member-5-text: #08717b;
+  --member-6: #dc2626;
+  --member-6-bg: #fbdedb;
+  --member-6-text: #9d1f1f;
+  /* 내 일정 — 언제나 브랜드색으로 고정 */
+  --member-me: var(--primary);
+  --member-me-bg: #e8ddff;
+  --member-me-text: #5930a7;
+  /* 아직 누구인지 모르는 작성자. 내 색으로 떨어뜨리면 남의 일정을 내 것으로 오인한다 */
+  --member-unknown-bg: var(--surface-muted);
+  --member-unknown-text: #4b5563;
+
+  /* ===== D-day ===== */
+  --dday-urgent-bg: var(--danger-bg);
+  --dday-urgent-text: var(--danger-text);
+  --dday-soon-bg: var(--warning-bg);
+  --dday-soon-text: var(--warning-text);
+  --dday-idle-bg: var(--surface-sunken);
+  --dday-idle-text: #969da7;
+
+  /* ===== Category ===== */
+  --c-approval: var(--primary-light);
+  --c-meeting: var(--success);
+  --c-message: var(--primary);
+
+  --icon: #565961;
+
+  /* ===== Overlay & Interaction ===== */
+  /* 배경을 가리는 층 */
+  --overlay: rgba(17, 17, 17, 0.4);
+  /* 배경색 없는 버튼의 hover — 어떤 표면 위에서도 같은 세기로 눌린다 */
+  --hover-ghost: rgba(0, 0, 0, 0.06);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+
+  /* ===== Shadow =====
+     이름은 "무엇을 띄우는가"다. 크기가 아니라 역할로 고른다. */
+  --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.05);
+  --shadow-card-sm: 0 4px 5px rgba(0, 0, 0, 0.05);
+  --shadow-panel: 0 2px 10px rgba(69, 41, 120, 0.05);
+  --shadow-raised: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --shadow-dropdown-sm: 0 8px 20px rgba(0, 0, 0, 0.1);
+  --shadow-popover: 0 12px 28px rgba(0, 0, 0, 0.12);
+  --shadow-menu: 0 8px 24px rgba(69, 41, 120, 0.16);
+  --shadow-menu-neutral: 0 8px 24px rgba(26, 26, 38, 0.14);
+  --shadow-popover-brand: 0 6px 20px rgba(69, 41, 120, 0.12);
+  --shadow-modal: 0 18px 46px rgba(0, 0, 0, 0.22);
+  --shadow-drawer: -8px 0 24px rgba(0, 0, 0, 0.08);
+
+  /* ===== Toast — 유일하게 어두운 표면이라 자기 색 세트를 가진다 ===== */
+  --toast-bg: rgba(22, 24, 31, 0.8);
+  --toast-border: rgba(255, 255, 255, 0.08);
+  --toast-shadow:
+    0 14px 34px rgba(16, 18, 24, 0.34), 0 3px 8px rgba(16, 18, 24, 0.2);
+  --toast-dot-gray: #9aa3ae;
+  --toast-ring-green: 0 0 0 5px rgba(0, 196, 113, 0.22);
+  --toast-ring-orange: 0 0 0 5px rgba(255, 152, 0, 0.22);
+  --toast-ring-purple: 0 0 0 5px rgba(139, 92, 246, 0.24);
+  --toast-ring-gray: 0 0 0 5px rgba(154, 163, 174, 0.22);
+  --toast-ring-danger: 0 0 0 5px rgba(255, 77, 79, 0.24);
+
+  /* ===== Tone — 상태·토스트·진행률이 함께 쓰는 4색 =====
+     TS 의 Tone 타입(src/constants/tone.ts)과 이름이 1:1로 맞는다. */
+  --tone-green: var(--success);
+  --tone-orange: var(--warning);
+  --tone-purple: var(--primary-light);
+  --tone-gray: var(--neutral);
+  --tone-danger: var(--danger);
+}

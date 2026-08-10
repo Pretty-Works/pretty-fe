@@ -64,7 +64,10 @@ export default function Modal({
       const last = items[items.length - 1];
       const active = document.activeElement;
 
-      if (e.shiftKey && (active === first || !panelRef.current.contains(active))) {
+      if (
+        e.shiftKey &&
+        (active === first || !panelRef.current.contains(active))
+      ) {
         e.preventDefault();
         last.focus();
       } else if (!e.shiftKey && active === last) {
@@ -92,11 +95,17 @@ export default function Modal({
     };
   }, [open, titleId]);
 
-  // 열릴 때 모달 안으로 포커스를 옮긴다
+  // 열릴 때 모달 안으로 포커스를 옮기고, 닫히면 열기 전 자리로 돌려준다
   useEffect(() => {
     if (!open || !panelRef.current) return;
+
+    const opener = document.activeElement as HTMLElement | null;
     const first = panelRef.current.querySelector<HTMLElement>(FOCUSABLE);
     (first ?? panelRef.current).focus();
+
+    return () => {
+      if (opener?.isConnected) opener.focus();
+    };
   }, [open]);
 
   if (!open || typeof document === "undefined") return null;

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 
 import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
+
 import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 
 export const useAttendeeOptions = (

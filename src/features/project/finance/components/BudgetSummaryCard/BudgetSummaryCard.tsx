@@ -12,7 +12,7 @@ import {
   CATEGORY_LABEL,
   type Budget,
 } from "@/features/project/finance/api/financeApi";
-import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
+import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
 
 import styles from "./BudgetSummaryCard.module.css";
 
@@ -36,13 +36,31 @@ const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 // 1234567 → ₩1,234,567
-const won = (value: number) =>
-  `₩${value.toLocaleString("ko-KR")}`;
+const won = (value: number) => `₩${value.toLocaleString("ko-KR")}`;
+
+interface Share {
+  key: string;
+  label: string;
+  amount: number;
+  ratio: number;
+}
+
+// 도넛 조각을 이어 붙이려면 각 조각 앞의 누적 비율이 필요하다
+const withOffsets = (items: Share[]) => {
+  let running = 0;
+
+  return items.map((item) => {
+    const offset = running;
+    running += item.ratio;
+
+    return { ...item, offset };
+  });
+};
 
 export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
   const [tab, setTab] = useState<Tab>("category");
 
-  const shares =
+  const shares = withOffsets(
     tab === "category"
       ? budget.byCategory.map((item) => ({
           key: item.category,
@@ -55,7 +73,8 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
           label: DEPARTMENT_LABEL[item.department],
           amount: item.amount,
           ratio: item.ratio,
-        }));
+        })),
+  );
 
   // 예산 대비 사용·사용 예정 막대. 할당이 0(제한 없음)이면 비율을 낼 수 없다.
   const hasLimit = budget.totalBudget > 0;
@@ -68,9 +87,6 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
 
   // 제한 없음이면 잔여가 항상 음수라 초과로 볼 수 없다 — 기준이 없으니 초과도 없다.
   const isOver = hasLimit && budget.remaining < 0;
-
-  // 도넛 조각을 이어 붙이기 위해 누적 비율을 들고 간다
-  let offset = 0;
 
   return (
     <section className={styles.card}>
@@ -162,8 +178,7 @@ export default function BudgetSummaryCard({ budget }: BudgetSummaryCardProps) {
                   />
                   {shares.map((share, index) => {
                     const dash = (CIRCUMFERENCE * share.ratio) / 100;
-                    const rotate = (offset / 100) * 360 - 90;
-                    offset += share.ratio;
+                    const rotate = (share.offset / 100) * 360 - 90;
 
                     return (
                       <circle

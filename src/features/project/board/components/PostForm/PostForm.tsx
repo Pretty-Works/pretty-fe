@@ -4,8 +4,9 @@ import { useMemo, useState } from "react";
 
 import Button from "@/components/Button/Button";
 import FormField from "@/components/FormField/FormField";
-import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
 import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
+
+import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
 import type { CreatePostRequest } from "@/features/project/board/api/postApi";
 import {
   IMPORTANCE_OPTIONS,

@@ -4,27 +4,11 @@
 
 import { api } from "@/lib/api/client";
 
-import type { DepartmentType } from "@/features/project/overview/api/taskBoardApi";
-
-// 낮은 직급부터
-export type PositionType =
-  | "STAFF"
-  | "SENIOR"
-  | "PART_LEADER"
-  | "TEAM_LEADER"
-  | "EXECUTIVE"
-  | "VICE_PRESIDENT"
-  | "PRESIDENT";
-
-export const POSITION_LABEL: Record<PositionType, string> = {
-  STAFF: "사원",
-  SENIOR: "선임",
-  PART_LEADER: "파트장",
-  TEAM_LEADER: "팀장",
-  EXECUTIVE: "임원",
-  VICE_PRESIDENT: "부사장",
-  PRESIDENT: "사장",
-};
+import type {
+  DepartmentType,
+  PositionType,
+  StatusType,
+} from "@/features/user/constants/organization";
 
 export interface MyProfile {
   userId: number;
@@ -54,8 +38,6 @@ export const fetchMyProfile = async (): Promise<MyProfileResponse> => {
  * 이름 자동완성 — GET /users/search?keyword=&limit=
  * 본인과 퇴사자는 서버가 빼고 준다 (재직·휴직만 내려온다).
  * ========================================================================= */
-
-export type StatusType = "ACTIVE" | "ON_LEAVE" | "RESIGNED";
 
 export interface UserSearchResult {
   userId: number;

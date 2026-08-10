@@ -4,11 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 import styles from "./FormTextArea.module.css";
 
-interface FormTextAreaProps
-  extends Omit<
-    React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-    "className" | "rows"
-  > {
+interface FormTextAreaProps extends Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  "className" | "rows"
+> {
   label: string;
   required?: boolean;
   minRows?: number;
@@ -30,9 +29,12 @@ export default function FormTextArea({
   ...rest
 }: FormTextAreaProps) {
   const ref = useRef<HTMLTextAreaElement>(null);
-  const [count, setCount] = useState(
-    String(value ?? defaultValue ?? "").length,
+
+  // 값을 밖에서 주면(제어 컴포넌트) 글자 수는 그 값에서 바로 읽는다
+  const [uncontrolledCount, setUncontrolledCount] = useState(
+    () => String(defaultValue ?? "").length,
   );
+  const count = value !== undefined ? String(value).length : uncontrolledCount;
 
   const autoGrow = () => {
     const el = ref.current;
@@ -41,13 +43,10 @@ export default function FormTextArea({
     el.style.height = `${el.scrollHeight}px`;
   };
 
-  useEffect(() => {
-    autoGrow();
-    if (value !== undefined) setCount(String(value).length);
-  }, [value]);
+  useEffect(autoGrow, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCount(e.target.value.length);
+    setUncontrolledCount(e.target.value.length);
     autoGrow();
     onChange?.(e);
   };

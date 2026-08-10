@@ -13,7 +13,6 @@
   color: var(--text);
 }
 
-/* 프로젝트 | 내 할 일 2단 */
 .columns {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
@@ -27,20 +26,15 @@
   }
 }
 
-/* 패널 — 회의록 .panel과 동일 계열 */
 .panel {
   display: flex;
   flex-direction: column;
   padding: 20px 22px 8px;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
-/* 좌우 4px은 아래 내용과 맞추기 위한 시각 보정.
-   목록 행이 자기 안쪽에 4px 여백을 갖고 있어(.row padding: 14px 4px),
-   제목을 패널 여백에 딱 붙이면 행 글자보다 왼쪽으로 튀어나와 보인다.
-   패널 padding을 늘리면 목록·검색바까지 같이 밀리므로 이 줄에만 준다. */
 .panelHead {
   display: flex;
   align-items: center;
@@ -68,40 +62,31 @@
   color: var(--text);
 }
 
-
 .filterbar {
   display: flex;
-  /* 높이를 숫자로 맞추지 않는다 — 검색바 높이가 바뀌면 상태 선택이 따라온다 */
   align-items: stretch;
   gap: 10px;
   padding: 6px 0 10px;
 }
 
-/* 검색바가 남는 폭을 차지하고 */
 .filterbar > :first-child {
   flex: 1;
   min-width: 0;
 }
 
-/* 상태 선택은 제 폭을 지킨다 */
 .filterbar > :last-child {
   flex-shrink: 0;
 }
 
-/* 카드를 가로로 늘어놓고 옆으로 넘겨 본다.
-   테두리는 카드마다 갖는다 — 바깥에 두면 스크롤되는 내용이 테두리를 뚫고 지나간다.
-   스크롤 스냅이 있어 넘길 때마다 카드가 왼쪽에 딱 맞춰 선다. */
 .requestList {
   display: flex;
   align-items: stretch;
   gap: 12px;
   margin-bottom: 12px;
-  /* 스크롤바가 카드 밑에 앉을 자리 */
   padding-bottom: 10px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  /* 카드 폭이 고정이라 몇 장이 더 있는지 보이지 않는다. 막대를 남겨 길이를 알린다 */
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
 }
 

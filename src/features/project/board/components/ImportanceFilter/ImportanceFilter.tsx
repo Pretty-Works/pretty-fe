@@ -1,5 +1,8 @@
 "use client";
 
+import { cx } from "@/lib/cx";
+
+import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
 import {
   IMPORTANCE_META,
   type PostImportance,
@@ -9,13 +12,15 @@ import styles from "./ImportanceFilter.module.css";
 
 export type ImportanceFilterValue = "ALL" | PostImportance;
 
-const OPTIONS: { value: ImportanceFilterValue; label: string; dot?: string }[] =
-  [
-    { value: "ALL", label: "전체" },
-    { value: "HIGH", label: "High", dot: IMPORTANCE_META.HIGH.dot },
-    { value: "MID", label: "Medium", dot: IMPORTANCE_META.MID.dot },
-    { value: "LOW", label: "Low", dot: IMPORTANCE_META.LOW.dot },
-  ];
+const IMPORTANCE_VALUES = Object.keys(IMPORTANCE_META) as PostImportance[];
+
+const OPTIONS: { value: ImportanceFilterValue; label: string }[] = [
+  { value: "ALL", label: "전체" },
+  ...IMPORTANCE_VALUES.map((value) => ({
+    value,
+    label: IMPORTANCE_META[value].label,
+  })),
+];
 
 interface ImportanceFilterProps {
   value: ImportanceFilterValue;
@@ -37,11 +42,11 @@ export default function ImportanceFilter({
             type="button"
             role="tab"
             aria-selected={active}
-            className={`${styles.chip} ${active ? styles.chipOn : ""}`}
+            className={cx(styles.chip, active && styles.chipOn)}
             onClick={() => onChange(option.value)}
           >
-            {option.dot && (
-              <span className={styles.dot} style={{ background: option.dot }} />
+            {option.value !== "ALL" && (
+              <ImportanceDot importance={option.value} size={8} round />
             )}
             {option.label}
           </button>

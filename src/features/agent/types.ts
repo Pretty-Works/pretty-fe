@@ -21,39 +21,31 @@ export type AgentInteractionStatus =
   | "ALTERNATIVE"
   | "EXPIRED";
 
-// 화면에 있는 기능만 다룬다 (없는 기능을 아는 척하면 안 된다)
-export type AgentKind =
-  | "general"
-  | "meeting"
-  | "board"
-  | "expense"
-  | "schedule"
-  | "leave"
-  | "task";
-
-export const AGENT_LABELS: Record<AgentKind, string> = {
-  general: "일반 도우미",
-  meeting: "회의 에이전트",
-  board: "게시판 에이전트",
-  expense: "지출 에이전트",
-  schedule: "일정 에이전트",
-  leave: "휴가 에이전트",
-  task: "할 일 에이전트",
-};
-
 /**
  * done 이벤트의 action. 일을 끝낸 뒤 "어느 화면으로 보낼지"를 가리킨다.
  * NAVIGATE 는 그냥 이동, FILL_FORM 은 이동한 화면의 폼을 formData 로 채운다.
  */
-export interface AgentAction {
-  type: "NAVIGATE" | "FILL_FORM";
+interface AgentActionBase {
   /** 버튼 문구 (예: "회의록 보러가기") */
   label: string;
   /** screenRegistry 의 ScreenKey */
+}
+
+export interface NavigateAgentAction extends AgentActionBase {
+  type: "NAVIGATE" | "FILL_FORM";
   targetScreen: string;
   params?: Record<string, unknown>;
   formData?: Record<string, unknown>;
 }
+
+export interface OpenExternalUrlAgentAction extends AgentActionBase {
+  type: "OPEN_EXTERNAL_URL";
+  targetScreen?: null;
+  params?: { url?: string };
+  formData?: null;
+}
+
+export type AgentAction = NavigateAgentAction | OpenExternalUrlAgentAction;
 
 /** approval_request — 실행 전에 사용자 승인이 필요한 요청 */
 export interface AgentApproval {
@@ -62,6 +54,8 @@ export interface AgentApproval {
   summary: string;
   /** 무엇을 저장/수정하는지 펼쳐 보여줄 본문 */
   previewText?: string;
+  /** 승인·거절 말고 고를 수 있는 것. "항상 허용"(ALWAYS)은 서버가 붙여 준다 */
+  alternatives?: AgentInteractionOption[];
   /** 승인 후 붙일 안내 문구 */
   successMessage?: string;
   /** 승인 후 이어서 제안할 이동 */
@@ -74,10 +68,19 @@ export interface AgentChoice {
   /** 짧은 머리말 (예: "작성 방식", "다른 방법") */
   label?: string;
   question: string;
-  options?: string[];
+  options?: AgentInteractionOption[];
   placeholder?: string;
   /** 직접 입력을 받을지. 정해진 것 중에서만 골라야 하면 false */
   allowFreeText?: boolean;
+}
+
+/**
+ * 말풍선에 붙였던 파일. 서버가 내용을 보관하지 않으므로 다시 내려받을 수 없다 —
+ * 이름과 크기만 남긴다.
+ */
+export interface ChatAttachment {
+  filename: string;
+  sizeBytes: number;
 }
 
 export interface ChatMessage {
@@ -85,13 +88,12 @@ export interface ChatMessage {
   role: ChatRole;
   content: string;
   createdAt: string;
-  agent?: AgentKind;
+  /** USER 행만 쓴다 */
+  attachments?: ChatAttachment[];
   /** AGENT 행만 쓴다. false 면 실패 안내 말풍선 */
   success?: boolean;
   /** 사용자가 중지시켜 도중에 끊긴 응답 */
   canceled?: boolean;
-  /** "참고한 내용 N건" 으로 접어 두는 진행 로그 */
-  steps?: string[];
   /** 이 답변에 딸린 이동 제안 */
   action?: AgentAction;
 }
@@ -112,6 +114,7 @@ export interface Conversation {
   runId?: string;
   /** 답을 기다리는 승인 카드 id. 목록의 '확인 필요' 배지가 이걸 본다 */
   pendingApprovalId?: number;
+  unread: boolean;
 }
 
 /** 승인·질문 카드에 그릴 버튼 한 개. id 는 응답 API 에 그대로 되돌려 보낸다 */

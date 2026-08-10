@@ -5,7 +5,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import Chip from "@/components/Chip/Chip";
 import FormField from "@/components/FormField/FormField";
 import SuggestList from "@/components/SuggestList/SuggestList";
-
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./PeoplePicker.module.css";
@@ -89,7 +88,9 @@ export default function PeoplePicker({
 
   // 서버 검색을 쓰면 후보 목록이 검색어마다 통째로 갈린다.
   // 고른 사람을 따로 기억해 두지 않으면 다음 글자를 치는 순간 칩이 사라진다.
-  const [pickedById, setPickedById] = useState<Record<string, PeopleOption>>({});
+  const [pickedById, setPickedById] = useState<Record<string, PeopleOption>>(
+    {},
+  );
 
   const pinnedIds = pinned.map((person) => person.id);
 
@@ -111,15 +112,16 @@ export default function PeoplePicker({
     [value, options, pickedById],
   );
 
-  const add = (name: string) => {
-    const picked = suggestions.find((option) => labelOf(option) === name);
+  const add = (id: string) => {
+    const picked = suggestions.find((option) => option.id === id);
 
     if (picked && !value.includes(picked.id)) {
       setPickedById((current) => ({ ...current, [picked.id]: picked }));
       onChange([...value, picked.id]);
     }
 
-    changeQuery("");
+    // 고르고 나면 목록을 닫는다. 열어 둔 채로는 방금 담은 칩이 목록에 가려 보이지 않는다.
+    closeSuggest();
   };
 
   const remove = (id: string) => {
@@ -138,7 +140,7 @@ export default function PeoplePicker({
 
     if (e.key === "Enter" && query.trim() && suggestions.length > 0) {
       e.preventDefault();
-      add(labelOf(suggestions[0]));
+      add(suggestions[0].id);
     }
   };
 
@@ -157,7 +159,10 @@ export default function PeoplePicker({
 
         {isOpen && (
           <SuggestList
-            items={suggestions.map(labelOf)}
+            items={suggestions.map((person) => ({
+              id: person.id,
+              label: labelOf(person),
+            }))}
             onSelect={add}
             emptyText={searching ? "찾는 중이에요…" : emptyText}
           />

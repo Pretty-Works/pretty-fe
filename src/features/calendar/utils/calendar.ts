@@ -1,21 +1,14 @@
+import { fromISO, toISO, WEEKDAYS } from "@/lib/date";
+
 import type { CalendarEvent } from "@/features/calendar/types";
 
-export const WEEKDAY_LABELS = ["일", "월", "화", "수", "목", "금", "토"];
+export const WEEKDAY_LABELS = WEEKDAYS;
 
-/** Date → "YYYY-MM-DD" (로컬 기준, toISOString은 UTC라 날짜가 밀릴 수 있어 직접 조합) */
-export function toDateKey(date: Date) {
-  const month = `${date.getMonth() + 1}`.padStart(2, "0");
-  const day = `${date.getDate()}`.padStart(2, "0");
-
-  return `${date.getFullYear()}-${month}-${day}`;
-}
+/** Date → "YYYY-MM-DD" */
+export const toDateKey = toISO;
 
 /** "YYYY-MM-DD" → Date */
-export function fromDateKey(key: string) {
-  const [year, month, day] = key.split("-").map(Number);
-
-  return new Date(year, month - 1, day);
-}
+export const fromDateKey = fromISO;
 
 /** "2026년 2월" */
 export function formatMonthLabel(month: Date) {
@@ -23,7 +16,7 @@ export function formatMonthLabel(month: Date) {
 }
 
 /** "2월 24일 (화)" */
-export function formatDayLabel(key: string) {
+export function formatCalendarDayLabel(key: string) {
   const date = fromDateKey(key);
 
   return `${date.getMonth() + 1}월 ${date.getDate()}일 (${
@@ -89,9 +82,20 @@ export function coversDate(event: CalendarEvent, key: string) {
   return event.start <= key && key <= event.end;
 }
 
+/** 캘린더에 늘어놓는 순서 — 종일 먼저 → 시작 시각 → 제목. */
+export function compareEvents(a: CalendarEvent, b: CalendarEvent) {
+  if (!a.time !== !b.time) return a.time ? 1 : -1;
+
+  return (
+    (a.time ?? "").localeCompare(b.time ?? "") || a.title.localeCompare(b.title)
+  );
+}
+
 /** 하루짜리 일정만 (여러 날 일정은 주 단위 막대로 따로 그림) */
 export function getSingleDayEvents(events: CalendarEvent[], key: string) {
-  return events.filter((event) => !isMultiDay(event) && event.start === key);
+  return events
+    .filter((event) => !isMultiDay(event) && event.start === key)
+    .sort(compareEvents);
 }
 
 /** 주 안에서 여러 날 일정이 차지하는 칸 범위와 레인(세로 줄) */
@@ -102,10 +106,13 @@ export interface WeekSpan {
   lane: number;
 }
 
-/**
- * 한 주에 걸친 여러 날 일정을 겹치지 않는 레인에 배치한다.
- * laneCountByCol[i] = i번째 칸을 덮고 있는 막대 수 (그만큼 칸 안에 자리를 비워 둔다)
- */
+/** 한 칸에 그릴 수 있는 줄 수. 칸 높이 108px 기준 */
+export const MAX_CELL_ROWS = 4;
+
+/** 여러 날 막대가 쓸 수 있는 최대 레인. */
+export const MAX_SPAN_LANES = MAX_CELL_ROWS;
+
+/** 한 주에 걸친 여러 날 일정을 겹치지 않는 레인에 배치한다. */
 export function layoutWeekSpans(week: Date[], events: CalendarEvent[]) {
   const weekStart = toDateKey(week[0]);
   const weekEnd = toDateKey(week[6]);
@@ -140,10 +147,26 @@ export function layoutWeekSpans(week: Date[], events: CalendarEvent[]) {
     spans.push(span);
   });
 
-  const laneCountByCol = week.map(
-    (_, col) =>
-      spans.filter((span) => span.startCol <= col && col <= span.endCol).length,
+  const covers = (span: WeekSpan, col: number) =>
+    span.startCol <= col && col <= span.endCol;
+
+  // 레인이 넘치는 막대는 그리지 않고 칸의 "+N"으로 넘긴다
+  const visible = spans.filter((span) => span.lane < MAX_SPAN_LANES);
+  const overflowed = spans.filter((span) => span.lane >= MAX_SPAN_LANES);
+
+  // 막대는 개수가 아니라 레인 번호로 위치가 정해진다.
+  // 레인 0은 비고 레인 1에만 걸친 칸에서 "1줄"만 비우면 하루짜리 칩이 막대 밑으로 들어간다.
+  const laneRowsByCol = week.map((_, col) => {
+    const covering = visible.filter((span) => covers(span, col));
+
+    return covering.length
+      ? Math.max(...covering.map((span) => span.lane)) + 1
+      : 0;
+  });
+
+  const hiddenCountByCol = week.map(
+    (_, col) => overflowed.filter((span) => covers(span, col)).length,
   );
 
-  return { spans, laneCountByCol };
+  return { spans: visible, laneRowsByCol, hiddenCountByCol };
 }

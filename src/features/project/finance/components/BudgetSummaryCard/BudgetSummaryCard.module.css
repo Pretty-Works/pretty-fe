@@ -5,9 +5,7 @@
   padding: 22px 24px;
   border-radius: 16px;
   background: var(--white);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  /* 아래 @container의 기준. 화면 폭이 아니라 이 카드가 실제로 차지한 폭을 본다 —
-     오른쪽 에이전트 패널이 열리면 화면은 그대로인데 카드만 좁아지기 때문이다 */
+  box-shadow: var(--shadow-card);
   container-type: inline-size;
 }
 
@@ -30,14 +28,12 @@
   color: var(--text);
 }
 
-/* 좁아져도 좌우 배치를 유지하고, 양쪽이 같이 줄어든다 */
 .body {
   display: flex;
   align-items: center;
   gap: clamp(16px, 2.4vw, 28px);
 }
 
-/* 왼쪽 — 막대 + 금액 */
 .amounts {
   display: flex;
   flex: 1;
@@ -63,18 +59,16 @@
   background: var(--primary);
 }
 
-/* 사용 예정은 아직 안 나간 돈이라 다른 톤으로 구분 */
 .barPlanned {
-  background: #d19a00;
+  background: var(--warning-strong);
 }
 
-/* 초과하면 막대 전체가 빨간색이 된다. 두 구간 구분은 톤 차이로 남긴다. */
 .barOver .barExecuted {
   background: var(--danger);
 }
 
 .barOver .barPlanned {
-  background: #f08a8d;
+  background: var(--danger-soft);
 }
 
 .amountGrid {
@@ -106,7 +100,6 @@
   color: var(--text);
 }
 
-/* 금액이 아니라 상태 — 숫자와 같은 무게로 읽히지 않게 톤을 낮춘다 */
 .noLimit {
   font-size: 15px;
   color: var(--text-sub);
@@ -117,15 +110,13 @@
 }
 
 .planned {
-  color: #d19a00;
+  color: var(--warning-strong);
 }
 
-/* 잔여가 음수 — 서버가 초과를 막지 않으므로 화면이 경고한다 */
 .over {
   color: var(--danger);
 }
 
-/* 오른쪽 — 비중 */
 .shareArea {
   display: flex;
   align-items: center;
@@ -137,8 +128,6 @@
   border-left: 1px solid var(--line);
 }
 
-/* 도넛은 SVG viewBox 비율을 지키며 폭에 맞춰 줄어든다.
-   다만 너무 줄면 조각 구분이 안 되므로 하한을 두고, 그 아래는 아래로 내려 배치한다 */
 .donut {
   position: relative;
   flex: 0 1 150px;
@@ -161,12 +150,6 @@
   transition: stroke-dasharray 0.3s ease;
 }
 
-/*
- * 범례
- * 폭을 고정하지 않으면 컨테이너가 가장 긴 라벨(부서명)에 맞춰 늘어나서
- * 항목별 ↔ 부서별을 오갈 때 도넛 크기와 위치가 흔들린다.
- * 부서명이 들어가는 폭으로 고정하고, 넘치는 라벨은 말줄임에 맡긴다.
- */
 .legend {
   display: flex;
   flex: 0 1 auto;
@@ -207,25 +190,24 @@
   color: var(--text);
 }
 
-/* 비중 색 — 도넛 조각과 범례가 같은 클래스를 쓴다 */
 .tone1 {
   stroke: var(--primary);
   background: var(--primary);
 }
 
 .tone2 {
-  stroke: #8b5cf6;
-  background: #8b5cf6;
+  stroke: var(--primary-light);
+  background: var(--primary-light);
 }
 
 .tone3 {
-  stroke: #22a3e0;
-  background: #22a3e0;
+  stroke: var(--cyan);
+  background: var(--cyan);
 }
 
 .tone4 {
-  stroke: #b8bec9;
-  background: #b8bec9;
+  stroke: var(--neutral-mid);
+  background: var(--neutral-mid);
 }
 
 .toneEtc {
@@ -233,17 +215,11 @@
   background: var(--text-placeholder);
 }
 
-/*
- * 카드가 좁아지면 좌우 배치를 위아래로 바꾼다.
- * 계속 좌우로 두면 금액 4칸과 도넛이 같이 눌려서 양쪽 다 못 읽게 된다.
- */
 @container (max-width: 660px) {
   .body {
     flex-direction: column;
     align-items: stretch;
   }
-
-  /* 세로로 쌓이면 경계도 세로선이 아니라 가로선이어야 한다 */
   .shareArea {
     justify-content: center;
     min-height: 0;
@@ -254,20 +230,16 @@
   }
 }
 
-/* 더 좁아지면 도넛과 범례도 위아래로 */
 @container (max-width: 400px) {
   .head {
     flex-wrap: wrap;
   }
-
   .amountGrid {
     grid-template-columns: 1fr;
   }
-
   .shareArea {
     flex-direction: column;
   }
-
   .legend {
     width: 100%;
   }

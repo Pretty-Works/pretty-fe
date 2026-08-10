@@ -1,9 +1,17 @@
+/**
+ * 구성원 색 번호. 실제 색은 CSS 토큰(--member-*)이 갖고,
+ * 번호를 배정하는 규칙은 utils/memberColor 가 갖는다.
+ */
+export type MemberColorId = `member-${number}` | "member-me";
+
 // 캘린더 구성원 (색상은 캘린더 칩·레일 점·상세 이름에 공통으로 쓰임)
 export interface CalendarMember {
   id: string;
   name: string;
-  color: string;
+  color: MemberColorId;
   isMe?: boolean;
+  /** "FE · 팀장" — 인원 선택 목록에서 동명이인을 가른다. 출처에 정보가 없으면 비어 있다 */
+  description?: string;
 }
 
 // 캘린더에 표시되는 프로젝트. 체크하면 참여 인원이 레일에 쌓인다.

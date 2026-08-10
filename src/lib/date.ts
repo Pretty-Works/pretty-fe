@@ -52,11 +52,6 @@ export function clampDate(iso: string, min: string, max: string): string {
 }
 
 // 타임존이 없는 벽시계 값. 서버가 세 가지 모양으로 준다.
-//   "2026-08-02 14:31:02"  — 대화 목록·대기 카드 (@JsonFormat)
-//   "2026-08-06T14:05:00"  — 대화 메시지 (LocalDateTime 기본 직렬화)
-//   "2026-08-06"           — 시각 없이 날짜만
-// 날짜만 있는 값을 new Date()에 넘기면 UTC 자정으로 읽혀 KST에서 09:00이 된다. 여기서 받아 낸다.
-// 끝에 Z나 ±09:00이 붙은 값은 걸리지 않고 아래 new Date()로 넘어간다.
 const LOCAL_DATE_TIME =
   /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.\d+)?)?$/;
 

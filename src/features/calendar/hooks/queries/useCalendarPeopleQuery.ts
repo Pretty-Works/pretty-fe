@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { useCurrentUserId } from "@/lib/auth/currentUser";
+
 import {
   fetchMyProjects,
   fetchProjectPeople,
@@ -9,7 +11,7 @@ import type {
   CalendarProject,
 } from "@/features/calendar/types";
 import { memberColor } from "@/features/calendar/utils/memberColor";
-import { useCurrentUserId } from "@/lib/auth/currentUser";
+import { describePerson } from "@/features/user/constants/organization";
 
 export interface CalendarPeople {
   /** 레일 체크박스 (진행 중인 내 프로젝트) */
@@ -20,11 +22,7 @@ export interface CalendarPeople {
   myName: string | null;
 }
 
-/**
- * 레일·참여 인원 선택에 쓸 프로젝트와 사람 목록.
- * 사내 사용자 검색 API가 없어서 "내 프로젝트의 참여자"를 후보로 삼는다.
- * 프로젝트 목록엔 인원이 없어 상세를 프로젝트 수만큼 함께 부른다(보통 한 자릿수).
- */
+/** 레일·참여 인원 선택에 쓸 프로젝트와 사람 목록. */
 export const useCalendarPeopleQuery = () => {
   const myId = useCurrentUserId();
 
@@ -46,9 +44,11 @@ export const useCalendarPeopleQuery = () => {
       const myNames: string[] = [];
 
       const projects = details.map((detail, index): CalendarProject | null => {
-        const people = [detail?.owner, ...(detail?.members ?? [])].filter(
-          (person): person is { userId: number; name: string } =>
-            person != null,
+        // 상세 조회가 실패한 프로젝트는 선택해도 표시할 인원을 알 수 없으므로 레일에서 제외한다.
+        if (!detail) return null;
+
+        const people = [detail.owner, ...detail.members].filter(
+          (person) => person != null,
         );
 
         const memberIds: string[] = [];
@@ -64,12 +64,18 @@ export const useCalendarPeopleQuery = () => {
 
           memberIds.push(id);
           if (!memberById.has(id)) {
-            memberById.set(id, { id, name: person.name, color: memberColor(id) });
+            memberById.set(id, {
+              id,
+              name: person.name,
+              color: memberColor(id),
+              // 인원 선택 목록에서 검색으로 찾은 사람과 같은 모양으로 보이게 한다
+              description: describePerson(person),
+            });
           }
         });
 
         // 본인 외 참여자가 없는 개인 프로젝트는 캘린더 필터에 노출하지 않는다.
-        if (detail && memberIds.length === 0) return null;
+        if (memberIds.length === 0) return null;
 
         return {
           id: String(summaries[index].projectId),

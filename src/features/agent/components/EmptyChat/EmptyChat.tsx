@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import AgentChatIcon from "@/assets/icons/agent/agent-chat.png";
+
 import { RECOMMENDED_PROMPTS } from "@/features/agent/constants/prompts";
 
 import styles from "./EmptyChat.module.css";

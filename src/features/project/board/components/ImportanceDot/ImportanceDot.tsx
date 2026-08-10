@@ -1,3 +1,5 @@
+import { cx } from "@/lib/cx";
+
 import {
   IMPORTANCE_META,
   type PostImportance,
@@ -20,13 +22,8 @@ export default function ImportanceDot({
 
   return (
     <span
-      className={styles.dot}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: round ? 999 : 4,
-        background: meta.dot,
-      }}
+      className={cx(styles.dot, styles[meta.tone], round && styles.round)}
+      style={{ width: size, height: size }}
       aria-label={`중요도 ${meta.label}`}
     />
   );

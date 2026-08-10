@@ -1,14 +1,17 @@
 "use client";
 
 import { useId, useState } from "react";
+
 import { IoEye, IoEyeOff } from "react-icons/io5";
 
 import { withJosa } from "@/lib/text";
 
 import styles from "./FormField.module.css";
 
-interface FormFieldProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "className"> {
+interface FormFieldProps extends Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "className"
+> {
   label: string;
   required?: boolean;
   right?: React.ReactNode;
@@ -73,7 +76,9 @@ export default function FormField({
             onClick={() => setRevealed((prev) => !prev)}
             aria-label={revealed ? "비밀번호 숨기기" : "비밀번호 표시"}
           >
-            {revealed ? <IoEyeOff /> : <IoEye />}
+            {/* 아이콘은 '지금 보이는 상태'를 나타낸다 — 드러난 동안 뜬 눈, 가려진 동안 감은 눈.
+                무엇을 하는 버튼인지는 aria-label이 말한다 */}
+            {revealed ? <IoEye /> : <IoEyeOff />}
           </button>
         )}
       </div>

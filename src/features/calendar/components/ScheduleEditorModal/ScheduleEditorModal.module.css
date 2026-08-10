@@ -10,7 +10,6 @@
   color: var(--text-sub);
 }
 
-/* 비종일 일정은 날짜 하나와 시작·종료 시각을 한 줄에 둔다 */
 .scheduleDateTime {
   display: flex;
   align-items: flex-end;
@@ -38,7 +37,6 @@
   font-size: 13px;
 }
 
-/* 삭제는 왼쪽 끝으로 밀어 저장과 떨어뜨린다 */
 .deleteButton {
   margin-right: auto;
 }

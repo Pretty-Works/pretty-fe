@@ -24,7 +24,6 @@
   color: var(--text-placeholder);
 }
 
-/* 돋보기 — 입력칸 오른쪽. 렌즈(::before) + 손잡이(::after) */
 .icon {
   position: relative;
   flex-shrink: 0;
@@ -32,7 +31,6 @@
   height: 15px;
 }
 
-/* 렌즈 */
 .icon::before {
   content: "";
   position: absolute;
@@ -44,7 +42,6 @@
   border-radius: 50%;
 }
 
-/* 손잡이 — 렌즈의 오른쪽 아래에서 45도로 뻗는다 */
 .icon::after {
   content: "";
   position: absolute;

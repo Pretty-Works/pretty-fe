@@ -18,6 +18,9 @@ export const getApiErrorMessage = (error: unknown, fallback: string) => {
     return error instanceof Error ? error.message : fallback;
   }
 
+  const status = error.response?.status;
+  if (status !== undefined && status >= 500) return fallback;
+
   const { errorCode, message } = error.response?.data ?? {};
   if (!message) return fallback;
 

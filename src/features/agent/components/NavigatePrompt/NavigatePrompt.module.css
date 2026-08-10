@@ -51,6 +51,11 @@
   background: var(--primary-light);
 }
 
+.primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .ghost {
   border: 1px solid var(--border);
   background: var(--white);

@@ -1,13 +1,4 @@
 // 알림 — 상단바 종 아이콘 드롭다운
-//   조회: GET   /api/v1/notifications?cursor=&size=  목록 (커서 페이지네이션)
-//         GET   /api/v1/notifications/unseen         뱃지 전용 (30초 폴링)
-//   쓰기: PATCH /api/v1/notifications/seen           드롭다운 열 때 (뱃지만 끔)
-//         PATCH /api/v1/notifications/{id}/read      항목 클릭
-//
-// ⚠️ 뱃지와 개별 읽음은 다른 개념이다.
-//    뱃지(빨간 점) — "확인 안 한 새 소식이 있다". 드롭다운을 열면 꺼진다.
-//    개별 읽음     — "이 알림을 처리했다". 항목을 클릭해야 꺼진다.
-//    여는 것만으로 전부 읽음이 되면 "안 읽은 것만 강조"가 무의미해진다.
 
 import { api } from "@/lib/api/client";
 

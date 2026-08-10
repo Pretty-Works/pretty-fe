@@ -4,13 +4,6 @@
   gap: 2px;
 }
 
-/*
- * ‹ › 글자를 쓰면 정렬이 맞지 않는다.
- * 본문 글꼴(Noto Sans KR)에 이 글리프가 없어 다른 글꼴로 대체되는데,
- * 그러면 좌우 여백과 기준선이 날짜 글자와 달라져 화살표만 삐뚤어 보인다.
- * 좌우 글리프의 여백도 서로 달라 간격까지 어긋난다.
- * CSS로 그리면 글꼴에 기대지 않아 두 화살표와 날짜가 항상 같은 축에 선다.
- */
 .arrow {
   display: flex;
   align-items: center;
@@ -32,10 +25,6 @@
   border-right: 1.4px solid currentColor;
 }
 
-/* 정사각형을 돌린 모양이라 무게중심이 한쪽으로 쏠린다. 좌우로 1px씩 밀어 광학적으로 맞춘다.
-   아래로도 1px 내리는 건 옆 날짜 때문이다 — 글자 상자 아래쪽에는 내려쓰기(g·y) 자리가
-   비어 있어서, 상자를 가운데 맞추면 숫자는 중심보다 살짝 위에 놓인다.
-   화살표는 그 여백이 없어 정확히 가운데 서므로, 숫자 높이에 맞춰 내려준다 */
 .prev::before {
   transform: translate(1px, 1px) rotate(-135deg);
 }
@@ -49,9 +38,6 @@
   color: var(--primary);
 }
 
-/* 글자 크기가 제각각인 것들이 한 줄에 서 있다. line-height를 그대로 두면
-   상자 높이가 서로 달라, 상자를 가운데 정렬해도 글자 중심은 어긋난다.
-   한 줄짜리들이라 line-height를 1로 묶어 상자 중심 = 글자 중심으로 만든다 */
 .label {
   min-width: 76px;
   white-space: nowrap;
@@ -66,7 +52,6 @@
   font-size: 13.5px;
 }
 
-/* 라벨에 목록이 붙을 때 — 목록이 라벨 아래 가운데에 서도록 기준점이 된다 */
 .labelWrap {
   position: relative;
   display: flex;
@@ -94,10 +79,73 @@
   transform: translateX(-50%);
 }
 
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  z-index: 20;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 216px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow-popover-brand);
+}
+
+.popHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.popYear {
+  font-size: 13.5px;
+  line-height: 1;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.popMonths {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.popMonth {
+  padding: 8px 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  line-height: 1;
+  font-weight: 500;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.popMonth:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+}
+
+.popMonthCurrent {
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+}
+
+.popMonthCurrent:hover {
+  background: var(--primary);
+  color: var(--white);
+}
+
 .reset {
-  /* gap이 줄어든 만큼 늘려서 '이번 주' 버튼은 원래 간격을 유지한다 */
   margin-left: 8px;
-  /* 화살표 버튼과 같은 높이로 맞춰 한 줄이 고르게 선다 */
   display: inline-flex;
   align-items: center;
   height: 24px;

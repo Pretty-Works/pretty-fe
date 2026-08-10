@@ -1,10 +1,12 @@
 import axios from "axios";
 
+import { LOGIN_PATH } from "@/constants/routes";
+
+import { useAuthStore } from "@/stores/useAuthStore";
+
 import { API_BASE_URL } from "../config";
 import { getErrorCode } from "./errorCode";
 import { clearQueryCache } from "./queryCache";
-import { LOGIN_PATH } from "@/constants/routes";
-import { useAuthStore } from "@/stores/useAuthStore";
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,

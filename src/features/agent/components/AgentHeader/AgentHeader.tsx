@@ -2,11 +2,13 @@
 
 import Image from "next/image";
 
+import { FaExpand, FaCompress } from "react-icons/fa";
 import { IoMenu, IoClose } from "react-icons/io5";
 import { LuPlus } from "react-icons/lu";
-import { FaExpand, FaCompress } from "react-icons/fa";
 
 import AgentChatIcon from "@/assets/icons/agent/agent-chat.png";
+
+import { cx } from "@/lib/cx";
 
 import styles from "./AgentHeader.module.css";
 
@@ -35,9 +37,7 @@ function IconButton({
       type="button"
       aria-label={label}
       aria-pressed={active || undefined}
-      className={[styles.icon, active && styles.iconActive]
-        .filter(Boolean)
-        .join(" ")}
+      className={cx(styles.icon, active && styles.iconActive)}
       onClick={onClick}
     >
       {children}

@@ -6,8 +6,6 @@ import { usePathname } from "next/navigation";
 
 import { formatDayLabel, isSameDay } from "@/lib/date";
 
-import { useAgentStore } from "@/stores/useAgentStore";
-
 import AgentComposer from "@/features/agent/components/AgentComposer/AgentComposer";
 import AgentHeader from "@/features/agent/components/AgentHeader/AgentHeader";
 import AgentRunIndicator from "@/features/agent/components/AgentRunIndicator/AgentRunIndicator";
@@ -15,12 +13,13 @@ import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt"
 import ConversationMenu from "@/features/agent/components/ConversationMenu/ConversationMenu";
 import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
+import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/ExternalUrlPrompt";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
-
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute } from "@/features/agent/screenRegistry";
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 
 import styles from "./AgentView.module.css";
 
@@ -41,7 +40,7 @@ export default function AgentView() {
     autoApprove,
     isAutoApproveUpdating,
     messages,
-    runAgents,
+    runSteps,
     runError,
     isBusy,
     pendingChoice,
@@ -54,9 +53,11 @@ export default function AgentView() {
     stop,
     changeAutoApprove,
     answerChoice,
+    answerChoiceText,
     answerApproval,
     approve,
     reject,
+    chooseAlternative,
     dismissAction,
     selectConversation,
     startNewChat,
@@ -73,7 +74,7 @@ export default function AgentView() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [
     messages,
-    runAgents,
+    runSteps,
     runError,
     pendingChoice,
     pendingApproval,
@@ -87,8 +88,11 @@ export default function AgentView() {
   // 이미 그 화면을 보고 있으면 이동을 물어볼 이유가 없다.
   // 남겨 두면 나중에 다른 화면으로 옮겼을 때 뒤늦게 튀어나온다.
   useEffect(() => {
-    if (!pendingAction) return;
-    const route = resolveRoute(pendingAction.targetScreen, pendingAction.params);
+    if (!pendingAction || pendingAction.type === "OPEN_EXTERNAL_URL") return;
+    const route = resolveRoute(
+      pendingAction.targetScreen,
+      pendingAction.params,
+    );
     if (route === pathname) dismissAction();
   }, [pendingAction, pathname, dismissAction]);
 
@@ -98,21 +102,26 @@ export default function AgentView() {
         label: pendingChoice.label,
         title: pendingChoice.question,
         preview: undefined,
-        options: (pendingChoice.options ?? []).map((label) => ({
-          label,
-          onSelect: () => answerChoice(label),
+        options: (pendingChoice.options ?? []).map((option) => ({
+          label: option.label,
+          onSelect: () => answerChoice(option.id),
         })),
         placeholder: pendingChoice.placeholder ?? "직접 입력",
         allowFreeText: pendingChoice.allowFreeText ?? true,
-        onDirect: answerChoice,
+        onDirect: answerChoiceText,
       }
     : pendingApproval
       ? {
           label: "실행 승인",
           title: pendingApproval.summary,
           preview: pendingApproval.previewText,
+          // 승인 → 대안 → 거절. 되돌리기 어려운 쪽을 아래에 둔다
           options: [
             { label: "승인", onSelect: approve },
+            ...(pendingApproval.alternatives ?? []).map((alternative) => ({
+              label: alternative.label,
+              onSelect: () => chooseAlternative(alternative.id),
+            })),
             { label: "거절", onSelect: reject },
           ],
           placeholder: "직접 입력",
@@ -122,10 +131,7 @@ export default function AgentView() {
       : null;
 
   const isEmpty =
-    messages.length === 0 &&
-    !isBusy &&
-    !historyLoading &&
-    !historyLoadError;
+    messages.length === 0 && !isBusy && !historyLoading && !historyLoadError;
 
   return (
     <div className={styles.agent}>
@@ -156,10 +162,9 @@ export default function AgentView() {
         onClose={() => setIsMenuOpen(false)}
       />
 
-      <main className={styles.chat}>
+      <div className={styles.chat}>
         {isEmpty ? (
           <EmptyChat
-            /* 홈에서만 추천 프롬프트를 붙인다 */
             showRecommendations={pathname === "/"}
             onSelectPrompt={sendMessage}
           />
@@ -193,8 +198,8 @@ export default function AgentView() {
               );
             })}
 
-            {/* 실행 중 에이전트 */}
-            {isBusy && runAgents && <AgentRunIndicator agents={runAgents} />}
+            {/* 실행 중 진행 상황 — 서버가 보낸 마지막 step 을 그대로 띄운다 */}
+            {isBusy && <AgentRunIndicator steps={runSteps} />}
 
             {/* 실패 — 말풍선 대신 같은 문장을 다시 보내는 버튼을 준다 */}
             {runError && !isBusy && (
@@ -215,14 +220,26 @@ export default function AgentView() {
             )}
 
             {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
-            {pendingAction && !isBusy && (
-              <NavigatePrompt action={pendingAction} onDismiss={dismissAction} />
+            {pendingAction &&
+              pendingAction.type !== "OPEN_EXTERNAL_URL" &&
+              !isBusy && (
+              <NavigatePrompt
+                action={pendingAction}
+                onDismiss={dismissAction}
+              />
+            )}
+
+            {pendingAction?.type === "OPEN_EXTERNAL_URL" && !isBusy && (
+              <ExternalUrlPrompt
+                action={pendingAction}
+                onDismiss={dismissAction}
+              />
             )}
 
             <div ref={bottomRef} />
           </div>
         )}
-      </main>
+      </div>
 
       <AgentComposer
         blocked={isBlocked}

@@ -12,8 +12,6 @@ export const useMeetingDetailQuery = (
     
     enabled: !!projectId && !!meetingId,
 
-    staleTime: 30 * 1000,
-
     select: (data) => data.result,
 
     retry: false,

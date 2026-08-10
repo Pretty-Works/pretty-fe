@@ -1,3 +1,5 @@
+import { cx } from "@/lib/cx";
+
 import styles from "./StateView.module.css";
 
 /** 여백 크기 — 팝오버 compact · 패널 default · 페이지 roomy */
@@ -42,9 +44,7 @@ function Message({
 }) {
   return (
     <p
-      className={[styles.message, SIZE_CLASS[size], isError && styles.error]
-        .filter(Boolean)
-        .join(" ")}
+      className={cx(styles.message, SIZE_CLASS[size], isError && styles.error)}
       role={isError ? "alert" : "status"}
     >
       {text}
@@ -52,15 +52,7 @@ function Message({
   );
 }
 
-/**
- * 목록·카드의 로딩 / 실패 / 빈 상태를 한곳에서 그린다.
- *
- * 화면마다 같은 3단 분기를 손으로 쓰다 보니 문구 톤과 여백이 조금씩 어긋났다.
- * 순서(로딩 → 실패 → 비어 있음)를 여기 가둬 두고, 화면은 문구만 넘긴다.
- *
- * 실패했는데 다시 시도할 방법이 있으면 `action`에 버튼을 준다.
- * 그림·설명까지 갖춘 큰 안내가 필요하면 이 컴포넌트가 아니라 `Result`를 쓴다.
- */
+/** 목록·카드의 로딩 / 실패 / 빈 상태를 한곳에서 그린다. */
 export default function StateView({
   loading = false,
   error = false,
@@ -80,9 +72,7 @@ export default function StateView({
     if (!action) return message;
 
     return (
-      <div
-        className={[styles.block, SIZE_CLASS[size]].filter(Boolean).join(" ")}
-      >
+      <div className={cx(styles.block, SIZE_CLASS[size])}>
         {message}
         {action}
       </div>

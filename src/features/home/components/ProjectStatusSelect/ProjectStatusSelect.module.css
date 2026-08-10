@@ -3,7 +3,6 @@
   display: flex;
 }
 
-/* 높이를 부모(검색바와 같은 줄)에 맞춘다. 혼자 쓰일 때를 위해 최소 높이만 남긴다 */
 .control {
   display: inline-flex;
   align-items: center;
@@ -27,7 +26,6 @@
   font-weight: 500;
 }
 
-/* 상태 색 점 */
 .dot {
   width: 8px;
   height: 8px;
@@ -60,9 +58,6 @@
   );
 }
 
-/* 드롭다운 */
-/* 버튼이 줄 오른쪽 끝에 있어 오른쪽을 기준으로 편다.
-   왼쪽 기준이면 목록이 버튼보다 넓을 때 화면 밖으로 삐져나간다 */
 .popup {
   position: absolute;
   top: calc(100% + 6px);
@@ -73,7 +68,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--white);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-dropdown);
   list-style: none;
 }
 

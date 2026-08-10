@@ -1,0 +1,159 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-sub);
+}
+
+.root {
+  position: relative;
+}
+
+.control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.control:focus-visible {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.value {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.valueName {
+  flex-shrink: 0;
+  color: var(--text);
+}
+
+.valueMeta {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-placeholder);
+}
+
+.placeholder {
+  color: var(--text-placeholder);
+}
+
+.caret {
+  width: 10px;
+  height: 5px;
+  flex-shrink: 0;
+  background-image: linear-gradient(45deg, transparent 50%, var(--text-placeholder) 50%),
+    linear-gradient(135deg, var(--text-placeholder) 50%, transparent 50%);
+  background-position: 0 0, 5px 0;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 30;
+  max-height: 260px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--white);
+  box-shadow: var(--shadow-popover);
+  list-style: none;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--surface);
+}
+
+.optionOn {
+  background: var(--primary-bright);
+}
+
+.name {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 12px;
+  color: var(--text-placeholder);
+}
+
+.role {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--primary-bright);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.leave {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-placeholder);
+}
+
+.owner {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-sub);
+}

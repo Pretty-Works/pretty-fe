@@ -1,9 +1,8 @@
-/* 헤더(60px) 아래를 덮는다. 헤더보다 z-index가 낮아 목록이 헤더 뒤에서 내려온다 */
 .backdrop {
   position: absolute;
   inset: 60px 0 0;
   z-index: 1;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--hover-ghost);
   opacity: 0;
   visibility: hidden;
   transition:
@@ -30,10 +29,8 @@
   overflow-y: auto;
   border-bottom: 1px solid var(--border);
   background: var(--white);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-dropdown);
   scrollbar-width: thin;
-
-  /* 닫힌 상태 — 헤더 뒤로 살짝 올라가 숨는다 */
   transform: translateY(-12px);
   opacity: 0;
   visibility: hidden;
@@ -61,7 +58,7 @@
 }
 
 .menu::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
 }
 
@@ -103,12 +100,11 @@
   color: var(--text-placeholder);
 }
 
-/* 답을 기다리는 승인 카드. 제목을 밀어내지 않게 폭을 지킨다 */
 .badge {
   flex-shrink: 0;
   padding: 2px 7px;
   border-radius: 999px;
-  background: #fff1f1;
+  background: var(--danger-bg-weak);
   color: var(--danger);
   font-size: 10.5px;
   line-height: 1.4;
@@ -116,7 +112,6 @@
   white-space: nowrap;
 }
 
-/* 아직 안 끝난 대화만 색이 찬다. 끝난 대화는 자리만 차지하고 비어 있다 */
 .dot {
   flex-shrink: 0;
   width: 7px;
@@ -124,15 +119,17 @@
   border-radius: 50%;
 }
 
-/* 에이전트가 일하는 중 */
 .running {
-  background: #3182f6;
+  background: var(--info);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
-/* 사용자가 답해야 넘어간다 */
 .waiting {
   background: var(--danger);
+}
+
+.unread {
+  background: var(--primary);
 }
 
 @keyframes pulse {

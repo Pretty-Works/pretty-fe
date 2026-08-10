@@ -2,16 +2,19 @@
 
 import { useMemo, useRef, useState } from "react";
 
-import OpenAgentButton from "@/components/OpenAgentButton/OpenAgentButton";
-import ConfirmModal from "@/features/calendar/components/ConfirmModal/ConfirmModal";
-import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
+import { getApiErrorMessage } from "@/lib/api/errorCode";
+
+import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
+import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
+import { useToastStore } from "@/stores/useToastStore";
+
+import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
 import CalendarRail from "@/features/calendar/components/CalendarRail/CalendarRail";
 import DayDetailCard from "@/features/calendar/components/DayDetailCard/DayDetailCard";
 import EventDetailModal from "@/features/calendar/components/EventDetailModal/EventDetailModal";
 import LeaveSummaryCard from "@/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard";
 import MonthCalendar from "@/features/calendar/components/MonthCalendar/MonthCalendar";
-
-import { getApiErrorMessage } from "@/lib/api/errorCode";
+import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
 import { useRemoveScheduleMutation } from "@/features/calendar/hooks/mutations/useRemoveScheduleMutation";
 import { useSaveScheduleMutation } from "@/features/calendar/hooks/mutations/useSaveScheduleMutation";
 import { useCalendarData } from "@/features/calendar/hooks/useCalendarData";
@@ -20,22 +23,23 @@ import {
   useCalendarRail,
 } from "@/features/calendar/hooks/useCalendarFilters";
 import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs";
+import type { ScheduleSubmit } from "@/features/calendar/types";
 import {
   addMonths,
   buildMonthWeeks,
+  compareEvents,
   coversDate,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
-import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
-import type { ScheduleSubmit } from "@/features/calendar/types";
-import { DEPARTMENT_LABEL } from "@/features/project/overview/api/taskBoardApi";
-import { POSITION_LABEL } from "@/features/user/api/userApi";
+import { describePerson } from "@/features/user/constants/organization";
 import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
-import { useToastStore } from "@/stores/useToastStore";
 
 import styles from "./CalendarView.module.css";
 
 // 삭제·나가기 확인 문구 (휴가는 '취소', 남의 일정은 '나가기')
+// 모달이 닫혀 있을 때의 빈 참여자 목록. 매번 새 배열을 만들면 useMemo가 계속 다시 돈다.
+const NO_IDS: string[] = [];
+
 const CONFIRM_TEXT = {
   leave: {
     title: "이 일정에서 나갈까요?",
@@ -108,44 +112,69 @@ export default function CalendarView() {
   // 작성자가 아니어도 보이는 사람이 참가자면 남긴다 (그 사람 일정에 잡힌 시간이라 보여야 한다).
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
+      if (
+        removeSchedule.isPending &&
+        removeSchedule.variables?.event.id === event.id
+      ) {
+        return false;
+      }
+
       if (visibleMemberIds.has(event.memberId)) return true;
 
-      return (event.participantIds ?? []).some((id) => visibleMemberIds.has(id));
+      return (event.participantIds ?? []).some((id) =>
+        visibleMemberIds.has(id),
+      );
     });
-  }, [events, visibleMemberIds]);
+  }, [
+    events,
+    visibleMemberIds,
+    removeSchedule.isPending,
+    removeSchedule.variables,
+  ]);
 
+  // 그리드 칩과 같은 기준으로 늘어놓는다 (compareEvents 한 곳에서 정한다)
   const selectedEvents = useMemo(() => {
     return visibleEvents
       .filter((event) => coversDate(event, selectedDate))
-      .sort((a, b) => (a.time ?? "").localeCompare(b.time ?? ""));
+      .sort(compareEvents);
   }, [visibleEvents, selectedDate]);
 
   // 참여 인원 후보 — 이미 아는 사람 + 사내 검색 결과
   const [peopleQuery, setPeopleQuery] = useState("");
   const peopleSearch = useUserSearchQuery(peopleQuery);
 
+  // 지금 열려 있는 일정에 이미 들어 있는 참여자. 후보에서 빠지면 칩이 사라져 뺄 수도 없다.
+  const editingParticipantIds =
+    dialogs.dialog?.kind === "editor"
+      ? dialogs.dialog.draft.participantIds
+      : NO_IDS;
+
   const peopleOptions = useMemo(() => {
     const byId = new Map<string, PeopleOption>();
+    const keep = new Set(editingParticipantIds);
 
-    // 프로젝트·일정에서 이미 만난 사람 (검색어를 치기 전에도 고를 수 있다)
-    members.knownMembers.forEach(({ id, name }) => byId.set(id, { id, name }));
+    // 프로젝트·일정에서 이미 만난 사람 (검색어를 치기 전에도 고를 수 있다).
+    //
+    // 소속을 모르는 사람은 뺀다 — 일정 응답에는 이름밖에 없어서, 그대로 두면 한 목록 안에
+    // 소속이 보이는 줄과 안 보이는 줄이 섞여 무엇이 다른 건지 알 수 없게 된다.
+    // 이름을 치면 사내 검색으로 소속까지 붙어 나오므로 못 고르게 되는 건 아니다.
+    members.knownMembers.forEach(({ id, name, description }) => {
+      if (!description && !keep.has(id)) return;
 
-    // 검색 결과는 부서·직급까지 붙여 동명이인을 구분한다.
-    // 휴직자도 일정에 넣을 수 있지만(서버가 막는 건 퇴사자뿐) 모르고 넣으면 곤란하니 표시는 한다.
+      byId.set(id, { id, name, description });
+    });
+
+    // 검색 결과도 같은 문구 규칙(describePerson)을 쓴다
     peopleSearch.results.forEach((user) => {
-      const onLeave = user.status === "ON_LEAVE" ? " · 휴직" : "";
-
       byId.set(String(user.userId), {
         id: String(user.userId),
         name: user.name,
-        description: `${DEPARTMENT_LABEL[user.department]} · ${
-          POSITION_LABEL[user.position]
-        }${onLeave}`,
+        description: describePerson(user),
       });
     });
 
     return [...byId.values()];
-  }, [members.knownMembers, peopleSearch.results]);
+  }, [members.knownMembers, peopleSearch.results, editingParticipantIds]);
 
   // 모달이 닫히면 검색어도 비운다 (다음에 열었을 때 지난 검색이 남아 있지 않게)
   const closeEditor = () => {
@@ -165,11 +194,13 @@ export default function CalendarView() {
         // 서버가 받아준 걸 확인하고 닫는다.
         // 미리 닫으면 실패했을 때 입력하던 내용을 되살릴 방법이 없다.
         onSuccess: closeEditor,
-        onError: (error) =>
+        onError: (error) => {
+          dialogs.renewIdempotencyKey();
           showToast(
             getApiErrorMessage(error, "일정을 저장하지 못했어요"),
             "danger",
-          ),
+          );
+        },
       },
     );
   };
@@ -212,7 +243,8 @@ export default function CalendarView() {
 
   // 렌더에서 좁힌 타입이 콜백 안까지 이어지지 않아 미리 꺼내 둔다
   const editor = dialogs.dialog?.kind === "editor" ? dialogs.dialog : null;
-  const detail = dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
+  const detail =
+    dialogs.dialog?.kind === "detail" ? dialogs.dialog.event : null;
 
   const confirmText = dialogs.confirmation
     ? CONFIRM_TEXT[
@@ -255,6 +287,7 @@ export default function CalendarView() {
         <CalendarRail
           projects={members.projects}
           checkedProjectIds={rail.checkedProjectIds}
+          me={members.me}
           members={rail.railMembers}
           candidates={rail.railCandidates}
           onToggleProject={rail.toggleProject}
@@ -267,12 +300,16 @@ export default function CalendarView() {
             month={month}
             events={visibleEvents}
             membersById={members.membersById}
+            myId={members.myId}
             selectedDate={selectedDate}
             todayDate={today}
             onChangeMonth={(diff) =>
               setMonth((current) => addMonths(current, diff))
             }
             onResetMonth={handleResetMonth}
+            onPickMonth={(year, monthIndex) =>
+              setMonth(new Date(year, monthIndex, 1))
+            }
             onSelectDate={handleSelectDate}
           />
 
@@ -282,6 +319,7 @@ export default function CalendarView() {
               date={selectedDate}
               events={selectedEvents}
               membersById={members.membersById}
+              myId={members.myId}
               loading={loading}
               onAddEvent={() => dialogs.openCreate(selectedDate)}
               onSelectEvent={(eventId) => {
@@ -328,7 +366,7 @@ export default function CalendarView() {
         />
       )}
 
-      <ConfirmModal
+      <ConfirmDialog
         open={!!dialogs.confirmation}
         onClose={dialogs.cancelConfirmation}
         onConfirm={handleConfirm}
@@ -336,6 +374,7 @@ export default function CalendarView() {
         description={confirmText.description}
         confirmLabel={confirmText.confirmLabel}
         tone="danger"
+        closeOnConfirm
       />
     </div>
   );

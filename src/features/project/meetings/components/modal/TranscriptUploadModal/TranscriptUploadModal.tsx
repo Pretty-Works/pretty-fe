@@ -128,8 +128,8 @@ export default function TranscriptUploadModal({
           ✦
         </span>
         <p className={styles.infoText}>
-          업로드하면 AI가 기본 정보 · 주요 내용 · 후속 조치 칸을 자동으로 채웁니다.
-          채워진 내용은 언제든 직접 수정할 수 있습니다.
+          업로드하면 AI가 기본 정보 · 주요 내용 · 후속 조치 칸을 자동으로
+          채웁니다. 채워진 내용은 언제든 직접 수정할 수 있습니다.
         </p>
       </div>
     </Modal>

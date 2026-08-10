@@ -1,0 +1,50 @@
+.row {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+
+.row:not(.rowDisabled):hover {
+  background: var(--surface);
+}
+
+.titleClickable {
+  cursor: pointer;
+}
+
+.titleClickable:hover {
+  text-decoration: underline;
+}
+
+.rowDisabled .title {
+  color: var(--text-placeholder);
+}
+
+.title {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.title.done {
+  color: var(--text-placeholder);
+  text-decoration: line-through;
+}
+
+.meta {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--text-placeholder);
+}

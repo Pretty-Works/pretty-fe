@@ -3,41 +3,7 @@
 
 import { api } from "@/lib/api/client";
 
-// BE DepartmentType. 코드명으로 직렬화되므로 라벨은 화면에서 매핑한다.
-export type DepartmentType =
-  | "MANAGEMENT_SUPPORT"
-  | "HR"
-  | "FINANCE"
-  | "SALES"
-  | "PLANNING"
-  | "CONSULTING"
-  | "PM"
-  | "FRONTEND"
-  | "BACKEND"
-  | "DEVOPS"
-  | "DATA"
-  | "INFRA"
-  | "SECURITY"
-  | "QA";
-
-// BE DepartmentType의 description과 글자까지 같아야 한다.
-// 화면마다 다르게 부르면 같은 부서가 다른 팀처럼 읽힌다.
-export const DEPARTMENT_LABEL: Record<DepartmentType, string> = {
-  MANAGEMENT_SUPPORT: "경영지원",
-  HR: "인사",
-  FINANCE: "재무",
-  SALES: "영업",
-  PLANNING: "사업기획",
-  CONSULTING: "컨설팅",
-  PM: "PM",
-  FRONTEND: "FE",
-  BACKEND: "BE",
-  DEVOPS: "DevOps",
-  DATA: "Data",
-  INFRA: "Infra",
-  SECURITY: "Security",
-  QA: "품질보증",
-};
+import type { DepartmentType } from "@/features/user/constants/organization";
 
 export interface TeamRate {
   team: DepartmentType;
@@ -56,11 +22,7 @@ export interface TaskItem {
   dDay: number;
   overdue: boolean;
 
-  /*
-   * 서버가 판정한 권한. 화면이 다시 계산하지 않는다 —
-   * 규칙이 어긋나면 버튼은 열려 있는데 요청은 403이 난다.
-   */
-  // 담당자 또는 작성자
+  // 서버가 판정한 권한. 화면이 다시 계산하지 않는다 —
   canEdit: boolean;
   // 담당자만
   canToggle: boolean;

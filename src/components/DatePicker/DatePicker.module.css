@@ -4,7 +4,6 @@
   gap: 8px;
 }
 
-/* 라벨과 보조 문구를 한 줄에 둔다 — 문구가 생겨도 높이가 변하지 않는다 */
 .fieldLabelRow {
   display: flex;
   align-items: baseline;
@@ -84,7 +83,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--white);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-popover);
 }
 
 .head {
@@ -182,7 +181,6 @@
   font-weight: 600;
 }
 
-/* 기간 모드 — 시작일과 종료일 사이 */
 .inRange {
   background: var(--primary-bg);
   color: var(--primary);
@@ -199,49 +197,15 @@
 }
 
 .sat {
-  color: #3b82f6;
-}
-
-/* 확인 전 임시 선택을 글로도 보여 준다 */
-.summary {
-  margin-top: 10px;
-  padding-top: 10px;
-  border-top: 1px solid var(--line);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary);
-  text-align: center;
+  color: var(--info);
 }
 
 .foot {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.footActions {
-  display: flex;
-  align-items: center;
+  justify-content: flex-end;
   gap: 6px;
-}
-
-.todayBtn {
-  padding: 6px 12px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--primary);
-  background: var(--primary-bg);
-  cursor: pointer;
-  border: none;
-  outline: none;
-}
-
-.todayBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  margin-top: 8px;
 }
 
 .cancelBtn,
@@ -281,8 +245,4 @@
 .confirmBtn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.singleFoot {
-  justify-content: flex-start;
 }

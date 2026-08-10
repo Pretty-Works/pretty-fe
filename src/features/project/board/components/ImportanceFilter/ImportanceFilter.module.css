@@ -1,7 +1,5 @@
 .filter {
   display: flex;
-  /* 검색창과 나란히 있을 땐 줄지 않고(검색창이 먼저 줄어든다),
-     아래로 내려가 폭이 모자라면 그때만 줄을 바꾼다 */
   flex-shrink: 0;
   flex-wrap: wrap;
   gap: 6px;
@@ -11,7 +9,6 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  /* 나란히 놓이는 검색창(SearchBar)과 같은 높이 */
   height: 39px;
   padding: 0 11px;
   border: 1px solid var(--border);
@@ -20,7 +17,7 @@
   font-family: inherit;
   font-size: 12.5px;
   font-weight: 700;
-  color: #4d5261;
+  color: var(--text-muted);
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -31,13 +28,7 @@
 }
 
 .chipOn {
-  background: #f2f0fe;
-  border-color: #d1c7fa;
-  color: #6b4ad9;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
+  background: var(--primary-bg-tint);
+  border-color: var(--primary-border-strong);
+  color: var(--primary-strong);
 }

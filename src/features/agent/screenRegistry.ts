@@ -86,13 +86,7 @@ export function resolveRoute(
   return missing ? null : path;
 }
 
-/**
- * 지금 보고 있는 경로가 어느 화면인지. 에이전트에 넘길 screenContext.screen 이자,
- * "이미 그 화면에 있는지" 판단의 근거다.
- *
- * `/projects/new` 처럼 고정 경로가 `/projects/[projectId]/...` 보다 먼저 걸려야 하므로
- * 자리(=params)가 없는 패턴부터 본다.
- */
+/** 지금 보고 있는 경로가 어느 화면인지. 에이전트에 넘길 screenContext.screen 이자, */
 export function findScreenKey(pathname: string): ScreenKey | null {
   const keys = (Object.keys(SCREEN_ROUTES) as ScreenKey[]).sort(
     (a, b) =>
@@ -108,13 +102,7 @@ export function findScreenKey(pathname: string): ScreenKey | null {
   );
 }
 
-/**
- * 요청에 실어 보낼 화면 문맥. 기본은 `{ screen }` 하나뿐이다.
- *
- * 서버는 내용을 열어보지 않지만 screen(빈 문자열이 아닌 문자열)은 필수라 빠지면 400 이다.
- * 화면마다 더 넘길 값이 생기면 extra 로 얹는다 — 규격은 LLM 팀과 맞춘다.
- * 여기 없는 경로에서도 에이전트를 열 수 있으므로 그때는 UNKNOWN 으로 채운다.
- */
+/** 요청에 실어 보낼 화면 문맥. 기본은 `{ screen }` 하나뿐이다. */
 export function buildScreenContext(
   pathname: string,
   extra?: Record<string, unknown>,

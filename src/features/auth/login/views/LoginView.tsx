@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 
@@ -7,17 +7,18 @@ import { useRouter } from "next/navigation";
 
 import axios from "axios";
 
-import FormField from "@/components/FormField/FormField";
+import LogoWhite from "@/assets/brand/logo-white.png";
+import Logo from "@/assets/brand/logo.png";
+
 import Button from "@/components/Button/Button";
+import FormField from "@/components/FormField/FormField";
 import Modal from "@/components/Modal/Modal";
 
 import { SESSION_END_MESSAGE_KEY } from "@/lib/api/client";
-import { useLoginMutation } from "@/features/auth/login/hooks/mutations/useLoginMutation";
 import { useAuthStore } from "@/stores/useAuthStore";
 import { useToastStore } from "@/stores/useToastStore";
 
-import Logo from "@/assets/brand/logo.png";
-import LogoWhite from "@/assets/brand/logo-white.png";
+import { useLoginMutation } from "@/features/auth/login/hooks/mutations/useLoginMutation";
 
 import styles from "./LoginView.module.css";
 
@@ -120,7 +121,12 @@ export default function LoginView() {
       {/* 로그인 */}
       <section className={styles.side}>
         <form className={styles.card} onSubmit={handleSubmit}>
-          <Image className={styles.logo} src={Logo} alt="PRETTY WORKS" priority />
+          <Image
+            className={styles.logo}
+            src={Logo}
+            alt="PRETTY WORKS"
+            priority
+          />
 
           <FormField
             label="사번 (ID)"
@@ -156,7 +162,12 @@ export default function LoginView() {
             }}
           />
 
-          <Button htmlType="submit" size="big" display="full" loading={isPending}>
+          <Button
+            htmlType="submit"
+            size="big"
+            display="full"
+            loading={isPending}
+          >
             로그인
           </Button>
         </form>
@@ -168,9 +179,7 @@ export default function LoginView() {
         onClose={() => setServerError("")}
         title="로그인 실패"
         width={400}
-        footer={
-          <Button onClick={() => setServerError("")}>확인</Button>
-        }
+        footer={<Button onClick={() => setServerError("")}>확인</Button>}
       >
         <p className={styles.errorText}>{serverError}</p>
       </Modal>

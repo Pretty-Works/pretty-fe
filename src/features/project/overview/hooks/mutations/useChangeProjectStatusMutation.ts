@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { changeProjectStatus } from "../../api/overviewApi";
+import type { ProjectStatus } from "@/features/project/api/projectListApi";
 
-import type { ProjectStatus } from "@/features/home/api/homeApi";
+import { changeProjectStatus } from "../../api/overviewApi";
 
 export const useChangeProjectStatusMutation = (projectId: string) => {
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ export const useChangeProjectStatusMutation = (projectId: string) => {
       queryClient.invalidateQueries({
         queryKey: ["project", "detail", projectId],
       });
-      queryClient.invalidateQueries({ queryKey: ["home", "projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", "list"] });
     },
   });
 };
