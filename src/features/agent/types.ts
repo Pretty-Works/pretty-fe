@@ -28,7 +28,6 @@ export type AgentInteractionStatus =
 interface AgentActionBase {
   /** 버튼 문구 (예: "회의록 보러가기") */
   label: string;
-  /** screenRegistry 의 ScreenKey */
 }
 
 export interface NavigateAgentAction extends AgentActionBase {
@@ -138,7 +137,7 @@ export interface PendingInteraction {
   conversationId: number;
   runId: string;
   conversationTitle: string;
-  /** APPROVAL 만 있다 — 무엇을 저장·수정하는지 접어서 보여준다 */
+  /** APPROVAL 만 있다 — 무엇을 저장·수정·발송하는지. 승인 대상이라 펼친 채로 보여준다 */
   previewText?: string;
   requestedAt: string;
   /** 이 시각이 지나면 카드가 닫히고 실행도 만료된다 (뜬 뒤 30분) */
