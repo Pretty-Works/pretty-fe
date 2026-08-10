@@ -25,15 +25,27 @@ export type AgentInteractionStatus =
  * done 이벤트의 action. 일을 끝낸 뒤 "어느 화면으로 보낼지"를 가리킨다.
  * NAVIGATE 는 그냥 이동, FILL_FORM 은 이동한 화면의 폼을 formData 로 채운다.
  */
-export interface AgentAction {
-  type: "NAVIGATE" | "FILL_FORM";
+interface AgentActionBase {
   /** 버튼 문구 (예: "회의록 보러가기") */
   label: string;
   /** screenRegistry 의 ScreenKey */
+}
+
+export interface NavigateAgentAction extends AgentActionBase {
+  type: "NAVIGATE" | "FILL_FORM";
   targetScreen: string;
   params?: Record<string, unknown>;
   formData?: Record<string, unknown>;
 }
+
+export interface OpenExternalUrlAgentAction extends AgentActionBase {
+  type: "OPEN_EXTERNAL_URL";
+  targetScreen?: null;
+  params?: { url?: string };
+  formData?: null;
+}
+
+export type AgentAction = NavigateAgentAction | OpenExternalUrlAgentAction;
 
 /** approval_request — 실행 전에 사용자 승인이 필요한 요청 */
 export interface AgentApproval {

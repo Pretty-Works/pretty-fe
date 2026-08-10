@@ -13,6 +13,7 @@ import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt"
 import ConversationMenu from "@/features/agent/components/ConversationMenu/ConversationMenu";
 import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
+import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/ExternalUrlPrompt";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
@@ -87,7 +88,7 @@ export default function AgentView() {
   // 이미 그 화면을 보고 있으면 이동을 물어볼 이유가 없다.
   // 남겨 두면 나중에 다른 화면으로 옮겼을 때 뒤늦게 튀어나온다.
   useEffect(() => {
-    if (!pendingAction) return;
+    if (!pendingAction || pendingAction.type === "OPEN_EXTERNAL_URL") return;
     const route = resolveRoute(
       pendingAction.targetScreen,
       pendingAction.params,
@@ -219,8 +220,17 @@ export default function AgentView() {
             )}
 
             {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
-            {pendingAction && !isBusy && (
+            {pendingAction &&
+              pendingAction.type !== "OPEN_EXTERNAL_URL" &&
+              !isBusy && (
               <NavigatePrompt
+                action={pendingAction}
+                onDismiss={dismissAction}
+              />
+            )}
+
+            {pendingAction?.type === "OPEN_EXTERNAL_URL" && !isBusy && (
+              <ExternalUrlPrompt
                 action={pendingAction}
                 onDismiss={dismissAction}
               />

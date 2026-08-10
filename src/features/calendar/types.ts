@@ -10,6 +10,8 @@ export interface CalendarMember {
   name: string;
   color: MemberColorId;
   isMe?: boolean;
+  /** "FE · 팀장" — 인원 선택 목록에서 동명이인을 가른다. 출처에 정보가 없으면 비어 있다 */
+  description?: string;
 }
 
 // 캘린더에 표시되는 프로젝트. 체크하면 참여 인원이 레일에 쌓인다.

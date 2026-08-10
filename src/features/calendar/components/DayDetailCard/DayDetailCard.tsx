@@ -5,7 +5,10 @@ import StateView from "@/components/StateView/StateView";
 
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
 import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar";
-import { eventMemberColor } from "@/features/calendar/utils/memberColor";
+import {
+  calendarEventColors,
+  eventMemberColor,
+} from "@/features/calendar/utils/memberColor";
 
 import styles from "./DayDetailCard.module.css";
 
@@ -83,7 +86,11 @@ export default function DayDetailCard({
       >
         <ul className={styles.list}>
           {events.map((event) => {
-            const color = eventMemberColor(event, membersById, myId);
+            // 색은 왼쪽 막대만 맡는다 (월간 그리드 배너와 같은 톤).
+            // 이름까지 색을 입히면 줄마다 글자색이 달라져 목록이 산만해진다.
+            const tone = calendarEventColors(
+              eventMemberColor(event, membersById, myId),
+            );
             const names = involvedNames(event, membersById);
 
             // 셋 이상이면 앞의 둘만 적고 나머지는 수로 줄인다 (전체는 title로 확인)
@@ -98,7 +105,7 @@ export default function DayDetailCard({
               <li key={event.id} className={styles.row}>
                 <span
                   className={styles.bar}
-                  style={{ background: color }}
+                  style={{ background: tone.background }}
                   aria-hidden="true"
                 />
                 <span className={styles.time}>{event.time ?? "종일"}</span>
@@ -109,12 +116,7 @@ export default function DayDetailCard({
                 >
                   {event.title}
                 </button>
-                {/* 색은 막대와 같게. 여럿이면 중립색으로 둬야 한 사람 일정으로 안 읽힌다 */}
-                <span
-                  className={styles.owner}
-                  style={names.length > 1 ? undefined : { color }}
-                  title={names.join(", ")}
-                >
+                <span className={styles.owner} title={names.join(", ")}>
                   {label}
                 </span>
               </li>
