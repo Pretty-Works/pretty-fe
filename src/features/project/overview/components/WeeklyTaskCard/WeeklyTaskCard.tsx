@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
-
-import { weekOffsetOf } from "@/lib/date";
+import { useMemo, useState } from "react";
 
 import Button from "@/components/Button/Button";
+import CheckboxField from "@/components/CheckboxField/CheckboxField";
 import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import StateView from "@/components/StateView/StateView";
+import { weekOffsetOf } from "@/lib/date";
 
 import type {
   TaskBoard,
@@ -66,6 +66,21 @@ export default function WeeklyTaskCard({
 }: WeeklyTaskCardProps) {
   const { summary, groups } = board;
   const undone = summary.total - summary.done;
+
+  const [hideDone, setHideDone] = useState(false);
+
+  // 완료한 할 일을 접는다. 전부 지워진 팀은 밴드만 남으므로 함께 뺀다.
+  // 위 집계·도넛은 그대로 둔다 — 이 주의 달성률이지 지금 보고 있는 목록의 비율이 아니다.
+  const visibleGroups = useMemo(() => {
+    if (!hideDone) return groups;
+
+    return groups
+      .map((group) => ({
+        ...group,
+        tasks: group.tasks.filter((task) => !task.done),
+      }))
+      .filter((group) => group.tasks.length > 0);
+  }, [groups, hideDone]);
 
   // 프로젝트가 걸쳐 있는 연도만 고를 수 있다
   const years = useMemo(() => {
@@ -133,12 +148,20 @@ export default function WeeklyTaskCard({
           />
         </div>
 
-        {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
-        {onAddTask && (
-          <Button size="tiny" leftAccessory="+" onClick={onAddTask}>
-            할일 추가
-          </Button>
-        )}
+        <div className={styles.headRight}>
+          <CheckboxField
+            label="완료 숨기기"
+            checked={hideDone}
+            onChange={setHideDone}
+          />
+
+          {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
+          {onAddTask && (
+            <Button size="tiny" leftAccessory="+" onClick={onAddTask}>
+              할일 추가
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* 하나도 없으면 집계·팀 목록이 모두 빈 껍데기라 안내만 남긴다 */}
@@ -189,9 +212,13 @@ export default function WeeklyTaskCard({
           </div>
         </div>
 
-        {/* 팀별 할 일 */}
+        {/* 팀별 할 일 — 완료를 숨겨 다 사라졌으면 목록 자리에만 알린다.
+            위 집계는 이 주의 기록이라 그대로 남긴다 */}
+        {visibleGroups.length === 0 ? (
+          <StateView empty emptyText="진행 중인 할 일이 없어요." size="compact" />
+        ) : (
         <div className={styles.groups}>
-          {groups.map((group) => (
+          {visibleGroups.map((group) => (
             <div key={group.team} className={styles.group}>
               {/* 내 팀은 배지 대신 밴드 배경을 연보라로 구분 */}
               <div
@@ -222,6 +249,7 @@ export default function WeeklyTaskCard({
             </div>
           ))}
         </div>
+        )}
       </StateView>
     </section>
   );

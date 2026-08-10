@@ -13,7 +13,10 @@ import Logo from "@/assets/brand/logo.png";
 import Button from "@/components/Button/Button";
 import FormField from "@/components/FormField/FormField";
 import Modal from "@/components/Modal/Modal";
+
+import { SESSION_END_MESSAGE_KEY } from "@/lib/api/client";
 import { useAuthStore } from "@/stores/useAuthStore";
+import { useToastStore } from "@/stores/useToastStore";
 
 import { useLoginMutation } from "@/features/auth/login/hooks/mutations/useLoginMutation";
 
@@ -39,11 +42,22 @@ export default function LoginView() {
   // Query
   const { mutate: login, isPending } = useLoginMutation();
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const showToast = useToastStore((state) => state.showToast);
 
   // 로그인 뒤에는 언제나 홈에서 시작한다.
   // 세션이 끊겨 보던 화면으로 되돌리는 것보다, 로그인이 늘 같은 곳에서 끝나는 편이 예측하기 쉽다.
   // (프로젝트로 이어서 가려면 상단바 '프로젝트'가 마지막으로 보던 프로젝트를 기억한다)
   const AFTER_LOGIN = "/";
+
+  // Effect — 세션이 끊겨 밀려온 경우 왜 나왔는지 알린다.
+  // 인터셉터가 전체 새로고침으로 보내서 토스트 스토어가 비워지므로 sessionStorage로 넘겨받는다.
+  useEffect(() => {
+    const message = sessionStorage.getItem(SESSION_END_MESSAGE_KEY);
+    if (!message) return;
+
+    sessionStorage.removeItem(SESSION_END_MESSAGE_KEY);
+    showToast(message, "danger");
+  }, [showToast]);
 
   // Event Handler
   const handleSubmit = (e: React.FormEvent) => {
