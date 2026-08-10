@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useRouter } from "next/navigation";
 
@@ -8,6 +8,7 @@ import { getApiErrorMessage } from "@/lib/api/errorCode";
 
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
+import CheckboxField from "@/components/CheckboxField/CheckboxField";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
@@ -57,6 +58,7 @@ export default function HomeView() {
 
   const [handledIds, setHandledIds] = useState<number[]>([]); // 답하거나 중단한 요청
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
+  const [hideDoneTasks, setHideDoneTasks] = useState(false); // 완료 숨기기
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
   // Query
@@ -93,6 +95,18 @@ export default function HomeView() {
     (interaction) => !handledIds.includes(interaction.interactionId),
   );
   const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
+
+  // 완료한 할 일을 접는다. 전부 지워진 그룹은 프로젝트명만 남으므로 함께 뺀다.
+  const visibleTaskGroups = useMemo(() => {
+    if (!hideDoneTasks) return taskGroups;
+
+    return taskGroups
+      .map((group) => ({
+        ...group,
+        tasks: group.tasks.filter((task) => !task.done),
+      }))
+      .filter((group) => group.tasks.length > 0);
+  }, [taskGroups, hideDoneTasks]);
 
   // 확인할 요청이 없으면 박스째 감춘다 — 대부분 비어 있어 빈 칸이 늘 자리를 차지한다.
   // 조회 실패는 남긴다: 요청이 있는데 못 불러온 것일 수 있어 조용히 사라지면 안 된다.
@@ -275,25 +289,36 @@ export default function HomeView() {
         <section className={styles.panel}>
           <div className={styles.panelHead}>
             <h2 className={styles.panelTitle}>내 할 일</h2>
-            <Button
-              size="medium"
-              leftAccessory="+"
-              onClick={() => setTaskModalOpen(true)}
-            >
-              할 일
-            </Button>
+
+            <div className={styles.panelHeadRight}>
+              <CheckboxField
+                label="완료 숨기기"
+                checked={hideDoneTasks}
+                onChange={setHideDoneTasks}
+              />
+              <Button
+                size="medium"
+                leftAccessory="+"
+                onClick={() => setTaskModalOpen(true)}
+              >
+                할 일
+              </Button>
+            </div>
           </div>
 
           <StateView
             loading={isTasksLoading}
             error={isTasksError}
-            empty={!hasTasks}
+            empty={visibleTaskGroups.length === 0}
             loadingText="할 일을 불러오는 중이에요…"
             errorText="할 일을 불러오지 못했어요."
-            emptyText="등록된 할 일이 없어요."
+            /* 다 끝내서 비었는지, 아예 없는지를 구분해 알린다 */
+            emptyText={
+              hasTasks ? "진행 중인 할 일이 없어요." : "등록된 할 일이 없어요."
+            }
           >
             <MyTaskList
-              groups={taskGroups}
+              groups={visibleTaskGroups}
               onToggle={handleToggleTask}
               onSelect={handleSelectTask}
             />

@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import { LuArrowRight } from "react-icons/lu";
 
 import { resolveRoute, screenLabel } from "@/features/agent/screenRegistry";
-import type { AgentAction } from "@/features/agent/types";
+import type { NavigateAgentAction } from "@/features/agent/types";
 
 import styles from "./NavigatePrompt.module.css";
 
 interface NavigatePromptProps {
-  action: AgentAction;
+  action: NavigateAgentAction;
   onDismiss: () => void;
 }
 

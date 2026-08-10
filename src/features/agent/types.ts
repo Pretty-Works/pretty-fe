@@ -25,15 +25,26 @@ export type AgentInteractionStatus =
  * done 이벤트의 action. 일을 끝낸 뒤 "어느 화면으로 보낼지"를 가리킨다.
  * NAVIGATE 는 그냥 이동, FILL_FORM 은 이동한 화면의 폼을 formData 로 채운다.
  */
-export interface AgentAction {
-  type: "NAVIGATE" | "FILL_FORM";
+interface AgentActionBase {
   /** 버튼 문구 (예: "회의록 보러가기") */
   label: string;
-  /** screenRegistry 의 ScreenKey */
+}
+
+export interface NavigateAgentAction extends AgentActionBase {
+  type: "NAVIGATE" | "FILL_FORM";
   targetScreen: string;
   params?: Record<string, unknown>;
   formData?: Record<string, unknown>;
 }
+
+export interface OpenExternalUrlAgentAction extends AgentActionBase {
+  type: "OPEN_EXTERNAL_URL";
+  targetScreen?: null;
+  params?: { url?: string };
+  formData?: null;
+}
+
+export type AgentAction = NavigateAgentAction | OpenExternalUrlAgentAction;
 
 /** approval_request — 실행 전에 사용자 승인이 필요한 요청 */
 export interface AgentApproval {
@@ -131,7 +142,7 @@ export interface PendingInteraction {
   conversationId: number;
   runId: string;
   conversationTitle: string;
-  /** APPROVAL 만 있다 — 무엇을 저장·수정하는지 접어서 보여준다 */
+  /** APPROVAL 만 있다 — 무엇을 저장·수정·발송하는지. 승인 대상이라 펼친 채로 보여준다 */
   previewText?: string;
   requestedAt: string;
   /** 이 시각이 지나면 카드가 닫히고 실행도 만료된다 (뜬 뒤 30분) */

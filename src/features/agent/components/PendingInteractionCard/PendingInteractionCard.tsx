@@ -70,7 +70,7 @@ export default function PendingInteractionCard({
         <details
           className={styles.preview}
           onClick={(e) => e.stopPropagation()}
-        >
+         open>
           <summary className={styles.previewSummary}>내용 확인</summary>
           <pre className={styles.previewBody}>{interaction.previewText}</pre>
         </details>

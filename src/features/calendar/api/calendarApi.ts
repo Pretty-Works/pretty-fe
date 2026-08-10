@@ -13,6 +13,11 @@ import type {
   ScheduleType,
 } from "@/features/calendar/types";
 import type { ProjectStatus } from "@/features/project/api/projectListApi";
+import type {
+  DepartmentType,
+  PositionType,
+  StatusType,
+} from "@/features/user/constants/organization";
 
 interface BaseResponse<T> {
   errorCode: string | null;
@@ -178,10 +183,21 @@ export interface ServerProjectSummary {
 // 지금 누구와 일정을 맞춰야 하는지가 묻힌다.
 const RAIL_STATUSES: ProjectStatus[] = ["ONGOING", "HOLDING"];
 
+// 부서·직급은 사용자 검색(UserSearchResponse)과 같은 코드 값이다.
+// 인원 선택 목록에 "이미 아는 사람"과 "방금 검색한 사람"이 섞이는데,
+// 여기서 안 받아오면 같은 목록 안에서 소속이 보이는 줄과 안 보이는 줄이 갈린다.
+interface ProjectPerson {
+  userId: number;
+  name: string;
+  department: DepartmentType;
+  position: PositionType;
+  status: StatusType;
+}
+
 export interface ServerProjectDetail {
   projectId: number;
-  owner: { userId: number; name: string } | null;
-  members: { userId: number; name: string }[];
+  owner: ProjectPerson | null;
+  members: ProjectPerson[];
 }
 
 // 내가 참여 중인 프로젝트 (레일 체크박스).

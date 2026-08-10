@@ -106,7 +106,7 @@ const requestStreamWithRetry = async (
     try {
       await refreshAccessTokenOnce();
     } catch (refreshError) {
-      handleSessionExpired();
+      handleSessionExpired(refreshError);
       throw refreshError;
     }
     response = await requestStream(method, path, body, signal);

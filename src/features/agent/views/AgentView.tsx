@@ -14,6 +14,7 @@ import ConversationMenu from "@/features/agent/components/ConversationMenu/Conve
 import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
 import DeleteConversationDialog from "@/features/agent/components/DeleteConversationDialog/DeleteConversationDialog";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
+import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/ExternalUrlPrompt";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
@@ -97,7 +98,7 @@ export default function AgentView() {
   }, [autoApprove, pendingApproval, approve]);
 
   useEffect(() => {
-    if (!pendingAction) return;
+    if (!pendingAction || pendingAction.type === "OPEN_EXTERNAL_URL") return;
     const route = resolveRoute(
       pendingAction.targetScreen,
       pendingAction.params,
@@ -255,8 +256,17 @@ export default function AgentView() {
             )}
 
             {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
-            {pendingAction && !isBusy && (
+            {pendingAction &&
+              pendingAction.type !== "OPEN_EXTERNAL_URL" &&
+              !isBusy && (
               <NavigatePrompt
+                action={pendingAction}
+                onDismiss={dismissAction}
+              />
+            )}
+
+            {pendingAction?.type === "OPEN_EXTERNAL_URL" && !isBusy && (
+              <ExternalUrlPrompt
                 action={pendingAction}
                 onDismiss={dismissAction}
               />

@@ -11,6 +11,7 @@ import type {
   CalendarProject,
 } from "@/features/calendar/types";
 import { memberColor } from "@/features/calendar/utils/memberColor";
+import { describePerson } from "@/features/user/constants/organization";
 
 export interface CalendarPeople {
   /** 레일 체크박스 (진행 중인 내 프로젝트) */
@@ -46,9 +47,8 @@ export const useCalendarPeopleQuery = () => {
         // 상세 조회가 실패한 프로젝트는 선택해도 표시할 인원을 알 수 없으므로 레일에서 제외한다.
         if (!detail) return null;
 
-        const people = [detail?.owner, ...(detail?.members ?? [])].filter(
-          (person): person is { userId: number; name: string } =>
-            person != null,
+        const people = [detail.owner, ...detail.members].filter(
+          (person) => person != null,
         );
 
         const memberIds: string[] = [];
@@ -64,7 +64,13 @@ export const useCalendarPeopleQuery = () => {
 
           memberIds.push(id);
           if (!memberById.has(id)) {
-            memberById.set(id, { id, name: person.name, color: memberColor(id) });
+            memberById.set(id, {
+              id,
+              name: person.name,
+              color: memberColor(id),
+              // 인원 선택 목록에서 검색으로 찾은 사람과 같은 모양으로 보이게 한다
+              description: describePerson(person),
+            });
           }
         });
 

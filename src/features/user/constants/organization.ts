@@ -74,3 +74,16 @@ export const describeAffiliation = (person: {
   department: DepartmentType;
   position: PositionType;
 }) => `${departmentLabel(person.department)} · ${positionLabel(person.position)}`;
+
+/**
+ * "FE · 팀장 · 휴직" — 인원 선택 목록에 쓰는 한 줄.
+ *
+ * 같은 목록에 출처가 다른 사람이 섞이므로(이미 아는 사람 / 방금 검색한 사람) 문구를 한 곳에서 만든다.
+ * 휴직자도 일정에 넣을 수는 있지만(서버가 막는 건 퇴사자뿐) 모르고 넣으면 곤란해서 표시한다.
+ */
+export const describePerson = (person: {
+  department: DepartmentType;
+  position: PositionType;
+  status?: StatusType;
+}) =>
+  `${describeAffiliation(person)}${person.status === "ON_LEAVE" ? " · 휴직" : ""}`;

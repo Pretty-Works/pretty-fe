@@ -38,8 +38,12 @@ export function eventMemberColor(
     !!myId &&
     (event.memberId === myId || !!event.participantIds?.includes(myId));
 
-  return mine ? ME_COLOR : membersById[event.memberId]?.color;
+  if (mine) return ME_COLOR;
+
+  // 작성자를 모를 수 있다 — BE는 참가자 중 WRITER가 있을 때만 owner를 채우므로 없으면 null로 내려온다
+  return membersById[event.memberId]?.color;
 }
+
 
 // 아직 누구인지 모르는 작성자(이름·색을 못 받은 상태)용 중립색.
 // 여기서 내 색으로 떨어뜨리면 남의 일정을 내 일정으로 오인하게 된다.
@@ -48,7 +52,14 @@ const UNKNOWN_COLORS = {
   color: "var(--member-unknown-text)",
 };
 
-/** 월간 일정 배너 전용 저채도 배경과 읽기 쉬운 전경색. */
+/**
+ * 일정에 쓰는 저채도 배경과 읽기 쉬운 전경색.
+ *
+ * 월간 배너·레일 점·선택일 목록이 모두 이걸 쓴다. 같은 사람이 화면마다 다른 톤으로 나오면
+ * 같은 색인지 알아볼 수 없다.
+ *
+ * 색 번호를 style에 그대로 넣지 말 것 — `background: member-3`은 무시돼 그 자리가 통째로 사라진다.
+ */
 export function calendarEventColors(colorId?: MemberColorId) {
   if (!colorId) return UNKNOWN_COLORS;
 
