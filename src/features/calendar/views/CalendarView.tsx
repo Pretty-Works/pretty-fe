@@ -22,6 +22,7 @@ import {
   useCalendarFilterState,
   useCalendarRail,
 } from "@/features/calendar/hooks/useCalendarFilters";
+import { useScheduleDeepLink } from "@/features/calendar/hooks/useScheduleDeepLink";
 import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs";
 import type { ScheduleSubmit } from "@/features/calendar/types";
 import {
@@ -29,6 +30,7 @@ import {
   buildMonthWeeks,
   compareEvents,
   coversDate,
+  fromDateKey,
   toDateKey,
 } from "@/features/calendar/utils/calendar";
 import { describePerson } from "@/features/user/constants/organization";
@@ -39,6 +41,13 @@ import styles from "./CalendarView.module.css";
 // 삭제·나가기 확인 문구 (휴가는 '취소', 남의 일정은 '나가기')
 // 모달이 닫혀 있을 때의 빈 참여자 목록. 매번 새 배열을 만들면 useMemo가 계속 다시 돈다.
 const NO_IDS: string[] = [];
+
+// "YYYY-MM-DD"가 속한 달의 1일 — 알림에서 넘어온 일정이 있는 달로 옮길 때 쓴다
+const monthOf = (dateKey: string) => {
+  const date = fromDateKey(dateKey);
+
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+};
 
 const CONFIRM_TEXT = {
   leave: {
@@ -99,6 +108,17 @@ export default function CalendarView() {
 
   // 저장·삭제 실패는 앱 공통 토스트로 알린다 (모달 위에 또 모달을 띄우지 않는다)
   const showToast = useToastStore((state) => state.showToast);
+
+  // 알림에서 넘어온 일정(`/calendar?scheduleId=42`)을 그 달로 옮겨 열어 준다
+  useScheduleDeepLink(!!members.myId, {
+    onOpen: (event) => {
+      setMonth(monthOf(event.start));
+      setSelectedDate(event.start);
+      dialogs.openEvent(event);
+    },
+    // 지워진 일정이거나 조회 실패. 캘린더 자체는 그대로 쓸 수 있어 토스트로만 알린다.
+    onMissing: (message) => showToast(message, "danger"),
+  });
 
   // 레일에 보이는 사람(+나)의 일정만 캘린더에 그린다.
   // myId를 아직 모를 때 빈 문자열을 넣으면 작성자가 비어 있는 일정과 매칭돼 필터를 그냥 통과한다.

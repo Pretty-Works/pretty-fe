@@ -20,11 +20,23 @@ export type NotificationType =
   // 할 일 — 남에게 배정한 경우에만 간다. 본인이 자기에게 만든 건 알리지 않는다.
   | "TASK_ASSIGNED"
   | "TASK_DELETED"
-  | "TASK_DUE_DATE_CHANGED";
+  | "TASK_DUE_DATE_CHANGED"
+  // 게시판 — 우선순위 HIGH인 글에만 발행된다(알림 폭주 방지).
+  | "POST_CREATED"
+  | "POST_UPDATED"
+  // 회의록 — 수정 알림(MEETING_UPDATED)은 BE에서 폐기됐다(발행 중단 + 기존 행 삭제).
+  | "MEETING_CREATED"
+  // 캘린더 — 이 셋만 target이 SCHEDULE이다.
+  | "SCHEDULE_PARTICIPANT_ADDED"
+  | "SCHEDULE_PARTICIPANT_REMOVED"
+  | "SCHEDULE_TIME_CHANGED"
+  // 삭제된 일정이라 열 곳이 없다. BE가 target을 null로 내려보낸다.
+  | "SCHEDULE_DELETED";
 
-// 지금은 PROJECT 하나뿐이다. 마일스톤·지출은 단독 화면이 없고 프로젝트 상세의 탭이라
-// 그쪽 알림도 PROJECT로 내려온다.
-export type NotificationTargetType = "PROJECT";
+// PROJECT면 id가 projectId, SCHEDULE이면 scheduleId다.
+// 마일스톤·지출·게시판·회의록은 단독 화면이 없고 프로젝트 상세의 탭이라 전부 PROJECT로 내려오지만,
+// 일정은 프로젝트에 속하지 않아서(연결 자체가 없다) 따로 온다.
+export type NotificationTargetType = "PROJECT" | "SCHEDULE";
 
 export interface NotificationTarget {
   type: NotificationTargetType;
