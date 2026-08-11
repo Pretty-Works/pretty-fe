@@ -192,68 +192,54 @@ export default function ProjectOverviewView({
 
       {/* 마일스톤 완료율 · 주간 Task (2단) */}
       <div className={styles.columns}>
-        <StateView
+        {/* 로딩·실패도 카드 안에서 알린다 — 껍데기를 잃으면 어느 칸이 비었는지
+            문구로만 알 수 있고, 2단 그리드가 무너진다 */}
+        <MilestoneProgressCard
+          board={milestoneBoard}
           loading={isMilestoneLoading}
-          error={isMilestoneError || !milestoneBoard}
-          size="roomy"
-          loadingText="마일스톤을 불러오는 중이에요…"
-          errorText="마일스톤을 불러오지 못했어요."
-        >
-          {milestoneBoard && (
-            <MilestoneProgressCard
-              board={milestoneBoard}
-              editable={isOpenForContent && canManage}
-              onToggle={(milestoneId, done) =>
-                toggleMilestone(
-                  { milestoneId, done },
-                  { onError: notifyToggleFailure },
-                )
-              }
-            />
-          )}
-        </StateView>
+          error={isMilestoneError}
+          editable={isOpenForContent && canManage}
+          onToggle={(milestoneId, done) =>
+            toggleMilestone(
+              { milestoneId, done },
+              { onError: notifyToggleFailure },
+            )
+          }
+        />
 
-        <StateView
+        <WeeklyTaskCard
+          board={board}
           loading={isBoardLoading}
-          error={isBoardError || !board}
-          size="roomy"
-          loadingText="할 일을 불러오는 중이에요…"
-          errorText="할 일을 불러오지 못했어요."
-        >
-          {board && (
-            <WeeklyTaskCard
-              board={board}
-              weekOffset={weekOffset}
-              onWeekChange={setWeekOffset}
-              period={{
-                startDate: project.startDate,
-                endDate: project.endDate,
-              }}
-              onAddTask={
-                isOpenForContent ? () => setTaskModalOpen(true) : undefined
-              }
-              onToggleTask={(taskId, done) =>
-                toggleTask(
-                  { taskId: String(taskId), done },
-                  { onSuccess: () => notifyIfCarriedOver(taskId, done) },
-                )
-              }
-              onSelectTask={(task) => {
-                // 이 화면의 할 일은 모두 현재 프로젝트 소속이다
-                setEditingTask({
-                  id: String(task.taskId),
-                  content: task.content,
-                  projectId: project.projectId,
-                  dueDate: task.dueDate,
-                  // 남의 할 일도 작성자면 고칠 수 있다. 삭제 가능 여부는 별개라 서버 값을 그대로 넘긴다.
-                  canDelete: task.canDelete,
-                  assignee: task.assignee,
-                });
-                setTaskModalOpen(true);
-              }}
-            />
-          )}
-        </StateView>
+          error={isBoardError}
+          weekOffset={weekOffset}
+          onWeekChange={setWeekOffset}
+          period={{
+            startDate: project.startDate,
+            endDate: project.endDate,
+          }}
+          onAddTask={
+            isOpenForContent ? () => setTaskModalOpen(true) : undefined
+          }
+          onToggleTask={(taskId, done) =>
+            toggleTask(
+              { taskId: String(taskId), done },
+              { onSuccess: () => notifyIfCarriedOver(taskId, done) },
+            )
+          }
+          onSelectTask={(task) => {
+            // 이 화면의 할 일은 모두 현재 프로젝트 소속이다
+            setEditingTask({
+              id: String(task.taskId),
+              content: task.content,
+              projectId: project.projectId,
+              dueDate: task.dueDate,
+              // 남의 할 일도 작성자면 고칠 수 있다. 삭제 가능 여부는 별개라 서버 값을 그대로 넘긴다.
+              canDelete: task.canDelete,
+              assignee: task.assignee,
+            });
+            setTaskModalOpen(true);
+          }}
+        />
       </div>
 
       {/* 할 일 추가 — 이 화면은 프로젝트가 정해져 있어 고정으로 연다.

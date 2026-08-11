@@ -4,7 +4,9 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 import Chip from "@/components/Chip/Chip";
 import FormField from "@/components/FormField/FormField";
-import SuggestList from "@/components/SuggestList/SuggestList";
+import SuggestList, {
+  type SuggestBadge,
+} from "@/components/SuggestList/SuggestList";
 import { useClickOutside } from "@/hooks/useClickOutside";
 
 import styles from "./PeoplePicker.module.css";
@@ -14,6 +16,10 @@ export interface PeopleOption {
   name: string;
   /** 소속·직급 등 이름 옆에 함께 보여줄 값 */
   description?: string;
+  /** 프로젝트 내 역할 (PM 등) — 목록에서 강조 표식으로 선다 */
+  role?: string;
+  onLeave?: boolean;
+  isOwner?: boolean;
 }
 
 interface PeoplePickerProps {
@@ -49,6 +55,22 @@ interface PeoplePickerProps {
 
 const labelOf = (person: PeopleOption) =>
   person.description ? `${person.name} · ${person.description}` : person.name;
+
+// 담당자 선택(AssigneePicker)과 같은 규칙 — 역할은 강조, 휴직은 회색, 책임자는 테두리.
+// 휴직자도 넣을 수는 있지만(서버가 막는 건 퇴사자뿐) 모르고 넣으면 곤란해서 표시한다.
+const badgesOf = (person: PeopleOption): SuggestBadge[] => {
+  const badges: SuggestBadge[] = [];
+
+  if (person.role) badges.push({ text: person.role });
+  if (person.onLeave) badges.push({ text: "휴직", tone: "muted" });
+  if (person.isOwner) badges.push({ text: "책임자", tone: "outline" });
+
+  return badges;
+};
+
+// 검색은 눈에 보이는 값을 모두 훑는다 — 이름·소속뿐 아니라 "PM"으로도 찾을 수 있어야 한다
+const searchTextOf = (person: PeopleOption) =>
+  [labelOf(person), person.role].filter(Boolean).join(" ");
 
 // 이름을 검색해 목록에서 고르면 아래에 칩으로 쌓이는 인원 선택 필드.
 // 회의록 작성 · 일정 모달 등에서 공통으로 쓴다.
@@ -97,7 +119,7 @@ export default function PeoplePicker({
   // 이미 담긴 사람과 고정 인원은 목록에서 뺀다 (중복 추가 방지)
   const suggestions = options.filter(
     (option) =>
-      labelOf(option).includes(query.trim()) &&
+      searchTextOf(option).includes(query.trim()) &&
       !value.includes(option.id) &&
       !pinnedIds.includes(option.id),
   );
@@ -161,7 +183,9 @@ export default function PeoplePicker({
           <SuggestList
             items={suggestions.map((person) => ({
               id: person.id,
-              label: labelOf(person),
+              label: person.name,
+              meta: person.description,
+              badges: badgesOf(person),
             }))}
             onSelect={add}
             emptyText={searching ? "찾는 중이에요…" : emptyText}

@@ -2,34 +2,29 @@ import { useMemo } from "react";
 
 import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
 
-import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
+import { describeAffiliation } from "@/features/user/constants/organization";
 
+// 참여자 명단을 쓴다 — 프로젝트 상세 응답에는 부서·직급이 없어 역할만 보여줄 수 있었다.
+// 할 일 담당자 선택(AssigneePicker)과 같은 출처라 목록에 보이는 값도 같아진다.
 export const useAttendeeOptions = (
   projectId: string,
   excludeUserId?: number,
 ) => {
-  const { data: project } = useProjectDetailQuery(projectId);
+  const { data: members } = useProjectMembersQuery(projectId);
 
   return useMemo<PeopleOption[]>(() => {
-    if (!project) return [];
+    if (!members) return [];
 
-    const people = [
-      {
-        id: String(project.owner.userId),
-        name: project.owner.name,
-        description: project.owner.ownerRole ?? undefined,
-      },
-      ...project.members.map((member) => ({
+    return members
+      .filter((member) => member.userId !== excludeUserId)
+      .map((member) => ({
         id: String(member.userId),
         name: member.name,
-        description: member.role ?? undefined,
-      })),
-    ];
-
-    const unique = [...new Map(people.map((p) => [p.id, p])).values()];
-
-    return excludeUserId == null
-      ? unique
-      : unique.filter((p) => p.id !== String(excludeUserId));
-  }, [project, excludeUserId]);
+        description: describeAffiliation(member),
+        role: member.role ?? undefined,
+        onLeave: member.status === "ON_LEAVE",
+        isOwner: member.isOwner,
+      }));
+  }, [members, excludeUserId]);
 };

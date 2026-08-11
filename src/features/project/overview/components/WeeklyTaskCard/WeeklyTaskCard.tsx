@@ -20,7 +20,10 @@ import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
 import styles from "./WeeklyTaskCard.module.css";
 
 interface WeeklyTaskCardProps {
-  board: TaskBoard;
+  /** 조회 전·실패면 없다 */
+  board?: TaskBoard | null;
+  loading?: boolean;
+  error?: boolean;
   weekOffset: number;
   onWeekChange: (offset: number) => void;
   // 연도 목록을 만들 프로젝트 기간. 없으면 라벨에 목록이 붙지 않는다
@@ -55,7 +58,37 @@ const periodLabel = (weekStart: string, weekEnd: string) => {
   return `${start} – ${end}`;
 };
 
+// 카드와 제목은 로딩·실패에도 남긴다 — 껍데기까지 사라지면 어느 칸이 비었는지
+// 문구로만 알 수 있고, 2단 그리드에 빨간 줄 하나만 떠 있게 된다.
+// 주차 이동·완료 숨기기는 주차 정보(board)가 있어야 그릴 수 있어 상태 표시만 남긴다.
 export default function WeeklyTaskCard({
+  board,
+  loading = false,
+  error = false,
+  ...props
+}: WeeklyTaskCardProps) {
+  if (!board) {
+    return (
+      <section className={styles.card}>
+        <div className={styles.head}>
+          <h2 className={styles.title}>주간 달성률</h2>
+        </div>
+
+        <StateView
+          loading={loading}
+          /* 다 불러왔는데 board가 없으면 실패다 (StateView는 loading을 먼저 본다) */
+          error={error || !loading}
+          loadingText="할 일을 불러오는 중이에요…"
+          errorText="할 일을 불러오지 못했어요."
+        />
+      </section>
+    );
+  }
+
+  return <WeeklyTaskBoardCard board={board} {...props} />;
+}
+
+function WeeklyTaskBoardCard({
   board,
   weekOffset,
   onWeekChange,
@@ -63,7 +96,9 @@ export default function WeeklyTaskCard({
   onAddTask,
   onToggleTask,
   onSelectTask,
-}: WeeklyTaskCardProps) {
+}: Omit<WeeklyTaskCardProps, "board" | "loading" | "error"> & {
+  board: TaskBoard;
+}) {
   const { summary, groups } = board;
   const undone = summary.total - summary.done;
 
@@ -229,46 +264,50 @@ export default function WeeklyTaskCard({
         {/* 팀별 할 일 — 완료를 숨겨 다 사라졌으면 목록 자리에만 알린다.
             위 집계는 이 주의 기록이라 그대로 남긴다 */}
         {visibleGroups.length === 0 ? (
-          <StateView empty emptyText="진행 중인 할 일이 없어요." size="compact" />
+          <StateView
+            empty
+            emptyText="진행 중인 할 일이 없어요."
+            size="compact"
+          />
         ) : (
-        <div className={styles.groups}>
-          {visibleGroups.map((group) => (
-            <div key={group.team} className={styles.group}>
-              {/* 내 팀은 배지 대신 밴드 배경을 연보라로 구분 */}
-              <div
-                className={`${styles.band} ${group.isMine ? styles.bandMine : ""}`}
-              >
-                {DEPARTMENT_LABEL[group.team]}
-              </div>
+          <div className={styles.groups}>
+            {visibleGroups.map((group) => (
+              <div key={group.team} className={styles.group}>
+                {/* 내 팀은 배지 대신 밴드 배경을 연보라로 구분 */}
+                <div
+                  className={`${styles.band} ${group.isMine ? styles.bandMine : ""}`}
+                >
+                  {DEPARTMENT_LABEL[group.team]}
+                </div>
 
-              {group.tasks.map((task) => (
-                <TaskRow
-                  key={task.taskId}
-                  title={task.content}
-                  dday={task.dDay}
-                  done={task.done}
-                  meta={task.assignee.name}
-                  /* 권한은 서버가 준 값만 쓴다. 화면이 팀·담당자로 다시 계산하면
+                {group.tasks.map((task) => (
+                  <TaskRow
+                    key={task.taskId}
+                    title={task.content}
+                    dday={task.dDay}
+                    done={task.done}
+                    meta={task.assignee.name}
+                    /* 권한은 서버가 준 값만 쓴다. 화면이 팀·담당자로 다시 계산하면
                      서버 규칙과 어긋나 버튼은 열려 있는데 요청은 403이 난다.
                      완료는 담당자만(canToggle), 수정은 담당자 또는 작성자(canEdit). */
-                  canToggle={task.canToggle}
-                  onToggle={() => {
-                    // 완료로 바꾼 것만 남긴다 — 되돌린 줄은 어차피 목록에 그대로 있다
-                    if (!task.done) keepVisible(task.taskId);
+                    canToggle={task.canToggle}
+                    onToggle={() => {
+                      // 완료로 바꾼 것만 남긴다 — 되돌린 줄은 어차피 목록에 그대로 있다
+                      if (!task.done) keepVisible(task.taskId);
 
-                    onToggleTask?.(task.taskId, !task.done);
-                  }}
-                  onSelect={
-                    task.canEdit && onSelectTask
-                      ? () => onSelectTask(task)
-                      : undefined
-                  }
-                  leaving={leavingIds.includes(task.taskId)}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
+                      onToggleTask?.(task.taskId, !task.done);
+                    }}
+                    onSelect={
+                      task.canEdit && onSelectTask
+                        ? () => onSelectTask(task)
+                        : undefined
+                    }
+                    leaving={leavingIds.includes(task.taskId)}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
         )}
       </StateView>
     </section>
