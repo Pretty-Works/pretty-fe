@@ -41,9 +41,9 @@
 }
 
 .itemOn {
-  background: var(--primary-bright);
-  color: var(--primary);
-  font-weight: 500;
+  background: var(--selected-bg);
+  color: var(--selected-on);
+  font-weight: 600;
 }
 
 .itemLabel {
@@ -58,7 +58,7 @@
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 500;
-  color: var(--primary);
+  color: var(--text-sub);
 }
 
 .dot {

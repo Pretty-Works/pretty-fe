@@ -27,7 +27,7 @@
 }
 
 .pageTitle {
-  font-size: 22px;
+  font-size: var(--fs-page-title);
   font-weight: 700;
   color: var(--text);
 }
@@ -58,7 +58,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 22px 24px;
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-card);
 }

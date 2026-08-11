@@ -6,6 +6,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { LuMenu } from "react-icons/lu";
+
 import Logo from "@/assets/brand/logo.png";
 import AgentActiveIcon from "@/assets/icons/menu/agent-active.svg";
 import AgentIcon from "@/assets/icons/menu/agent.svg";
@@ -26,6 +28,8 @@ import { useLastProjectStore } from "@/features/project/stores/useLastProjectSto
 import { describeAffiliation } from "@/features/user/constants/organization";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
+import GnbDrawer from "./GnbDrawer";
+
 import styles from "./Gnb.module.css";
 
 export default function Gnb() {
@@ -38,6 +42,7 @@ export default function Gnb() {
   const showUnread = folded && hasUnread;
 
   const [menuOpen, setMenuOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { mutate: logout } = useLogoutMutation();
   const { data: me } = useMyProfileQuery();
@@ -88,39 +93,63 @@ export default function Gnb() {
   }, [menuOpen]);
 
   const menuItems = [
-    { label: "홈", path: "/", paths: ["/"] },
+    { key: "home", label: "홈", path: "/", paths: ["/"] },
     // 활성 표시는 목적지가 아니라 지금 어디에 있는지로 판단한다
-    { label: "프로젝트", path: projectPath, paths: ["/projects"] },
-    { label: "캘린더", path: "/calendar", paths: ["/calendar"] },
+    { key: "projects", label: "프로젝트", path: projectPath, paths: ["/projects"] },
+    { key: "calendar", label: "캘린더", path: "/calendar", paths: ["/calendar"] },
   ];
+
+  const withActive = menuItems.map((menu) => ({
+    key: menu.key,
+    label: menu.label,
+    path: menu.path,
+    active: menu.paths.some((path) =>
+      path === "/" ? pathname === "/" : pathname.startsWith(path),
+    ),
+  }));
+
+  // 서랍이 프로젝트 하위 메뉴를 펼칠 대상. '/projects/new' 는 아직 프로젝트가 아니다
+  const projectParts = pathname.split("/");
+  const openProjectId =
+    projectParts[1] === "projects" &&
+    projectParts[2] &&
+    projectParts[2] !== "new"
+      ? projectParts[2]
+      : null;
 
   return (
     <header className={styles.gnb}>
       <div className={styles.container}>
         <div className={styles.brand}>
+          {/* 좁아지면 가운데 메뉴와 프로젝트 좌측 메뉴가 여기로 들어온다 */}
+          <button
+            type="button"
+            className={styles.hamburger}
+            onClick={() => setDrawerOpen(true)}
+            aria-haspopup="dialog"
+            aria-expanded={drawerOpen}
+            aria-label="전체 메뉴 열기"
+          >
+            <LuMenu size={22} aria-hidden="true" />
+          </button>
+
           <Link href="/" onClick={guard("/")}>
             <Image src={Logo} alt="Pretty Works 홈" priority />
           </Link>
         </div>
 
         <nav className={styles.menu} aria-label="주요 메뉴">
-          {menuItems.map((menu) => {
-            const isActive = menu.paths.some((path) =>
-              path === "/" ? pathname === "/" : pathname.startsWith(path),
-            );
-
-            return (
-              <Link
-                key={menu.label}
-                href={menu.path}
-                onClick={guard(menu.path)}
-                className={cx(styles.menuItem, isActive && styles.active)}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {menu.label}
-              </Link>
-            );
-          })}
+          {withActive.map((menu) => (
+            <Link
+              key={menu.key}
+              href={menu.path}
+              onClick={guard(menu.path)}
+              className={cx(styles.menuItem, menu.active && styles.active)}
+              aria-current={menu.active ? "page" : undefined}
+            >
+              {menu.label}
+            </Link>
+          ))}
         </nav>
 
         <div className={styles.right}>
@@ -213,6 +242,15 @@ export default function Gnb() {
           </div>
         </div>
       </div>
+
+      <GnbDrawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        items={withActive}
+        projectId={openProjectId}
+        activeSegment={projectParts[3] ?? ""}
+        guard={guard}
+      />
     </header>
   );
 }

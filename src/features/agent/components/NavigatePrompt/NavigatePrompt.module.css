@@ -1,20 +1,20 @@
+/* 카드가 아니라 답변에 이어지는 한 문단이다 —
+   테두리와 배경을 걷어야 "답변 → 제안"이 한 흐름으로 읽힌다.
+   묻는 문장은 답변 본문과 같은 크기·행간을 쓴다 */
 .card {
   display: flex;
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  padding: 13px 14px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--white);
 }
 
 .text {
-  font-size: 13.5px;
-  line-height: 1.5;
+  font-size: 15px;
+  line-height: 1.7;
   color: var(--text);
 }
 
+/* 어느 화면으로 가는지가 이 제안의 핵심이라 문장에서 먼저 눈에 들어와야 한다 */
 .text b {
   font-weight: 700;
   color: var(--primary);
@@ -44,12 +44,12 @@
 
 .primary {
   border: none;
-  background: var(--primary);
-  color: var(--white);
+  background: var(--action);
+  color: var(--action-on);
 }
 
 .primary:hover {
-  background: var(--primary-light);
+  background: var(--action-hover);
 }
 
 .primary:disabled {

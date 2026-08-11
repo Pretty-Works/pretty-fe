@@ -142,19 +142,26 @@
   --scrollbar-thumb: rgba(0, 0, 0, 0.2);
 
   /* ===== Shadow =====
-     이름은 "무엇을 띄우는가"다. 크기가 아니라 역할로 고른다. */
-  --shadow-card: 0 4px 10px rgba(0, 0, 0, 0.05);
-  --shadow-card-sm: 0 4px 5px rgba(0, 0, 0, 0.05);
-  --shadow-panel: 0 2px 10px rgba(69, 41, 120, 0.05);
-  --shadow-raised: 0 1px 3px rgba(0, 0, 0, 0.08);
-  --shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.1);
-  --shadow-dropdown-sm: 0 8px 20px rgba(0, 0, 0, 0.1);
-  --shadow-popover: 0 12px 28px rgba(0, 0, 0, 0.12);
-  --shadow-menu: 0 8px 24px rgba(69, 41, 120, 0.16);
-  --shadow-menu-neutral: 0 8px 24px rgba(26, 26, 38, 0.14);
-  --shadow-popover-brand: 0 6px 20px rgba(69, 41, 120, 0.12);
-  --shadow-modal: 0 18px 46px rgba(0, 0, 0, 0.22);
-  --shadow-drawer: -8px 0 24px rgba(0, 0, 0, 0.08);
+     이름은 "무엇을 띄우는가"다. 크기가 아니라 역할로 고른다.
+
+     깊이는 두 단계뿐이다.
+     문서 위에 그냥 놓인 것(카드·패널)은 띄우지 않는다 — 1px 링으로 경계만 긋는다.
+     정말로 떠 있는 것(드롭다운·모달·서랍)만 그림자를 갖는다.
+     둘 다 그림자를 가지면 화면에 층이 너무 많아져 답답해진다. */
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-card-sm: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --shadow-panel: 0 0 0 1px rgba(69, 41, 120, 0.06);
+  --shadow-raised: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-dropdown: 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-dropdown-sm: 0 6px 14px rgba(0, 0, 0, 0.08);
+  --shadow-popover: 0 8px 20px rgba(0, 0, 0, 0.1);
+  --shadow-menu: 0 6px 18px rgba(69, 41, 120, 0.12);
+  --shadow-menu-neutral: 0 6px 18px rgba(26, 26, 38, 0.1);
+  --shadow-popover-brand: 0 5px 14px rgba(69, 41, 120, 0.1);
+  --shadow-modal: 0 14px 36px rgba(0, 0, 0, 0.18);
+  --shadow-drawer: -6px 0 18px rgba(0, 0, 0, 0.06);
+  /* 왼쪽에서 열리는 서랍 — 그림자도 반대로 진다 */
+  --shadow-drawer-left: 6px 0 18px rgba(0, 0, 0, 0.06);
 
   /* ===== Toast — 유일하게 어두운 표면이라 자기 색 세트를 가진다 ===== */
   --toast-bg: rgba(22, 24, 31, 0.8);
@@ -175,4 +182,54 @@
   --tone-purple: var(--primary-light);
   --tone-gray: var(--neutral);
   --tone-danger: var(--danger);
+
+  /* ===== Action — "눌러서 실행하는 것"의 색 =====
+     브랜드색(--primary)에서 갈라낸다. 보라는 AI·브랜드 표시에 남기고
+     주 동작은 무채색으로 통일한다 — 화면에서 보라가 곧 실행을 뜻하면
+     AI 표시와 실행 버튼을 같은 색으로 읽게 된다.
+
+     값은 이미 있는 글자색을 그대로 쓴다. 거의 같은 검정을 하나 더 만들면
+     이 파일 첫 줄이 경고하는 "화면마다 미묘하게 다른 검정"이 생긴다. */
+  /* 순검정에 가까운 --text 는 흰 글자를 얹으면 대비가 너무 세서 눈이 아프다.
+     한 단계 부드러운 먹색을 기본으로 두고, 눌리는 느낌은 hover 에서 더 진해지며 낸다 */
+  --action: var(--text-strong);
+  --action-hover: var(--text);
+  --action-on: var(--white);
+  --action-disabled: var(--surface-muted);
+  --action-disabled-on: var(--text-disabled);
+
+  /* 고른 것 표시 — 채워서 강조하는 대신 옅게 깐다 (필터·탭) */
+  --selected-bg: var(--surface-sunken);
+  --selected-on: var(--text);
+  --selected-border: var(--border-strong);
+
+  /* ===== Radius =====
+     크기가 아니라 "무엇을 감싸는가"로 고른다. 바깥이 가장 크고 안으로 갈수록 작아진다.
+     panel 을 control 과 같은 값까지 내리면 중첩이 평평해 보이므로 한 단계는 남긴다. */
+  --radius-modal: 16px;
+  --radius-panel: 12px;
+  --radius-control: 8px;
+  --radius-pill: 999px;
+
+  /* ===== Type =====
+     여러 화면에 똑같이 반복되는 두 단계만 이름을 갖는다.
+     본문·캡션은 자리마다 달라서 토큰으로 묶으면 오히려 안 맞는다.
+
+     굵기는 600 이 기본이다. 650 은 패널 제목, 700 은 페이지 제목에만 쓴다 —
+     작은 제목과 버튼까지 700 이면 화면 전체가 굵어져 위계가 사라진다.
+     (650 은 Pretendard Variable 이라서 낼 수 있는 값이다) */
+  --fs-page-title: 26px;
+  --fs-panel-title: 18px;
+
+  /* ===== Spacing =====
+     같은 묶음 안은 좁게, 묶음 사이는 넓게. 그 경계가 section-gap 이다.
+     px 을 직접 적기 전에 여기에 이름이 있는지 먼저 본다. */
+  --page-pad-top: 36px;
+  --page-pad-bottom: 64px;
+  /* 흰 패널끼리, 또는 페이지의 큰 덩어리끼리 벌리는 간격 */
+  --section-gap: 28px;
+  /* 흰 패널 안쪽 여백 — 위·좌·우. 아래는 목록이 자기 여백을 갖는 경우가 많아 따로 준다 */
+  --panel-pad: 24px;
+  /* 패널 제목과 그 아래 내용 사이 */
+  --panel-head-gap: 18px;
 }

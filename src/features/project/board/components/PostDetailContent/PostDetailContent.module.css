@@ -51,7 +51,7 @@
 
 .card {
   padding: 24px;
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-card-sm);
 }

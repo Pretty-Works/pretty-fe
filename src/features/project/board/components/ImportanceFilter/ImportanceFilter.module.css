@@ -28,7 +28,7 @@
 }
 
 .chipOn {
-  background: var(--primary-bg-tint);
-  border-color: var(--primary-border-strong);
-  color: var(--primary-strong);
+  background: var(--selected-bg);
+  border-color: var(--selected-border);
+  color: var(--selected-on);
 }

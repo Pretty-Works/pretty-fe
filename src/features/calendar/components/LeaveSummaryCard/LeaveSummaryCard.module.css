@@ -4,7 +4,7 @@
   min-height: 124px;
   padding: 20px 23px;
   border: none;
-  border-radius: 16px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-panel);
 }

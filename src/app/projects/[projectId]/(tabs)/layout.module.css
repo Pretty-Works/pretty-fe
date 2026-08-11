@@ -2,7 +2,7 @@
   container: project-area / inline-size;
   max-width: 1240px;
   margin: 0 auto;
-  padding: 24px 20px 48px;
+  padding: var(--page-pad-top) 20px var(--page-pad-bottom);
 }
 
 .container {
@@ -17,7 +17,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--section-gap);
 }
 
 @container project-area (max-width: 900px) {

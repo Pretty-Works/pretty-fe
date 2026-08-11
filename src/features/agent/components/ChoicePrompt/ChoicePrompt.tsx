@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { cx } from "@/lib/cx";
+
 import styles from "./ChoicePrompt.module.css";
 
 export interface SelectOption {
@@ -11,7 +13,18 @@ export interface SelectOption {
   onSelect: () => void;
 }
 
+/*
+ * 이 카드는 답변이 아니라 답변으로 가는 도중이다. 그 사실을 적어 두지 않으면
+ * 사용자는 이걸 최종 답변으로 읽고, 왜 자기한테 묻는지 모른 채 고르게 된다.
+ */
+const STAGE_NOTE = {
+  question: "답변을 이어가려면 확인이 필요해요",
+  approval: "승인하면 바로 실행돼요",
+} as const;
+
 interface ChoicePromptProps {
+  /** 무엇을 묻는 자리인지 — 되묻기(question)인지 실행 승인(approval)인지 */
+  kind?: keyof typeof STAGE_NOTE;
   /** 짧은 머리말 (예: "다른 방법", "작성 방식") */
   label?: string;
   /** 무엇을 묻는지 (질문 문구 · 승인 요약) */
@@ -31,6 +44,7 @@ interface ChoicePromptProps {
 
 // 공통 선택 UI (옵션 + 직접입력)
 export default function ChoicePrompt({
+  kind = "question",
   label,
   title,
   preview,
@@ -56,6 +70,18 @@ export default function ChoicePrompt({
     ? checkedIds.length > 0 || value.trim().length > 0
     : value.trim().length > 0;
 
+  /*
+   * 몇 개를 고를 수 있는지는 눌러 보기 전에는 알 수 없다 — 체크박스와 버튼이
+   * 생김새로 갈리긴 하지만 그걸 아는 사람만 안다. 보기가 둘 이상일 때만 적는다.
+   * 승인은 승인/거절 중 하나인 게 자명해서 붙이지 않는다.
+   */
+  const modeHint =
+    kind === "question" && options.length > 1
+      ? multiple
+        ? "여러 개 고를 수 있어요"
+        : "하나만 고를 수 있어요"
+      : null;
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!canSubmit) return;
@@ -72,8 +98,19 @@ export default function ChoicePrompt({
     <div className={styles.wrap}>
       {(title || label) && (
         <div className={styles.head}>
-          {label && <span className={styles.label}>{label}</span>}
-          {title && <p className={styles.title}>{title}</p>}
+          <div className={styles.stage}>
+            {label && <span className={styles.label}>{label}</span>}
+            <span className={styles.note}>{STAGE_NOTE[kind]}</span>
+          </div>
+
+          {title && (
+            <p className={styles.title}>
+              {title}
+              {modeHint && (
+                <span className={styles.mode}> ({modeHint})</span>
+              )}
+            </p>
+          )}
 
           {preview && (
             <details className={styles.preview}>
@@ -84,28 +121,36 @@ export default function ChoicePrompt({
         </div>
       )}
 
-      {multiple
-        ? options.map((option) => (
-            <label key={option.id} className={styles.check}>
-              <input
-                type="checkbox"
-                className={styles.checkbox}
-                checked={checkedIds.includes(option.id)}
-                onChange={() => toggle(option.id)}
-              />
-              {option.label}
-            </label>
-          ))
-        : options.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={styles.option}
-              onClick={option.onSelect}
-            >
-              {option.label}
-            </button>
-          ))}
+      <div className={styles.options}>
+        {multiple
+          ? options.map((option) => (
+              <label
+                key={option.id}
+                className={cx(
+                  styles.check,
+                  checkedIds.includes(option.id) && styles.checkOn,
+                )}
+              >
+                <input
+                  type="checkbox"
+                  className={styles.checkbox}
+                  checked={checkedIds.includes(option.id)}
+                  onChange={() => toggle(option.id)}
+                />
+                {option.label}
+              </label>
+            ))
+          : options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={styles.option}
+                onClick={option.onSelect}
+              >
+                {option.label}
+              </button>
+            ))}
+      </div>
 
       {(allowFreeText || multiple) && (
         <form className={styles.directRow} onSubmit={submit}>
@@ -118,18 +163,22 @@ export default function ChoicePrompt({
             />
           )}
 
-          {/* 다중 선택은 다 고른 뒤 한 번에 보낸다 */}
-          {multiple && (
-            <button
-              type="submit"
-              className={styles.submit}
-              disabled={!canSubmit}
-            >
-              {checkedIds.length > 0
+          {/*
+           * 다중 선택은 다 고른 뒤 한 번에 보낸다.
+           * 단일 선택도 버튼을 세운다 — 없으면 직접 입력을 보낼 방법이 Enter 뿐인데
+           * 그렇게 하라는 표시가 화면 어디에도 없다.
+           */}
+          <button
+            type="submit"
+            className={cx(styles.submit, !allowFreeText && styles.submitWide)}
+            disabled={!canSubmit}
+          >
+            {multiple
+              ? checkedIds.length > 0
                 ? `${checkedIds.length}개 선택 완료`
-                : "선택 완료"}
-            </button>
-          )}
+                : "선택 완료"
+              : "보내기"}
+          </button>
         </form>
       )}
     </div>

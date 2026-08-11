@@ -1,6 +1,7 @@
+/* 구분선을 두지 않는다 — 입력칸이 이미 자기 테두리를 갖고 있어 선이 두 겹이 된다.
+   대신 아래 여백을 키워 입력칸을 바닥에서 띄우고, 그 빈자리가 경계를 대신한다 */
 .area {
-  padding: 14px 18px;
-  border-top: 1px solid var(--border);
+  padding: 10px 18px 20px;
   background: var(--white);
 }
 
@@ -10,7 +11,7 @@
   gap: 8px;
   padding: 12px 12px 8px;
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   transition: border-color 0.15s ease;
 }
@@ -211,7 +212,8 @@
   background: transparent;
   font-size: 14px;
   line-height: 1.5;
-  font-family: "Noto Sans KR", sans-serif;
+  /* textarea 는 본문 글꼴을 물려받지 않는다. 이름을 박아두면 본문만 바뀌었을 때 여기만 남는다 */
+  font-family: inherit;
   min-height: 24px;
   max-height: 160px;
   overflow-y: auto;
@@ -243,6 +245,7 @@
   padding: 0;
   border: none;
   border-radius: 10px;
+  /* 에이전트 자리의 주 동작은 브랜드색으로 남긴다 */
   background: var(--primary);
   cursor: pointer;
   transition: background 0.15s ease;
@@ -256,17 +259,22 @@
   background: var(--primary-border-focus);
 }
 
+/* 중지는 되돌릴 수 있는 동작이라 경고처럼 보일 이유가 없다 —
+   보내기와 자리만 바꾸고 무게는 한 단계 낮춘다.
+   :hover 를 홑겹으로 두면 위의 .sendButton:hover:not(:disabled) 가 더 구체적이어서
+   중지 버튼에 보라색이 얹힌다. 같은 형태로 맞춰 이긴다 */
 .stopButton {
-  background: var(--text);
+  border: 1px solid var(--border);
+  background: var(--surface);
 }
 
-.stopButton:hover {
-  background: var(--text-sub);
+.stopButton:hover:not(:disabled) {
+  background: var(--surface-muted);
 }
 
 .stopIcon {
-  width: 12px;
-  height: 12px;
+  width: 11px;
+  height: 11px;
   border-radius: 3px;
-  background: var(--white);
+  background: var(--text-sub);
 }

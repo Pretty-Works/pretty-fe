@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Noto_Sans_KR } from "next/font/google";
+import localFont from "next/font/local";
 
 import AgentLayout from "@/layouts/AgentLayout";
 import AuthGuard from "@/layouts/AuthGuard/AuthGuard";
@@ -9,11 +9,14 @@ import Providers from "./providers";
 
 import "@/styles/globals.css";
 
-const notoSansKr = Noto_Sans_KR({
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
+// Pretendard 는 구글 폰트가 아니라 파일을 직접 들고 있어야 한다.
+// Variable 한 벌이 45~920 을 모두 덮으므로 굵기별로 파일을 늘리지 않는다.
+const pretendard = localFont({
+  src: "../styles/fonts/PretendardVariable.woff2",
+  weight: "45 920",
   display: "swap",
-  variable: "--font-noto-sans-kr",
+  variable: "--font-pretendard",
+  fallback: ["system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -27,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={notoSansKr.variable}>
+    <html lang="ko" className={pretendard.variable}>
       <body>
         <Providers>
           <AuthGuard>

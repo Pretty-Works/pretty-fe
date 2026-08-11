@@ -30,10 +30,26 @@
   background: transparent;
 }
 
+/* 답변에서 말풍선을 걷어낸 만큼 글끼리 붙어 보인다 — 발화 사이를 넓혀 경계를 대신한다 */
 .chatContent {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
+}
+
+/* 앞 답변에 이어지는 제안 묶음. 바깥(.chatContent)이 발화 사이를 벌리고,
+   여기 gap 은 제안과 그 시간을 붙여 둔다 — 말풍선 안에서 시간이 붙는 간격과 같은 값이다 */
+.trailing {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+/* MessageBubble 의 .time 과 같은 모양이어야 자리만 옮긴 것으로 읽힌다 */
+.trailingTime {
+  font-size: 11px;
+  color: var(--text-placeholder);
 }
 
 .historyStatus,

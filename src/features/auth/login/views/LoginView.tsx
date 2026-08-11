@@ -165,6 +165,7 @@ export default function LoginView() {
           />
 
           <Button
+            type="brand"
             htmlType="submit"
             size="big"
             display="full"
