@@ -7,6 +7,7 @@ import {
   extractRouteParams,
   resolveRoute,
   screenLabel,
+  suggestionScreen,
 } from "./screenRegistry.ts";
 
 test("경로에서 화면 키와 값을 함께 뽑는다", () => {
@@ -53,4 +54,18 @@ test("모르는 경로도 화면 문맥은 만든다", () => {
 
   assert.equal(context.screen, "UNKNOWN");
   assert.equal(context.formState._screen, "알 수 없는 화면");
+});
+
+test("추천 문구용 화면은 규격의 세 값으로 접어서 보낸다", () => {
+  assert.equal(suggestionScreen("/"), "HOME");
+  assert.equal(suggestionScreen("/calendar"), "CALENDAR");
+
+  // 프로젝트 안의 탭은 전부 PROJECT 한 값으로 묶인다
+  assert.equal(suggestionScreen("/projects/new"), "PROJECT");
+  assert.equal(suggestionScreen("/projects/3/overview"), "PROJECT");
+  assert.equal(suggestionScreen("/projects/3/meetings/41"), "PROJECT");
+  assert.equal(suggestionScreen("/projects/3/finance"), "PROJECT");
+
+  // 표에 없는 경로는 기본값으로 떨어진다
+  assert.equal(suggestionScreen("/somewhere/else"), "HOME");
 });

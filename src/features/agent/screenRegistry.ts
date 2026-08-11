@@ -4,6 +4,7 @@
 // 그때는 이동 버튼을 아예 띄우지 않는다 — 없는 경로로 보내는 것보다 안 보내는 쪽이 낫다.
 
 import type { AgentScreenContext } from "@/features/agent/api/agentApi";
+import type { SuggestionScreen } from "@/features/agent/types";
 
 export interface ScreenRoute {
   /** 이동 카드에 보여줄 화면 이름 */
@@ -124,6 +125,24 @@ export function findScreenKey(pathname: string): ScreenKey | null {
       return new RegExp(`^${source}$`).test(pathname);
     }) ?? null
   );
+}
+
+const PROJECT_PATH = "/projects";
+
+/**
+ * 추천 문구 API 에 보낼 화면 이름. 규격에 있는 세 값 중 하나로 접어서 보낸다.
+ *
+ * 게시판·회의록·재무는 전부 프로젝트 안의 탭이라 PROJECT 로 묶인다 — 화면 키만큼 잘게
+ * 나눠 보내면 서버 캐시가 탭마다 갈라지고, 추천 후보는 어차피 같다.
+ * 모르는 경로는 HOME 이다. 서버가 못 알아보는 값을 보내는 것보다 기본값이 낫다.
+ */
+export function suggestionScreen(pathname: string): SuggestionScreen {
+  const key = findScreenKey(pathname);
+  if (key === "CALENDAR") return "CALENDAR";
+
+  return key && SCREEN_ROUTES[key].pattern.startsWith(PROJECT_PATH)
+    ? "PROJECT"
+    : "HOME";
 }
 
 /**

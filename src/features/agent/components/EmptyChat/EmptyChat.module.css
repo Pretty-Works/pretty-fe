@@ -35,8 +35,12 @@
 }
 
 .item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   max-width: 500px;
+  min-height: 41px;
   padding: 11px 14px;
   border: none;
   border-radius: 12px;
@@ -50,4 +54,37 @@
 .item:hover {
   background: var(--primary-bright);
   border-color: var(--primary);
+}
+
+.itemIcon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: var(--primary);
+}
+
+/* 받아오는 동안의 자리. .item 과 같은 높이라 칩이 오면 줄이 흔들리지 않는다 */
+.skeleton {
+  width: 100%;
+  max-width: 500px;
+  height: 41px;
+  border-radius: 12px;
+  background: var(--primary-bg-weak);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }

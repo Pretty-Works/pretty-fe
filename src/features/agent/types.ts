@@ -121,6 +121,35 @@ export interface Conversation {
   unread: boolean;
 }
 
+/**
+ * 추천 문구를 만들 때 서버에 알려 주는 화면. 규격에 있는 세 값뿐이다.
+ *
+ * 화면 키(SCREEN_ROUTES)를 그대로 보내지 않는 이유는 이 값의 쓰임이 다르기 때문이다 —
+ * 서버는 같은 재료라도 이 값으로 고를 후보를 가른다(프로젝트 화면과 캘린더에서 권할 것이 다르다).
+ */
+export type SuggestionScreen = "HOME" | "PROJECT" | "CALENDAR";
+
+/**
+ * 패널 첫 화면에 걸어 주는 추천 칩 한 개.
+ *
+ * 고정 문구가 아니라 그 사용자의 지금 상황(밀린 할 일·정리 안 된 회의·임박 마감·남은 연차)에서
+ * 서버가 만든 것이라, 걸 것이 없으면 아무것도 오지 않는다.
+ */
+export interface AgentSuggestion {
+  /** 칩에 보이는 문구. "~해드릴까요?" 물음형이다 */
+  text: string;
+  /**
+   * 눌렀을 때 보낼 요청문. text 는 물음형이라 그대로 보내면 에이전트가 되묻는다 —
+   * 보내는 것은 언제나 이 값이다.
+   */
+  prompt: string;
+  /**
+   * 후보 종류(overdue_task·meeting_followup·due_soon·upcoming_meeting·project_check·leave).
+   * 아이콘을 고르는 데만 쓰고, 서버가 값을 늘려도 화면은 기본 아이콘으로 넘어간다.
+   */
+  kind?: string;
+}
+
 /** 승인·질문 카드에 그릴 버튼 한 개. id 는 응답 API 에 그대로 되돌려 보낸다 */
 export interface AgentInteractionOption {
   id: string;
