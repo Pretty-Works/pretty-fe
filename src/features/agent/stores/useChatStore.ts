@@ -26,6 +26,8 @@ export interface AgentInteractionRequest {
   interactionId: number;
   conversationId: number;
   optionIds: string[];
+  /** 홈 카드에 직접 쓴 문장. 되묻기(QUESTION)에만 온다 */
+  freeText?: string;
 }
 
 // 자동 승인 모드: default는 false
