@@ -140,16 +140,19 @@
   gap: 12px;
 }
 
+/* 줄 사이는 gap으로 띄우지 않는다 — 다 접힌 줄에도 gap은 자리를 남겨 빈칸이 뜬다.
+   밴드 아래 여백만 주면 되고, 그러면 홈 '내 할 일'처럼 줄끼리는 붙는다 */
 .group {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .band {
   display: flex;
   align-items: center;
   gap: 8px;
+  /* .group의 gap을 대신한다 — 밴드와 첫 줄만 띄우고 줄끼리는 붙인다 */
+  margin-bottom: 4px;
   padding: 7px 12px;
   border-radius: 7px;
   background: var(--surface-ai);

@@ -3,10 +3,10 @@
 import { useMemo, useState } from "react";
 
 import Button from "@/components/Button/Button";
-import CheckboxField from "@/components/CheckboxField/CheckboxField";
 import PeriodNavigator from "@/components/PeriodNavigator/PeriodNavigator";
 import ProgressBar from "@/components/ProgressBar/ProgressBar";
 import StateView from "@/components/StateView/StateView";
+import { useLingeringIds } from "@/hooks/useLingeringIds";
 import { weekOffsetOf } from "@/lib/date";
 
 import type {
@@ -67,7 +67,15 @@ export default function WeeklyTaskCard({
   const { summary, groups } = board;
   const undone = summary.total - summary.done;
 
-  const [hideDone, setHideDone] = useState(false);
+  // 완료한 할 일은 기본으로 접어 둔다 — 남은 일이 먼저 보여야 한다
+  const [hideDone, setHideDone] = useState(true);
+
+  // 방금 완료한 줄은 잠깐 더 남긴다 — 체크하자마자 사라지면 되돌릴 자리가 없다
+  const {
+    ids: lingeringIds,
+    leaving: leavingIds,
+    keep: keepVisible,
+  } = useLingeringIds<number>();
 
   // 완료한 할 일을 접는다. 전부 지워진 팀은 밴드만 남으므로 함께 뺀다.
   // 위 집계·도넛은 그대로 둔다 — 이 주의 달성률이지 지금 보고 있는 목록의 비율이 아니다.
@@ -77,10 +85,12 @@ export default function WeeklyTaskCard({
     return groups
       .map((group) => ({
         ...group,
-        tasks: group.tasks.filter((task) => !task.done),
+        tasks: group.tasks.filter(
+          (task) => !task.done || lingeringIds.includes(task.taskId),
+        ),
       }))
       .filter((group) => group.tasks.length > 0);
-  }, [groups, hideDone]);
+  }, [groups, hideDone, lingeringIds]);
 
   // 프로젝트가 걸쳐 있는 연도만 고를 수 있다
   const years = useMemo(() => {
@@ -149,11 +159,15 @@ export default function WeeklyTaskCard({
         </div>
 
         <div className={styles.headRight}>
-          <CheckboxField
-            label="완료 숨기기"
-            checked={hideDone}
-            onChange={setHideDone}
-          />
+          {/* 문구는 지금 상태가 아니라 누르면 일어날 일을 가리킨다 */}
+          <Button
+            type="light"
+            buttonStyle="weak"
+            size="tiny"
+            onClick={() => setHideDone((prev) => !prev)}
+          >
+            {hideDone ? "완료 보기" : "완료 숨기기"}
+          </Button>
 
           {/* 완료·보관 프로젝트에는 할 일을 추가할 수 없어 버튼 자체를 감춘다 */}
           {onAddTask && (
@@ -238,12 +252,18 @@ export default function WeeklyTaskCard({
                      서버 규칙과 어긋나 버튼은 열려 있는데 요청은 403이 난다.
                      완료는 담당자만(canToggle), 수정은 담당자 또는 작성자(canEdit). */
                   canToggle={task.canToggle}
-                  onToggle={() => onToggleTask?.(task.taskId, !task.done)}
+                  onToggle={() => {
+                    // 완료로 바꾼 것만 남긴다 — 되돌린 줄은 어차피 목록에 그대로 있다
+                    if (!task.done) keepVisible(task.taskId);
+
+                    onToggleTask?.(task.taskId, !task.done);
+                  }}
                   onSelect={
                     task.canEdit && onSelectTask
                       ? () => onSelectTask(task)
                       : undefined
                   }
+                  leaving={leavingIds.includes(task.taskId)}
                 />
               ))}
             </div>
