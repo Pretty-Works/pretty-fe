@@ -4,7 +4,9 @@ import Button from "@/components/Button/Button";
 
 import type { ProjectSummarySection } from "@/features/project/api/projectSummaryApi";
 import AiSummaryCard from "@/features/project/components/AiSummaryCard/AiSummaryCard";
+import { hasManagedSummary } from "@/features/project/constants/projectStatus";
 import { useProjectSummary } from "@/features/project/hooks/useProjectSummary";
+import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
 
 import styles from "./ProjectAiSummary.module.css";
 
@@ -19,15 +21,31 @@ interface ProjectAiSummaryProps {
  * 배너는 화면의 부가 정보라 서버도 실패를 삼키고 빈 배열을 준다. 그래서 "없음"은
  * 세 가지 뜻이 되는데(아직 안 만듦 · 만들다 실패 · 조회 자체가 실패), 넷 다 아무것도
  * 안 그리면 사용자는 이 자리에 무엇이 있어야 하는지조차 알 수 없다. 여기서 갈라 준다.
+ *
+ * 진행·보류가 아닌 프로젝트에는 배너를 두지 않는다. 야간 배치가 그 둘만 다시 만들어서
+ * (BE ProjectSummaryScheduler) 나머지는 배너가 낡은 채로 남는데, 조회가 곧 생성이라
+ * (BE read-through) 그 낡은 배너를 화면이 탭마다 새로 만들며 LLM 비용을 쓰게 된다.
  */
 export default function ProjectAiSummary({
   projectId,
   section,
 }: ProjectAiSummaryProps) {
-  const summary = useProjectSummary(projectId, section);
+  // 상단바·좌측 메뉴가 이미 읽어 둔 쿼리라 요청이 늘지 않는다
+  const { data: project, isError: isProjectError } =
+    useProjectDetailQuery(projectId);
+  const managed = !!project && hasManagedSummary(project.status);
 
-  // 첫 조회 — 자리를 잡아 둬야 배너가 뜰 때 아래 내용이 밀리지 않는다
-  if (summary.isLoading) {
+  // 상태를 알기 전에는 조회하지 않는다 — 여기서 미리 부르면 숨길 프로젝트에서도
+  // 요약 요청이 한 번 나가 숨기는 의미가 없어진다.
+  const summary = useProjectSummary(projectId, section, managed);
+
+  // 프로젝트를 못 읽었을 때도 자리를 비운다. 상태를 모르는 채 요약을 부르면 숨기려던
+  // 프로젝트에서 요청이 나가고, 그 실패는 이미 화면의 다른 곳이 알리고 있다.
+  if (isProjectError || (project && !managed)) return null;
+
+  // 첫 조회 — 자리를 잡아 둬야 배너가 뜰 때 아래 내용이 밀리지 않는다.
+  // 프로젝트 상태를 기다리는 동안도 같은 자리를 잡아 둔다.
+  if (!project || summary.isLoading) {
     return (
       <div
         className={styles.shell}

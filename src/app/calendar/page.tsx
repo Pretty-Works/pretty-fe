@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
@@ -11,5 +13,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  return <CalendarView />;
+  // 알림 딥링크(`?scheduleId=`)를 읽느라 useSearchParams를 쓴다 — 프리렌더 경계가 필요하다
+  return (
+    <Suspense>
+      <CalendarView />
+    </Suspense>
+  );
 }

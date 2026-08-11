@@ -11,6 +11,7 @@ import StateView from "@/components/StateView/StateView";
 import { useToastStore } from "@/stores/useToastStore";
 
 import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
+import { isOpenForContent } from "@/features/project/constants/projectStatus";
 import { useCanManageProject } from "@/features/project/hooks/useCanManageProject";
 import MilestoneProgressCard from "@/features/project/overview/components/MilestoneProgressCard/MilestoneProgressCard";
 import WeeklyTaskCard from "@/features/project/overview/components/WeeklyTaskCard/WeeklyTaskCard";
@@ -146,8 +147,7 @@ export default function ProjectOverviewView({
   }
 
   // 완료·보관 프로젝트에는 할 일을 추가할 수 없다 (BE ProjectPolicy.isOpenForContent)
-  const isOpenForContent =
-    project.status !== "COMPLETED" && project.status !== "ARCHIVED";
+  const canAddContent = isOpenForContent(project.status);
 
   return (
     <div className={styles.container}>
@@ -198,7 +198,7 @@ export default function ProjectOverviewView({
           board={milestoneBoard}
           loading={isMilestoneLoading}
           error={isMilestoneError}
-          editable={isOpenForContent && canManage}
+          editable={canAddContent && canManage}
           onToggle={(milestoneId, done) =>
             toggleMilestone(
               { milestoneId, done },
@@ -217,9 +217,7 @@ export default function ProjectOverviewView({
             startDate: project.startDate,
             endDate: project.endDate,
           }}
-          onAddTask={
-            isOpenForContent ? () => setTaskModalOpen(true) : undefined
-          }
+          onAddTask={canAddContent ? () => setTaskModalOpen(true) : undefined}
           onToggleTask={(taskId, done) =>
             toggleTask(
               { taskId: String(taskId), done },
