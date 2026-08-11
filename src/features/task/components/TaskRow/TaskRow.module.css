@@ -1,3 +1,23 @@
+/* 접히며 사라지는 자리. 1fr → 0fr 이라 줄 높이를 몰라도(제목이 두 줄이어도) 부드럽게 줄어든다.
+   시간은 useLingeringIds의 FADE_MS와 같아야 한다 */
+.wrap {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.32s ease, opacity 0.32s ease;
+}
+
+.leaving {
+  grid-template-rows: 0fr;
+  opacity: 0;
+}
+
+/* 접히는 동안만 넘치는 내용을 감춘다.
+   min-height를 풀지 않으면 36px에서 멈춰 끝까지 접히지 않는다 */
+.leaving > * {
+  min-height: 0;
+  overflow: hidden;
+}
+
 .row {
   display: flex;
   align-items: center;

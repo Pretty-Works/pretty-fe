@@ -8,11 +8,11 @@ import { getApiErrorMessage } from "@/lib/api/errorCode";
 
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
-import CheckboxField from "@/components/CheckboxField/CheckboxField";
 import Pagination from "@/components/Pagination/Pagination";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
 import { useClampPage } from "@/hooks/useClampPage";
+import { useLingeringIds } from "@/hooks/useLingeringIds";
 import { useListParams } from "@/hooks/useListParams";
 import { useToastStore } from "@/stores/useToastStore";
 
@@ -58,7 +58,8 @@ export default function HomeView() {
 
   const [handledIds, setHandledIds] = useState<number[]>([]); // 답하거나 중단한 요청
   const [taskModalOpen, setTaskModalOpen] = useState(false); // 할 일 추가·수정 팝업
-  const [hideDoneTasks, setHideDoneTasks] = useState(false); // 완료 숨기기
+  // 완료한 할 일은 기본으로 접어 둔다 — 남은 일이 먼저 보여야 한다
+  const [hideDoneTasks, setHideDoneTasks] = useState(true);
   const [editingTask, setEditingTask] = useState<EditingTask | undefined>();
 
   // Query
@@ -96,6 +97,13 @@ export default function HomeView() {
   );
   const hasTasks = taskGroups.some((group) => group.tasks.length > 0);
 
+  // 방금 완료한 줄은 잠깐 더 남긴다 — 체크하자마자 사라지면 되돌릴 자리가 없다
+  const {
+    ids: lingeringTaskIds,
+    leaving: leavingTaskIds,
+    keep: keepTaskVisible,
+  } = useLingeringIds<string>();
+
   // 완료한 할 일을 접는다. 전부 지워진 그룹은 프로젝트명만 남으므로 함께 뺀다.
   const visibleTaskGroups = useMemo(() => {
     if (!hideDoneTasks) return taskGroups;
@@ -103,10 +111,12 @@ export default function HomeView() {
     return taskGroups
       .map((group) => ({
         ...group,
-        tasks: group.tasks.filter((task) => !task.done),
+        tasks: group.tasks.filter(
+          (task) => !task.done || lingeringTaskIds.includes(task.id),
+        ),
       }))
       .filter((group) => group.tasks.length > 0);
-  }, [taskGroups, hideDoneTasks]);
+  }, [taskGroups, hideDoneTasks, lingeringTaskIds]);
 
   // 확인할 요청이 없으면 박스째 감춘다 — 대부분 비어 있어 빈 칸이 늘 자리를 차지한다.
   // 조회 실패는 남긴다: 요청이 있는데 못 불러온 것일 수 있어 조용히 사라지면 안 된다.
@@ -169,6 +179,9 @@ export default function HomeView() {
   };
 
   const handleToggleTask = (taskId: string, done: boolean) => {
+    // 완료로 바꾼 것만 남긴다 — 되돌린 줄은 어차피 목록에 그대로 있다
+    if (done) keepTaskVisible(taskId);
+
     toggleTask({ taskId, done });
   };
 
@@ -291,11 +304,16 @@ export default function HomeView() {
             <h2 className={styles.panelTitle}>내 할 일</h2>
 
             <div className={styles.panelHeadRight}>
-              <CheckboxField
-                label="완료 숨기기"
-                checked={hideDoneTasks}
-                onChange={setHideDoneTasks}
-              />
+              {/* 문구는 지금 상태가 아니라 누르면 일어날 일을 가리킨다 */}
+              <Button
+                type="light"
+                buttonStyle="weak"
+                size="medium"
+                onClick={() => setHideDoneTasks((prev) => !prev)}
+              >
+                {hideDoneTasks ? "완료 보기" : "완료 숨기기"}
+              </Button>
+
               <Button
                 size="medium"
                 leftAccessory="+"
@@ -321,6 +339,7 @@ export default function HomeView() {
               groups={visibleTaskGroups}
               onToggle={handleToggleTask}
               onSelect={handleSelectTask}
+              leavingIds={leavingTaskIds}
             />
           </StateView>
         </section>

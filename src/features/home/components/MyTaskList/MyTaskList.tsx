@@ -12,12 +12,15 @@ interface MyTaskListProps {
   onToggle?: (taskId: string, done: boolean) => void;
   // 행 클릭 — 수정 화면을 연다. 소속 프로젝트는 그룹에서 가져온다.
   onSelect?: (task: MyTask, projectId: number | null) => void;
+  // 목록에서 빠지는 중인 할 일 (완료 직후 잠깐 남겼다 접히는 줄)
+  leavingIds?: readonly string[];
 }
 
 export default function MyTaskList({
   groups,
   onToggle,
   onSelect,
+  leavingIds = [],
 }: MyTaskListProps) {
   return (
     <div className={styles.list}>
@@ -48,6 +51,7 @@ export default function MyTaskList({
                   onSelect={
                     onSelect ? () => onSelect(task, group.projectId) : undefined
                   }
+                  leaving={leavingIds.includes(task.id)}
                 />
               </li>
             ))}
