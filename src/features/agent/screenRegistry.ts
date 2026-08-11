@@ -61,6 +61,8 @@ export type ScreenKey = keyof typeof SCREEN_ROUTES;
  */
 export const SCREEN_ALIASES: Record<string, ScreenKey> = {
   PROJECT_DETAIL: "PROJECT_OVERVIEW",
+  // 녹취록으로 초안을 만든 뒤 에이전트가 부르는 이름. 가리키는 곳은 회의록 작성 화면이다
+  MEETING_DRAFT: "MEETING_CREATE",
   // 할 일은 따로 화면이 없고 프로젝트 개요 탭에 있다
   TASK_LIST: "PROJECT_OVERVIEW",
   // 휴가·일정은 캘린더 한 화면에서 함께 본다

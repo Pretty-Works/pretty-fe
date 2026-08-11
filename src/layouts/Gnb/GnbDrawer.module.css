@@ -1,0 +1,176 @@
+/* 에이전트 패널(50)·드롭다운(60) 위에 서고, 인증 화면(100)·토스트(1000) 아래에 남는다 */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: var(--overlay);
+  cursor: pointer;
+  animation: fade 0.16s ease-out;
+}
+
+.panel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(320px, 86vw);
+  height: 100%;
+  background: var(--white);
+  box-shadow: var(--shadow-drawer-left);
+  animation: slide 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+  height: 60px;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+}
+
+.brand img {
+  display: block;
+  width: auto;
+  height: 18px;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+}
+
+.close:hover {
+  background: var(--surface);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 12px;
+  overscroll-behavior: contain;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+}
+
+.item:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* 하위 메뉴. 왼쪽 세로선이 어디에 속한 항목인지 알려 준다 */
+.sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px 22px;
+  padding-left: 10px;
+  border-left: 2px solid var(--line);
+}
+
+.subCaption {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 6px 12px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-disabled);
+}
+
+.subItem {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-sub);
+  text-decoration: none;
+}
+
+.subItem:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/*
+ * 서랍은 한 번에 한 곳만 보여 주는 화면이라, 지금 어디에 있는지가 회색보다 세게 보여야 한다.
+ * 화면에 늘 떠 있는 좌측 메뉴(무채색)와 다른 이유다.
+ *
+ * .item / .subItem 보다 뒤에 두어야 한다 — 셋 다 홑겹 클래스라 특이도가 같아서,
+ * 앞에 두면 나중에 선언된 .subItem 의 색·굵기가 이 규칙을 덮는다.
+ */
+.itemActive,
+.itemActive:hover {
+  background: var(--primary-bg);
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* 이 프로젝트를 벗어나는 항목 — 탭들과 한 칸 떼어 놓는다 */
+.subItemDetached {
+  margin-top: 6px;
+}
+
+.subItemDetached + .subItemDetached {
+  margin-top: 0;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .panel {
+    animation: none;
+  }
+}

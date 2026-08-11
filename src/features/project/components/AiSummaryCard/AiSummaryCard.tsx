@@ -63,15 +63,19 @@ export default function AiSummaryCard({
 
   const updatedLabel =
     updatedAt && now !== null
-      ? `${formatRelativeTime(updatedAt, now)} 업데이트`
+      ? `${formatRelativeTime(updatedAt, now)}`
       : "";
 
   return (
     <section
       className={cx(styles.card, refreshing && styles.refreshing)}
-      aria-label="AI 회의 요약"
+      aria-label="AI 요약"
       aria-busy={refreshing || undefined}
     >
+      {/*
+       * 배지와 갱신 정보만 머리줄에 둔다. 예전에는 헤드라인까지 이 줄에 끼어 있어서
+       * 좁아지면 order 를 바꿔 세 번째 줄로 내려야 했다 — 줄을 나누면 그 규칙이 필요 없다.
+       */}
       <div className={styles.head}>
         <span className={styles.badge}>
           <span className={styles.badgeMark} aria-hidden="true">
@@ -79,7 +83,6 @@ export default function AiSummaryCard({
           </span>
           AI 요약
         </span>
-        <p className={styles.headline}>{headline}</p>
 
         {(updatedLabel || onRefresh) && (
           <div className={styles.meta}>
@@ -107,13 +110,17 @@ export default function AiSummaryCard({
         )}
       </div>
 
-      <div className={styles.body}>
+      <p className={styles.headline}>{headline}</p>
+
+      {/* 글머리표를 문자열로 붙이면 줄이 넘어갈 때 둘째 줄이 점 아래로 들어간다 —
+          진짜 목록으로 세워야 들여쓰기가 유지된다 */}
+      <ul className={styles.body}>
         {lines.map((line, index) => (
-          <p key={index} className={styles.line}>
-            · {line}
-          </p>
+          <li key={index} className={styles.line}>
+            {line}
+          </li>
         ))}
-      </div>
+      </ul>
 
       <div className={styles.stats}>
         {stats.map((stat) => (

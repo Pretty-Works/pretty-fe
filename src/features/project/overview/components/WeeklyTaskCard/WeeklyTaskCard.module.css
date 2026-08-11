@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 16px;
   padding: 22px 24px;
-  border-radius: 16px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-card);
 }
@@ -32,9 +32,9 @@
 
 .title {
   flex-shrink: 0;
-  font-size: 15.5px;
+  font-size: var(--fs-panel-title);
   line-height: 1;
-  font-weight: 700;
+  font-weight: 650;
   color: var(--text);
 }
 

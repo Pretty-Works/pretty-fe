@@ -1,14 +1,14 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--section-gap);
   max-width: 1100px;
   margin: 0 auto;
-  padding: 28px 24px 60px;
+  padding: var(--page-pad-top) 24px var(--page-pad-bottom);
 }
 
 .greeting {
-  font-size: 24px;
+  font-size: var(--fs-page-title);
   font-weight: 700;
   color: var(--text);
 }
@@ -16,7 +16,7 @@
 .columns {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  gap: 20px;
+  gap: var(--section-gap);
   align-items: start;
 }
 
@@ -29,8 +29,8 @@
 .panel {
   display: flex;
   flex-direction: column;
-  padding: 20px 22px 8px;
-  border-radius: 16px;
+  padding: var(--panel-pad) var(--panel-pad) 8px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-card);
 }
@@ -40,7 +40,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 4px 14px;
+  padding: 0 4px var(--panel-head-gap);
 }
 
 .panelHeadLeft {
@@ -57,8 +57,8 @@
 }
 
 .panelTitle {
-  font-size: 15.5px;
-  font-weight: 700;
+  font-size: var(--fs-panel-title);
+  font-weight: 650;
   color: var(--text);
 }
 
@@ -66,7 +66,7 @@
   display: flex;
   align-items: stretch;
   gap: 10px;
-  padding: 6px 0 10px;
+  padding: 6px 0 16px;
 }
 
 .filterbar > :first-child {

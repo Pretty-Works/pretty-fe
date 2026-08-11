@@ -41,14 +41,16 @@
 }
 
 .tab:hover:not(.active) {
-  border-color: var(--primary-light);
-  color: var(--primary);
+  border-color: var(--border-strong);
+  color: var(--text);
 }
 
+/* 고른 탭은 채워서 외치지 않는다 — 옅게 깔고 글자를 진하게 해도 충분히 갈린다 */
 .active {
-  border-color: var(--primary);
-  background: var(--primary);
-  color: var(--white);
+  border-color: var(--selected-border);
+  background: var(--selected-bg);
+  color: var(--selected-on);
+  font-weight: 600;
 }
 
 /* 값 자체가 색을 갖는 선택지 (중요도 등) — 선택됐을 때만 브랜드색을 대신한다 */

@@ -1,23 +1,53 @@
-import type { ReactNode } from "react";
+import { Fragment } from "react";
 
-// 에이전트 답변에 섞여 오는 **굵게** 표기만 살린다.
-// 줄바꿈을 건너뛰지 않으므로 닫히지 않은 **는 별표 그대로 남는다
-const BOLD = /\*\*(.+?)\*\*/g;
+import { parseRichText, type Inline } from "./parseRichText";
+
+import styles from "./RichText.module.css";
 
 interface RichTextProps {
   text: string;
 }
 
+function renderLine(parts: Inline[]) {
+  return parts.map((part, index) =>
+    part.bold ? (
+      <strong key={index}>{part.text}</strong>
+    ) : (
+      <Fragment key={index}>{part.text}</Fragment>
+    ),
+  );
+}
+
 export default function RichText({ text }: RichTextProps) {
-  const nodes: ReactNode[] = [];
-  let cursor = 0;
+  const blocks = parseRichText(text);
 
-  for (const match of text.matchAll(BOLD)) {
-    if (match.index > cursor) nodes.push(text.slice(cursor, match.index));
-    nodes.push(<strong key={match.index}>{match[1]}</strong>);
-    cursor = match.index + match[0].length;
-  }
-  nodes.push(text.slice(cursor));
+  return (
+    <div className={styles.root}>
+      {blocks.map((block, index) => {
+        if (block.kind === "list") {
+          const List = block.ordered ? "ol" : "ul";
 
-  return <>{nodes}</>;
+          return (
+            <List key={index} className={styles.list}>
+              {block.items.map((item, itemIndex) => (
+                <li key={itemIndex}>{renderLine(item)}</li>
+              ))}
+            </List>
+          );
+        }
+
+        return (
+          <p key={index} className={styles.paragraph}>
+            {/* 문단 안쪽의 줄바꿈은 그대로 살린다 — 문단 사이보다 좁게 벌어진다 */}
+            {block.lines.map((line, lineIndex) => (
+              <Fragment key={lineIndex}>
+                {lineIndex > 0 && <br />}
+                {renderLine(line)}
+              </Fragment>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
 }

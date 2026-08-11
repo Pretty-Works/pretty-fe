@@ -175,9 +175,10 @@
   font-weight: 600;
 }
 
+/* 고른 날짜는 한 칸뿐이라 옅게 깔면 놓친다 — 여기는 채운다 */
 .selected {
-  background: var(--primary);
-  color: var(--white);
+  background: var(--action);
+  color: var(--action-on);
   font-weight: 600;
 }
 
@@ -232,14 +233,14 @@
 }
 
 .confirmBtn {
-  border: 1px solid var(--primary);
-  background: var(--primary);
-  color: var(--white);
+  border: 1px solid var(--action);
+  background: var(--action);
+  color: var(--action-on);
 }
 
 .confirmBtn:hover:not(:disabled) {
-  background: var(--primary-light);
-  border-color: var(--primary-light);
+  background: var(--action-hover);
+  border-color: var(--action-hover);
 }
 
 .confirmBtn:disabled {

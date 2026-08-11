@@ -1,15 +1,43 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 import { fetchAgentSuggestions } from "@/features/agent/api/agentApi";
-import type { SuggestionScreen } from "@/features/agent/types";
+import type { AgentSuggestion, SuggestionScreen } from "@/features/agent/types";
 
 /**
  * 한 번 받은 칩을 다시 쓰는 시간.
  *
- * 서버도 같은 길이로 보관한다(agent.suggestion.cache-ttl-minutes: 5). 더 짧게 두면 다시 물어도
- * 서버 캐시에서 같은 칩이 오므로 왕복만 늘고, 더 길게 두면 할 일을 정리한 뒤에도 낡은 칩이 남는다.
+ * 서버도 같은 길이로 보관한다(agent.suggestion.cache-ttl-minutes: 1). 더 짧게 두면 다시 물어도
+ * 서버 캐시에서 같은 칩이 오므로 왕복만 늘어난다.
+ *
+ * 낡음을 막는 것은 이 시간이 아니라 무효화다 — 실행이 끝나면 아래 invalidate 로 다시 받고,
+ * 서버도 쓰기 도구가 돌면 자기 캐시를 버린다. TTL 이 맡는 일은 연타 방어뿐이라 짧게 둔다.
  */
-const SUGGESTIONS_TTL_MS = 5 * 60 * 1000;
+const SUGGESTIONS_TTL_MS = 60 * 1000;
+
+/** 화면별로 따로 담는다. 무효화는 화면을 빼고 걸어 전부 한 번에 턴다 */
+const suggestionsQueryKey = (screen: SuggestionScreen) =>
+  ["agent", "suggestions", screen] as const;
+
+export const AGENT_SUGGESTIONS_KEY_ROOT = ["agent", "suggestions"] as const;
+
+/**
+ * 방금 누른 칩을 목록에서 뺀다.
+ *
+ * 서버를 다시 부르지 않는 이유: 누른 칩이 사라지는 것은 사용자가 이미 아는 사실이라
+ * 기다릴 이유가 없고, 실행이 끝나면 어차피 무효화로 새 칩을 받는다. 그 사이에 새 대화를
+ * 열었을 때 방금 보낸 요청이 다시 추천으로 뜨는 것만 막으면 된다.
+ */
+export const dismissAgentSuggestion = (
+  queryClient: QueryClient,
+  screen: SuggestionScreen,
+  prompt: string,
+) => {
+  queryClient.setQueryData<AgentSuggestion[]>(
+    suggestionsQueryKey(screen),
+    (current) => current?.filter((suggestion) => suggestion.prompt !== prompt),
+  );
+};
 
 /**
  * 그 화면을 떠난 뒤에도 칩을 들고 있는 시간.
@@ -36,7 +64,7 @@ export const useAgentSuggestionsQuery = (
   enabled: boolean,
 ) => {
   return useQuery({
-    queryKey: ["agent", "suggestions", screen],
+    queryKey: suggestionsQueryKey(screen),
     queryFn: () => fetchAgentSuggestions(screen),
     enabled,
     staleTime: SUGGESTIONS_TTL_MS,

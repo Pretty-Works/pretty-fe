@@ -134,14 +134,14 @@
 }
 
 .popMonthCurrent {
-  background: var(--primary);
-  color: var(--white);
+  background: var(--action);
+  color: var(--action-on);
   font-weight: 700;
 }
 
 .popMonthCurrent:hover {
-  background: var(--primary);
-  color: var(--white);
+  background: var(--action);
+  color: var(--action-on);
 }
 
 .reset {

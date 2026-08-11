@@ -24,7 +24,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 8px;
+  padding: 16px 8px;
   max-height: 340px;
   overflow-y: auto;
   border-bottom: 1px solid var(--border);
@@ -65,7 +65,7 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -95,11 +95,12 @@
 
 .item:hover,
 .row:focus-within .item {
-  background: var(--primary-bright);
+  background: var(--surface);
 }
 
+/* 지금 열려 있는 대화 — hover 와 겹치지 않게 한 단계 진하다 */
 .itemActive {
-  background: var(--primary-bright);
+  background: var(--selected-bg);
 }
 
 .more {

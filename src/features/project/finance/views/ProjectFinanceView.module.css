@@ -1,15 +1,15 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--section-gap);
 }
 
 .panel {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 20px 22px 8px;
-  border-radius: 16px;
+  padding: var(--panel-pad) var(--panel-pad) 8px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-card);
 }
@@ -19,7 +19,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding-bottom: 14px;
+  padding-bottom: var(--panel-head-gap);
 }
 
 .panelHeadLeft {
@@ -29,8 +29,8 @@
 }
 
 .panelTitle {
-  font-size: 15.5px;
-  font-weight: 700;
+  font-size: var(--fs-panel-title);
+  font-weight: 650;
   color: var(--text);
 }
 
@@ -38,7 +38,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 0 10px;
+  padding: 6px 0 16px;
 }
 
 .clip {

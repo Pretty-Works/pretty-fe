@@ -2,7 +2,9 @@ import { cx } from "@/lib/cx";
 
 import styles from "./Button.module.css";
 
-export type ButtonType = "primary" | "danger" | "light" | "dark";
+/* primary 가 곧 먹색이라 예전의 dark 는 같은 규칙이 하나 더 있는 셈이었다 — 지웠다.
+   brand 는 반대로, 보라를 남겨 둘 몇 자리를 위해 따로 뒀다 */
+export type ButtonType = "primary" | "brand" | "danger" | "light";
 export type ButtonStyle = "fill" | "weak";
 export type ButtonSize = "big" | "large" | "medium" | "tiny";
 export type ButtonDisplay = "block" | "full";

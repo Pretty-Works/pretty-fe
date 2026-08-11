@@ -3,7 +3,7 @@
   top: 24px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   width: 200px;
   flex-shrink: 0;
   padding: 12px;
@@ -11,20 +11,19 @@
 }
 
 .caption {
-  padding: 6px 12px 10px;
+  padding: 6px 12px 14px;
   font-size: 11.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--text-placeholder);
+  color: var(--text-disabled);
 }
 
 .item {
   display: flex;
   align-items: center;
-  gap: 10px;
-  height: 42px;
+  height: 44px;
   padding: 0 12px;
-  border-radius: 12px;
+  border-radius: var(--radius-control);
   font-size: 14px;
   font-weight: 500;
   color: var(--text-sub);
@@ -43,33 +42,12 @@
   background: var(--surface-muted);
 }
 
-.icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  color: var(--text-placeholder);
-  transition: color 0.12s ease;
-}
-
-.item:hover .icon {
-  color: var(--text-sub);
-}
-
-.label {
-  min-width: 0;
-  white-space: nowrap;
-}
-
+/* 지금 보고 있는 메뉴. hover 보다 확실히 진해야 해서 선택 배경을 그대로 쓴다 */
 .active,
 .active:hover {
-  background: var(--primary-bg);
-  color: var(--primary);
+  background: var(--selected-bg);
+  color: var(--selected-on);
   font-weight: 700;
-}
-
-.active .icon,
-.active:hover .icon {
-  color: var(--primary);
 }
 
 .divider {
@@ -78,19 +56,11 @@
   border-top: 1px solid var(--line);
 }
 
-@container project-area (max-width: 900px) {
+/* 좁아지면 이 메뉴는 통째로 햄버거 서랍으로 옮겨 간다.
+   기준을 GNB 의 햄버거와 같은 컨테이너·같은 폭으로 맞춰야, 둘 사이에
+   메뉴가 어디에도 없는 구간이 생기지 않는다 */
+@container app-main (max-width: 900px) {
   .lnb {
-    width: 60px;
-    padding: 10px 8px;
-    border-radius: 16px;
-  }
-  .caption,
-  .label {
     display: none;
-  }
-  .item {
-    justify-content: center;
-    gap: 0;
-    padding: 0;
   }
 }

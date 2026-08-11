@@ -1,10 +1,12 @@
 "use client";
 
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 
 import { usePathname } from "next/navigation";
 
-import { formatDayLabel, isSameDay } from "@/lib/date";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { formatDayLabel, formatTimeOfDay, isSameDay } from "@/lib/date";
 
 import AgentComposer from "@/features/agent/components/AgentComposer/AgentComposer";
 import AgentHeader from "@/features/agent/components/AgentHeader/AgentHeader";
@@ -18,7 +20,10 @@ import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/Ext
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
-import { useAgentSuggestionsQuery } from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
+import {
+  dismissAgentSuggestion,
+  useAgentSuggestionsQuery,
+} from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute, suggestionScreen } from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
@@ -29,6 +34,7 @@ import styles from "./AgentView.module.css";
 
 export default function AgentView() {
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
   const toggleExpanded = useAgentStore((state) => state.toggleExpanded);
@@ -92,8 +98,18 @@ export default function AgentView() {
    * 서버에서 LLM 이 돌기 때문이다 — 접힌 패널이나 대화 중인 패널까지 부르면 아무도 보지 않는
    * 칩을 만든다. 화면이 바뀌면 그 화면 칩을 캐시에서 찾아 걸고, 없으면 새로 받는다.
    */
+  const screen = suggestionScreen(pathname);
   const { data: suggestions, isLoading: suggestionsLoading } =
-    useAgentSuggestionsQuery(suggestionScreen(pathname), isEmpty && !folded);
+    useAgentSuggestionsQuery(screen, isEmpty && !folded);
+
+  // 누른 칩은 목록에서 뺀다. 방금 보낸 요청이 다음 대화의 추천으로 다시 뜨지 않게 한다
+  const selectSuggestion = useCallback(
+    (prompt: string) => {
+      dismissAgentSuggestion(queryClient, screen, prompt);
+      sendMessage(prompt);
+    },
+    [queryClient, screen, sendMessage],
+  );
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -126,6 +142,7 @@ export default function AgentView() {
   // 선택지 / 승인 → 하나의 선택 UI 로 통합
   const selection = pendingChoice
     ? {
+        kind: "question" as const,
         label: pendingChoice.label,
         title: pendingChoice.question,
         preview: undefined,
@@ -143,6 +160,7 @@ export default function AgentView() {
       }
     : pendingApproval
       ? {
+          kind: "approval" as const,
           label: "실행 승인",
           title: pendingApproval.summary,
           preview: pendingApproval.previewText,
@@ -163,6 +181,19 @@ export default function AgentView() {
           onDirect: answerApproval,
           onSubmitSelected: undefined,
         }
+      : null;
+
+  /*
+   * 답변과 그 뒤에 붙는 제안은 한 번의 발화다. 사이에 시간이 끼면 둘로 갈려 보이므로
+   * 제안이 붙어 있는 동안에는 마지막 답변의 시간을 감추고 흐름의 맨 끝에서 한 번만 찍는다.
+   * 마지막 줄이 내 말이면(질문을 막 보낸 참) 옮겨 올 시간 자체가 없다.
+   */
+  const lastMessage = messages.at(-1);
+  const hasTrailingPrompt =
+    !isBusy && !runError && (selection !== null || pendingAction !== null);
+  const trailingTime =
+    hasTrailingPrompt && lastMessage && lastMessage.role !== "USER"
+      ? lastMessage.createdAt
       : null;
 
   return (
@@ -215,7 +246,7 @@ export default function AgentView() {
           <EmptyChat
             suggestions={suggestions ?? []}
             loading={suggestionsLoading}
-            onSelectPrompt={sendMessage}
+            onSelectPrompt={selectSuggestion}
           />
         ) : (
           <div className={styles.chatContent}>
@@ -242,7 +273,12 @@ export default function AgentView() {
                   {showDate && (
                     <DateDivider label={formatDayLabel(message.createdAt)} />
                   )}
-                  <MessageBubble message={message} />
+                  <MessageBubble
+                    message={message}
+                    hideTime={
+                      trailingTime !== null && index === messages.length - 1
+                    }
+                  />
                 </Fragment>
               );
             })}
@@ -255,36 +291,46 @@ export default function AgentView() {
               <RunErrorNotice message={runError} onRetry={retry} />
             )}
 
-            {/* 선택 UI */}
-            {selection && !isBusy && (
-              <ChoicePrompt
-                label={selection.label}
-                title={selection.title}
-                preview={selection.preview}
-                options={selection.options}
-                placeholder={selection.placeholder}
-                allowFreeText={selection.allowFreeText}
-                onDirect={selection.onDirect}
-                multiple={selection.multiple}
-                onSubmitSelected={selection.onSubmitSelected}
-              />
-            )}
+            {/* 선택·이동 제안과 그 시간까지가 앞 답변에 이어지는 한 덩어리다 */}
+            {hasTrailingPrompt && (
+              <div className={styles.trailing}>
+                {selection && (
+                  <ChoicePrompt
+                    kind={selection.kind}
+                    label={selection.label}
+                    title={selection.title}
+                    preview={selection.preview}
+                    options={selection.options}
+                    placeholder={selection.placeholder}
+                    allowFreeText={selection.allowFreeText}
+                    onDirect={selection.onDirect}
+                    multiple={selection.multiple}
+                    onSubmitSelected={selection.onSubmitSelected}
+                  />
+                )}
 
-            {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
-            {pendingAction &&
-              pendingAction.type !== "OPEN_EXTERNAL_URL" &&
-              !isBusy && (
-              <NavigatePrompt
-                action={pendingAction}
-                onDismiss={dismissAction}
-              />
-            )}
+                {/* 처리를 끝낸 뒤의 화면 이동 제안 */}
+                {pendingAction &&
+                  pendingAction.type !== "OPEN_EXTERNAL_URL" && (
+                    <NavigatePrompt
+                      action={pendingAction}
+                      onDismiss={dismissAction}
+                    />
+                  )}
 
-            {pendingAction?.type === "OPEN_EXTERNAL_URL" && !isBusy && (
-              <ExternalUrlPrompt
-                action={pendingAction}
-                onDismiss={dismissAction}
-              />
+                {pendingAction?.type === "OPEN_EXTERNAL_URL" && (
+                  <ExternalUrlPrompt
+                    action={pendingAction}
+                    onDismiss={dismissAction}
+                  />
+                )}
+
+                {trailingTime && (
+                  <div className={styles.trailingTime}>
+                    {formatTimeOfDay(trailingTime)}
+                  </div>
+                )}
+              </div>
             )}
 
             <div ref={bottomRef} />

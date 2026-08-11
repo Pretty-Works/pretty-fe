@@ -19,6 +19,7 @@ import type {
   ResolveAgentApprovalRequest,
 } from "@/features/agent/api/agentApi";
 import { agentLogError } from "@/features/agent/api/agentDebug";
+import { AGENT_SUGGESTIONS_KEY_ROOT } from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
 import { AgentStreamError } from "@/features/agent/api/agentStream";
 import {
   useAnswerAgentQuestionMutation,
@@ -71,6 +72,10 @@ export function useAgentRun() {
   const flushWrites = useCallback(() => {
     invalidateAfterAgentWrites(queryClient, executedWritesRef.current);
     executedWritesRef.current.clear();
+    // 추천 칩은 쓰기가 없었어도 다시 받는다 — 방금 물어본 것이 재료(최근 대화)에 들어가고,
+    // 실행 중에 사용자가 직접 바꾼 것도 여기서 함께 반영된다. 서버가 같은 칩을 들고 있으면
+    // 캐시에서 그대로 오므로 LLM 이 매번 도는 것도 아니다.
+    void queryClient.invalidateQueries({ queryKey: AGENT_SUGGESTIONS_KEY_ROOT });
   }, [queryClient]);
 
   const disconnectRunStream = useCallback(() => {

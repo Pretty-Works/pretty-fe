@@ -14,7 +14,7 @@
 }
 
 .name {
-  font-size: 22px;
+  font-size: var(--fs-page-title);
   font-weight: 700;
   color: var(--text);
 }

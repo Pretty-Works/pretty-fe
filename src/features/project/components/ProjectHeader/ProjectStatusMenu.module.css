@@ -5,7 +5,7 @@
   width: 200px;
   padding: 8px;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-panel);
   background: var(--white);
   box-shadow: var(--shadow-menu-neutral);
 }

@@ -35,8 +35,8 @@
   margin-top: 8px;
   padding: 9px 18px;
   border-radius: 9px;
-  background: var(--primary);
-  color: var(--white);
+  background: var(--action);
+  color: var(--action-on);
   font-size: 13px;
   font-weight: 600;
 }

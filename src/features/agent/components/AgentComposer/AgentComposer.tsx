@@ -234,7 +234,7 @@ export default function AgentComposer({
               ? "먼저 위에서 선택해 주세요"
               : busy
                 ? "답변을 만들고 있어요"
-                : "메시지를 입력하세요"
+                : "에이전트에게 물어보세요"
           }
           value={message}
           onChange={handleInput}

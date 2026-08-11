@@ -18,12 +18,13 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* 머리글(.head)은 48px 그대로 둔다 — 본문 행만 키워야 목록이 헐거워 보이지 않는다 */
 .row {
   display: flex;
   gap: var(--col-gap);
   align-items: center;
   min-width: var(--row-min, auto);
-  height: 48px;
+  height: 54px;
   padding: 0 var(--row-pad);
   border-bottom: 1px solid var(--line);
   transition: background 0.15s ease;

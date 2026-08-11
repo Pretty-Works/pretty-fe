@@ -11,8 +11,12 @@
   cursor: pointer;
   white-space: nowrap;
   font: inherit;
-  font-weight: 700;
-  line-height: 1;
+  /* 버튼까지 700 이면 화면에서 제목과 같은 무게로 읽힌다 */
+  font-weight: 600;
+  /* line-height: 1 로 조이면 줄상자(15px)가 글자상자(18.4px)보다 작아지고,
+     글꼴의 위아래 여백이 비대칭이라 글자가 0.7px 떠 보인다.
+     줄상자를 글자 본래 높이에 맞춰야 flex 가운데 정렬이 실제로 가운데가 된다 */
+  line-height: normal;
   transition: all 0.2s ease;
 }
 
@@ -48,24 +52,48 @@
   width: 100%;
 }
 
+/* 주 동작. type 을 안 주면 여기로 온다 — 화면 대부분의 버튼이 이 규칙을 탄다 */
 .primary.fill {
+  background: var(--action);
+  color: var(--action-on);
+  border-color: var(--action);
+}
+
+.primary.fill:hover:not(:disabled) {
+  background: var(--action-hover);
+  border-color: var(--action-hover);
+}
+
+.primary.weak {
+  background: var(--selected-bg);
+  color: var(--selected-on);
+  border-color: var(--selected-border);
+}
+
+.primary.weak:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+/* 브랜드색을 그대로 쓰는 자리. 주 동작의 기본색은 아니고,
+   로그인처럼 그 화면의 얼굴이 되는 버튼에만 붙인다 */
+.brand.fill {
   background: var(--primary);
   color: var(--white);
   border-color: var(--primary);
 }
 
-.primary.fill:hover:not(:disabled) {
+.brand.fill:hover:not(:disabled) {
   background: var(--primary-light);
   border-color: var(--primary-light);
 }
 
-.primary.weak {
+.brand.weak {
   background: var(--primary-bg);
   color: var(--primary);
   border-color: var(--primary-border-focus);
 }
 
-.primary.weak:hover:not(:disabled) {
+.brand.weak:hover:not(:disabled) {
   background: var(--primary-pressed);
 }
 
@@ -111,27 +139,6 @@
   background: var(--surface);
   border-color: var(--text-placeholder);
   color: var(--text);
-}
-
-.dark.fill {
-  background: var(--text);
-  color: var(--white);
-  border-color: var(--text);
-}
-
-.dark.fill:hover:not(:disabled) {
-  background: var(--text-strong);
-  border-color: var(--text-strong);
-}
-
-.dark.weak {
-  background: var(--white);
-  color: var(--text);
-  border-color: var(--text);
-}
-
-.dark.weak:hover:not(:disabled) {
-  background: var(--surface);
 }
 
 .big {

@@ -19,7 +19,8 @@ export default function GlobalError({
           justifyContent: "center",
           minHeight: "100vh",
           gap: "12px",
-          fontFamily: "'Noto Sans KR', sans-serif",
+          // 이 화면은 루트 레이아웃 밖이라 본문 글꼴 변수가 닿지 않는다
+          fontFamily: "system-ui, sans-serif",
           textAlign: "center",
           padding: "24px",
         }}

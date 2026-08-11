@@ -1,0 +1,30 @@
+/* 글꼴 크기·행간은 말풍선(.bubbleAgent)에서 받는다. 여기서는 덩어리 사이만 잡는다 */
+.root {
+  display: flex;
+  flex-direction: column;
+  /* 문단 사이 — 문단 안쪽 줄바꿈보다 확실히 넓어야 덩어리가 갈린다 */
+  gap: 11px;
+  word-break: break-word;
+}
+
+.paragraph {
+  margin: 0;
+}
+
+.list {
+  margin: 0;
+  /* 글머리표가 본문 왼쪽 밖으로 나가지 않게 안쪽으로 들여 쓴다 */
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.list li::marker {
+  color: var(--text-placeholder);
+}
+
+/* 기본값(700)은 본문 대비 너무 튄다 */
+.root strong {
+  font-weight: 600;
+}
