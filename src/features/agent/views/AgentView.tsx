@@ -18,8 +18,9 @@ import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/Ext
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
+import { useAgentSuggestionsQuery } from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
 import { useChat } from "@/features/agent/hooks/useChat";
-import { resolveRoute } from "@/features/agent/screenRegistry";
+import { resolveRoute, suggestionScreen } from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
 import type { Conversation } from "@/features/agent/types";
@@ -32,6 +33,7 @@ export default function AgentView() {
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
   const toggleExpanded = useAgentStore((state) => state.toggleExpanded);
   const expanded = useAgentStore((state) => state.expanded);
+  const folded = useAgentStore((state) => state.folded);
 
   const {
     conversations,
@@ -82,6 +84,17 @@ export default function AgentView() {
   const isBlocked =
     historyLoading || pendingChoice !== null || pendingApproval !== null;
 
+  const isEmpty =
+    messages.length === 0 && !isBusy && !historyLoading && !historyLoadError;
+
+  /*
+   * 추천 칩은 첫 화면에만 걸린다. 그 자리가 실제로 보이는 동안만 부르는 이유는 만들 때마다
+   * 서버에서 LLM 이 돌기 때문이다 — 접힌 패널이나 대화 중인 패널까지 부르면 아무도 보지 않는
+   * 칩을 만든다. 화면이 바뀌면 그 화면 칩을 캐시에서 찾아 걸고, 없으면 새로 받는다.
+   */
+  const { data: suggestions, isLoading: suggestionsLoading } =
+    useAgentSuggestionsQuery(suggestionScreen(pathname), isEmpty && !folded);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [
@@ -97,8 +110,12 @@ export default function AgentView() {
     if (autoApprove && pendingApproval) approve();
   }, [autoApprove, pendingApproval, approve]);
 
+  // 이미 그 화면에 있으면 이동 카드는 할 말이 없어 치운다.
+  // 폼을 채워 주는 카드는 예외다 — 채우는 일이 남아 있고, 애초에 그 화면에서 부탁하는 일이다.
   useEffect(() => {
     if (!pendingAction || pendingAction.type === "OPEN_EXTERNAL_URL") return;
+    if (pendingAction.type === "FILL_FORM" && pendingAction.formData) return;
+
     const route = resolveRoute(
       pendingAction.targetScreen,
       pendingAction.params,
@@ -148,9 +165,6 @@ export default function AgentView() {
         }
       : null;
 
-  const isEmpty =
-    messages.length === 0 && !isBusy && !historyLoading && !historyLoadError;
-
   return (
     <div className={styles.agent}>
       <AgentHeader
@@ -199,7 +213,8 @@ export default function AgentView() {
       <div className={styles.chat}>
         {isEmpty ? (
           <EmptyChat
-            showRecommendations={pathname === "/"}
+            suggestions={suggestions ?? []}
+            loading={suggestionsLoading}
             onSelectPrompt={sendMessage}
           />
         ) : (

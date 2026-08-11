@@ -15,6 +15,8 @@ import FormField from "@/components/FormField/FormField";
 import SearchBar from "@/components/SearchBar/SearchBar";
 import { useToastStore } from "@/stores/useToastStore";
 
+import { useAgentFormFill } from "@/features/agent/hooks/useAgentFormFill";
+import { useScreenFormState } from "@/features/agent/hooks/useScreenFormState";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
 import { type MilestoneInput } from "@/features/project/create/api/projectApi";
@@ -359,6 +361,148 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
   };
 
   const drag = useMilestoneReorder(moveMilestone);
+
+  // 에이전트에게 "지금 이 화면에 뭐가 들어 있는지" 알린다.
+  // 이미 채운 칸을 다시 묻지 않게 하는 것이 목적이라, 빈 칸도 빈 채로 올린다.
+  useScreenFormState({
+    mode: isEdit ? "edit" : "create",
+    name,
+    description,
+    startDate,
+    endDate,
+    budget: noBudgetLimit ? 0 : Number(budget) || null,
+    noBudgetLimit,
+    ownerRole,
+    members: members.map((member) => ({
+      userId: member.userId,
+      name: member.name,
+      role: member.role || null,
+    })),
+    milestones: milestones
+      .filter((ms) => ms.targetDate || ms.goal)
+      .map(({ targetDate, goal }) => ({ targetDate, goal })),
+  });
+
+  // 에이전트가 대신 채워 주는 값 (done.action 의 FILL_FORM).
+  // 생성 요청 바디와 같은 형태로 오지만 사람이 쓴 글이 아니라 LLM 이 만든 값이다 —
+  // 형식이 맞는 것만 받고 나머지는 조용히 버린다. 저장은 하지 않는다.
+  const applyFill = (formData: Record<string, unknown>) => {
+    const text = (value: unknown, max: number) =>
+      typeof value === "string" && value.trim() ? value.slice(0, max) : null;
+    const day = (value: unknown) =>
+      typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)
+        ? value
+        : null;
+
+    const filled: string[] = [];
+
+    const nextName = text(formData.name, MAX.name);
+    if (nextName) {
+      setName(nextName);
+      filled.push("프로젝트명");
+    }
+
+    const nextDescription = text(formData.description, MAX.description);
+    if (nextDescription) {
+      setDescription(nextDescription);
+      filled.push("설명");
+    }
+
+    const nextStart = day(formData.startDate);
+    const nextEnd = day(formData.endDate);
+    // 뒤집힌 기간은 서버가 거절한다(PROJECT_003). 짝이 맞을 때만 함께 넣는다
+    if (nextStart && (!nextEnd || nextStart <= nextEnd)) {
+      setStartDate(nextStart);
+      filled.push("시작일");
+    }
+    if (nextEnd && (!nextStart || nextStart <= nextEnd)) {
+      setEndDate(nextEnd);
+      filled.push("목표일");
+    }
+
+    if (typeof formData.budget === "number" && formData.budget >= 0) {
+      // 0은 '제한 없음'이다. 금액 0원이 아니라 체크박스로 표현한다
+      setNoBudgetLimit(formData.budget === 0);
+      setBudget(
+        formData.budget === 0
+          ? ""
+          : String(Math.floor(formData.budget)).slice(0, MAX.budgetDigits),
+      );
+      filled.push("목표 예산");
+    }
+
+    const nextOwnerRole = text(formData.ownerRole, MAX.role);
+    if (nextOwnerRole) {
+      setOwnerRole(nextOwnerRole);
+      filled.push("내 역할");
+    }
+
+    // 참여자는 이름이 함께 와야 줄을 그릴 수 있다. userId 만으로 이름을 알아낼
+    // 경로가 없어서(사용자 조회는 이름 검색뿐이다) 그때는 넣지 않고 아래에서 알린다.
+    const namedMembers = Array.isArray(formData.members)
+      ? formData.members
+          .filter(
+            (row): row is { userId: number; name: string; role?: unknown } =>
+              !!row &&
+              typeof row === "object" &&
+              typeof (row as { userId?: unknown }).userId === "number" &&
+              typeof (row as { name?: unknown }).name === "string" &&
+              !!(row as { name: string }).name.trim(),
+          )
+          .filter((row) => row.userId !== ownerUserId)
+          .slice(0, MAX.members)
+      : [];
+
+    const skippedMembers =
+      Array.isArray(formData.members) &&
+      formData.members.length > namedMembers.length;
+
+    if (namedMembers.length > 0) {
+      setMembers(
+        namedMembers.map((row) => ({
+          userId: row.userId,
+          name: row.name,
+          team: "",
+          position: "",
+          role: text(row.role, MAX.role) ?? "",
+        })),
+      );
+      filled.push("참여자");
+    }
+
+    const nextMilestones = Array.isArray(formData.milestones)
+      ? formData.milestones
+          .map((row) => {
+            const item = (row ?? {}) as Record<string, unknown>;
+            const targetDate = day(item.targetDate);
+            const goal = text(item.goal, MAX.milestoneGoal);
+
+            return targetDate && goal
+              ? { key: crypto.randomUUID(), targetDate, goal }
+              : null;
+          })
+          .filter((row): row is MilestoneRow => row !== null)
+          .slice(0, MAX.milestones)
+      : [];
+
+    if (nextMilestones.length > 0) {
+      setMilestones(nextMilestones);
+      filled.push("마일스톤");
+    }
+
+    if (filled.length === 0) {
+      showToast("채울 수 있는 내용을 찾지 못했어요", "danger");
+      return;
+    }
+
+    showToast(
+      skippedMembers
+        ? `${filled.join(" · ")}을(를) 채웠어요. 참여자는 직접 골라 주세요.`
+        : `${filled.join(" · ")}을(를) 채웠어요. 확인 후 저장해 주세요.`,
+    );
+  };
+
+  useAgentFormFill(isEdit ? "PROJECT_EDIT" : "PROJECT_CREATE", applyFill);
 
   const handleSubmit = () => {
     const body = {

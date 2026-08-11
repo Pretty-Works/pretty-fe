@@ -1,0 +1,92 @@
+{
+  "source": "front/pretty-works/src/features/agent/screenRegistry.ts",
+  "command": "npm run screens",
+  "screens": {
+    "HOME": {
+      "label": "홈",
+      "route": "/",
+      "params": []
+    },
+    "CALENDAR": {
+      "label": "캘린더",
+      "route": "/calendar",
+      "params": []
+    },
+    "PROJECT_CREATE": {
+      "label": "프로젝트 생성",
+      "route": "/projects/new",
+      "params": []
+    },
+    "PROJECT_OVERVIEW": {
+      "label": "프로젝트 개요",
+      "route": "/projects/[projectId]/overview",
+      "params": [
+        "projectId"
+      ]
+    },
+    "PROJECT_EDIT": {
+      "label": "프로젝트 수정",
+      "route": "/projects/[projectId]/edit",
+      "params": [
+        "projectId"
+      ]
+    },
+    "BOARD_LIST": {
+      "label": "게시판",
+      "route": "/projects/[projectId]/board",
+      "params": [
+        "projectId"
+      ]
+    },
+    "BOARD_CREATE": {
+      "label": "게시글 작성",
+      "route": "/projects/[projectId]/board/write",
+      "params": [
+        "projectId"
+      ]
+    },
+    "BOARD_DETAIL": {
+      "label": "게시글 상세",
+      "route": "/projects/[projectId]/board/[postId]",
+      "params": [
+        "projectId",
+        "postId"
+      ]
+    },
+    "MEETING_LIST": {
+      "label": "회의록",
+      "route": "/projects/[projectId]/meetings",
+      "params": [
+        "projectId"
+      ]
+    },
+    "MEETING_CREATE": {
+      "label": "회의록 작성",
+      "route": "/projects/[projectId]/meetings/write",
+      "params": [
+        "projectId"
+      ]
+    },
+    "MEETING_DETAIL": {
+      "label": "회의록 상세",
+      "route": "/projects/[projectId]/meetings/[meetingId]",
+      "params": [
+        "projectId",
+        "meetingId"
+      ]
+    },
+    "FINANCE": {
+      "label": "재무",
+      "route": "/projects/[projectId]/finance",
+      "params": [
+        "projectId"
+      ]
+    }
+  },
+  "aliases": {
+    "PROJECT_DETAIL": "PROJECT_OVERVIEW",
+    "TASK_LIST": "PROJECT_OVERVIEW",
+    "LEAVE_LIST": "CALENDAR",
+    "SCHEDULE_LIST": "CALENDAR"
+  }
+}

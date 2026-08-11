@@ -22,6 +22,10 @@ const createQueryClient = () =>
   new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {
+        // 없어도 화면이 멀쩡한 부가 조회(meta.silentError)는 실패를 알리지 않는다 —
+        // 에이전트 추천 문구처럼 자리를 접으면 끝나는 것들이다. 토스트가 오히려 사고처럼 보인다.
+        if (query.meta?.silentError) return;
+
         if (query.state.data !== undefined) {
           toastError(
             getApiErrorMessage(

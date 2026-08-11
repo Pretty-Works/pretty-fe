@@ -7,6 +7,7 @@ import FormField from "@/components/FormField/FormField";
 import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
 
 import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
+import { useScreenFormState } from "@/features/agent/hooks/useScreenFormState";
 import type { CreatePostRequest } from "@/features/project/board/api/postApi";
 import {
   IMPORTANCE_OPTIONS,
@@ -67,6 +68,9 @@ export default function PostForm({
 
   // 목록·취소 버튼만이 아니라 좌측 메뉴·GNB·새로고침으로 나가도 먼저 묻는다
   const leaveGuard = useLeaveGuard(isDirty, onExit);
+
+  // 지금 이 화면에 뭐가 들어 있는지 에이전트에게 알린다 (채워 주는 도구는 아직 없다)
+  useScreenFormState({ mode, title, importance, content });
 
   // 제목·내용은 필수다. 다 채우기 전에는 저장할 수 없다 —
   // 눌러 놓고 무엇이 빠졌는지 되묻는 것보다 버튼으로 미리 알려 주는 편이 낫다.
