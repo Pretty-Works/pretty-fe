@@ -13,11 +13,15 @@ import { useProjectSummaryQuery } from "@/features/project/hooks/queries/useProj
 export const useProjectSummary = (
   projectId: string,
   section: ProjectSummarySection,
+  /** false면 조회하지 않는다 — 배너를 그리지 않을 프로젝트에서 쓴다 */
+  enabled = true,
 ) => {
   const showToast = useToastStore((state) => state.showToast);
 
-  const { data, isLoading, isError, refetch } =
-    useProjectSummaryQuery(projectId);
+  const { data, isLoading, isError, refetch } = useProjectSummaryQuery(
+    projectId,
+    enabled,
+  );
   const { mutateAsync: refreshSummary, isPending } =
     useRefreshProjectSummaryMutation(projectId);
 
