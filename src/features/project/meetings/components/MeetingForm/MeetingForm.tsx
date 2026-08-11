@@ -15,6 +15,8 @@ import PeoplePicker, {
 import { useToastStore } from "@/stores/useToastStore";
 
 import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
+import { useAgentFormFill } from "@/features/agent/hooks/useAgentFormFill";
+import { useScreenFormState } from "@/features/agent/hooks/useScreenFormState";
 import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
 import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
 import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
@@ -250,6 +252,54 @@ export default function MeetingForm({
     draftMutation.reset();
     setUploadOpen(false);
   };
+
+  // 지금 이 화면에 뭐가 들어 있는지 에이전트에게 알린다 (이미 쓴 칸을 다시 묻지 않게).
+  // 본문은 길어질 수 있지만 실어 보내기 전에 줄인다 — compactFormState 가 맡는다.
+  useScreenFormState({
+    mode,
+    projectId,
+    title,
+    meetingDate: date,
+    location: place,
+    purpose,
+    content,
+    followUp: followup,
+    attendeeIds: attendees,
+    transcript,
+  });
+
+  // 채팅에 파일을 붙여 회의록 초안을 부탁하면 이 값이 온다 (meeting_draft_fill 도구).
+  // 화면에서 파일을 올렸을 때와 같은 자리로 흘려보낸다 — 채우는 규칙이 한 벌이어야 한다.
+  const applyAgentFill = (formData: Record<string, unknown>) => {
+    const text = (value: unknown) =>
+      typeof value === "string" && value.trim() ? value : null;
+
+    const draft: MeetingDraft = {
+      title: text(formData.title),
+      meetingDate: text(formData.meetingDate),
+      location: text(formData.location),
+      purpose: text(formData.purpose),
+      content: text(formData.content),
+      followUp: text(formData.followUp),
+      attendeeUserIds: Array.isArray(formData.attendeeIds)
+        ? formData.attendeeIds.filter(
+            (id): id is number => typeof id === "number",
+          )
+        : [],
+    };
+
+    if (isEmptyDraft(draft)) {
+      showToast("채울 수 있는 내용을 찾지 못했어요", "danger");
+      return;
+    }
+
+    // 사용자가 부탁해서 만들어 온 값이다 — 물어보지 않고 덮어쓴다
+    applyDraft(draft, "overwrite");
+    showToast("작성 화면에 채웠어요. 내용을 확인해 주세요.");
+  };
+
+  // 초안은 새로 쓰는 회의록에만 채운다. 이미 저장된 회의록을 에이전트가 덮어쓰지 않는다
+  useAgentFormFill(mode === "create" ? "MEETING_CREATE" : null, applyAgentFill);
 
   const handleSave = () => {
     onSave?.({

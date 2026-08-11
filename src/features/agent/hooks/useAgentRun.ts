@@ -28,8 +28,12 @@ import {
   useResolveAgentApprovalMutation,
   useSendAgentMessageMutation,
 } from "@/features/agent/hooks/mutations/useAgentMutations";
-import { buildScreenContext } from "@/features/agent/screenRegistry";
+import {
+  buildScreenContext,
+  findScreenKey,
+} from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
+import { readScreenFormState } from "@/features/agent/stores/useScreenContextStore";
 import { useChatStore } from "@/features/agent/stores/useChatStore";
 import {
   invalidateAfterAgentWrites,
@@ -191,12 +195,17 @@ export function useAgentRun() {
     (goal: string, files: File[]) => {
       const { handlers, callbacks } = beginStream();
 
+      // 화면 문맥은 보내는 순간의 것을 담는다 — 답을 기다리는 사이에 다른 화면으로
+      // 옮겨 갔다면 그건 다음 질문의 문맥이다.
       sendMessageStream(
         {
           body: {
             conversationId: useChatStore.getState().conversationId,
             goal,
-            screenContext: buildScreenContext(pathname),
+            screenContext: buildScreenContext(
+              pathname,
+              readScreenFormState(findScreenKey(pathname)),
+            ),
           },
           files,
           ...handlers,

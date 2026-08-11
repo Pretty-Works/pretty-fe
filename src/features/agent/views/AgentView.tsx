@@ -97,8 +97,12 @@ export default function AgentView() {
     if (autoApprove && pendingApproval) approve();
   }, [autoApprove, pendingApproval, approve]);
 
+  // 이미 그 화면에 있으면 이동 카드는 할 말이 없어 치운다.
+  // 폼을 채워 주는 카드는 예외다 — 채우는 일이 남아 있고, 애초에 그 화면에서 부탁하는 일이다.
   useEffect(() => {
     if (!pendingAction || pendingAction.type === "OPEN_EXTERNAL_URL") return;
+    if (pendingAction.type === "FILL_FORM" && pendingAction.formData) return;
+
     const route = resolveRoute(
       pendingAction.targetScreen,
       pendingAction.params,
