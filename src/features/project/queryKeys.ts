@@ -16,5 +16,7 @@
  * 그 위에 얹혀 있던 클라이언트 캐시(staleTime)라는 두 번째 지연이다.
  */
 export const projectQueryKeys = {
+  /** 프로젝트를 가리지 않는 요약 전체. 에이전트가 무엇을 바꿨는지 프로젝트까지는 모를 때 쓴다 */
+  summaryRoot: ["project", "summary"] as const,
   summary: (projectId: string) => ["project", "summary", projectId] as const,
 };

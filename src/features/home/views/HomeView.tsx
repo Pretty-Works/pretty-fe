@@ -140,8 +140,9 @@ export default function HomeView() {
   const handleSelectOptions = (
     interaction: PendingInteraction,
     optionIds: string[],
+    freeText?: string,
   ) => {
-    openAgent(); // 선택하면 에이전트 패널을 열어 답변을 이어받는다
+    openAgent(); // 답하면 에이전트 패널을 열어 답변을 이어받는다
 
     // 답한 카드를 남겨 두면 한 번 더 눌러 409를 받는다
     setHandledIds((prev) => [...prev, interaction.interactionId]);
@@ -151,6 +152,7 @@ export default function HomeView() {
       interactionId: interaction.interactionId,
       conversationId: interaction.conversationId,
       optionIds,
+      freeText,
     });
   };
 

@@ -142,8 +142,11 @@ export function useAgentInteractions({
       }
 
       if (request.kind === "QUESTION") {
+        const freeText = request.freeText?.trim();
+
         resumeQuestion(request.interactionId, {
           selectedOptionIds: request.optionIds,
+          ...(freeText ? { freeText: freeText.slice(0, FREE_TEXT_MAX) } : {}),
         });
         return;
       }

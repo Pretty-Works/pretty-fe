@@ -28,13 +28,6 @@
   padding: 0 3px;
 }
 
-.heading {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
 .label {
   min-width: 0;
   font-size: 14px;
@@ -45,16 +38,6 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.source {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 11.5px;
-  line-height: 1.4;
-  color: var(--text-placeholder);
 }
 
 .preview {
@@ -143,7 +126,39 @@
   background: var(--primary-bright);
 }
 
+/* 보기가 없거나 보기로 답할 수 없는 되묻기는 여기에 바로 쓴다 */
+.answer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
 .submit {
+  flex-shrink: 0;
   padding: 6px 10px;
   border: none;
   border-radius: 8px;

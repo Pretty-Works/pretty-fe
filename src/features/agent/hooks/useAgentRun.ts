@@ -29,10 +29,20 @@ import {
   useSendAgentMessageMutation,
 } from "@/features/agent/hooks/mutations/useAgentMutations";
 import { buildScreenContext } from "@/features/agent/screenRegistry";
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import { useChatStore } from "@/features/agent/stores/useChatStore";
+import {
+  invalidateAfterAgentWrites,
+  UNKNOWN_WRITE_TOOL,
+} from "@/features/agent/utils/writeToolCache";
 
 // 실패 안내 옆에 다시 시도 버튼이 붙으니 "잠시 후 다시 시도해 주세요"까지 적지 않는다.
 const FALLBACK_ERROR = "요청을 처리하지 못했어요.";
+
+// 승인한 요청만 실제로 실행된다. 거절·대안(직접 고치기)은 도구가 돌지 않아 화면도 그대로다.
+// "항상 허용"은 이번 요청까지 승인하고 다음부터 자동으로 넘기겠다는 뜻이라 실행에 들어간다.
+const runsTheTool = (body: ResolveAgentApprovalRequest) =>
+  body.decision === "APPROVED" || body.alternativeId === "ALWAYS";
 
 /** 에이전트 실행 SSE를 시작·재개·재연결하고 중지한다. */
 export function useAgentRun() {
@@ -46,9 +56,24 @@ export function useAgentRun() {
   const { mutate: markRead } = useMarkAgentConversationReadMutation();
   const lastSendRef = useRef<{ goal: string; files: File[] } | null>(null);
 
+  // 이번 실행에서 실제로 돌아간 쓰기 도구. 승인을 거치면 스트림이 여러 구간으로 갈리므로
+  // 구간마다 새로 만들어지는 값이 아니라 훅에 두어 실행 하나를 통째로 따라간다.
+  const executedWritesRef = useRef(new Set<string>());
+  // 아직 답하지 않은 쓰기 승인 (approvalId → 도구 이름). 승인해야 위 목록으로 옮긴다.
+  const awaitingWritesRef = useRef(new Map<number, string>());
+
+  // 바뀐 것을 화면에 반영하고 목록을 비운다. 실행이 끝나는 자리마다 부른다 —
+  // 끝은 done 만이 아니라 실패·중단·대화 전환이기도 하고, 그때까지 돌아간 쓰기는 이미 반영됐다.
+  const flushWrites = useCallback(() => {
+    invalidateAfterAgentWrites(queryClient, executedWritesRef.current);
+    executedWritesRef.current.clear();
+  }, [queryClient]);
+
   const disconnectRunStream = useCallback(() => {
     abortRunStream();
-  }, []);
+    flushWrites();
+    awaitingWritesRef.current.clear();
+  }, [flushWrites]);
 
   // 패널이 사라져도 스트림은 살아남는다. 로그아웃으로 화면을 떠날 때가 그렇다 —
   // 끊지 않으면 다음 사용자의 채팅에 이전 실행의 이벤트가 이어서 꽂힌다.
@@ -83,6 +108,17 @@ export function useAgentRun() {
             state.appendStep(event.data.text);
             break;
           case "approval_request":
+            // 무엇이 바뀔지 알려주는 유일한 자리다. 자동 승인이면 카드는 안 뜨지만 도구는 돈다.
+            if (event.data.access === "WRITE") {
+              if (event.data.autoApproved) {
+                executedWritesRef.current.add(event.data.tool);
+              } else {
+                awaitingWritesRef.current.set(
+                  event.data.approvalId,
+                  event.data.tool,
+                );
+              }
+            }
             state.waitApproval(event.data);
             refreshPendingInteractions();
             break;
@@ -92,8 +128,18 @@ export function useAgentRun() {
             break;
           case "done":
             state.completeRun(event.data);
-            // 보고 있는 대화의 답변은 이미 읽은 것이다 — 목록에 안 읽음으로 남기지 않는다
-            if (state.conversationId !== null) markRead(state.conversationId);
+            // 펼쳐 놓고 보고 있는 대화의 답변만 읽은 것으로 친다.
+            // 접어 둔 사이에 온 답변까지 읽음으로 보내면, 방금 켠 '새 답장' 점이
+            // 목록을 다시 읽는 순간 서버 값(읽음)으로 덮여 곧바로 꺼진다.
+            if (
+              state.conversationId !== null &&
+              !useAgentStore.getState().folded
+            ) {
+              markRead(state.conversationId);
+            }
+            // 에이전트가 바꿔 놓은 화면 데이터를 다시 읽는다
+            flushWrites();
+            awaitingWritesRef.current.clear();
             // 실행이 끝나면 답을 기다리던 카드도 서버에서 닫힌다
             refreshPendingInteractions();
             break;
@@ -101,6 +147,9 @@ export function useAgentRun() {
             // 서버 message 에는 에이전트 서버가 삼킨 예외가 그대로 실려 오기도 한다.
             // 말풍선 자리에 뜨는 문장이라 코드로 찾은 문구만 내보낸다.
             state.failRun(toUserMessage(event.data.code, FALLBACK_ERROR));
+            // 도중에 멈췄어도 거기까지 돌아간 쓰기는 이미 반영됐다
+            flushWrites();
+            awaitingWritesRef.current.clear();
             refreshPendingInteractions();
             break;
         }
@@ -114,6 +163,8 @@ export function useAgentRun() {
         onSuccess: () => {
           const state = useChatStore.getState();
           if (state.running) state.failRun("답변이 도중에 끊겼어요.");
+          // 승인을 기다리며 닫힌 구간이면 여기서 비는 목록이라 대개 아무 일도 하지 않는다
+          flushWrites();
         },
         onError: (error: unknown) => {
           if (controller.signal.aborted) return;
@@ -126,13 +177,14 @@ export function useAgentRun() {
                 ? toUserMessage(error.errorCode, FALLBACK_ERROR)
                 : FALLBACK_ERROR,
             );
+          flushWrites();
         },
         onSettled: () => {
           releaseRunStreamController(controller);
         },
       },
     };
-  }, [markRead, queryClient]);
+  }, [flushWrites, markRead, queryClient]);
 
   // 말풍선을 쌓을지 말지는 부르는 쪽이 정한다 — 첫 전송과 다시 시도가 같은 요청을 보낸다.
   const openRunStream = useCallback(
@@ -192,6 +244,16 @@ export function useAgentRun() {
   const resumeApproval = useCallback(
     (approvalId: number, body: ResolveAgentApprovalRequest) => {
       const { handlers, callbacks } = beginStream();
+
+      // 승인하면 이제 도구가 돈다 — 이번 실행이 바꿀 목록에 올려 둔다.
+      // 어떤 도구인지 모르는 경우가 있다: 새로 고침한 뒤 홈 카드로 답하면
+      // 그 승인 이벤트를 이 탭이 본 적 없다. 그때는 넓게 무효화하는 쪽으로 보낸다.
+      if (runsTheTool(body)) {
+        executedWritesRef.current.add(
+          awaitingWritesRef.current.get(approvalId) ?? UNKNOWN_WRITE_TOOL,
+        );
+      }
+      awaitingWritesRef.current.delete(approvalId);
 
       useChatStore.getState().resumeRun();
       resolveApprovalStream({ approvalId, body, ...handlers }, callbacks);

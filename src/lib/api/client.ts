@@ -7,6 +7,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { clearSession } from "../auth/session";
 import { API_BASE_URL } from "../config";
 import { getErrorCode } from "./errorCode";
+import { SESSION_END_CODES, findErrorMessage } from "./errorMessage";
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,
@@ -42,14 +43,6 @@ export const refreshAccessTokenOnce = (): Promise<string> => {
   return refreshPromise;
 };
 
-// 세션이 끊긴 이유. 서버가 폐기 사유를 코드로 구분해 준다(RevokeReason → GlobalErrorCode).
-// 로그아웃은 사용자가 스스로 한 일이라 목록에 없다 — 알릴 것이 없다.
-const SESSION_END_MESSAGE: Record<string, string> = {
-  REQUEST_030: "다른 기기에서 로그인해 이 기기는 로그아웃됐어요.",
-  REQUEST_031: "보안을 위해 로그아웃됐어요. 다시 로그인해 주세요.",
-  REQUEST_032: "더 이상 이용할 수 없는 계정이에요.",
-};
-
 /** 로그인 화면이 꺼내 읽을 자리 */
 export const SESSION_END_MESSAGE_KEY = "session-end-message";
 
@@ -61,8 +54,12 @@ export const handleSessionExpired = (error?: unknown) => {
   if (typeof window === "undefined") return;
 
   // 전체 새로고침이라 토스트 스토어가 초기화된다 — 문구를 넘겨 두고 로그인 화면이 띄운다.
-  // 이유를 모르는 만료는 굳이 알리지 않는다(자리를 비우고 조용히 보낸다).
-  const message = SESSION_END_MESSAGE[getErrorCode(error) ?? ""];
+  // 서버가 폐기 사유를 코드로 구분해 준다(RevokeReason → GlobalErrorCode).
+  // 이유를 모르는 만료와 스스로 한 로그아웃은 굳이 알리지 않는다(자리를 비우고 조용히 보낸다).
+  const code = getErrorCode(error);
+  const message = SESSION_END_CODES.includes(code ?? "")
+    ? findErrorMessage(code)
+    : undefined;
   if (message) sessionStorage.setItem(SESSION_END_MESSAGE_KEY, message);
 
   window.location.href = LOGIN_PATH;
