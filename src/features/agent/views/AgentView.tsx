@@ -14,7 +14,6 @@ import AgentRunIndicator from "@/features/agent/components/AgentRunIndicator/Age
 import ChoicePrompt from "@/features/agent/components/ChoicePrompt/ChoicePrompt";
 import ConversationMenu from "@/features/agent/components/ConversationMenu/ConversationMenu";
 import DateDivider from "@/features/agent/components/DateDivider/DateDivider";
-import DeleteConversationDialog from "@/features/agent/components/DeleteConversationDialog/DeleteConversationDialog";
 import EmptyChat from "@/features/agent/components/EmptyChat/EmptyChat";
 import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/ExternalUrlPrompt";
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
@@ -28,7 +27,6 @@ import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute, suggestionScreen } from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
-import type { Conversation } from "@/features/agent/types";
 
 import styles from "./AgentView.module.css";
 
@@ -75,15 +73,12 @@ export default function AgentView() {
     dismissAction,
     selectConversation,
     startNewChat,
-    isDeletingConversation,
     deleteConversation,
   } = useChat();
 
   const hasUnread = useHasUnreadConversations();
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  // 지울지 묻고 있는 대화. 목록에서 사라지면 물어볼 것도 없어 같이 닫는다
-  const [deleteTarget, setDeleteTarget] = useState<Conversation | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // 선택지 또는 승인 대기 중이면 입력 차단
@@ -226,19 +221,10 @@ export default function AgentView() {
           selectConversation(id);
           setIsMenuOpen(false);
         }}
-        /* 물어보는 동안 목록은 열어 둔다 — 취소하면 고르던 자리로 그대로 돌아온다 */
-        onDelete={setDeleteTarget}
+        /* 줄 메뉴에서 이미 한 번 고른 동작이라 여기서 다시 묻지 않는다.
+           결과는 토스트가 알린다 (성공·이미 삭제됨·거절 모두) */
+        onDelete={(conversation) => deleteConversation(conversation.id)}
         onClose={() => setIsMenuOpen(false)}
-      />
-
-      <DeleteConversationDialog
-        conversation={deleteTarget}
-        loading={isDeletingConversation}
-        /* 요청이 도는 중에는 닫지 않는다. 끝나면 아래 onSettled 가 닫는다 */
-        onClose={() => {
-          if (!isDeletingConversation) setDeleteTarget(null);
-        }}
-        onConfirm={(id) => deleteConversation(id, () => setDeleteTarget(null))}
       />
 
       <div className={styles.chat}>

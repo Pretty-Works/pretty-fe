@@ -53,6 +53,18 @@
   color: var(--text-sub);
 }
 
+/* 값이 없는 칸. 에이전트가 근거 없이 채우지 않은 자리라 흐리게 둔다 */
+.unset {
+  color: var(--text-muted);
+}
+
+/* render 를 쓰는 칸은 표의 기본 말줄임을 물려받지 않아 여기서 다시 건다 */
+.clip {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .addTask {
   margin-left: auto;
   padding: 0;
@@ -65,8 +77,23 @@
   cursor: pointer;
 }
 
-.addTask:hover {
+.addTask:hover:not(:disabled) {
   text-decoration: underline;
+}
+
+/* 등록이 오가는 동안만. 값이 빠진 줄은 막지 않고 팝업으로 넘기므로 여기 해당하지 않는다 */
+.addTaskOff {
+  color: var(--text-sub);
+  cursor: default;
+}
+
+/* 등록한 줄. 버튼이 있던 자리를 그대로 차지해 표가 흔들리지 않는다 */
+.added {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success-strong);
+  white-space: nowrap;
 }
 
 /* 버튼이 문구에 눌려 두 글자만 남는 것보다 아래로 내리는 편이 낫다 */

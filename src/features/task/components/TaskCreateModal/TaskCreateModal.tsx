@@ -59,6 +59,20 @@ export interface EditingTask {
   assignee?: { userId: number; name: string };
 }
 
+/**
+ * 추가 모드로 열되 아는 값은 미리 채워 둘 때 (회의록 실행 항목 → 할 일).
+ *
+ * 값이 다 있는 항목은 팝업 없이 바로 등록되므로, 여기로 오는 것은 무언가 빠졌거나
+ * 그대로 쓸 수 없는 항목뿐이다 — 사용자가 채울 칸이 반드시 하나는 남아 있다.
+ */
+export interface TaskDraft {
+  content?: string;
+  /** 프로젝트 기간을 벗어나면 화면이 알아서 비운다 (dueDateInRange) */
+  dueDate?: string;
+  /** 담당자. 참여자로 확인된 값만 넘긴다 — 아니면 비워 두고 고르게 한다 (TASK_009) */
+  assigneeId?: number;
+}
+
 interface TaskCreateModalProps {
   open: boolean;
   onClose: () => void;
@@ -66,9 +80,14 @@ interface TaskCreateModalProps {
   fixedProject?: { id: string; name: string };
   // 값을 넘기면 수정 모드가 된다 (없으면 추가 모드)
   task?: EditingTask;
-  // 추가 모드로 열되 값을 미리 채워 둘 때 (회의록 실행 항목 → 할 일).
-  // 담당자는 채우지 않는다 — 이름만으로는 참여자를 특정할 수 없다 (TASK_009).
-  draft?: { content?: string; dueDate?: string };
+  // 추가 모드의 초기값
+  draft?: TaskDraft;
+  /**
+   * 저장에 성공했을 때. onClose 와 나눠 두는 이유는 취소와 구분하기 위해서다 —
+   * 부른 쪽이 "등록됐다"를 기록해야 하는데(회의록 실행 항목의 등록 완료 표시),
+   * onClose 만으로는 닫기 버튼과 저장 성공이 같은 신호로 들어온다.
+   */
+  onCreated?: () => void;
 }
 
 export default function TaskCreateModal({
@@ -77,6 +96,7 @@ export default function TaskCreateModal({
   fixedProject,
   task,
   draft,
+  onCreated,
 }: TaskCreateModalProps) {
   const isEdit = !!task;
 
@@ -94,7 +114,9 @@ export default function TaskCreateModal({
     () => task?.dueDate ?? draft?.dueDate ?? "",
   );
   // 빈 값이면 본인이 담당한다
-  const [pickedAssigneeId, setPickedAssigneeId] = useState("");
+  const [pickedAssigneeId, setPickedAssigneeId] = useState(() =>
+    draft?.assigneeId ? String(draft.assigneeId) : "",
+  );
   const [errorText, setErrorText] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
 
@@ -204,7 +226,10 @@ export default function TaskCreateModal({
     createTask(
       { ...body, assigneeId: assigneeId ? Number(assigneeId) : undefined },
       {
-        onSuccess: onClose,
+        onSuccess: () => {
+          onCreated?.();
+          onClose();
+        },
         onError: (error) => showError(error, "할 일을 만들지 못했어요."),
       },
     );
