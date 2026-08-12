@@ -14,19 +14,26 @@ const TITLES = {
     "'사내 포털' 프로젝트 기간이 2026-08-01 ~ 2026-12-31 로 변경되었습니다",
   MILESTONE_COMPLETED: "'1차 배포' 마일스톤이 완료되었습니다",
   EXPENSE_CREATED: "'사내 포털' 프로젝트에 320,000원 지출이 등록되었습니다",
-  // 할 일 3종은 "첫 인자 = 프로젝트명, 마지막 = 할 일 내용" 규칙으로 통일돼 있다.
-  TASK_ASSIGNED: "'사내 포털' 프로젝트에 할 일이 배정되었습니다: 로그인 화면 QA",
-  TASK_DELETED: "'사내 포털' 프로젝트에서 할 일이 삭제되었습니다: 로그인 화면 QA",
+  // 프로젝트 '안'의 항목 — 배지는 프로젝트명, 항목 이름은 대괄호로 문장에 남는다.
+  // 조사(이/가)는 BE가 대괄호 안 마지막 글자의 받침을 보고 채워서 내려준다.
+  MILESTONE_COMPLETED: "'사내 포털' 마일스톤 [1차 배포]가 완료되었습니다",
+  TASK_ASSIGNED: "'사내 포털' 할일 [로그인 화면 QA]가 배정되었습니다",
+  TASK_DELETED: "'사내 포털' 할일 [로그인 화면 QA]가 삭제되었습니다",
   TASK_DUE_DATE_CHANGED:
-    "'사내 포털' 프로젝트의 할 일 마감일이 2026-08-20 로 변경되었습니다: 로그인 화면 QA",
-  POST_CREATED: "'사내 포털' 프로젝트에 중요 게시글이 등록되었습니다: 배포 일정 공지",
-  POST_UPDATED: "'배포 일정 공지' 게시글이 수정되었습니다",
-  MEETING_CREATED: "'사내 포털' 프로젝트에 회의록이 등록되었습니다: 8월 2주차 정기회의",
-  SCHEDULE_PARTICIPANT_ADDED: "'주간 회의' 일정에 참가자로 추가되었습니다",
-  SCHEDULE_PARTICIPANT_REMOVED: "'주간 회의' 일정에서 제외되었습니다",
+    "'사내 포털' 할일 [로그인 화면 QA]의 마감일이 2026-08-20 로 변경되었습니다",
+  POST_CREATED: "'사내 포털' 게시판에 [배포 일정 공지]가 등록되었습니다",
+  POST_UPDATED: "'사내 포털' 게시판의 [배포 일정 공지]가 수정되었습니다",
+  MEETING_CREATED: "'사내 포털' 회의록에 [8월 2주차 정기회의]가 등록되었습니다",
+};
+
+// 일정 알림은 배지에 넣을 프로젝트가 없어 문구가 따옴표로 시작하지 않는다.
+// 배지("일정")는 toAppNotification이 타입을 보고 붙이므로 여기서는 본문만 검사한다.
+const SCHEDULE_TITLES = {
+  SCHEDULE_PARTICIPANT_ADDED: "[주간 회의]에 참가자로 추가되었습니다",
+  SCHEDULE_PARTICIPANT_REMOVED: "[주간 회의]에서 제외되었습니다",
   SCHEDULE_TIME_CHANGED:
-    "'주간 회의' 일정 시간이 2026-08-11 14:00 ~ 2026-08-11 15:00 로 변경되었습니다",
-  SCHEDULE_DELETED: "'주간 회의' 일정이 삭제되었습니다",
+    "[주간 회의]의 시간이 2026-08-11 14:00 ~ 2026-08-11 15:00 로 변경되었습니다",
+  SCHEDULE_DELETED: "[주간 회의]가 삭제되었습니다",
 };
 
 test("이름은 배지로 빠지고 문장은 그대로 남는다", () => {
@@ -44,11 +51,16 @@ test("무엇에서 빠졌는지가 본문에 남는다", () => {
   assert.equal(body, "프로젝트에서 제외되었습니다");
 });
 
-test("일정 알림도 같은 규칙으로 읽힌다", () => {
-  assert.deepEqual(splitNotificationTitle(TITLES.SCHEDULE_PARTICIPANT_REMOVED), {
-    subject: "주간 회의",
-    body: "일정에서 제외되었습니다",
-  });
+// 일정 문구가 따옴표로 시작했다면 일정 제목이 배지로 잘려나가 본문에서 사라졌을 것이다.
+// 대괄호로 바꾼 덕에 파싱이 그냥 실패하고 문구가 통째로 본문에 남는다.
+test("일정 문구는 제목을 본문에 남긴 채 통째로 내려온다", () => {
+  for (const [type, title] of Object.entries(SCHEDULE_TITLES)) {
+    assert.deepEqual(
+      splitNotificationTitle(title),
+      { subject: null, body: title },
+      `${type}: 일정 제목이 본문에서 빠졌다`,
+    );
+  }
 });
 
 // 앞의 이름만 떼고 나머지는 한 글자도 건드리지 않는다 = 본문은 항상 원문의 꼬리다.

@@ -26,21 +26,34 @@ export type NotificationType =
   | "POST_UPDATED"
   // 회의록 — 수정 알림(MEETING_UPDATED)은 BE에서 폐기됐다(발행 중단 + 기존 행 삭제).
   | "MEETING_CREATED"
-  // 캘린더 — 이 셋만 target이 SCHEDULE이다.
+  // 캘린더 — 추가·시간변경은 그 일정을 열고(SCHEDULE), 제외·삭제는 날짜로만 보낸다.
   | "SCHEDULE_PARTICIPANT_ADDED"
   | "SCHEDULE_PARTICIPANT_REMOVED"
   | "SCHEDULE_TIME_CHANGED"
-  // 삭제된 일정이라 열 곳이 없다. BE가 target을 null로 내려보낸다.
   | "SCHEDULE_DELETED";
 
-// PROJECT면 id가 projectId, SCHEDULE이면 scheduleId다.
-// 마일스톤·지출·게시판·회의록은 단독 화면이 없고 프로젝트 상세의 탭이라 전부 PROJECT로 내려오지만,
-// 일정은 프로젝트에 속하지 않아서(연결 자체가 없다) 따로 온다.
-export type NotificationTargetType = "PROJECT" | "SCHEDULE";
+// PROJECT는 id가 projectId, SCHEDULE은 scheduleId.
+// POST·MEETING은 상세 경로가 /projects/{projectId}/... 로 중첩이라 id(항목)와 projectId를 같이 쓴다.
+// 마일스톤·지출·할 일은 단독 화면이 없어 PROJECT로 내려온다.
+export type NotificationTargetType =
+  | "PROJECT"
+  | "POST"
+  | "MEETING"
+  | "SCHEDULE";
 
+/**
+ * 이동할 곳의 재료. 경로 조립은 화면이 한다(notificationLink.ts).
+ *
+ * 날짜로만 보내는 알림(일정 제외·삭제)은 열 리소스가 없어 `type`·`id`가 null이고
+ * `date`만 채워져 온다. 그래서 type이 있다고 가정하면 안 된다.
+ */
 export interface NotificationTarget {
-  type: NotificationTargetType;
-  id: number;
+  type: NotificationTargetType | null;
+  id: number | null;
+  /** POST·MEETING처럼 상세 경로가 중첩일 때만 채워진다 */
+  projectId: number | null;
+  /** "YYYY-MM-DD". 일정 제외·삭제가 쓴다 */
+  date: string | null;
 }
 
 /* =========================================================================
@@ -87,17 +100,28 @@ export interface AppNotification {
 
 export const NOTIFICATION_PAGE_SIZE = 20;
 
+// 일정 알림에는 배지로 쓸 프로젝트가 없다(일정은 프로젝트에 속하지 않는다).
+// BE 문구도 따옴표로 시작하지 않아 파싱이 그냥 실패하고 문구 전체가 본문으로 남는데,
+// 그 위에 종류를 알려주는 라벨만 화면이 붙인다.
+const SCHEDULE_BADGE = "일정";
+
 export const toAppNotification = (
   notification: ServerNotification,
-): AppNotification => ({
-  id: String(notification.notificationId),
-  type: notification.type,
-  title: notification.title,
-  ...splitNotificationTitle(notification.title),
-  target: notification.target,
-  read: notification.read,
-  createdAt: notification.createdAt,
-});
+): AppNotification => {
+  const text = splitNotificationTitle(notification.title);
+  const isSchedule = notification.type.startsWith("SCHEDULE_");
+
+  return {
+    id: String(notification.notificationId),
+    type: notification.type,
+    title: notification.title,
+    subject: isSchedule ? SCHEDULE_BADGE : text.subject,
+    body: text.body,
+    target: notification.target,
+    read: notification.read,
+    createdAt: notification.createdAt,
+  };
+};
 
 // ⚠️ offset이 아니라 커서다. 알림은 계속 위로 쌓여서 page 방식이면 스크롤하는 사이
 //    새 알림이 도착해 경계가 밀리고 이미 본 건이 다시 나온다.

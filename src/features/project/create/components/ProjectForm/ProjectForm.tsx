@@ -636,7 +636,6 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
           <div className={styles.col}>
             <FormField
               label="기간"
-              placeholder="시작일·목표일을 선택하세요"
               value={periodLabel(startDate, endDate)}
               readOnly
             />
@@ -657,7 +656,6 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
           <div className={styles.col}>
             <FormField
               label="한글 표기"
-              placeholder="목표 예산을 입력하세요"
               value={noBudgetLimit ? "제한 없음" : koreanMoney(budget)}
               readOnly
             />

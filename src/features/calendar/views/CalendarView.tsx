@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getApiErrorMessage } from "@/lib/api/errorCode";
 
@@ -41,6 +41,12 @@ import styles from "./CalendarView.module.css";
 // 삭제·나가기 확인 문구 (휴가는 '취소', 남의 일정은 '나가기')
 // 모달이 닫혀 있을 때의 빈 참여자 목록. 매번 새 배열을 만들면 useMemo가 계속 다시 돈다.
 const NO_IDS: string[] = [];
+
+// 알림에서 일정을 열 때, 상세 목록까지 스크롤한 뒤에 모달을 띄우기 위한 대기 시간.
+//
+// ⚠️ 겹쳐서 열면 안 된다. 모달이 body를 `overflow: hidden`으로 잠그는데(useBodyScrollLock),
+//    그 순간 진행 중이던 smooth 스크롤이 그 자리에서 얼어붙어 어중간한 위치에 남는다.
+const SCROLL_SETTLE_MS = 350;
 
 // "YYYY-MM-DD"가 속한 달의 1일 — 알림에서 넘어온 일정이 있는 달로 옮길 때 쓴다
 const monthOf = (dateKey: string) => {
@@ -109,12 +115,42 @@ export default function CalendarView() {
   // 저장·삭제 실패는 앱 공통 토스트로 알린다 (모달 위에 또 모달을 띄우지 않는다)
   const showToast = useToastStore((state) => state.showToast);
 
-  // 알림에서 넘어온 일정(`/calendar?scheduleId=42`)을 그 달로 옮겨 열어 준다
+  // 화면을 벗어나면 예약해 둔 모달을 취소한다 (아래 onOpen의 지연 실행)
+  const openTimerRef = useRef<number | null>(null);
+  useEffect(() => {
+    return () => {
+      if (openTimerRef.current !== null) {
+        window.clearTimeout(openTimerRef.current);
+      }
+    };
+  }, []);
+
+  // 알림에서 넘어온 딥링크. 일정을 열거나(`?scheduleId=`) 날짜만 고른다(`?date=`).
   useScheduleDeepLink(!!members.myId, {
+    // 곧바로 모달을 띄우면 그리드도 목록도 못 본 채 팝업만 뜬다.
+    // 그 일정이 있는 자리로 내려간 뒤에 열어 어디를 보고 있는지 알 수 있게 한다.
     onOpen: (event) => {
       setMonth(monthOf(event.start));
-      setSelectedDate(event.start);
-      dialogs.openEvent(event);
+      handleSelectDate(event.start);
+
+      // 이미 목록이 제자리에 있으면 기다릴 이유가 없다.
+      // scrollIntoView가 block:"start"라 top이 0이면 움직이지 않는다.
+      const top = detailRef.current?.getBoundingClientRect().top ?? 0;
+      if (Math.abs(top) <= 4) {
+        dialogs.openEvent(event);
+        return;
+      }
+
+      openTimerRef.current = window.setTimeout(
+        () => dialogs.openEvent(event),
+        SCROLL_SETTLE_MS,
+      );
+    },
+    // 제외·삭제된 일정. 그 일정은 화면에 없지만 그날 무엇이 남았는지는 보여준다.
+    // 상세 카드가 그리드 아래라 스크롤까지 해야 목적지가 눈에 들어온다.
+    onFocusDate: (dateKey) => {
+      setMonth(monthOf(dateKey));
+      handleSelectDate(dateKey);
     },
     // 지워진 일정이거나 조회 실패. 캘린더 자체는 그대로 쓸 수 있어 토스트로만 알린다.
     onMissing: (message) => showToast(message, "danger"),
