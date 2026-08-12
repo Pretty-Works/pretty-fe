@@ -323,7 +323,7 @@ export default function MeetingForm({
             {mode === "create" ? "회의록 작성" : "회의록 수정"}
           </h2>
           <div className={styles.pageSub}>
-            <OpenAgentButton>
+            <OpenAgentButton prompt="회의 내용을 정리해서 회의록을 작성해줘">
               AI로 빠르고 간편하게 회의 내용을 정리해 보세요 →
             </OpenAgentButton>
           </div>

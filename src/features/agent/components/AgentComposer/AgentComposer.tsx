@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Image from "next/image";
 
@@ -10,6 +10,13 @@ import { cx } from "@/lib/cx";
 import { formatFileSize } from "@/lib/text";
 
 import { useToastStore } from "@/stores/useToastStore";
+
+import {
+  draftKeyOf,
+  EMPTY_DRAFT,
+  useComposerDraftStore,
+} from "@/features/agent/stores/useComposerDraftStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore";
 
 import styles from "./AgentComposer.module.css";
 
@@ -54,8 +61,25 @@ export default function AgentComposer({
   onSend,
   onStop,
 }: AgentComposerProps) {
-  const [message, setMessage] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
+  /*
+   * 쓰던 글은 대화별로 나눠 둔다 — 입력칸이 자기 안에 들고 있으면 대화를 옮겨도
+   * 그대로 남아, 다른 대화에 쓰던 문장이 따라붙는다.
+   * 아직 서버 대화가 없는 새 채팅도 자기 자리를 하나 갖는다.
+   */
+  const conversationId = useChatStore((state) => state.conversationId);
+  const draftKey = draftKeyOf(conversationId);
+  const draft = useComposerDraftStore(
+    (state) => state.drafts[draftKey] ?? EMPTY_DRAFT,
+  );
+  const setDraft = useComposerDraftStore((state) => state.setDraft);
+  const clearDraft = useComposerDraftStore((state) => state.clearDraft);
+
+  const message = draft.text;
+  const files = draft.files;
+
+  const setMessage = (text: string) => setDraft(draftKey, { text });
+  const setFiles = (next: File[]) => setDraft(draftKey, { files: next });
+
   const [dragging, setDragging] = useState(false);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,34 +139,32 @@ export default function AgentComposer({
   };
 
   const removeFile = (file: File) =>
-    setFiles((prev) => prev.filter((item) => keyOf(item) !== keyOf(file)));
+    setFiles(files.filter((item) => keyOf(item) !== keyOf(file)));
 
   const stopDragging = () => {
     dragDepth.current = 0;
     setDragging(false);
   };
 
-  // 줄이 늘면 입력칸도 같이 늘린다
-  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
-
+  /*
+   * 줄이 늘면 입력칸도 같이 늘린다.
+   * 입력 처리에 두지 않고 글 자체를 따라가게 한 이유는 대화 전환 때문이다 —
+   * 다른 대화의 초안을 되살릴 때는 사용자가 타이핑한 게 아니라 높이를 맞출 기회가 없다.
+   */
+  useEffect(() => {
     const el = textareaRef.current;
     if (!el) return;
 
     el.style.height = "0px";
     el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
-  };
+  }, [message, draftKey]);
 
   const handleSend = () => {
     if (blocked || busy) return;
     if (isEmpty) return;
 
     onSend(message, files);
-
-    setMessage("");
-    setFiles([]);
-    // 인라인 높이를 지워 CSS의 한 줄 높이로 되돌린다
-    if (textareaRef.current) textareaRef.current.style.height = "";
+    clearDraft(draftKey);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -237,7 +259,7 @@ export default function AgentComposer({
                 : "에이전트에게 물어보세요"
           }
           value={message}
-          onChange={handleInput}
+          onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           rows={1}
           disabled={blocked}

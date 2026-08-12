@@ -317,7 +317,7 @@ export default function CalendarView() {
       <div className={styles.header}>
         <div className={styles.titleGroup}>
           <h1 className={styles.pageTitle}>캘린더</h1>
-          <OpenAgentButton>
+          <OpenAgentButton prompt="참여자들이 모두 가능한 시간으로 일정을 잡아줘">
             AI와 함께 참여자 일정을 고려해 일정을 잡을 수 있어요 →
           </OpenAgentButton>
         </div>

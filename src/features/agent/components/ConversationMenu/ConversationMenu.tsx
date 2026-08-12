@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+
 import { HiOutlineDotsVertical } from "react-icons/hi";
 
 import { cx } from "@/lib/cx";
@@ -30,7 +32,7 @@ interface ConversationMenuProps {
   /** 스크롤이 목록 끝에 닿았을 때 */
   onLoadMore?: () => void;
   onSelect: (id: string) => void;
-  /** ⋮ 또는 오른쪽 클릭 — 지울지 묻는 것까지가 여기 일이고, 지우는 건 부르는 쪽이 한다 */
+  /** 줄 메뉴에서 삭제를 고른 순간 — 확인은 이 메뉴가 이미 받았고, 지우는 건 부르는 쪽이 한다 */
   onDelete: (conversation: Conversation) => void;
   onClose: () => void;
 }
@@ -72,8 +74,29 @@ export default function ConversationMenu({
 }: ConversationMenuProps) {
   const hasConversations = conversations.length > 0;
 
+  // 줄 메뉴를 펼쳐 둔 대화. 한 번에 하나만 열린다
+  const [menuFor, setMenuFor] = useState<string | null>(null);
+
+  // 목록이 닫히면 줄 메뉴도 같이 접는다 — 다음에 열었을 때 남아 있으면 안 된다.
+  // 효과가 아니라 렌더 중에 맞춘다 (열린 프롭에 맞춰 자기 상태를 고치는 자리라 재렌더가 한 번으로 끝난다)
+  if (!open && menuFor !== null) setMenuFor(null);
+
+  useEffect(() => {
+    if (menuFor === null) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuFor(null);
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [menuFor]);
+
   // 닫히는 동안에도 스크롤 이벤트가 오므로 열려 있을 때만 받는다.
   const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    // 줄에 붙어 있는 메뉴라 목록이 움직이면 가리키던 자리를 잃는다
+    setMenuFor(null);
+
     if (!open || !hasMore || loadingMore || !onLoadMore) return;
 
     const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
@@ -124,17 +147,20 @@ export default function ConversationMenu({
           {/* 한 줄이 고르기와 지우기 두 가지 일을 한다. 버튼 안에 버튼을 넣을 수 없어
               줄을 li 로 두고 그 안에 버튼 둘을 나란히 놓는다 */}
           <ul className={styles.list} aria-label="최근 대화">
-            {conversations.map((conversation) => {
+            {conversations.map((conversation, index) => {
               const dot = dotFor(conversation.status, conversation.unread);
+              const menuOpen = menuFor === conversation.id;
+              // 마지막 줄은 아래로 펼치면 목록 밖으로 나간다 — 그때만 위로 연다
+              const dropUp = index === conversations.length - 1 && index > 0;
 
               return (
                 <li
                   key={conversation.id}
                   className={styles.row}
-                  /* 목록 어디서 눌러도 지울 수 있게 한 줄 전체가 오른쪽 클릭을 받는다 */
+                  /* 목록 어디서 눌러도 열 수 있게 한 줄 전체가 오른쪽 클릭을 받는다 */
                   onContextMenu={(event) => {
                     event.preventDefault();
-                    onDelete(conversation);
+                    setMenuFor(conversation.id);
                   }}
                 >
                   <button
@@ -146,7 +172,10 @@ export default function ConversationMenu({
                     )}
                     /* 닫히는 동안에는 눌리지 않게 한다 */
                     tabIndex={open ? 0 : -1}
-                    onClick={() => onSelect(conversation.id)}
+                    onClick={() => {
+                      setMenuFor(null);
+                      onSelect(conversation.id);
+                    }}
                   >
                     {/* 끝난 대화는 점이 없다. 자리는 남겨야 제목 줄이 흔들리지 않는다 */}
                     {dot ? (
@@ -172,17 +201,41 @@ export default function ConversationMenu({
                     </span>
                   </button>
 
-                  {/* 평소에는 숨어 있다가 그 줄에 손이 닿으면 나온다 — 줄마다 떠 있으면 제목을 가린다 */}
+                  {/* 평소에는 숨어 있다가 그 줄에 손이 닿으면 나온다 — 줄마다 떠 있으면 제목을 가린다.
+                      메뉴를 펼쳐 둔 동안에는 손이 떠나도 남아 있어야 어디를 눌렀는지 알 수 있다 */}
                   <button
                     type="button"
-                    className={styles.more}
+                    className={cx(styles.more, menuOpen && styles.moreOpen)}
                     tabIndex={open ? 0 : -1}
-                    aria-label={`${conversation.title} 삭제`}
-                    title="대화 삭제"
-                    onClick={() => onDelete(conversation)}
+                    aria-haspopup="menu"
+                    aria-expanded={menuOpen}
+                    aria-label={`${conversation.title} 메뉴`}
+                    title="대화 메뉴"
+                    onClick={() =>
+                      setMenuFor(menuOpen ? null : conversation.id)
+                    }
                   >
                     <HiOutlineDotsVertical size={15} aria-hidden="true" />
                   </button>
+
+                  {menuOpen && (
+                    <div
+                      className={cx(styles.rowMenu, dropUp && styles.rowMenuUp)}
+                      role="menu"
+                    >
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className={styles.rowMenuDelete}
+                        onClick={() => {
+                          setMenuFor(null);
+                          onDelete(conversation);
+                        }}
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
                 </li>
               );
             })}

@@ -15,14 +15,18 @@
   gap: 8px;
 }
 
+/* 뼈대는 회색이 아니라 보라 계열로 둔다 — 이 자리에 뜰 것이 AI 요약 배너라는 걸
+   기다리는 동안에도 알려 준다. 카드 배경(--primary-bright)보다 한 단계 진한 색을 바탕으로,
+   훑고 지나가는 띠만 거기서 한 단계 더 진하게 잡는다. 회색 토큰을 쓰면 보라 배경 위에서
+   색이 겉돌아 "아직 안 그려진 자리"가 아니라 "다른 컴포넌트"처럼 보인다. */
 .bar {
   height: 12px;
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    var(--line) 25%,
-    var(--border) 37%,
-    var(--line) 63%
+    var(--primary-border) 25%,
+    var(--primary-border-strong) 37%,
+    var(--primary-border) 63%
   );
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;

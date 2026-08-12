@@ -59,6 +59,7 @@ const emptyChatState = (): Partial<ChatStore> => ({
   pendingInteractionId: null,
   interactionRequest: null,
   conversationRequest: null,
+  newChatRequest: null,
   historyLoading: false,
   historyLoadError: false,
 });
@@ -97,6 +98,11 @@ interface ChatStore {
   interactionRequest: AgentInteractionRequest | null;
   /** 홈 카드를 눌러 열어 달라고 한 대화. 패널이 집어 가 그 대화로 이동한다 */
   conversationRequest: number | null;
+  /**
+   * 화면에서 "AI와 함께 해보세요"를 눌러 요청한 새 대화와 그 자리에 채워 둘 문구.
+   * 패널이 집어 가 새 대화로 옮기고 입력칸 초안에만 넣는다 — 보내지는 않는다.
+   */
+  newChatRequest: string | null;
   /** 목록에서 고른 대화의 지난 메시지를 불러오는 중 */
   historyLoading: boolean;
   historyLoadError: boolean;
@@ -126,6 +132,8 @@ interface ChatStore {
   clearInteractionRequest: () => void;
   requestConversation: (conversationId: number) => void;
   clearConversationRequest: () => void;
+  requestNewChat: (prompt: string) => void;
+  clearNewChatRequest: () => void;
   completeRun: (payload: AgentDonePayload) => void;
   failRun: (message: string) => void;
   cancelRun: () => void;
@@ -205,6 +213,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
     pendingInteractionId: null,
     interactionRequest: null,
     conversationRequest: null,
+    newChatRequest: null,
     historyLoading: false,
     historyLoadError: false,
 
@@ -364,6 +373,11 @@ export const useChatStore = create<ChatStore>((set, get) => {
 
     // 위 대화 열기 요청을 처리한 뒤 비움
     clearConversationRequest: () => set({ conversationRequest: null }),
+
+    // 화면에서 새 대화를 열어 달라고 요청함 (채울 문구를 함께 받는다)
+    requestNewChat: (prompt) => set({ newChatRequest: prompt }),
+
+    clearNewChatRequest: () => set({ newChatRequest: null }),
 
     // Agent 최종 답변을 메시지에 추가하고 실행을 COMPLETED로 끝내며 읽음/안읽음 상태도 처리함
     completeRun: (payload) => {

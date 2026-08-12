@@ -91,23 +91,32 @@ export default function MeetingDetailView({
         onEdit={page.startEdit}
       />
 
-      <MeetingActionItems
-        items={page.actionItems}
-        onAddTask={page.canAddTask ? page.openTaskDraft : undefined}
-      />
+      {/* 배정 권한이 없으면 카드째 뜨지 않는다 — 이 카드가 하는 일은 담당자에게 할 일을
+          배정하는 것 하나뿐이라, 줄마다 막아 봐야 눌리지 않는 표만 남는다.
 
-      {/* 실행 항목을 할 일로 옮겨 담는 팝업.
-          열 때 마운트해 그 줄의 내용·목표일을 초기값으로 한 번만 잡는다 */}
-      {page.taskDraft && (
+          값이 다 있는 줄은 팝업 없이 그 자리에서 등록된다. 확인만 받는 단계를 한 번 더
+          거칠 이유가 없어서다 */}
+      {page.actionItems.visible && (
+        <MeetingActionItems
+          items={page.actionItems.items}
+          generated={page.actionItems.generated}
+          generating={page.actionItems.generating}
+          onGenerate={page.actionItems.generate}
+          addStateOf={page.actionItems.addStateOf}
+          onAddTask={page.actionItems.onAddTask}
+        />
+      )}
+
+      {/* 목표일처럼 빠진 값이 있는 줄만 이 팝업으로 넘어온다.
+          열 때 마운트해 그 줄의 값을 초기값으로 한 번만 잡는다 */}
+      {page.actionItems.draftItem && (
         <TaskCreateModal
-          key={page.taskDraft.id}
+          key={page.actionItems.draftItem.id}
           open
-          onClose={page.closeTaskDraft}
+          onClose={page.actionItems.closeDraft}
+          onCreated={page.actionItems.completeDraft}
           fixedProject={{ id: projectId, name: page.projectName }}
-          draft={{
-            content: page.taskDraft.task,
-            dueDate: page.taskDraft.due,
-          }}
+          draft={page.actionItems.draft}
         />
       )}
 

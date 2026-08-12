@@ -92,7 +92,7 @@ export default function PostForm({
             {mode === "create" ? "게시글 작성" : "게시글 수정"}
           </h2>
           <div className={styles.pageSub}>
-            <OpenAgentButton>
+            <OpenAgentButton prompt="이 게시글 작성을 도와줘">
               AI와 함께 빠르고 간편하게 작성해 보세요 →
             </OpenAgentButton>
           </div>

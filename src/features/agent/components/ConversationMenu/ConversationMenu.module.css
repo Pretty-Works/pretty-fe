@@ -130,9 +130,58 @@
   opacity: 1;
 }
 
+/* 이제 이 버튼은 지우는 버튼이 아니라 메뉴를 여는 버튼이다 — 빨강으로 겁줄 이유가 없다.
+   삭제라는 사실은 펼쳐진 메뉴 안에서 알린다 */
 .more:hover {
+  background: var(--surface-muted);
+  color: var(--text-sub);
+}
+
+.moreOpen {
+  opacity: 1;
+  background: var(--surface-muted);
+  color: var(--text-sub);
+}
+
+/* ⋮ 바로 아래에 붙는 작은 메뉴 */
+.rowMenu {
+  position: absolute;
+  top: calc(50% + 16px);
+  right: 6px;
+  z-index: 2;
+  min-width: 104px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--white);
+  box-shadow: var(--shadow-dropdown-sm);
+}
+
+/* 마지막 줄에서 아래로 펼치면 목록 밖으로 나간다 */
+.rowMenuUp {
+  top: auto;
+  bottom: calc(50% + 16px);
+}
+
+.rowMenuDelete {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--danger-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.rowMenuDelete:hover {
   background: var(--danger-bg-weak);
-  color: var(--danger);
 }
 
 /* 가리킬 수 없는 화면에서는 나올 일이 없어 늘 보여 둔다 */

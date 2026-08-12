@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -19,10 +19,16 @@ import {
   useUpdateAgentAutoApproveMutation,
 } from "@/features/agent/hooks/mutations/useAgentMutations";
 import { useAgentConversationsQuery } from "@/features/agent/hooks/queries/useAgentConversationsQuery";
+import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import {
   NEW_CONVERSATION_AUTO_APPROVE,
   useChatStore,
 } from "@/features/agent/stores/useChatStore";
+import {
+  draftKeyOf,
+  NEW_CHAT_DRAFT_KEY,
+  useComposerDraftStore,
+} from "@/features/agent/stores/useComposerDraftStore";
 
 interface UseAgentConversationsOptions {
   disconnectRunStream: () => void;
@@ -54,6 +60,7 @@ export function useAgentConversations({
   const conversationRequest = useChatStore(
     (state) => state.conversationRequest,
   );
+  const newChatRequest = useChatStore((state) => state.newChatRequest);
 
   const {
     data,
@@ -167,6 +174,53 @@ export function useAgentConversations({
 
     pushAutoApprove(afterSync.conversationId, beforeSync.autoApprove);
   }, [conversationList, pushAutoApprove, syncConversations]);
+
+  /*
+   * 점을 끄는 일과 서버 읽음 처리는 짝이어야 한다.
+   *
+   * syncConversations 는 패널이 펼쳐져 있으면 지금 보는 대화의 점을 로컬에서 끄는데,
+   * 여기에 대응하는 서버 호출이 없었다. 그래서 접어 둔 사이 온 답변을 펼쳐서 읽어도
+   * 서버는 계속 안 읽음이었고, 패널을 다시 접는 순간 목록이 준 값이 그대로 들어와
+   * GNB 아이콘에 점이 되살아났다. 새 대화의 첫 답변도 done 시점에 conversationId 가
+   * 아직 없으면 같은 자리로 떨어진다 — 둘 다 "목록이 오는 시점"을 지나가므로 여기서 함께 막는다.
+   *
+   * 위 효과보다 뒤에 둔다. syncConversations 가 새 대화의 id 를 먼저 붙여 줘야
+   * activeId 로 이번 목록에서 자기 줄을 찾을 수 있다.
+   */
+  const autoReadRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!conversationList) return;
+    if (useAgentStore.getState().folded) return;
+
+    const { activeId } = useChatStore.getState();
+    if (activeId === null) return;
+
+    const mine = conversationList.find(
+      (conversation) => conversation.id === activeId,
+    );
+
+    // 서버가 읽음을 받아들였다 — 다음에 다시 안 읽음이 되면 그때 또 보낸다
+    if (!mine?.unread) {
+      if (autoReadRef.current === activeId) autoReadRef.current = null;
+      return;
+    }
+
+    // markRead 성공이 목록을 무효화한다. 한 번의 안 읽음마다 한 번만 보내지 않으면
+    // 서버가 값을 안 바꿔 줄 때 재조회 → markRead 가 끝없이 돈다.
+    if (autoReadRef.current === activeId) return;
+
+    const conversationId = Number(activeId);
+    if (Number.isNaN(conversationId)) return;
+
+    autoReadRef.current = activeId;
+    markRead(conversationId, {
+      // 실패했으면 서버는 그대로다 — 다음 목록에서 다시 시도할 수 있게 자물쇠를 푼다
+      onError: () => {
+        if (autoReadRef.current === activeId) autoReadRef.current = null;
+      },
+    });
+  }, [conversationList, markRead]);
 
   const changeAutoApprove = useCallback(
     (nextAutoApprove: boolean) => {
@@ -286,6 +340,25 @@ export function useAgentConversations({
     startNewChatInStore();
   }, [disconnectRunStream, startNewChatInStore]);
 
+  /*
+   * 화면에서 "AI와 함께 해보세요"를 눌렀을 때. 새 대화로 옮기고 문구를 초안에만 넣는다 —
+   * 보내지는 않는다. 무엇을 부탁할지는 사용자가 고치고 나서 정한다.
+   *
+   * 밖에서 startNewChat 을 직접 부르지 않고 요청으로 받는 이유는 스트림 때문이다.
+   * 그냥 새 대화로 옮기면 아직 돌고 있던 실행의 이벤트가 새 대화에 그대로 꽂힌다.
+   */
+  useEffect(() => {
+    if (newChatRequest === null) return;
+
+    const prompt = newChatRequest;
+
+    startNewChat();
+    useChatStore.getState().clearNewChatRequest();
+    useComposerDraftStore
+      .getState()
+      .setDraft(NEW_CHAT_DRAFT_KEY, { text: prompt });
+  }, [newChatRequest, startNewChat]);
+
   // 목록에서 치우고, 보고 있던 대화였으면 새 대화 자리로 옮긴다.
   // 삭제는 진행 중인 실행이 없을 때만 통과하므로 열려 있는 스트림도 없어야 하지만,
   // 서버가 실행을 끝낸 직후처럼 연결만 남아 있을 수 있어 옮기기 전에 끊는다.
@@ -296,6 +369,10 @@ export function useAgentConversations({
       }
 
       useChatStore.getState().removeConversation(conversationId);
+      // 지운 대화에 쓰다 만 글은 돌아갈 자리가 없다
+      useComposerDraftStore
+        .getState()
+        .clearDraft(draftKeyOf(conversationId));
     },
     [disconnectRunStream],
   );
