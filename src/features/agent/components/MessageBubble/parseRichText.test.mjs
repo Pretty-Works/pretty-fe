@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { parseRichText } from "./parseRichText.ts";
+import { parseInline, parseRichText } from "./parseRichText.ts";
 
 /** 블록을 읽기 쉬운 문자열로 눌러 비교한다 — 굵게는 <>로 감싼다 */
 const flat = (parts) =>
@@ -63,6 +63,13 @@ test("빈 줄 없이 목록이 끝나도 다음 문장과 섞이지 않는다", 
 test("굵게는 조각으로 갈린다", () => {
   assert.deepEqual(shape(parseRichText("앞 **가운데** 뒤")), [
     { kind: "p", lines: ["앞 <가운데> 뒤"] },
+  ]);
+});
+
+test("제목·보기에서 재사용하는 인라인 파서도 굵게를 구분한다", () => {
+  assert.deepEqual(parseInline("**필수** 항목"), [
+    { text: "필수", bold: true },
+    { text: " 항목", bold: false },
   ]);
 });
 

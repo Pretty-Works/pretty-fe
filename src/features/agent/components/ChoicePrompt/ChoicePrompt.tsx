@@ -4,6 +4,10 @@ import { useState } from "react";
 
 import { cx } from "@/lib/cx";
 
+import RichText, {
+  InlineRichText,
+} from "@/features/agent/components/MessageBubble/RichText";
+
 import styles from "./ChoicePrompt.module.css";
 
 export interface SelectOption {
@@ -101,13 +105,17 @@ export default function ChoicePrompt({
       {(title || label) && (
         <div className={styles.head}>
           <div className={styles.stage}>
-            {label && <span className={styles.label}>{label}</span>}
+            {label && (
+              <span className={styles.label}>
+                <InlineRichText text={label} />
+              </span>
+            )}
             <span className={styles.note}>{STAGE_NOTE[kind]}</span>
           </div>
 
           {title && (
             <p className={styles.title}>
-              {title}
+              <InlineRichText text={title} />
               {modeHint && (
                 <span className={styles.mode}> ({modeHint})</span>
               )}
@@ -123,7 +131,9 @@ export default function ChoicePrompt({
           {preview && (
             <details className={styles.preview} open>
               <summary className={styles.previewSummary}>내용 확인</summary>
-              <pre className={styles.previewBody}>{preview}</pre>
+              <div className={styles.previewBody}>
+                <RichText text={preview} />
+              </div>
             </details>
           )}
         </div>
@@ -145,13 +155,8 @@ export default function ChoicePrompt({
                   checked={checkedIds.includes(option.id)}
                   onChange={() => toggle(option.id)}
                 />
-                <span className={styles.optionBody}>
-                  <span>{option.label}</span>
-                  {option.description && (
-                    <span className={styles.optionDesc}>
-                      {option.description}
-                    </span>
-                  )}
+                <span>
+                  <InlineRichText text={option.label} />
                 </span>
               </label>
             ))
@@ -162,14 +167,7 @@ export default function ChoicePrompt({
                 className={styles.option}
                 onClick={option.onSelect}
               >
-                <span className={styles.optionBody}>
-                  <span>{option.label}</span>
-                  {option.description && (
-                    <span className={styles.optionDesc}>
-                      {option.description}
-                    </span>
-                  )}
-                </span>
+                <InlineRichText text={option.label} />
               </button>
             ))}
       </div>

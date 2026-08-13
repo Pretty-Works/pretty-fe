@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { getApiErrorMessage } from "@/lib/api/errorCode";
+import { getApiErrorMessage, getErrorCode } from "@/lib/api/errorCode";
 
 import { useToastStore } from "@/stores/useToastStore";
 
@@ -49,12 +49,24 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
   });
 
   const saveEdit = (body: CreateMeetingRequest) => {
-    updateMutation.mutate(body, {
+    if (!meeting) return;
+
+    updateMutation.mutate({ version: meeting.version, body }, {
       onSuccess: () => {
         showToast("회의록이 수정되었어요.");
         setEditing(false);
       },
       onError: (error) => {
+        if (getErrorCode(error) === "REQUEST_029") {
+          showToast(
+            "다른 사람이 먼저 수정했어요. 최신 내용을 확인한 뒤 다시 수정해 주세요.",
+            "danger",
+          );
+          setEditing(false);
+          void refetch();
+          return;
+        }
+
         showToast(
           getApiErrorMessage(
             error,

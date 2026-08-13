@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LuArrowRight } from "react-icons/lu";
 
 import { agentLogError } from "@/features/agent/api/agentDebug";
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
 import {
   canonicalScreenKey,
   resolveRoute,
@@ -78,7 +79,7 @@ export default function NavigatePrompt({
 
       <div className={styles.actions}>
         <button type="button" className={styles.primary} onClick={go}>
-          {action.label}
+          <InlineRichText text={action.label} />
           <LuArrowRight size={15} />
         </button>
         <button type="button" className={styles.ghost} onClick={onDismiss}>

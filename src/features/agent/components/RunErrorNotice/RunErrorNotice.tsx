@@ -4,6 +4,8 @@ import { LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
 
 import Button from "@/components/Button/Button";
 
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
+
 import styles from "./RunErrorNotice.module.css";
 
 interface RunErrorNoticeProps {
@@ -21,7 +23,9 @@ export default function RunErrorNotice({
     <div className={styles.notice} role="alert">
       <LuTriangleAlert className={styles.icon} size={15} aria-hidden="true" />
 
-      <p className={styles.text}>{message}</p>
+      <p className={styles.text}>
+        <InlineRichText text={message} />
+      </p>
 
       <Button
         type="light"

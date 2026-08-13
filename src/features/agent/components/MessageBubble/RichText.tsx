@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 
-import { parseRichText, type Inline } from "./parseRichText";
+import { parseInline, parseRichText, type Inline } from "./parseRichText";
 
 import styles from "./RichText.module.css";
 
@@ -15,6 +15,20 @@ function renderLine(parts: Inline[]) {
     ) : (
       <Fragment key={index}>{part.text}</Fragment>
     ),
+  );
+}
+
+/** 제목·버튼처럼 블록 요소를 넣을 수 없는 자리에서도 답변과 같은 굵게 규칙을 쓴다. */
+export function InlineRichText({ text }: RichTextProps) {
+  return (
+    <span className={styles.inline}>
+      {text.split("\n").map((line, index) => (
+        <Fragment key={index}>
+          {index > 0 && <br />}
+          {renderLine(parseInline(line))}
+        </Fragment>
+      ))}
+    </span>
   );
 }
 

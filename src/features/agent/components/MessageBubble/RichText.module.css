@@ -28,3 +28,8 @@
 .root strong {
   font-weight: 600;
 }
+
+/* 버튼·배지·제목 안에서는 블록을 만들지 않고 같은 굵게 규칙만 적용한다 */
+.inline strong {
+  font-weight: 600;
+}
