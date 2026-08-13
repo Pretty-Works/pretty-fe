@@ -95,6 +95,37 @@
   background: var(--primary-bright);
 }
 
+/* 설명이 붙은 보기 — 알약을 옆으로 늘어놓는 대신 한 줄에 하나씩 세운다 */
+.optionsStacked {
+  flex-wrap: nowrap;
+  flex-direction: column;
+}
+
+.option.optionStacked {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  text-align: left;
+  white-space: normal;
+}
+
+/* 카드는 대화를 여는 입구다 — 전문은 대화에서 보고, 여기선 두 줄까지만 */
+.optionDesc {
+  color: var(--text-sub);
+  font-size: 11px;
+  line-height: 1.45;
+  font-weight: 400;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
 .option:last-child {
   border-color: var(--border);
   color: var(--text-sub);
@@ -102,6 +133,17 @@
 
 .option:last-child:hover {
   background: var(--surface);
+}
+
+/* 위 두 규칙(마지막 보기를 흐리게)은 승인 카드의 '거절' 자리를 위한 것이다.
+   설명이 붙은 되묻기 목록에서는 마지막 보기도 그냥 보기 하나라 되돌린다 */
+.option.optionStacked:last-child {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.option.optionStacked:last-child:hover {
+  background: var(--primary-bright);
 }
 
 /* 다중 선택 칩 — 누르면 담기고 다시 누르면 빠진다.

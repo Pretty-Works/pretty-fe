@@ -317,9 +317,12 @@ export const useChatStore = create<ChatStore>((set, get) => {
           id: String(payload.questionId),
           label: payload.label,
           question: payload.text,
+          // description 은 고르기 '전에' 봐야 하는 근거다 — 여기서 버리면
+          // 사용자는 이름표만 보고 되돌릴 수 없는 선택을 하게 된다
           options: payload.options.map((option) => ({
             id: option.id,
             label: option.label,
+            description: option.description ?? undefined,
           })),
           allowFreeText: payload.allowFreeText,
           multiple: payload.multiple,

@@ -164,6 +164,7 @@ export default function AgentView() {
         options: (pendingChoice.options ?? []).map((option) => ({
           id: option.id,
           label: option.label,
+          description: option.description,
           onSelect: () => answerChoice([option.id]),
         })),
         placeholder: pendingChoice.placeholder ?? "직접 입력",

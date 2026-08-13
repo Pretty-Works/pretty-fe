@@ -11,7 +11,6 @@ import type {
   AgentAction,
   AgentApproval,
   AgentInteractionKind,
-  AgentInteractionOption,
   AgentInteractionStatus,
   AgentRunStatus,
   AgentSuggestion,
@@ -62,7 +61,8 @@ export interface AgentApprovalPayload {
 export interface AgentQuestionOption {
   id: string;
   label: string;
-  description?: string;
+  /** 에이전트가 설명을 안 붙이면 키는 오되 값이 null 이다 */
+  description?: string | null;
 }
 
 export interface AgentQuestionPayload {
@@ -292,11 +292,22 @@ export const fetchAgentConversations = async ({
   };
 };
 
+/*
+ * 보기 하나. description 은 QUESTION 에서 에이전트가 option_details 를 채웠을 때만
+ * 문자열이고, 안 채웠거나 APPROVAL(승인·거절·대안)이면 null 이 온다.
+ * 화면 타입은 없음을 undefined 로 쓰므로 경계에서 바꿔 넣는다.
+ */
+interface PendingInteractionApiOption {
+  id: string;
+  label: string;
+  description: string | null;
+}
+
 interface PendingInteractionApiItem {
   kind: AgentInteractionKind;
   interactionId: number;
   label: string;
-  options: AgentInteractionOption[];
+  options: PendingInteractionApiOption[];
   multiple: boolean;
   conversationId: number;
   runId: string;
@@ -323,7 +334,11 @@ const toPendingInteraction = (
   kind: item.kind,
   interactionId: item.interactionId,
   label: item.label,
-  options: item.options,
+  options: item.options.map((option) => ({
+    id: option.id,
+    label: option.label,
+    description: option.description ?? undefined,
+  })),
   multiple: item.multiple,
   conversationId: item.conversationId,
   runId: item.runId,
