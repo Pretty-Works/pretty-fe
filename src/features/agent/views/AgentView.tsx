@@ -1,10 +1,15 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { usePathname } from "next/navigation";
-
-import { useQueryClient } from "@tanstack/react-query";
 
 import { formatDayLabel, formatTimeOfDay, isSameDay } from "@/lib/date";
 
@@ -19,20 +24,17 @@ import ExternalUrlPrompt from "@/features/agent/components/ExternalUrlPrompt/Ext
 import MessageBubble from "@/features/agent/components/MessageBubble/MessageBubble";
 import NavigatePrompt from "@/features/agent/components/NavigatePrompt/NavigatePrompt";
 import RunErrorNotice from "@/features/agent/components/RunErrorNotice/RunErrorNotice";
-import {
-  dismissAgentSuggestion,
-  useAgentSuggestionsQuery,
-} from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
+import { useAgentSuggestionsQuery } from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
 import { useChat } from "@/features/agent/hooks/useChat";
 import { resolveRoute, suggestionScreen } from "@/features/agent/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
+import { useDismissedSuggestionsStore } from "@/features/agent/stores/useDismissedSuggestionsStore";
 
 import styles from "./AgentView.module.css";
 
 export default function AgentView() {
   const pathname = usePathname();
-  const queryClient = useQueryClient();
 
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
   const toggleExpanded = useAgentStore((state) => state.toggleExpanded);
@@ -97,13 +99,29 @@ export default function AgentView() {
   const { data: suggestions, isLoading: suggestionsLoading } =
     useAgentSuggestionsQuery(screen, isEmpty && !folded);
 
-  // 누른 칩은 목록에서 뺀다. 방금 보낸 요청이 다음 대화의 추천으로 다시 뜨지 않게 한다
+  // 한 번 누른 칩은 다시 걸지 않는다. 서버는 상황이 그대로면 같은 칩을 또 만들어 주므로
+  // 조회 결과에서 걸러 낸다 (지운 목록은 useDismissedSuggestionsStore 가 들고 있다)
+  const dismissedPrompts = useDismissedSuggestionsStore(
+    (state) => state.prompts,
+  );
+  const dismissSuggestion = useDismissedSuggestionsStore(
+    (state) => state.dismiss,
+  );
+
+  const visibleSuggestions = useMemo(
+    () =>
+      (suggestions ?? []).filter(
+        (suggestion) => !dismissedPrompts.includes(suggestion.prompt),
+      ),
+    [suggestions, dismissedPrompts],
+  );
+
   const selectSuggestion = useCallback(
     (prompt: string) => {
-      dismissAgentSuggestion(queryClient, screen, prompt);
+      dismissSuggestion(prompt);
       sendMessage(prompt);
     },
-    [queryClient, screen, sendMessage],
+    [dismissSuggestion, sendMessage],
   );
 
   useEffect(() => {
@@ -230,7 +248,7 @@ export default function AgentView() {
       <div className={styles.chat}>
         {isEmpty ? (
           <EmptyChat
-            suggestions={suggestions ?? []}
+            suggestions={visibleSuggestions}
             loading={suggestionsLoading}
             onSelectPrompt={selectSuggestion}
           />

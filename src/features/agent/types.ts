@@ -116,7 +116,10 @@ export interface Conversation {
   status?: AgentRunStatus;
   /** 가장 최근 실행의 X-Run-Id. 끝난 실행도 남아 있다 */
   runId?: string;
-  /** 답을 기다리는 승인 카드 id. 목록의 '확인 필요' 배지가 이걸 본다 */
+  /**
+   * 답을 기다리는 승인 카드 id. 지금 화면에 그리는 곳은 없다 —
+   * 대화 목록은 status 로 켜지는 점 하나로만 알린다(줄이 좁아 배지까지 얹으면 제목이 잘린다).
+   */
   pendingApprovalId?: number;
   unread: boolean;
 }
