@@ -1,8 +1,7 @@
-import type { QueryClient } from "@tanstack/react-query";
 import { useQuery } from "@tanstack/react-query";
 
 import { fetchAgentSuggestions } from "@/features/agent/api/agentApi";
-import type { AgentSuggestion, SuggestionScreen } from "@/features/agent/types";
+import type { SuggestionScreen } from "@/features/agent/types";
 
 /**
  * 한 번 받은 칩을 다시 쓰는 시간.
@@ -21,23 +20,11 @@ const suggestionsQueryKey = (screen: SuggestionScreen) =>
 
 export const AGENT_SUGGESTIONS_KEY_ROOT = ["agent", "suggestions"] as const;
 
-/**
- * 방금 누른 칩을 목록에서 뺀다.
- *
- * 서버를 다시 부르지 않는 이유: 누른 칩이 사라지는 것은 사용자가 이미 아는 사실이라
- * 기다릴 이유가 없고, 실행이 끝나면 어차피 무효화로 새 칩을 받는다. 그 사이에 새 대화를
- * 열었을 때 방금 보낸 요청이 다시 추천으로 뜨는 것만 막으면 된다.
- */
-export const dismissAgentSuggestion = (
-  queryClient: QueryClient,
-  screen: SuggestionScreen,
-  prompt: string,
-) => {
-  queryClient.setQueryData<AgentSuggestion[]>(
-    suggestionsQueryKey(screen),
-    (current) => current?.filter((suggestion) => suggestion.prompt !== prompt),
-  );
-};
+/*
+  누른 칩을 다시 걸지 않는 일은 여기가 아니라 useDismissedSuggestionsStore 가 맡는다.
+  이 캐시에서 지워 봐야 실행이 끝나면 무효화로 다시 받아오고, 서버는 같은 상황을 보고
+  같은 칩을 또 만들어 준다 — 지운 사실이 조회 결과보다 오래 살아야 한다.
+*/
 
 /**
  * 그 화면을 떠난 뒤에도 칩을 들고 있는 시간.

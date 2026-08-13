@@ -212,18 +212,6 @@
   color: var(--text-placeholder);
 }
 
-.badge {
-  flex-shrink: 0;
-  padding: 2px 7px;
-  border-radius: 999px;
-  background: var(--danger-bg-weak);
-  color: var(--danger);
-  font-size: 10.5px;
-  line-height: 1.4;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
 .loadingMore {
   padding: 10px 12px;
   text-align: center;
@@ -243,8 +231,9 @@
   animation: pulse 1.4s ease-in-out infinite;
 }
 
+/* 답을 기다리는 상태는 실패가 아니라 보류다 — 프로젝트 '보류' 배지와 같은 색을 쓴다 */
 .waiting {
-  background: var(--danger);
+  background: var(--tone-orange);
 }
 
 .unread {

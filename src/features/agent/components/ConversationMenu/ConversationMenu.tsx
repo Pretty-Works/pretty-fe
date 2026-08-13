@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 
 import { cx } from "@/lib/cx";
-import { formatDayLabel } from "@/lib/date";
+import { formatNotifiedAt } from "@/lib/date";
 
 import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
@@ -191,13 +191,10 @@ export default function ConversationMenu({
 
                     <span className={styles.title}>{conversation.title}</span>
 
-                    {/* 답을 기다리는 승인 카드가 있는 대화. 점만으로는 무엇을 기다리는지 모른다 */}
-                    {conversation.pendingApprovalId !== undefined && (
-                      <span className={styles.badge}>확인 필요</span>
-                    )}
-
+                    {/* 알림 목록과 같은 규칙 — 오늘은 시각, 1~3일은 "N일 전", 그 밖은 날짜.
+                        "오늘/어제"만 있던 때는 그제와 지난달이 똑같이 날짜로 보였다 */}
                     <span className={styles.date}>
-                      {formatDayLabel(conversation.lastMessageAt)}
+                      {formatNotifiedAt(conversation.lastMessageAt)}
                     </span>
                   </button>
 
