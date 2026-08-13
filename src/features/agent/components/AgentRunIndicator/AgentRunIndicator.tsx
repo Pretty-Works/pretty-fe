@@ -1,3 +1,5 @@
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
+
 import styles from "./AgentRunIndicator.module.css";
 
 // 첫 step 이 오기 전까지의 빈자리. 서버 문구와 말투를 맞춘다.
@@ -28,7 +30,7 @@ export default function AgentRunIndicator({ steps }: AgentRunIndicatorProps) {
 
       {/* key 를 문구로 두면 step 이 바뀔 때마다 올라오는 연출이 다시 돈다 */}
       <span key={current} className={styles.label}>
-        {current}
+        <InlineRichText text={current} />
       </span>
     </div>
   );

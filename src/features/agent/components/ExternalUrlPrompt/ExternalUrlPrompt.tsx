@@ -5,6 +5,7 @@ import { LuExternalLink } from "react-icons/lu";
 import { AGENT_OAUTH_ORIGIN } from "@/lib/config";
 import { useToastStore } from "@/stores/useToastStore";
 
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
 import type { OpenExternalUrlAgentAction } from "@/features/agent/types";
 import { resolveAllowedExternalUrl } from "@/features/agent/utils/externalUrl";
 
@@ -42,7 +43,7 @@ export default function ExternalUrlPrompt({
             target="_blank"
             rel="noopener noreferrer"
           >
-            {action.label}
+            <InlineRichText text={action.label} />
             <LuExternalLink size={15} />
           </a>
         ) : (
@@ -51,7 +52,7 @@ export default function ExternalUrlPrompt({
             className={styles.primary}
             onClick={() => showToast("안전하지 않은 연결 주소입니다.", "danger")}
           >
-            {action.label}
+            <InlineRichText text={action.label} />
             <LuExternalLink size={15} />
           </button>
         )}

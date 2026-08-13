@@ -32,6 +32,10 @@
   color: var(--primary);
 }
 
+.label strong {
+  font-weight: 800;
+}
+
 .note {
   font-size: 12px;
   line-height: 1.5;
@@ -48,9 +52,15 @@
 
 .title {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 1.7;
   color: var(--text);
+}
+
+.title strong,
+.option strong,
+.check strong {
+  font-weight: 700;
 }
 
 .preview {
@@ -80,11 +90,9 @@
 
 .previewBody {
   margin-top: 6px;
-  font-family: inherit;
   font-size: 12px;
   line-height: 1.6;
   color: var(--text-sub);
-  white-space: pre-wrap;
   word-break: break-word;
 }
 

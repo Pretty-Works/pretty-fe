@@ -26,7 +26,7 @@ const BULLET = /^\s*[-*·•]\s+(.*)$/;
 const ORDERED = /^\s*\d+[.)]\s+(.*)$/;
 
 /** "앞 **가운데** 뒤" → 조각 셋 */
-function parseInline(line: string): Inline[] {
+export function parseInline(line: string): Inline[] {
   const parts: Inline[] = [];
   let cursor = 0;
 

@@ -105,6 +105,7 @@ export interface MeetingPerson {
 
 export interface MeetingDetail {
   meetingId: number;
+  version: number;
   documentNumber: string;
   title: string;
   meetingDate: string;
@@ -186,6 +187,7 @@ export const createMeeting = async (
 export const updateMeeting = async (
   projectId: string,
   meetingId: string,
+  version: number,
   body: CreateMeetingRequest,
 ): Promise<MeetingDetailResponse> => {
   const attendeeIds = body.attendeeIds.map(Number);
@@ -197,6 +199,7 @@ export const updateMeeting = async (
   const response = await api.put<MeetingDetailResponse>(
     `/projects/${projectId}/meetings/${meetingId}`,
     { ...body, attendeeIds },
+    { headers: { "X-Resource-Version": String(version) } },
   );
 
   return response.data;

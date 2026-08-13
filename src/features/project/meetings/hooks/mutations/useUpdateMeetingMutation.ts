@@ -6,6 +6,11 @@ import {
 } from "@/features/project/meetings/api/meetingApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
+interface UpdateMeetingVariables {
+  version: number;
+  body: CreateMeetingRequest;
+}
+
 export const useUpdateMeetingMutation = (
   projectId: string,
   meetingId: string,
@@ -13,7 +18,8 @@ export const useUpdateMeetingMutation = (
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (meeting: CreateMeetingRequest) => updateMeeting(projectId, meetingId, meeting),
+    mutationFn: ({ version, body }: UpdateMeetingVariables) =>
+      updateMeeting(projectId, meetingId, version, body),
 
     onSuccess: (data) => {
       queryClient.setQueryData(
