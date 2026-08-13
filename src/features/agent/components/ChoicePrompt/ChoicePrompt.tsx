@@ -14,6 +14,8 @@ export interface SelectOption {
   /** 다중 선택일 때 무엇을 골랐는지 되돌려 보낼 값 */
   id: string;
   label: string;
+  /** 이름표만으로 차이를 알 수 없을 때 아래에 작게 붙는 설명 */
+  description?: string;
   onSelect: () => void;
 }
 
@@ -120,8 +122,14 @@ export default function ChoicePrompt({
             </p>
           )}
 
+          {/*
+           * 펼친 채로 둔다. 제목(title)은 에이전트가 쓴 한 줄이지만 이 본문은 BE 가
+           * 실제 변경 내용을 직접 읽어 그린 것이라, 승인 전에 대조해야 하는 쪽은
+           * 이쪽이다. 접어 두면 "할 일 N건 영구 삭제"를 못 본 채 승인이 눌린다.
+           * (홈의 대기 카드도 같은 이유로 펼쳐 둔다)
+           */}
           {preview && (
-            <details className={styles.preview}>
+            <details className={styles.preview} open>
               <summary className={styles.previewSummary}>내용 확인</summary>
               <div className={styles.previewBody}>
                 <RichText text={preview} />
