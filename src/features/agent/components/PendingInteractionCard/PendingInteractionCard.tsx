@@ -46,6 +46,13 @@ export default function PendingInteractionCard({
   // 승인은 여기에 쓰는 문장이 곧 거절 사유라, 코멘트인 줄 알고 쓰는 일이 없게 패널에만 둔다.
   const canWrite = interaction.kind === "QUESTION";
 
+  /*
+   * 설명이 붙은 보기는 알약 칩에 담기지 않는다 — 카드 폭이 240px 고정이고 칩은
+   * 줄바꿈을 안 한다. 설명이 하나라도 있으면 그 카드만 세로 목록으로 바꾼다.
+   * (승인·거절처럼 짧은 보기만 있는 카드는 지금 모양 그대로 둔다)
+   */
+  const hasDetails = interaction.options.some((option) => option.description);
+
   const typed = text.trim();
   // 다중 선택은 체크한 것과 쓴 문장을 함께 보낸다 — 둘 다 비면 보낼 게 없다
   const canSubmit = interaction.multiple
@@ -109,7 +116,7 @@ export default function PendingInteractionCard({
       )}
 
       {interaction.options.length > 0 && (
-        <div className={styles.options}>
+        <div className={cx(styles.options, hasDetails && styles.optionsStacked)}>
           {interaction.options.map((option) => {
             const checked = checkedIds.includes(option.id);
 
@@ -119,6 +126,7 @@ export default function PendingInteractionCard({
                 type="button"
                 className={cx(
                   styles.option,
+                  hasDetails && styles.optionStacked,
                   interaction.multiple && styles.optionToggle,
                   checked && styles.optionChecked,
                 )}
@@ -133,6 +141,11 @@ export default function PendingInteractionCard({
                 }}
               >
                 {option.label}
+                {option.description && (
+                  <span className={styles.optionDesc}>
+                    {option.description}
+                  </span>
+                )}
               </button>
             );
           })}

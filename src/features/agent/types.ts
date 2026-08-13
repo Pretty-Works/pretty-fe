@@ -157,6 +157,12 @@ export interface AgentSuggestion {
 export interface AgentInteractionOption {
   id: string;
   label: string;
+  /**
+   * 이름표만으로는 차이를 알 수 없는 보기의 부가 설명 (예: 재계획 조정안의
+   * 일정회복·비용·리스크 요약). 에이전트가 채워 보내며, 없을 수도 있다.
+   * 대기 목록 복원 경로에는 아직 이 값이 오지 않는다 (BE 응답에 필드가 없음).
+   */
+  description?: string;
 }
 
 /**
