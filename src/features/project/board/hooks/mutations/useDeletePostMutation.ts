@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { deletePost } from "@/features/project/board/api/postApi";
+import { deletePost } from "@/features/project/board/api/postApi/postApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useDeletePostMutation = (projectId: string, postId: string) => {

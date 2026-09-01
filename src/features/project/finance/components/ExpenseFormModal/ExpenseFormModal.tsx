@@ -1,9 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
-import { getErrorCode } from "@/lib/api/errorCode";
-
 import Button from "@/components/Button/Button";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import DatePicker from "@/components/DatePicker/DatePicker";
@@ -12,38 +8,15 @@ import Modal from "@/components/Modal/Modal";
 import SelectField from "@/components/SelectField/SelectField";
 
 import {
-  CATEGORY_LABEL,
   type Expense,
-  type ExpenseCategory,
-} from "@/features/project/finance/api/financeApi";
+} from "@/features/project/finance/api/financeApi/financeApi";
 import {
-  useCreateExpenseMutation,
-  useUpdateExpenseMutation,
-  useDeleteExpenseMutation,
-} from "@/features/project/finance/hooks/mutations/useExpenseMutations";
+  EXPENSE_CATEGORY_OPTIONS,
+  EXPENSE_FORM_LIMITS,
+  useExpenseFormController,
+} from "@/features/project/finance/hooks/useExpenseFormController";
 
 import styles from "./ExpenseFormModal.module.css";
-
-// 서버 검증과 동일한 상한 (ExpenseRequest)
-const MAX_MERCHANT = 100;
-const MAX_PURPOSE = 255;
-
-const CATEGORY_OPTIONS = (Object.keys(CATEGORY_LABEL) as ExpenseCategory[]).map(
-  (category) => ({ value: category, label: CATEGORY_LABEL[category] }),
-);
-
-// 원인별로 다르게 알려준다 — 사용일 범위와 권한은 사용자가 고칠 수 있는 문제라 구분이 필요하다.
-const ERROR_MESSAGE: Record<string, string> = {
-  EXPENSE_003: "사용일이 프로젝트 기간을 벗어났어요.",
-  EXPENSE_004: "지출 내역을 찾을 수 없어요.",
-  EXPENSE_005: "본인이 등록한 지출만 수정·삭제할 수 있어요.",
-  EXPENSE_006: "이미 삭제된 지출이에요.",
-  MEMBER_001: "이 프로젝트에 참여 중일 때만 지출을 등록할 수 있어요.",
-  PROJECT_004: "프로젝트를 찾을 수 없어요.",
-  USER_003: "퇴사한 사용자는 지출을 등록할 수 없어요.",
-  REQUEST_001: "입력값을 다시 확인해 주세요.",
-  REQUEST_028: "같은 요청이 이미 접수됐어요. 잠시 후 다시 시도해 주세요.",
-};
 
 interface ExpenseFormModalProps {
   open: boolean;
@@ -62,103 +35,28 @@ export default function ExpenseFormModal({
   period,
   expense,
 }: ExpenseFormModalProps) {
-  const isEdit = !!expense;
-
-  // State — 열 때 마운트되므로 초기값은 여기서 한 번만 잡는다
-  const [expenseDate, setExpenseDate] = useState(
-    () => expense?.expenseDate ?? "",
-  );
-  const [category, setCategory] = useState<string>(
-    () => expense?.category ?? "",
-  );
-  const [merchant, setMerchant] = useState(() => expense?.merchant ?? "");
-  const [purpose, setPurpose] = useState(() => expense?.purpose ?? "");
-  const [amount, setAmount] = useState(() =>
-    expense ? String(expense.amount) : "",
-  );
-  const [errorText, setErrorText] = useState("");
-  const [deleteOpen, setDeleteOpen] = useState(false); // 삭제 확인
-
-  // 연타·재시도로 지출이 두 건 생기지 않게 한 번 발급한다. 수정은 PUT(멱등)이라 필요 없다.
-  const [idempotencyKey] = useState(() => crypto.randomUUID());
-
-  // Query
-  const { mutate: createExpense, isPending: isCreating } =
-    useCreateExpenseMutation(projectId);
-  const { mutate: updateExpense, isPending: isUpdating } =
-    useUpdateExpenseMutation(projectId);
-  const { mutate: deleteExpense, isPending: isDeleting } =
-    useDeleteExpenseMutation(projectId);
-
-  // 저장(추가·수정)과 삭제를 나눠 둔다 — 삭제 중에 저장 버튼이 진행 상태로 보이면 안 된다.
-  const isSaving = isCreating || isUpdating;
-  const isPending = isSaving || isDeleting;
-
-  // 서버가 돌려준 실패 원인을 문구로 바꾼다
-  const showError = (error: unknown, fallback: string) => {
-    const code = getErrorCode(error);
-    setErrorText((code && ERROR_MESSAGE[code]) || fallback);
-  };
-
-  // 숫자만 남긴다 — 서버가 1원 이상의 정수만 받는다
-  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setAmount(e.target.value.replace(/[^0-9]/g, ""));
-  };
-
-  const handleSubmit = () => {
-    setErrorText("");
-
-    // PUT은 전체 교체라 수정 때도 다섯 필드를 모두 보낸다
-    const body = {
-      expenseDate,
-      category: category as ExpenseCategory,
-      merchant: merchant.trim(),
-      purpose: purpose.trim(),
-      amount: Number(amount),
-    };
-
-    if (expense) {
-      updateExpense(
-        { expenseId: expense.expenseId, body },
-        {
-          onSuccess: onClose,
-          onError: (error) => showError(error, "지출을 수정하지 못했어요."),
-        },
-      );
-      return;
-    }
-
-    createExpense(
-      { body, idempotencyKey },
-      {
-        onSuccess: onClose,
-        onError: (error) => showError(error, "지출을 등록하지 못했어요."),
-      },
-    );
-  };
-
-  const handleDelete = () => {
-    if (!expense) return;
-    setErrorText("");
-
-    deleteExpense(expense.expenseId, {
-      onSuccess: onClose,
-      // 확인 창을 닫아야 폼 아래의 실패 문구가 보인다
-      onError: (error) => {
-        setDeleteOpen(false);
-        showError(error, "지출을 삭제하지 못했어요.");
-      },
-    });
-  };
-
-  // 다섯 항목 모두 필수. 금액은 1원 이상.
-  const canSubmit =
-    !!expenseDate &&
-    !!category &&
-    !!merchant.trim() &&
-    !!purpose.trim() &&
-    Number(amount) >= 1 &&
-    !isPending;
+  const {
+    isEdit,
+    expenseDate,
+    setExpenseDate,
+    category,
+    setCategory,
+    merchant,
+    setMerchant,
+    purpose,
+    setPurpose,
+    amount,
+    changeAmount,
+    errorText,
+    deleteOpen,
+    setDeleteOpen,
+    isDeleting,
+    isSaving,
+    isPending,
+    submit,
+    remove,
+    canSubmit,
+  } = useExpenseFormController({ projectId, expense, onClose });
 
   return (
     <Modal
@@ -184,7 +82,7 @@ export default function ExpenseFormModal({
             size="medium"
             loading={isSaving}
             disabled={!canSubmit}
-            onClick={handleSubmit}
+            onClick={submit}
           >
             {isEdit ? "수정" : "추가"}
           </Button>
@@ -210,7 +108,7 @@ export default function ExpenseFormModal({
           value={category}
           onChange={setCategory}
           placeholder="유형을 선택하세요"
-          options={CATEGORY_OPTIONS}
+          options={EXPENSE_CATEGORY_OPTIONS}
         />
 
         {/* 상한을 넘기면 FormField가 알아서 알려 준다 */}
@@ -218,7 +116,7 @@ export default function ExpenseFormModal({
           label="사용처"
           required
           placeholder="예: 코레일"
-          maxLength={MAX_MERCHANT}
+          maxLength={EXPENSE_FORM_LIMITS.merchant}
           value={merchant}
           onChange={(e) => setMerchant(e.target.value)}
         />
@@ -227,7 +125,7 @@ export default function ExpenseFormModal({
           label="사용 목적"
           required
           placeholder="예: 부산 거래처 미팅 출장"
-          maxLength={MAX_PURPOSE}
+          maxLength={EXPENSE_FORM_LIMITS.purpose}
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
         />
@@ -239,7 +137,7 @@ export default function ExpenseFormModal({
           inputMode="numeric"
           placeholder="0"
           value={amount ? Number(amount).toLocaleString("ko-KR") : ""}
-          onChange={handleAmountChange}
+          onChange={changeAmount}
           right="원"
         />
 
@@ -255,7 +153,7 @@ export default function ExpenseFormModal({
         tone="danger"
         loading={isDeleting}
         onClose={() => setDeleteOpen(false)}
-        onConfirm={handleDelete}
+        onConfirm={remove}
       />
     </Modal>
   );

@@ -15,8 +15,8 @@ import {
   draftKeyOf,
   EMPTY_DRAFT,
   useComposerDraftStore,
-} from "@/features/agent/stores/useComposerDraftStore";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+} from "@/features/agent/stores/useComposerDraftStore/useComposerDraftStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 
 import styles from "./AgentComposer.module.css";
 

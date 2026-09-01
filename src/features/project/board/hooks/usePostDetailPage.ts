@@ -8,7 +8,7 @@ import { getApiErrorMessage } from "@/lib/api/errorCode";
 
 import { useToastStore } from "@/stores/useToastStore";
 
-import type { CreatePostRequest } from "@/features/project/board/api/postApi";
+import type { CreatePostRequest } from "@/features/project/board/api/postApi/postApi";
 import { useDeletePostMutation } from "@/features/project/board/hooks/mutations/useDeletePostMutation";
 import { useUpdatePostMutation } from "@/features/project/board/hooks/mutations/useUpdatePostMutation";
 import { usePostDetailQuery } from "@/features/project/board/hooks/queries/usePostDetailQuery";

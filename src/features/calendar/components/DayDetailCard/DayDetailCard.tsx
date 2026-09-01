@@ -4,7 +4,7 @@ import Button from "@/components/Button/Button";
 import StateView from "@/components/StateView/StateView";
 
 import type { CalendarEvent, CalendarMember } from "@/features/calendar/types";
-import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar";
+import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar/calendar";
 import {
   calendarEventColors,
   eventMemberColor,

@@ -6,7 +6,7 @@ import { cx } from "@/lib/cx";
 
 import RichText, {
   InlineRichText,
-} from "@/features/agent/components/MessageBubble/RichText";
+} from "@/features/agent/components/MessageBubble/RichText/RichText";
 
 import styles from "./ChoicePrompt.module.css";
 

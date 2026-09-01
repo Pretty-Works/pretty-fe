@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import MeetingWriteView from "@/features/project/meetings/views/MeetingWriteView";
+import MeetingWriteView from "@/features/project/meetings/views/MeetingWriteView/MeetingWriteView";
 
 interface PageProps {
   params: Promise<{ projectId: string }>;

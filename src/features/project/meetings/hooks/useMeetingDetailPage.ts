@@ -9,7 +9,7 @@ import { getApiErrorMessage, getErrorCode } from "@/lib/api/errorCode";
 import { useToastStore } from "@/stores/useToastStore";
 
 import { useIsProjectOpenForContent } from "@/features/project/hooks/useIsProjectOpenForContent";
-import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi";
+import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import { useDeleteMeetingMutation } from "@/features/project/meetings/hooks/mutations/useDeleteMeetingMutation";
 import { useUpdateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useUpdateMeetingMutation";
 import { useMeetingDetailQuery } from "@/features/project/meetings/hooks/queries/useMeetingDetailQuery";

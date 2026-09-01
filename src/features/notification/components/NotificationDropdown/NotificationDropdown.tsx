@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
-import type { AppNotification } from "../../api/notificationApi";
+import type { AppNotification } from "../../api/notificationApi/notificationApi";
 import { useReadNotificationMutation } from "../../hooks/mutations/useReadNotificationMutation";
 import { useNotificationsQuery } from "../../hooks/queries/useNotificationsQuery";
 import { getNotificationHref } from "../../utils/notificationLink";

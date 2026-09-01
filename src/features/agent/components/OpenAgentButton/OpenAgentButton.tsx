@@ -1,7 +1,7 @@
 "use client";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 
 import styles from "./OpenAgentButton.module.css";
 

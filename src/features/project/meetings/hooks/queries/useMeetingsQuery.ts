@@ -4,7 +4,7 @@ import {
   fetchMeetings,
   type FetchMeetingsParams,
   type MeetingsResponse,
-} from "@/features/project/meetings/api/meetingApi";
+} from "@/features/project/meetings/api/meetingApi/meetingApi";
 
 // 모듈 스코프에 둬야 react-query가 select 결과를 재사용한다 (인라인이면 매 렌더 재계산)
 const selectMeetings = (data: MeetingsResponse) => ({

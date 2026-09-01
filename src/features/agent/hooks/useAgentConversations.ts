@@ -11,7 +11,7 @@ import { useToastStore } from "@/stores/useToastStore";
 import {
   fetchAgentConversationMessages,
   fetchAgentPendingInteractions,
-} from "@/features/agent/api/agentApi";
+} from "@/features/agent/api/agentApi/agentApi";
 import { agentLogError } from "@/features/agent/api/agentDebug";
 import {
   useDeleteAgentConversationMutation,
@@ -23,12 +23,12 @@ import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import {
   NEW_CONVERSATION_AUTO_APPROVE,
   useChatStore,
-} from "@/features/agent/stores/useChatStore";
+} from "@/features/agent/stores/useChatStore/useChatStore";
 import {
   draftKeyOf,
   NEW_CHAT_DRAFT_KEY,
   useComposerDraftStore,
-} from "@/features/agent/stores/useComposerDraftStore";
+} from "@/features/agent/stores/useComposerDraftStore/useComposerDraftStore";
 
 interface UseAgentConversationsOptions {
   disconnectRunStream: () => void;

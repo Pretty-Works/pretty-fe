@@ -14,7 +14,7 @@ import path from "node:path";
 import {
   SCREEN_ALIASES,
   SCREEN_ROUTES,
-} from "../src/features/agent/screenRegistry.ts";
+} from "../src/features/agent/screenRegistry/screenRegistry.ts";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const OUTPUT = path.join(ROOT, "screens.json");
@@ -37,7 +37,7 @@ export function buildScreenCatalog() {
 
   return {
     // 사람이 이 파일을 열었을 때 어디서 온 것인지 알 수 있어야 한다
-    source: "front/pretty-works/src/features/agent/screenRegistry.ts",
+    source: "front/pretty-works/src/features/agent/screenRegistry/screenRegistry.ts",
     command: "npm run screens",
     screens,
     // 옛 이름·비슷한 이름. 프론트가 여기 있는 이름도 받아 주지만, 새 코드는 정본을 쓴다

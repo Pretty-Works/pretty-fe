@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-import { fetchAgentConversations } from "@/features/agent/api/agentApi";
+import { fetchAgentConversations } from "@/features/agent/api/agentApi/agentApi";
 
 /** 한 번에 가져올 대화 수. 스크롤이 바닥에 닿을 때마다 이만큼씩 더 받는다 */
 export const CONVERSATION_PAGE_SIZE = 20;

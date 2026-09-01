@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import CalendarView from "@/features/calendar/views/CalendarView";
+import CalendarView from "@/features/calendar/views/CalendarView/CalendarView";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "캘린더",

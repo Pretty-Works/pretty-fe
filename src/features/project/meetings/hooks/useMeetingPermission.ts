@@ -1,6 +1,6 @@
 "use client";
 
-import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi";
+import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
 /** 이 회의록으로 무엇을 할 수 있는가. */

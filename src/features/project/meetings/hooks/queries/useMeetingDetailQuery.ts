@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchMeetingDetail } from "@/features/project/meetings/api/meetingApi";
+import { fetchMeetingDetail } from "@/features/project/meetings/api/meetingApi/meetingApi";
 
 export const useMeetingDetailQuery = (
   projectId: string,

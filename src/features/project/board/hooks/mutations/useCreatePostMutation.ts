@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createPost,
   type CreatePostRequest,
-} from "@/features/project/board/api/postApi";
+} from "@/features/project/board/api/postApi/postApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useCreatePostMutation = (projectId: string) => {

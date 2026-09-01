@@ -19,7 +19,7 @@ import { useHydrated } from "@/hooks/useHydrated";
 import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
-import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore";
+import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore/useChatStore";
 import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
 import NotificationBell from "@/features/notification/components/NotificationBell/NotificationBell";
 import { DEFAULT_PROJECT_TAB } from "@/features/project/constants/projectTabs";
@@ -28,7 +28,7 @@ import { useLastProjectStore } from "@/features/project/stores/useLastProjectSto
 import { describeAffiliation } from "@/features/user/constants/organization";
 import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
-import GnbDrawer from "./GnbDrawer";
+import GnbDrawer from "./GnbDrawer/GnbDrawer";
 
 import styles from "./Gnb.module.css";
 

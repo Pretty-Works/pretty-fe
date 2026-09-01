@@ -6,18 +6,18 @@ import { usePathname } from "next/navigation";
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { toUserMessage } from "@/lib/api/errorMessage";
+import { toUserMessage } from "@/lib/api/errorMessage/errorMessage";
 
 import {
   abortRunStream,
   openRunStreamController,
   releaseRunStreamController,
-} from "@/features/agent/api/activeRunStream";
+} from "@/features/agent/api/activeRunStream/activeRunStream";
 import type {
   AgentStreamHandlers,
   AnswerAgentQuestionRequest,
   ResolveAgentApprovalRequest,
-} from "@/features/agent/api/agentApi";
+} from "@/features/agent/api/agentApi/agentApi";
 import { agentLogError } from "@/features/agent/api/agentDebug";
 import { AGENT_SUGGESTIONS_KEY_ROOT } from "@/features/agent/hooks/queries/useAgentSuggestionsQuery";
 import { AgentStreamError } from "@/features/agent/api/agentStream";
@@ -32,14 +32,14 @@ import {
 import {
   buildScreenContext,
   findScreenKey,
-} from "@/features/agent/screenRegistry";
+} from "@/features/agent/screenRegistry/screenRegistry";
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
-import { readScreenFormState } from "@/features/agent/stores/useScreenContextStore";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+import { readScreenFormState } from "@/features/agent/stores/useScreenContextStore/useScreenContextStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 import {
   invalidateAfterAgentWrites,
   UNKNOWN_WRITE_TOOL,
-} from "@/features/agent/utils/writeToolCache";
+} from "@/features/agent/utils/writeToolCache/writeToolCache";
 
 // 실패 안내 옆에 다시 시도 버튼이 붙으니 "잠시 후 다시 시도해 주세요"까지 적지 않는다.
 const FALLBACK_ERROR = "요청을 처리하지 못했어요.";

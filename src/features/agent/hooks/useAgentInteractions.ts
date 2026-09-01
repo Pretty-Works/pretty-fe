@@ -5,9 +5,9 @@ import { useCallback, useEffect } from "react";
 import type {
   AnswerAgentQuestionRequest,
   ResolveAgentApprovalRequest,
-} from "@/features/agent/api/agentApi";
+} from "@/features/agent/api/agentApi/agentApi";
 import { agentLogError } from "@/features/agent/api/agentDebug";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 
 // 서버 상한. 넘겨 보내면 400 이라 화면에서 먼저 자른다.
 const REASON_MAX = 200;

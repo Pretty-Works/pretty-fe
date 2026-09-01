@@ -9,7 +9,7 @@ import {
 import {
   readNotification,
   type NotificationsResponse,
-} from "../../api/notificationApi";
+} from "../../api/notificationApi/notificationApi";
 import { NOTIFICATIONS_QUERY_KEY } from "../queries/useNotificationsQuery";
 
 type NotificationPages = InfiniteData<NotificationsResponse, number | undefined>;

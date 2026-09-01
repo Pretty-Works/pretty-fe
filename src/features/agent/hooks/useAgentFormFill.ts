@@ -5,7 +5,7 @@ import { useEffect, useRef } from "react";
 import {
   FILL_REQUEST_TTL_MS,
   useScreenContextStore,
-} from "@/features/agent/stores/useScreenContextStore";
+} from "@/features/agent/stores/useScreenContextStore/useScreenContextStore";
 
 /**
  * 에이전트가 "이 값으로 채워 달라"고 보낸 것을 받는다 (done.action 의 FILL_FORM).

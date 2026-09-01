@@ -11,7 +11,7 @@ import StateView from "@/components/StateView/StateView";
 import {
   CATEGORY_LABEL,
   type Budget,
-} from "@/features/project/finance/api/financeApi";
+} from "@/features/project/finance/api/financeApi/financeApi";
 import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
 
 import styles from "./BudgetSummaryCard.module.css";

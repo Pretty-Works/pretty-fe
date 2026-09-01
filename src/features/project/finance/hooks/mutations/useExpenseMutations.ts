@@ -7,7 +7,7 @@ import {
   deleteExpense,
   updateExpense,
   type ExpenseBody,
-} from "../../api/financeApi";
+} from "../../api/financeApi/financeApi";
 
 // 지출이 바뀌면 목록과 예산 집계가 함께 달라진다.
 // 특히 사용일을 고치면 EXECUTED ↔ PLANNED 탭이 바뀌므로 목록 전체를 무효화한다.

@@ -2,7 +2,7 @@
 
 import { formatNotifiedAt } from "@/lib/date";
 
-import type { AppNotification } from "../../api/notificationApi";
+import type { AppNotification } from "../../api/notificationApi/notificationApi";
 
 import styles from "./NotificationItem.module.css";
 

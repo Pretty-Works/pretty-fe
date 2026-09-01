@@ -6,14 +6,14 @@ import { isPublicPath } from "@/constants/routes";
 import { cx } from "@/lib/cx";
 
 import Button from "@/components/Button/Button";
-import ErrorBoundary from "@/components/ErrorBoundary/ErrorBoundary";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import StateView from "@/components/StateView/StateView";
 
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
 import Gnb from "@/layouts/Gnb/Gnb";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
-import AgentView from "@/features/agent/views/AgentView";
+import AgentView from "@/features/agent/views/AgentView/AgentView";
 
 // 상단바와 AI 패널은 root layout 안이라 error.tsx 가 감싸 주지 못한다.
 // 여기서 각자 막지 않으면 둘 중 하나만 깨져도 앱 전체가 global-error 로 넘어간다.

@@ -4,9 +4,9 @@ import { useEffect } from "react";
 
 import { usePathname } from "next/navigation";
 
-import { findScreenKey } from "@/features/agent/screenRegistry";
-import { useScreenContextStore } from "@/features/agent/stores/useScreenContextStore";
-import { compactFormState } from "@/features/agent/utils/formState";
+import { findScreenKey } from "@/features/agent/screenRegistry/screenRegistry";
+import { useScreenContextStore } from "@/features/agent/stores/useScreenContextStore/useScreenContextStore";
+import { compactFormState } from "@/features/agent/utils/formState/formState";
 
 /**
  * 이 화면이 지금 들고 있는 입력값을 에이전트에게 알린다.

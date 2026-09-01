@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import { toUserMessage } from "./errorMessage";
+import { toUserMessage } from "./errorMessage/errorMessage";
 
 // 서버는 실패 응답에 { errorCode, message, result: null } 형태로 원인을 담아준다.
 // 화면이 원인별로 다른 문구를 보여줄 때 쓴다.
