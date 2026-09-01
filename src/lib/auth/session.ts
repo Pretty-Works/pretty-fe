@@ -2,8 +2,8 @@ import { LOGIN_PATH } from "@/constants/routes";
 
 import { AUTH_STORAGE_KEY, useAuthStore } from "@/stores/useAuthStore";
 
-import { abortRunStream } from "@/features/agent/api/activeRunStream";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+import { abortRunStream } from "@/features/agent/api/activeRunStream/activeRunStream";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 import { useLastProjectStore } from "@/features/project/stores/useLastProjectStore";
 
 import { clearQueryCache } from "../api/queryCache";

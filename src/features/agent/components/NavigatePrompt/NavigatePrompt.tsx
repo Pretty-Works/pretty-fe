@@ -5,13 +5,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { LuArrowRight } from "react-icons/lu";
 
 import { agentLogError } from "@/features/agent/api/agentDebug";
-import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText/RichText";
 import {
   canonicalScreenKey,
   resolveRoute,
   screenLabel,
-} from "@/features/agent/screenRegistry";
-import { useScreenContextStore } from "@/features/agent/stores/useScreenContextStore";
+} from "@/features/agent/screenRegistry/screenRegistry";
+import { useScreenContextStore } from "@/features/agent/stores/useScreenContextStore/useScreenContextStore";
 import type { NavigateAgentAction } from "@/features/agent/types";
 
 import styles from "./NavigatePrompt.module.css";

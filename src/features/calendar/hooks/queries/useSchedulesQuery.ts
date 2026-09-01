@@ -4,7 +4,7 @@ import {
   fetchSchedules,
   type FetchSchedulesParams,
   type ServerSchedule,
-} from "@/features/calendar/api/calendarApi";
+} from "@/features/calendar/api/calendarApi/calendarApi";
 import { toEvent } from "@/features/calendar/utils/scheduleMapper";
 
 // 모듈 스코프에 둬야 react-query가 select 결과를 재사용한다 (인라인이면 매 렌더 재계산)

@@ -1,4 +1,4 @@
-import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText/RichText";
 
 import styles from "./AgentRunIndicator.module.css";
 

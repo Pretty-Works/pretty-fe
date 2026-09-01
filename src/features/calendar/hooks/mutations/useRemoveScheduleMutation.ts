@@ -5,7 +5,7 @@ import {
   deleteSchedule,
   leaveSchedule,
   type ServerSchedule,
-} from "@/features/calendar/api/calendarApi";
+} from "@/features/calendar/api/calendarApi/calendarApi";
 import type { CalendarEvent } from "@/features/calendar/types";
 
 interface RemoveVariables {

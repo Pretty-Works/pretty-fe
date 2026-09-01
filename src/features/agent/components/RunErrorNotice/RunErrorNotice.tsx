@@ -4,7 +4,7 @@ import { LuRefreshCw, LuTriangleAlert } from "react-icons/lu";
 
 import Button from "@/components/Button/Button";
 
-import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText";
+import { InlineRichText } from "@/features/agent/components/MessageBubble/RichText/RichText";
 
 import styles from "./RunErrorNotice.module.css";
 

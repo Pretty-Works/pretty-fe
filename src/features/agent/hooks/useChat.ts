@@ -5,7 +5,7 @@ import { useShallow } from "zustand/shallow";
 import { useAgentConversations } from "@/features/agent/hooks/useAgentConversations";
 import { useAgentInteractions } from "@/features/agent/hooks/useAgentInteractions";
 import { useAgentRun } from "@/features/agent/hooks/useAgentRun";
-import { useChatStore } from "@/features/agent/stores/useChatStore";
+import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 
 /** AgentView가 쓰는 채팅 상태와 기능을 한 인터페이스로 묶는 파사드. */
 export function useChat() {

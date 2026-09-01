@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchAgentSuggestions } from "@/features/agent/api/agentApi";
+import { fetchAgentSuggestions } from "@/features/agent/api/agentApi/agentApi";
 import type { SuggestionScreen } from "@/features/agent/types";
 
 /**

@@ -1,5 +1,5 @@
 {
-  "source": "front/pretty-works/src/features/agent/screenRegistry.ts",
+  "source": "front/pretty-works/src/features/agent/screenRegistry/screenRegistry.ts",
   "command": "npm run screens",
   "screens": {
     "HOME": {

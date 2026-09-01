@@ -1,6 +1,6 @@
 import { DEFAULT_PROJECT_TAB } from "@/features/project/constants/projectTabs";
 
-import type { AppNotification, NotificationType } from "../api/notificationApi";
+import type { AppNotification, NotificationType } from "../api/notificationApi/notificationApi";
 
 // 서버는 target으로 재료(종류·id·프로젝트·날짜)만 준다. 경로는 화면이 조립한다.
 // PROJECT는 단독 화면이 없는 것들이 쓰므로 어느 탭으로 갈지를 알림 종류가 정한다.

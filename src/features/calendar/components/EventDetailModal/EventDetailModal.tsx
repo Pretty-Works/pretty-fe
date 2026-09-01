@@ -10,7 +10,7 @@ import type {
   LeaveType,
   ScheduleType,
 } from "@/features/calendar/types";
-import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar";
+import { formatCalendarDayLabel } from "@/features/calendar/utils/calendar/calendar";
 import { memberColorVar } from "@/features/calendar/utils/memberColor";
 
 import styles from "./EventDetailModal.module.css";

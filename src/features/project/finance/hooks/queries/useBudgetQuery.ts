@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { fetchBudget } from "../../api/financeApi";
+import { fetchBudget } from "../../api/financeApi/financeApi";
 
 export const useBudgetQuery = (projectId: string) => {
   return useQuery({

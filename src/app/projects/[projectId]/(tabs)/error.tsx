@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import ErrorPage from "@/layouts/ErrorPage/ErrorPage";
+import ErrorPage from "@/layouts/ErrorPage";
 
 export default function ProjectTabsError({
   error,

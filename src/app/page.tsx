@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import HomeView from "@/features/home/views/HomeView";
+import HomeView from "@/features/home/views/HomeView/HomeView";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Pretty",

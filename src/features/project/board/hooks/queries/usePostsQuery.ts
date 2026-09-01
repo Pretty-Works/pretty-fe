@@ -4,7 +4,7 @@ import {
   fetchPosts,
   type FetchPostsParams,
   type PostsResponse,
-} from "@/features/project/board/api/postApi";
+} from "@/features/project/board/api/postApi/postApi";
 
 // 모듈 스코프에 둬야 react-query가 select 결과를 재사용한다 (인라인이면 매 렌더 재계산)
 const selectPosts = (data: PostsResponse) => ({

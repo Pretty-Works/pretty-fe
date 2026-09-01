@@ -1,7 +1,7 @@
 # 화면 이름 규약 (프론트 ↔ 에이전트)
 
 화면 이름의 정본은 프론트입니다. 경로와 한국어 이름이 실재하는 곳이 여기뿐이기 때문입니다
-(`src/features/agent/screenRegistry.ts`의 `SCREEN_ROUTES`).
+(`src/features/agent/screenRegistry/screenRegistry.ts`의 `SCREEN_ROUTES`).
 
 그 이름을 실제로 쓰는 쪽은 에이전트입니다 — `navigate`로 화면을 지목하고, 라우팅 판단에
 "현재 화면"을 읽습니다. 저장소가 달라 소스를 공유할 수 없으므로 표를 파일로 넘깁니다.
@@ -9,7 +9,7 @@
 ## 넘기는 것
 
 **`screens.json`** — `npm run screens`로 만듭니다. `SCREEN_ROUTES`를 고쳤으면 함께 돌리세요.
-안 돌리면 `src/features/agent/screens.test.mjs`가 깨집니다.
+안 돌리면 `src/features/agent/screenRegistry/screens.test.mjs`가 깨집니다.
 
 ```json
 {

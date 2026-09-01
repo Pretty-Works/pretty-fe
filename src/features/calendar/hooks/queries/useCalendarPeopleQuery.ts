@@ -5,7 +5,7 @@ import { useCurrentUserId } from "@/lib/auth/currentUser";
 import {
   fetchMyProjects,
   fetchProjectPeople,
-} from "@/features/calendar/api/calendarApi";
+} from "@/features/calendar/api/calendarApi/calendarApi";
 import type {
   CalendarMember,
   CalendarProject,

@@ -14,7 +14,7 @@ import {
   type ResolveAgentApprovalRequest,
   type SendAgentMessageOptions,
   type SendAgentMessageRequest,
-} from "@/features/agent/api/agentApi";
+} from "@/features/agent/api/agentApi/agentApi";
 
 interface SendAgentMessageVariables extends SendAgentMessageOptions {
   body: SendAgentMessageRequest;

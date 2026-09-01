@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 
 import AgentLayout from "@/layouts/AgentLayout";
 import AuthGuard from "@/layouts/AuthGuard/AuthGuard";
-import ToastViewport from "@/layouts/Toast/ToastViewport";
+import ToastViewport from "@/layouts/Toast/ToastViewport/ToastViewport";
 
 import Providers from "./providers";
 

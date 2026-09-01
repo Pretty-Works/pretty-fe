@@ -3,7 +3,7 @@ import { formatDateLabel } from "@/lib/date";
 import Button from "@/components/Button/Button";
 import Chip from "@/components/Chip/Chip";
 
-import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi";
+import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import { personLabel } from "@/features/project/meetings/utils/format";
 
 import styles from "./MeetingDetailContent.module.css";

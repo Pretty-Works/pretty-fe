@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/useAuthStore";
 import { clearSession } from "../auth/session";
 import { API_BASE_URL } from "../config";
 import { getErrorCode } from "./errorCode";
-import { SESSION_END_CODES, findErrorMessage } from "./errorMessage";
+import { SESSION_END_CODES, findErrorMessage } from "./errorMessage/errorMessage";
 
 export const api = axios.create({
   baseURL: `${API_BASE_URL}/api/v1`,

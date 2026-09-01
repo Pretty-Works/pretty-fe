@@ -8,13 +8,13 @@ import SegmentedTabs from "@/components/SegmentedTabs/SegmentedTabs";
 
 import OpenAgentButton from "@/features/agent/components/OpenAgentButton/OpenAgentButton";
 import { useScreenFormState } from "@/features/agent/hooks/useScreenFormState";
-import type { CreatePostRequest } from "@/features/project/board/api/postApi";
+import type { CreatePostRequest } from "@/features/project/board/api/postApi/postApi";
 import {
   IMPORTANCE_OPTIONS,
   type PostImportance,
 } from "@/features/project/board/types";
 import FormTextArea from "@/features/project/components/FormTextArea/FormTextArea";
-import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal/LeaveConfirmModal";
+import LeaveConfirmModal from "@/features/project/components/modal/LeaveConfirmModal";
 import { useLeaveGuard } from "@/features/project/hooks/useLeaveGuard";
 
 import styles from "./PostForm.module.css";

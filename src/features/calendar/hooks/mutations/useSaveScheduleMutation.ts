@@ -5,7 +5,7 @@ import {
   createSchedule,
   updateLeave,
   updateSchedule,
-} from "@/features/calendar/api/calendarApi";
+} from "@/features/calendar/api/calendarApi/calendarApi";
 import type { ScheduleSubmit } from "@/features/calendar/types";
 
 interface SaveScheduleVariables {

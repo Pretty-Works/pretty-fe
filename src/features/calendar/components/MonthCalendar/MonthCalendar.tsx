@@ -16,7 +16,7 @@ import {
   isSameMonth,
   layoutWeekSpans,
   toDateKey,
-} from "@/features/calendar/utils/calendar";
+} from "@/features/calendar/utils/calendar/calendar";
 import {
   calendarEventColors,
   eventMemberColor,

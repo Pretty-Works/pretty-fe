@@ -1,4 +1,4 @@
-export const PUBLIC_PATHS = ["/login", "/signup"];
+export const PUBLIC_PATHS = ["/login"];
 
 export const isPublicPath = (pathname: string) =>
   PUBLIC_PATHS.some(

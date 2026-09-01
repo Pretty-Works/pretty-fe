@@ -1,4 +1,4 @@
-import type { ServerSchedule } from "@/features/calendar/api/calendarApi";
+import type { ServerSchedule } from "@/features/calendar/api/calendarApi/calendarApi";
 import type { CalendarEvent } from "@/features/calendar/types";
 
 export const toEvent = (item: ServerSchedule): CalendarEvent => ({

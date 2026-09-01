@@ -1,6 +1,6 @@
 import { useEffect, useRef, type KeyboardEvent } from "react";
 
-import { addDays, toDateKey } from "@/features/calendar/utils/calendar";
+import { addDays, toDateKey } from "@/features/calendar/utils/calendar/calendar";
 
 interface CalendarGridKeyboardOptions {
   month: Date;

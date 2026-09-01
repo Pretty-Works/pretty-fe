@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { deleteMeeting } from "@/features/project/meetings/api/meetingApi";
+import { deleteMeeting } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useDeleteMeetingMutation = (

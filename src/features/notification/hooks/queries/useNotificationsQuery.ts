@@ -7,7 +7,7 @@ import {
   toAppNotification,
   type AppNotification,
   type NotificationsResponse,
-} from "../../api/notificationApi";
+} from "../../api/notificationApi/notificationApi";
 
 export const NOTIFICATIONS_QUERY_KEY = ["notifications", "list"];
 

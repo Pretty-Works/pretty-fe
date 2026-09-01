@@ -4,7 +4,7 @@ import { formatFileSize } from "@/lib/text";
 
 import type { ChatMessage } from "@/features/agent/types";
 
-import RichText from "./RichText";
+import RichText from "./RichText/RichText";
 
 import styles from "./MessageBubble.module.css";
 

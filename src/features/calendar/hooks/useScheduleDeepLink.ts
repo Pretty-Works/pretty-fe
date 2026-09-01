@@ -7,7 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   fetchSchedule,
   isScheduleNotFound,
-} from "@/features/calendar/api/calendarApi";
+} from "@/features/calendar/api/calendarApi/calendarApi";
 import type { CalendarEvent } from "@/features/calendar/types";
 import { toEvent } from "@/features/calendar/utils/scheduleMapper";
 

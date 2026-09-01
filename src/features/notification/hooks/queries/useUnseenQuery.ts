@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 import { useAuthStore } from "@/stores/useAuthStore";
 
-import { fetchUnseen } from "../../api/notificationApi";
+import { fetchUnseen } from "../../api/notificationApi/notificationApi";
 
 export const UNSEEN_QUERY_KEY = ["notifications", "unseen"];
 

@@ -1,4 +1,4 @@
-import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi";
+import type { MeetingDetail } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import type { MeetingData } from "@/features/project/meetings/types";
 
 export const personLabel = (name: string, department: string) =>

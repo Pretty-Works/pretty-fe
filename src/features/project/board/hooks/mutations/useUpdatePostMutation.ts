@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   updatePost,
   type CreatePostRequest,
-} from "@/features/project/board/api/postApi";
+} from "@/features/project/board/api/postApi/postApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useUpdatePostMutation = (projectId: string, postId: string) => {

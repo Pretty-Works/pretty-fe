@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   createMeeting,
   type CreateMeetingRequest,
-} from "@/features/project/meetings/api/meetingApi";
+} from "@/features/project/meetings/api/meetingApi/meetingApi";
 import { projectQueryKeys } from "@/features/project/queryKeys";
 
 export const useCreateMeetingMutation = (projectId: string) => {

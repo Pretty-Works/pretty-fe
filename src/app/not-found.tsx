@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import ErrorPage from "@/layouts/ErrorPage/ErrorPage";
+import ErrorPage from "@/layouts/ErrorPage";
 
 export default function NotFound() {
   const router = useRouter();

@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   markNotificationsSeen,
   type UnseenResponse,
-} from "../../api/notificationApi";
+} from "../../api/notificationApi/notificationApi";
 import { UNSEEN_QUERY_KEY } from "../queries/useUnseenQuery";
 
 // 드롭다운을 여는 순간 호출해 뱃지를 끈다.
