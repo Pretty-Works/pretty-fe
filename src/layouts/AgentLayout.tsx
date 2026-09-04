@@ -7,6 +7,7 @@ import { cx } from "@/lib/cx";
 
 import Button from "@/components/Button/Button";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import RenderProfiler from "@/components/RenderProfiler/RenderProfiler";
 import StateView from "@/components/StateView/StateView";
 
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
@@ -60,35 +61,39 @@ export default function AgentLayout({
   return (
     <div className={cx("layout", folded && "folded", expanded && "expanded")}>
       <div className="main">
-        <ErrorBoundary
-          name="Gnb"
-          fallback={(reset) => (
-            <RetryFallback
-              message="상단 메뉴를 표시하지 못했어요."
-              size="compact"
-              onRetry={reset}
-            />
-          )}
-        >
-          <Gnb />
-        </ErrorBoundary>
+        <RenderProfiler id="Gnb">
+          <ErrorBoundary
+            name="Gnb"
+            fallback={(reset) => (
+              <RetryFallback
+                message="상단 메뉴를 표시하지 못했어요."
+                size="compact"
+                onRetry={reset}
+              />
+            )}
+          >
+            <Gnb />
+          </ErrorBoundary>
+        </RenderProfiler>
 
-        {children}
+        <RenderProfiler id="PageContent">{children}</RenderProfiler>
       </div>
 
       {/* 서버가 보낸 말풍선·선택지를 그대로 그리는 자리라 예상 밖의 값이 닿을 여지가 가장 크다 */}
       <aside className="agent">
-        <ErrorBoundary
-          name="AgentView"
-          fallback={(reset) => (
-            <RetryFallback
-              message="AI 패널을 표시하지 못했어요."
-              onRetry={reset}
-            />
-          )}
-        >
-          <AgentView />
-        </ErrorBoundary>
+        <RenderProfiler id="AgentPanel">
+          <ErrorBoundary
+            name="AgentView"
+            fallback={(reset) => (
+              <RetryFallback
+                message="AI 패널을 표시하지 못했어요."
+                onRetry={reset}
+              />
+            )}
+          >
+            <AgentView />
+          </ErrorBoundary>
+        </RenderProfiler>
       </aside>
     </div>
   );
