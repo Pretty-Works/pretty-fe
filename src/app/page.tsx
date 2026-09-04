@@ -5,8 +5,8 @@ import { buildPageMetadata } from "@/lib/metadata";
 import HomeView from "@/features/home/views/HomeView/HomeView";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Pretty",
-  description: "Pretty 메인 페이지입니다.",
+  title: "Pretty Works",
+  description: "Pretty Works 메인 페이지입니다.",
   path: "/",
 });
 
