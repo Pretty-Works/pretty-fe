@@ -16,7 +16,7 @@ export const usePostListPage = (projectId: string) => {
 
   const list = useListParams<ImportanceFilterValue>({ initialFilter: "ALL" });
 
-  const { data, isLoading, isError, refetch } = usePostsQuery(
+  const { data } = usePostsQuery(
     projectId,
     {
       title: list.query,
@@ -48,13 +48,11 @@ export const usePostListPage = (projectId: string) => {
     totalCount: data?.totalElements,
 
     posts: data?.posts ?? [],
-    isLoading,
-    isError,
-    retry: refetch,
-
     canWrite,
     goWrite: () => router.push(`/projects/${projectId}/board/write`),
     goDetail: (postId: string) =>
       router.push(`/projects/${projectId}/board/${postId}`),
   };
 };
+
+export type PostListPageModel = ReturnType<typeof usePostListPage>;

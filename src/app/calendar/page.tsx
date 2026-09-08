@@ -1,10 +1,9 @@
-import { Suspense } from "react";
-
 import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import CalendarView from "@/features/calendar/views/CalendarView/CalendarView";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import CalendarContainer from "@/features/calendar/containers/CalendarContainer";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "캘린더",
@@ -13,10 +12,10 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  // 알림 딥링크(`?scheduleId=`)를 읽느라 useSearchParams를 쓴다 — 프리렌더 경계가 필요하다
+  // useSearchParams 프리렌더와 캘린더 조회를 같은 비동기 경계에서 받는다.
   return (
-    <Suspense>
-      <CalendarView />
-    </Suspense>
+    <QueryBoundary name="Calendar">
+      <CalendarContainer />
+    </QueryBoundary>
   );
 }

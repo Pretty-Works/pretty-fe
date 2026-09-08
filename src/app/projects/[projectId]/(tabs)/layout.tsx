@@ -1,4 +1,4 @@
-import ProjectHeader from "@/features/project/components/ProjectHeader/ProjectHeader";
+import ProjectHeaderContainer from "@/features/project/components/ProjectHeader/ProjectHeaderContainer";
 import ProjectLnb from "@/features/project/components/ProjectLnb/ProjectLnb";
 
 import styles from "./layout.module.css";
@@ -14,7 +14,7 @@ export default function ProjectLayout({
         <ProjectLnb />
 
         <div className={styles.content}>
-          <ProjectHeader />
+          <ProjectHeaderContainer />
           {children}
         </div>
       </div>

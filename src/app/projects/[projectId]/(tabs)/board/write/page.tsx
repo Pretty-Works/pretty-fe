@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import PostWriteView from "@/features/project/board/views/PostWriteView/PostWriteView";
+import PostWriteContainer from "@/features/project/board/containers/PostWriteContainer";
 
 interface PageProps {
   params: Promise<{ projectId: string }>;
@@ -23,5 +23,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = await params;
 
-  return <PostWriteView projectId={projectId} />;
+  return <PostWriteContainer projectId={projectId} />;
 }

@@ -1,66 +1,40 @@
 "use client";
 
-import { useMemo } from "react";
-
 import { LuCrown } from "react-icons/lu";
 
 import type { ProjectMember } from "@/features/project/api/projectMemberApi";
-import { useProjectMembersQuery } from "@/features/project/hooks/queries/useProjectMembersQuery";
 import { DEPARTMENT_LABEL } from "@/features/user/constants/organization";
 import { POSITION_LABEL } from "@/features/user/constants/organization";
 
 import styles from "./ProjectMemberMenu.module.css";
 
-interface ProjectMemberMenuProps {
-  projectId: string;
-}
-
-interface DepartmentGroup {
+export interface DepartmentGroup {
   department: ProjectMember["department"];
   members: ProjectMember[];
 }
 
-export default function ProjectMemberMenu({
-  projectId,
-}: ProjectMemberMenuProps) {
-  const {
-    data: members,
-    isPending,
-    isError,
-  } = useProjectMembersQuery(projectId);
+interface ProjectMemberMenuViewProps {
+  groups: DepartmentGroup[];
+  memberCount?: number;
+  isLoading: boolean;
+  isError: boolean;
+}
 
-  // 부서로 묶는다. 서버가 정렬을 보장하지 않아 화면에서 모은다.
-  // 부서 순서는 처음 등장한 순서를 따른다 — 오너가 먼저 오면 그 부서가 위에 선다.
-  const groups = useMemo<DepartmentGroup[]>(() => {
-    if (!members) return [];
-
-    const byDepartment = new Map<string, DepartmentGroup>();
-
-    members.forEach((member) => {
-      const group = byDepartment.get(member.department);
-
-      if (group) {
-        group.members.push(member);
-        return;
-      }
-
-      byDepartment.set(member.department, {
-        department: member.department,
-        members: [member],
-      });
-    });
-
-    return [...byDepartment.values()];
-  }, [members]);
+export default function ProjectMemberMenuView({
+  groups,
+  memberCount,
+  isLoading,
+  isError,
+}: ProjectMemberMenuViewProps) {
 
   return (
     <div className={styles.menu}>
       <div className={styles.list}>
-        {isPending && <p className={styles.state}>불러오는 중…</p>}
+        {isLoading && <p className={styles.state}>불러오는 중…</p>}
 
         {isError && <p className={styles.state}>참여자를 불러오지 못했어요</p>}
 
-        {members?.length === 0 && (
+        {memberCount === 0 && (
           <p className={styles.state}>참여자가 없어요</p>
         )}
 

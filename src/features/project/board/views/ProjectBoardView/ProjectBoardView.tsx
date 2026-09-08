@@ -8,13 +8,12 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 
 import ImportanceDot from "@/features/project/board/components/ImportanceDot/ImportanceDot";
 import ImportanceFilter from "@/features/project/board/components/ImportanceFilter/ImportanceFilter";
-import { usePostListPage } from "@/features/project/board/hooks/usePostListPage";
+import type { PostListPageModel } from "@/features/project/board/hooks/usePostListPage";
 import type { BoardPost } from "@/features/project/board/types";
-import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummaryContainer";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
-import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 
 import styles from "./ProjectBoardView.module.css";
 
@@ -34,16 +33,18 @@ const BOARD_COLUMNS: ProjectTableColumn<BoardPost>[] = [
 ];
 
 interface ProjectBoardViewProps {
-  projectId?: string;
+  projectId: string;
+  page: PostListPageModel;
 }
 
-export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
-  const page = usePostListPage(projectId ?? "");
-
+export default function ProjectBoardView({
+  projectId,
+  page,
+}: ProjectBoardViewProps) {
   return (
     <>
       {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
-      <ProjectAiSummary projectId={projectId ?? ""} section="board" />
+      <ProjectAiSummary projectId={projectId} section="board" />
 
       <section className={styles.panel}>
         <div className={styles.panelHead}>
@@ -75,26 +76,7 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
           <ImportanceFilter value={page.filter} onChange={page.changeFilter} />
         </div>
 
-        {page.isLoading ? (
-          // 로딩 (스켈레톤)
-          <TableSkeleton rows={6} />
-        ) : page.isError ? (
-          // 조회 실패
-          <Result
-            figure={<Result.Figure tone="error">❗</Result.Figure>}
-            title="게시글을 불러오지 못했어요"
-            description="일시적인 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 문의해 주세요."
-            button={
-              <Result.Button
-                type="light"
-                buttonStyle="weak"
-                onClick={() => void page.retry()}
-              >
-                ↻ 다시 시도
-              </Result.Button>
-            }
-          />
-        ) : page.posts.length === 0 && (page.query || page.filter !== "ALL") ? (
+        {page.posts.length === 0 && (page.query || page.filter !== "ALL") ? (
           // 검색·필터 결과 없음
           <Result
             figure={<Result.Figure>🔍</Result.Figure>}
@@ -141,16 +123,13 @@ export default function ProjectBoardView({ projectId }: ProjectBoardViewProps) {
           />
         )}
 
-        {!page.isLoading &&
-          !page.isError &&
-          page.posts.length > 0 &&
-          page.totalPages > 1 && (
+        {page.posts.length > 0 && page.totalPages > 1 && (
             <Pagination
               currentPage={page.page}
               totalPages={page.totalPages}
               onPageChange={page.setPage}
             />
-          )}
+        )}
       </section>
     </>
   );

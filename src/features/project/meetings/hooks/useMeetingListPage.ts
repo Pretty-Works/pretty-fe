@@ -17,7 +17,7 @@ export const useMeetingListPage = (projectId: string) => {
 
   // 제목으로만 찾는다. title·attendeeName을 같이 보내면 서버가 AND로 묶어
   // (attendeeName은 완전 일치) 둘 다 만족해야 해서 제목 검색이 사실상 항상 0건이 됐다.
-  const { data, isLoading, isError, refetch } = useMeetingsQuery(
+  const { data } = useMeetingsQuery(
     projectId,
     {
       title: list.query,
@@ -44,13 +44,11 @@ export const useMeetingListPage = (projectId: string) => {
     totalCount: data?.totalElements,
 
     meetings: data?.meetings ?? [],
-    isLoading,
-    isError,
-    retry: refetch,
-
     canWrite,
     goWrite: () => router.push(`/projects/${projectId}/meetings/write`),
     goDetail: (meetingId: string) =>
       router.push(`/projects/${projectId}/meetings/${meetingId}`),
   };
 };
+
+export type MeetingListPageModel = ReturnType<typeof useMeetingListPage>;

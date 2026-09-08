@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { startTransition, useDeferredValue, useState } from "react";
 
 import { useDebounce } from "@/hooks/useDebounce";
 
@@ -23,29 +23,37 @@ export function useListParams<TFilter = undefined>(
 
   // 입력이 멈춘 뒤에만 조회한다 (타이핑마다 요청 방지)
   const debouncedKeyword = useDebounce(keyword, options.delay);
+  // Suspense 조회가 새 조건을 기다리는 동안 현재 목록을 그대로 유지한다.
+  const deferredKeyword = useDeferredValue(debouncedKeyword);
+
+  const changePage = (next: number) => {
+    startTransition(() => setPage(next));
+  };
 
   return {
     /** 입력창에 그대로 묶는 값 */
     keyword,
     /** 서버로 보낼 검색어 — 디바운스된 값 */
-    query: debouncedKeyword.trim(),
+    query: deferredKeyword.trim(),
     changeKeyword: (value: string) => {
       setKeyword(value);
-      setPage(1);
+      changePage(1);
     },
     resetKeyword: () => {
       setKeyword("");
-      setPage(1);
+      changePage(1);
     },
 
     filter,
     changeFilter: (next: TFilter) => {
-      setFilter(next);
-      setPage(1);
+      startTransition(() => {
+        setFilter(next);
+        setPage(1);
+      });
     },
 
     page,
-    setPage,
+    setPage: changePage,
     /** 서버 페이지는 0부터 시작한다 */
     pageIndex: page - 1,
   };

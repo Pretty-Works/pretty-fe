@@ -47,9 +47,5 @@ export const useCalendarData = ({
     events: schedules.data?.events ?? NO_EVENTS,
     members,
     leave: leaveBalance.data,
-    /** 첫 조회 중 — 달 이동은 이전 데이터를 유지하므로 여기 걸리지 않는다 */
-    loading: schedules.isPending,
-    failed: schedules.isError,
-    retry: schedules.refetch,
   };
 };

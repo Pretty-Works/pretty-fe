@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import {
   fetchSchedules,
@@ -23,11 +23,9 @@ const selectSchedules = (schedules: ServerSchedule[]) => ({
  * 레일 체크/해제는 이미 받아온 목록을 화면에서 거르므로 재요청하지 않는다.
  */
 export const useSchedulesQuery = (params: FetchSchedulesParams) => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: ["calendar", "schedules", params],
     queryFn: () => fetchSchedules(params),
-
-    placeholderData: keepPreviousData,
 
     select: selectSchedules,
   });

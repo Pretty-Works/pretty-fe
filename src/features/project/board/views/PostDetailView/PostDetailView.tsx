@@ -1,57 +1,17 @@
 "use client";
 
-import Result from "@/components/Result/Result";
-
 import PostDetailContent from "@/features/project/board/components/PostDetailContent/PostDetailContent";
 import PostForm from "@/features/project/board/components/PostForm/PostForm";
-import { usePostDetailPage } from "@/features/project/board/hooks/usePostDetailPage";
+import type { PostDetailPageModel } from "@/features/project/board/hooks/usePostDetailPage";
 import DeleteConfirmModal from "@/features/project/components/modal/DeleteConfirmModal/DeleteConfirmModal";
 
 import styles from "./PostDetailView.module.css";
 
 interface PostDetailViewProps {
-  projectId: string;
-  postId: string;
+  page: PostDetailPageModel;
 }
 
-export default function PostDetailView({
-  projectId,
-  postId,
-}: PostDetailViewProps) {
-  const page = usePostDetailPage(projectId, postId);
-
-  if (page.isLoading) {
-    return (
-      <Result
-        figure={<Result.Figure>📋</Result.Figure>}
-        title="게시글을 불러오는 중이에요"
-        description="잠시만 기다려 주세요."
-      />
-    );
-  }
-
-  if (page.isError || !page.post) {
-    // 삭제하고 목록으로 넘어가는 중이라면 없는 게 정상이다 — 에러 화면을 띄우지 않는다
-    if (page.isDeleting) return null;
-
-    return (
-      <Result
-        figure={<Result.Figure tone="error">❗</Result.Figure>}
-        title="게시글을 불러오지 못했어요"
-        description="게시글이 없거나 조회 권한이 없을 수 있어요."
-        button={
-          <Result.Button
-            type="light"
-            buttonStyle="weak"
-            onClick={() => void page.retry()}
-          >
-            ↻ 다시 시도
-          </Result.Button>
-        }
-      />
-    );
-  }
-
+export default function PostDetailView({ page }: PostDetailViewProps) {
   if (page.editing) {
     return (
       <div className={styles.page}>

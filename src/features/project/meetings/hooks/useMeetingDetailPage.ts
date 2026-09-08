@@ -26,8 +26,6 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
 
   const {
     data: meeting,
-    isLoading,
-    isError,
     refetch,
   } = useMeetingDetailQuery(projectId, meetingId);
   const { data: project } = useProjectDetailQuery(projectId);
@@ -103,10 +101,6 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
   return {
     meeting,
     projectName: project?.name ?? "",
-    isLoading,
-    isError,
-    retry: refetch,
-
     canEdit,
     canDelete,
 
@@ -131,3 +125,5 @@ export const useMeetingDetailPage = (projectId: string, meetingId: string) => {
     goList: () => router.push(`/projects/${projectId}/meetings`),
   };
 };
+
+export type MeetingDetailPageModel = ReturnType<typeof useMeetingDetailPage>;

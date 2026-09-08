@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import {
   fetchExpenses,
@@ -13,19 +13,18 @@ const selectExpenses = (data: ExpensesResponse) => ({
   totalElements: data.result.totalElements,
 });
 
+export const expensesQueryOptions = (
+  projectId: string,
+  params: FetchExpensesParams,
+) => ({
+  queryKey: ["project", "expenses", projectId, params] as const,
+  queryFn: () => fetchExpenses(projectId, params),
+  select: selectExpenses,
+});
+
 export const useExpensesQuery = (
   projectId: string,
   params: FetchExpensesParams,
 ) => {
-  return useQuery({
-    queryKey: ["project", "expenses", projectId, params],
-    queryFn: () => fetchExpenses(projectId, params),
-
-    enabled: !!projectId,
-
-    // 검색어·페이지를 바꿀 때 표가 비었다가 다시 차는 깜빡임을 막는다
-    placeholderData: keepPreviousData,
-
-    select: selectExpenses,
-  });
+  return useSuspenseQuery(expensesQueryOptions(projectId, params));
 };

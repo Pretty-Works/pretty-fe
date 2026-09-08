@@ -2,8 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getApiErrorMessage } from "@/lib/api/errorCode";
-
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
 import { useToastStore } from "@/stores/useToastStore";
@@ -15,26 +13,17 @@ import EventDetailModal from "@/features/calendar/components/EventDetailModal/Ev
 import LeaveSummaryCard from "@/features/calendar/components/LeaveSummaryCard/LeaveSummaryCard";
 import MonthCalendar from "@/features/calendar/components/MonthCalendar/MonthCalendar";
 import ScheduleEditorModal from "@/features/calendar/components/ScheduleEditorModal/ScheduleEditorModal";
-import { useRemoveScheduleMutation } from "@/features/calendar/hooks/mutations/useRemoveScheduleMutation";
-import { useSaveScheduleMutation } from "@/features/calendar/hooks/mutations/useSaveScheduleMutation";
-import { useCalendarData } from "@/features/calendar/hooks/useCalendarData";
-import {
-  useCalendarFilterState,
-  useCalendarRail,
-} from "@/features/calendar/hooks/useCalendarFilters";
 import { useScheduleDeepLink } from "@/features/calendar/hooks/useScheduleDeepLink";
 import { useScheduleDialogs } from "@/features/calendar/hooks/useScheduleDialogs";
+import type { CalendarViewModel } from "@/features/calendar/hooks/useCalendarViewModel";
 import type { ScheduleSubmit } from "@/features/calendar/types";
 import {
-  addMonths,
-  buildMonthWeeks,
   compareEvents,
   coversDate,
   fromDateKey,
   toDateKey,
 } from "@/features/calendar/utils/calendar/calendar";
 import { describePerson } from "@/features/user/constants/organization";
-import { useUserSearchQuery } from "@/features/user/hooks/queries/useUserSearchQuery";
 
 import styles from "./CalendarView.module.css";
 
@@ -73,46 +62,29 @@ const CONFIRM_TEXT = {
   },
 };
 
-export default function CalendarView() {
+export default function CalendarView({ model }: { model: CalendarViewModel }) {
+  const {
+    month,
+    setMonth,
+    changeMonth,
+    pickMonth,
+    events,
+    members,
+    leave,
+    rail,
+    peopleSearch,
+    setPeopleQuery,
+    saveSchedule,
+    removeSchedule,
+    isSavingSchedule,
+    removingScheduleId,
+  } = model;
   // 자정을 넘겨 탭을 열어 두는 경우가 있어 '오늘'을 누를 때 다시 계산한다
   const [today, setToday] = useState(() => toDateKey(new Date()));
-  const [month, setMonth] = useState(
-    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-  );
   const [selectedDate, setSelectedDate] = useState(today);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // 달력 격자는 앞뒤 달을 물고 있어서 보이는 칸 전체를 조회 범위로 쓴다
-  const range = useMemo(() => {
-    const weeks = buildMonthWeeks(month);
-
-    return {
-      from: toDateKey(weeks[0][0]),
-      to: toDateKey(weeks[weeks.length - 1][6]),
-    };
-  }, [month]);
-
-  // 레일 상태 → 일정 조회 → 레일 파생값 순서다.
-  // 레일에 올린 사람의 일정까지 받아 와야 이름만 뜨고 캘린더는 비는 일이 없다.
-  const filters = useCalendarFilterState();
-
-  const { events, members, leave, loading, failed, retry } = useCalendarData({
-    ...range,
-    extraUserIds: filters.addedMemberIds,
-  });
-
-  const rail = useCalendarRail({
-    filters,
-    projects: members.projects,
-    knownMembers: members.knownMembers,
-    membersById: members.membersById,
-  });
-
   const dialogs = useScheduleDialogs(members.myId);
-  const saveSchedule = useSaveScheduleMutation();
-  const removeSchedule = useRemoveScheduleMutation();
-
-  // 저장·삭제 실패는 앱 공통 토스트로 알린다 (모달 위에 또 모달을 띄우지 않는다)
   const showToast = useToastStore((state) => state.showToast);
 
   // 화면을 벗어나면 예약해 둔 모달을 취소한다 (아래 onOpen의 지연 실행)
@@ -168,10 +140,7 @@ export default function CalendarView() {
   // 작성자가 아니어도 보이는 사람이 참가자면 남긴다 (그 사람 일정에 잡힌 시간이라 보여야 한다).
   const visibleEvents = useMemo(() => {
     return events.filter((event) => {
-      if (
-        removeSchedule.isPending &&
-        removeSchedule.variables?.event.id === event.id
-      ) {
+      if (removingScheduleId === event.id) {
         return false;
       }
 
@@ -184,8 +153,7 @@ export default function CalendarView() {
   }, [
     events,
     visibleMemberIds,
-    removeSchedule.isPending,
-    removeSchedule.variables,
+    removingScheduleId,
   ]);
 
   // 그리드 칩과 같은 기준으로 늘어놓는다 (compareEvents 한 곳에서 정한다)
@@ -196,9 +164,6 @@ export default function CalendarView() {
   }, [visibleEvents, selectedDate]);
 
   // 참여 인원 후보 — 이미 아는 사람 + 사내 검색 결과
-  const [peopleQuery, setPeopleQuery] = useState("");
-  const peopleSearch = useUserSearchQuery(peopleQuery);
-
   // 지금 열려 있는 일정에 이미 들어 있는 참여자. 후보에서 빠지면 칩이 사라져 뺄 수도 없다.
   const editingParticipantIds =
     dialogs.dialog?.kind === "editor"
@@ -244,38 +209,19 @@ export default function CalendarView() {
         ? dialogs.dialog.idempotencyKey
         : undefined;
 
-    saveSchedule.mutate(
-      { submit, idempotencyKey },
-      {
+    saveSchedule(submit, idempotencyKey, {
         // 서버가 받아준 걸 확인하고 닫는다.
         // 미리 닫으면 실패했을 때 입력하던 내용을 되살릴 방법이 없다.
         onSuccess: closeEditor,
-        onError: (error) => {
-          dialogs.renewIdempotencyKey();
-          showToast(
-            getApiErrorMessage(error, "일정을 저장하지 못했어요"),
-            "danger",
-          );
-        },
-      },
-    );
+        onError: dialogs.renewIdempotencyKey,
+      });
   };
 
   const handleConfirm = () => {
     const target = dialogs.confirmation;
     if (!target) return;
 
-    removeSchedule.mutate(
-      { event: target.event, mode: target.mode },
-      {
-        // 화면에서는 이미 지워졌다가 되살아나므로, 왜 되돌아왔는지 알려 준다
-        onError: (error) =>
-          showToast(
-            getApiErrorMessage(error, "일정을 지우지 못했어요"),
-            "danger",
-          ),
-      },
-    );
+    removeSchedule(target.event, target.mode);
 
     dialogs.closeAll();
   };
@@ -326,19 +272,6 @@ export default function CalendarView() {
       {/* 응답 전엔 0이 아니라 빈 값을 보여준다 (0일이 잠깐 보이면 잘못된 정보가 된다) */}
       <LeaveSummaryCard leave={leave} />
 
-      {failed && (
-        <p className={styles.loadError} role="alert">
-          일정을 불러오지 못했어요.
-          <button
-            type="button"
-            className={styles.retry}
-            onClick={() => retry()}
-          >
-            다시 시도
-          </button>
-        </p>
-      )}
-
       <div className={styles.body}>
         <CalendarRail
           projects={members.projects}
@@ -359,13 +292,9 @@ export default function CalendarView() {
             myId={members.myId}
             selectedDate={selectedDate}
             todayDate={today}
-            onChangeMonth={(diff) =>
-              setMonth((current) => addMonths(current, diff))
-            }
+            onChangeMonth={changeMonth}
             onResetMonth={handleResetMonth}
-            onPickMonth={(year, monthIndex) =>
-              setMonth(new Date(year, monthIndex, 1))
-            }
+            onPickMonth={pickMonth}
             onSelectDate={handleSelectDate}
           />
 
@@ -376,7 +305,6 @@ export default function CalendarView() {
               events={selectedEvents}
               membersById={members.membersById}
               myId={members.myId}
-              loading={loading}
               onAddEvent={() => dialogs.openCreate(selectedDate)}
               onSelectEvent={(eventId) => {
                 const event = visibleEvents.find((item) => item.id === eventId);
@@ -398,7 +326,7 @@ export default function CalendarView() {
           me={members.me ?? undefined}
           onSearchPeople={setPeopleQuery}
           peopleSearching={peopleSearch.searching}
-          submitting={saveSchedule.isPending}
+          submitting={isSavingSchedule}
           onClose={closeEditor}
           onSubmit={handleSubmit}
           onDelete={

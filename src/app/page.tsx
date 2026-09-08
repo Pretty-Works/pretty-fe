@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import HomeView from "@/features/home/views/HomeView/HomeView";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import HomeContainer from "@/features/home/containers/HomeContainer";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Pretty Works",
@@ -11,5 +12,9 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  return <HomeView />;
+  return (
+    <QueryBoundary name="Home">
+      <HomeContainer />
+    </QueryBoundary>
+  );
 }

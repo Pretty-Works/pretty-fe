@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import {
   fetchMeetings,
@@ -17,13 +17,9 @@ export const useMeetingsQuery = (
   projectId: string,
   params: FetchMeetingsParams,
 ) => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: ["project", "meetings", projectId, params],
     queryFn: () => fetchMeetings(projectId, params),
-
-    enabled: !!projectId,
-
-    placeholderData: keepPreviousData,
 
     select: selectMeetings,
   });

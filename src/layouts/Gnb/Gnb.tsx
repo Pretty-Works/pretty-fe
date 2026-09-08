@@ -15,24 +15,30 @@ import AgentIcon from "@/assets/icons/menu/agent.svg";
 import { cx } from "@/lib/cx";
 
 import { useClickOutside } from "@/hooks/useClickOutside";
-import { useHydrated } from "@/hooks/useHydrated";
 import { useLeaveGuardStore } from "@/stores/useLeaveGuardStore";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import { useHasUnreadConversations } from "@/features/agent/stores/useChatStore/useChatStore";
-import { useLogoutMutation } from "@/features/auth/login/hooks/mutations/useLogoutMutation";
-import NotificationBell from "@/features/notification/components/NotificationBell/NotificationBell";
+import NotificationBellContainer from "@/features/notification/components/NotificationBell/NotificationBellContainer";
 import { DEFAULT_PROJECT_TAB } from "@/features/project/constants/projectTabs";
-import { useProjectsQuery } from "@/features/project/hooks/queries/useProjectsQuery";
-import { useLastProjectStore } from "@/features/project/stores/useLastProjectStore";
 import { describeAffiliation } from "@/features/user/constants/organization";
-import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
+import type { MyProfile } from "@/features/user/api/userApi";
 
 import GnbDrawer from "./GnbDrawer/GnbDrawer";
 
 import styles from "./Gnb.module.css";
 
-export default function Gnb() {
+interface GnbViewProps {
+  profile?: MyProfile;
+  targetProjectId?: string | null;
+  onLogout: () => void;
+}
+
+export default function GnbView({
+  profile,
+  targetProjectId,
+  onLogout,
+}: GnbViewProps) {
   const pathname = usePathname();
   const folded = useAgentStore((state) => state.folded);
   const toggleFolded = useAgentStore((state) => state.toggleFolded);
@@ -44,28 +50,6 @@ export default function Gnb() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { mutate: logout } = useLogoutMutation();
-  const { data: me } = useMyProfileQuery();
-
-  // '프로젝트'는 마지막으로 보던 프로젝트로 되돌아가되, 항상 개요부터 연다.
-  const lastProjectId = useLastProjectStore((state) => state.projectId);
-
-  const hydrated = useHydrated();
-
-  // 기억해둔 게 없을 때(첫 로그인·기억하던 프로젝트가 삭제됨) 대신 갈 곳.
-  const needsFallback = hydrated && !lastProjectId;
-  const { data: fallback } = useProjectsQuery(
-    { status: "ONGOING", page: 0, size: 1 },
-    needsFallback,
-  );
-
-  const fallbackProjectId = fallback?.projects[0]?.id;
-
-  // 참여 중인 프로젝트가 하나도 없으면 갈 곳이 없다 — 목록이 있는 홈으로 보낸다.
-  const targetProjectId =
-    (hydrated ? lastProjectId : null) ??
-    (needsFallback ? fallbackProjectId : null);
-
   const projectPath = targetProjectId
     ? `/projects/${targetProjectId}/${DEFAULT_PROJECT_TAB}`
     : "/";
@@ -154,7 +138,7 @@ export default function Gnb() {
 
         <div className={styles.right}>
           <div className={styles.actions}>
-            <NotificationBell />
+            <NotificationBellContainer />
 
             <button
               type="button"
@@ -191,33 +175,33 @@ export default function Gnb() {
               aria-expanded={menuOpen}
               aria-label="프로필 메뉴"
             >
-              {me?.name.charAt(0) ?? ""}
+              {profile?.name.charAt(0) ?? ""}
             </button>
 
             {menuOpen && (
               <div className={styles.dropdown}>
                 <div className={styles.profileInfo}>
-                  <p className={styles.profileName}>{me?.name ?? "—"}</p>
+                  <p className={styles.profileName}>{profile?.name ?? "—"}</p>
                   <p className={styles.profileMeta}>
-                    {me ? describeAffiliation(me) : "불러오는 중…"}
+                    {profile ? describeAffiliation(profile) : "불러오는 중…"}
                   </p>
                 </div>
 
-                {me && (
+                {profile && (
                   <>
                     <hr className={styles.dropdownDivider} />
 
                     <dl className={styles.facts}>
                       <div className={styles.factRow}>
                         <dt className={styles.factLabel}>사번</dt>
-                        <dd className={styles.factValue}>{me.employeeNo}</dd>
+                        <dd className={styles.factValue}>{profile.employeeNo}</dd>
                       </div>
 
-                      {me.email && (
+                      {profile.email && (
                         <div className={styles.factRow}>
                           <dt className={styles.factLabel}>메일</dt>
-                          <dd className={styles.factValue} title={me.email}>
-                            {me.email}
+                          <dd className={styles.factValue} title={profile.email}>
+                            {profile.email}
                           </dd>
                         </div>
                       )}
@@ -232,7 +216,7 @@ export default function Gnb() {
                   className={styles.dropdownItem}
                   onClick={() => {
                     setMenuOpen(false);
-                    logout();
+                    onLogout();
                   }}
                 >
                   로그아웃
@@ -250,6 +234,7 @@ export default function Gnb() {
         projectId={openProjectId}
         activeSegment={projectParts[3] ?? ""}
         guard={guard}
+        canCreateProject={!!profile?.canCreateProject}
       />
     </header>
   );

@@ -1,4 +1,4 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import {
   fetchPosts,
@@ -17,14 +17,9 @@ export const usePostsQuery = (
   projectId: string,
   params: FetchPostsParams,
 ) => {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: ["project", "posts", projectId, params],
     queryFn: () => fetchPosts(projectId, params),
-
-    enabled: !!projectId,
-
-    // 검색어·페이지를 바꿀 때 표가 비었다가 다시 차는 깜빡임을 막는다
-    placeholderData: keepPreviousData,
 
     select: selectPosts,
   });
