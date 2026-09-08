@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { useCurrentUserId } from "@/lib/auth/currentUser";
 
@@ -26,7 +26,7 @@ export interface CalendarPeople {
 export const useCalendarPeopleQuery = () => {
   const myId = useCurrentUserId();
 
-  return useQuery<CalendarPeople>({
+  return useSuspenseQuery<CalendarPeople>({
     queryKey: ["calendar", "people", myId],
     // 프로젝트 구성원은 자주 바뀌지 않는데 조회는 (프로젝트 수 + 1)번 나간다.
     // 캐시를 두지 않으면 캘린더에 들를 때마다 그만큼 다시 부른다.

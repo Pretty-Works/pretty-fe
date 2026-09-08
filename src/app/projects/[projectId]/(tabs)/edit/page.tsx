@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import ProjectCreateView from "@/features/project/create/views/ProjectCreateView";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import ProjectCreateContainer from "@/features/project/create/containers/ProjectCreateContainer";
 
 interface PageProps {
   params: Promise<{ projectId: string }>;
@@ -23,5 +24,9 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = await params;
 
-  return <ProjectCreateView projectId={projectId} />;
+  return (
+    <QueryBoundary name="ProjectEdit" resetKeys={[projectId]}>
+      <ProjectCreateContainer projectId={projectId} />
+    </QueryBoundary>
+  );
 }

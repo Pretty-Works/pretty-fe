@@ -1,63 +1,40 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-import { getApiErrorMessage } from "@/lib/api/errorCode";
-
-import { useToastStore } from "@/stores/useToastStore";
+import type { PeopleOption } from "@/components/PeoplePicker/PeoplePicker";
 
 import type { CreateMeetingRequest } from "@/features/project/meetings/api/meetingApi/meetingApi";
 import MeetingForm from "@/features/project/meetings/components/MeetingForm/MeetingForm";
-import { useCreateMeetingMutation } from "@/features/project/meetings/hooks/mutations/useCreateMeetingMutation";
-import { useAttendeeOptions } from "@/features/project/meetings/hooks/useAttendeeOptions";
-import { useMyProfileQuery } from "@/features/user/hooks/queries/useMyProfileQuery";
 
 import styles from "./MeetingWriteView.module.css";
 
 interface MeetingWriteViewProps {
   projectId: string;
+  author?: string;
+  attendeeOptions: PeopleOption[];
+  isSaving: boolean;
+  onSave: (body: CreateMeetingRequest) => void;
+  onExit: () => void;
 }
 
-export default function MeetingWriteView({ projectId }: MeetingWriteViewProps) {
-  const router = useRouter();
-  const showToast = useToastStore((state) => state.showToast);
-
-  const { data: profile } = useMyProfileQuery();
-  const attendeeOptions = useAttendeeOptions(projectId, profile?.userId);
-
-  const createMutation = useCreateMeetingMutation(projectId);
-
-  const handleSave = (body: CreateMeetingRequest) => {
-    createMutation.mutate(body, {
-      onSuccess: (data) => {
-        showToast("회의록이 저장되었어요.");
-        router.replace(
-          `/projects/${projectId}/meetings/${data.result.meetingId}`,
-        );
-      },
-      onError: (error) => {
-        showToast(
-          getApiErrorMessage(
-            error,
-            "회의록을 저장하지 못했어요. 다시 시도해 주세요.",
-          ),
-          "danger",
-        );
-      },
-    });
-  };
-
+export default function MeetingWriteView({
+  projectId,
+  author,
+  attendeeOptions,
+  isSaving,
+  onSave,
+  onExit,
+}: MeetingWriteViewProps) {
   return (
     <div className={styles.page}>
       <MeetingForm
         mode="create"
         projectId={projectId}
-        author={profile?.name}
+        author={author}
         attendeeOptions={attendeeOptions}
-        isSaving={createMutation.isPending}
-        onSave={handleSave}
+        isSaving={isSaving}
+        onSave={onSave}
         /* '목록'이라 적혀 있으니 back이 아니라 목록으로 보낸다 (어디서 들어왔든) */
-        onExit={() => router.push(`/projects/${projectId}/meetings`)}
+        onExit={onExit}
       />
     </div>
   );

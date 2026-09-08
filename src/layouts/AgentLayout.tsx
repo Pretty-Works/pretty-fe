@@ -11,7 +11,7 @@ import RenderProfiler from "@/components/RenderProfiler/RenderProfiler";
 import StateView from "@/components/StateView/StateView";
 
 import { useBodyScrollLock } from "@/hooks/useBodyScrollLock";
-import Gnb from "@/layouts/Gnb/Gnb";
+import GnbContainer from "@/layouts/Gnb/GnbContainer";
 
 import { useAgentStore } from "@/features/agent/stores/useAgentStore";
 import AgentView from "@/features/agent/views/AgentView/AgentView";
@@ -72,7 +72,7 @@ export default function AgentLayout({
               />
             )}
           >
-            <Gnb />
+            <GnbContainer />
           </ErrorBoundary>
         </RenderProfiler>
 

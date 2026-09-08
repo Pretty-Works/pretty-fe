@@ -62,3 +62,13 @@ export const useProjectTasksQuery = (projectId: string, weekOffset: number) => {
     select,
   });
 };
+
+export const projectTasksQueryOptions = (
+  projectId: string,
+  weekOffset: number,
+) => ({
+  queryKey: ["project", "tasks", projectId, weekOffset] as const,
+  queryFn: () => fetchProjectTasks(projectId, weekOffset),
+  select: (data: TaskBoardResponse) =>
+    weekOffset > 0 ? withoutCarriedOver(data.result) : data.result,
+});

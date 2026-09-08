@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import ProjectCreateView from "@/features/project/create/views/ProjectCreateView";
+import ProjectCreateContainer from "@/features/project/create/containers/ProjectCreateContainer";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "프로젝트 생성",
@@ -11,5 +11,5 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  return <ProjectCreateView />;
+  return <ProjectCreateContainer />;
 }

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import MeetingDetailView from "@/features/project/meetings/views/MeetingDetailView/MeetingDetailView";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import MeetingDetailContainer from "@/features/project/meetings/containers/MeetingDetailContainer";
 
 interface PageProps {
   params: Promise<{ projectId: string; meetingId: string }>;
@@ -24,5 +25,9 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId, meetingId } = await params;
 
-  return <MeetingDetailView projectId={projectId} meetingId={meetingId} />;
+  return (
+    <QueryBoundary name="MeetingDetail" resetKeys={[projectId, meetingId]}>
+      <MeetingDetailContainer projectId={projectId} meetingId={meetingId} />
+    </QueryBoundary>
+  );
 }

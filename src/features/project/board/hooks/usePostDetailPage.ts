@@ -21,12 +21,7 @@ export const usePostDetailPage = (projectId: string, postId: string) => {
   const [editing, setEditing] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const {
-    data: post,
-    isLoading,
-    isError,
-    refetch,
-  } = usePostDetailQuery(projectId, postId);
+  const { data: post } = usePostDetailQuery(projectId, postId);
   const updateMutation = useUpdatePostMutation(projectId, postId);
   const deleteMutation = useDeletePostMutation(projectId, postId);
 
@@ -75,10 +70,6 @@ export const usePostDetailPage = (projectId: string, postId: string) => {
 
   return {
     post,
-    isLoading,
-    isError,
-    retry: refetch,
-
     canEdit,
     canDelete,
 
@@ -100,3 +91,5 @@ export const usePostDetailPage = (projectId: string, postId: string) => {
     goList: () => router.push(`/projects/${projectId}/board`),
   };
 };
+
+export type PostDetailPageModel = ReturnType<typeof usePostDetailPage>;

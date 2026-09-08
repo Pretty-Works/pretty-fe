@@ -1,45 +1,39 @@
 "use client";
 
-import { useState } from "react";
-
 import SearchBar from "@/components/SearchBar/SearchBar";
 import StateView from "@/components/StateView/StateView";
-import { useDebounce } from "@/hooks/useDebounce";
 
+import type { Project } from "@/features/project/api/projectListApi";
 import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
-import { useProjectsQuery } from "@/features/project/hooks/queries/useProjectsQuery";
 
 import styles from "./ProjectSwitchMenu.module.css";
 
-interface ProjectSwitchMenuProps {
+interface ProjectSwitchMenuViewProps {
   currentProjectId: string;
+  keyword: string;
+  projects: Project[];
+  isLoading: boolean;
+  isError: boolean;
+  onKeywordChange: (keyword: string) => void;
   onSelect: (projectId: string) => void;
 }
 
-export default function ProjectSwitchMenu({
+export default function ProjectSwitchMenuView({
   currentProjectId,
+  keyword,
+  projects,
+  isLoading,
+  isError,
+  onKeywordChange,
   onSelect,
-}: ProjectSwitchMenuProps) {
-  const [keyword, setKeyword] = useState("");
-  const debouncedKeyword = useDebounce(keyword);
-
-  // 홈 목록과 같은 API. 전환 팝업은 전체 상태를 보여준다.
-  const { data, isLoading, isError } = useProjectsQuery({
-    keyword: debouncedKeyword,
-    status: "ALL",
-    page: 0,
-    size: 100,
-  });
-
-  const projects = data?.projects ?? [];
-
+}: ProjectSwitchMenuViewProps) {
   return (
     <div className={styles.menu}>
       <div className={styles.searchArea}>
         <SearchBar
           placeholder="프로젝트명으로 검색"
           value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
+          onChange={(e) => onKeywordChange(e.target.value)}
         />
       </div>
 

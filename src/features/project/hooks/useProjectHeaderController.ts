@@ -132,3 +132,7 @@ export function useProjectHeaderController() {
     confirmStatus: () => pendingStatus && applyStatus(pendingStatus),
   };
 }
+
+export type ProjectHeaderModel = ReturnType<
+  typeof useProjectHeaderController
+>;

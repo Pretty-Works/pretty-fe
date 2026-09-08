@@ -21,16 +21,19 @@ const selectProjects = (data: ProjectsResponse) => ({
   totalPages: data.result.totalPages,
 });
 
+export const projectsQueryOptions = (params?: FetchProjectsParams) => ({
+  queryKey: ["project", "list", params] as const,
+  queryFn: () => fetchProjects(params),
+  select: selectProjects,
+});
+
 // enabled: 필요할 때만 부르는 호출부가 있다 (상단바가 대체 목적지를 찾을 때)
 export const useProjectsQuery = (
   params?: FetchProjectsParams,
   enabled = true,
 ) => {
   return useQuery({
-    queryKey: ["project", "list", params],
-    queryFn: () => fetchProjects(params),
+    ...projectsQueryOptions(params),
     enabled,
-
-    select: selectProjects,
   });
 };

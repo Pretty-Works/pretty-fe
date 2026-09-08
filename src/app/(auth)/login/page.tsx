@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata } from "@/lib/metadata";
 
-import LoginView from "@/features/auth/login/views/LoginView/LoginView";
+import LoginContainer from "@/features/auth/login/containers/LoginContainer";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "로그인 | Pretty Works",
@@ -11,5 +11,5 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default function Page() {
-  return <LoginView />;
+  return <LoginContainer />;
 }

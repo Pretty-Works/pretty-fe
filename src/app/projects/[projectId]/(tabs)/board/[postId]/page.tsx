@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import PostDetailView from "@/features/project/board/views/PostDetailView/PostDetailView";
+import QueryBoundary from "@/components/QueryBoundary/QueryBoundary";
+import PostDetailContainer from "@/features/project/board/containers/PostDetailContainer";
 
 interface PageProps {
   params: Promise<{ projectId: string; postId: string }>;
@@ -24,5 +25,9 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId, postId } = await params;
 
-  return <PostDetailView projectId={projectId} postId={postId} />;
+  return (
+    <QueryBoundary name="PostDetail" resetKeys={[projectId, postId]}>
+      <PostDetailContainer projectId={projectId} postId={postId} />
+    </QueryBoundary>
+  );
 }

@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useCurrentUserId } from "@/lib/auth/currentUser";
-
 import Badge from "@/components/Badge/Badge";
 import Button from "@/components/Button/Button";
 import Pagination from "@/components/Pagination/Pagination";
@@ -12,15 +10,11 @@ import SearchBar from "@/components/SearchBar/SearchBar";
 import SegmentedTabs, {
   type SegmentedOption,
 } from "@/components/SegmentedTabs/SegmentedTabs";
-import StateView from "@/components/StateView/StateView";
-import { useClampPage } from "@/hooks/useClampPage";
-import { useListParams } from "@/hooks/useListParams";
 
-import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummaryContainer";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
-import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 import {
   CATEGORY_LABEL,
   type Expense,
@@ -28,13 +22,9 @@ import {
 } from "@/features/project/finance/api/financeApi/financeApi";
 import BudgetSummaryCard from "@/features/project/finance/components/BudgetSummaryCard/BudgetSummaryCard";
 import ExpenseFormModal from "@/features/project/finance/components/ExpenseFormModal/ExpenseFormModal";
-import { useBudgetQuery } from "@/features/project/finance/hooks/queries/useBudgetQuery";
-import { useExpensesQuery } from "@/features/project/finance/hooks/queries/useExpensesQuery";
-import { useProjectDetailQuery } from "@/features/project/overview/hooks/queries/useProjectDetailQuery";
+import type { ProjectFinanceViewModel } from "@/features/project/finance/hooks/useProjectFinanceViewModel";
 
 import styles from "./ProjectFinanceView.module.css";
-
-const PAGE_SIZE = 10;
 
 const STATUS_OPTIONS: SegmentedOption<ExpenseStatus>[] = [
   { value: "EXECUTED", label: "사용 내역" },
@@ -79,48 +69,28 @@ const EXPENSE_COLUMNS: ProjectTableColumn<Expense>[] = [
 ];
 
 interface ProjectFinanceViewProps {
-  projectId?: string;
+  model: ProjectFinanceViewModel;
 }
 
 export default function ProjectFinanceView({
-  projectId,
+  model,
 }: ProjectFinanceViewProps) {
-  const list = useListParams<ExpenseStatus>({
-    initialFilter: "EXECUTED",
-  });
+  const {
+    projectId,
+    project,
+    budget,
+    expensesQuery,
+    list,
+    currentUserId,
+  } = model;
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense>();
 
-  const currentUserId = useCurrentUserId();
-
-  const { data: project } = useProjectDetailQuery(projectId ?? "");
-
-  const {
-    data: budget,
-    isLoading: isBudgetLoading,
-    isError: isBudgetError,
-  } = useBudgetQuery(projectId ?? "");
-
-  const {
-    data: expenseData,
-    isLoading: isExpensesLoading,
-    isError: isExpensesError,
-    refetch: retryExpenses,
-  } = useExpensesQuery(projectId ?? "", {
-    status: list.filter,
-    // 디바운스된 값 — 타이핑마다 요청이 나가지 않게
-    keyword: list.query,
-    page: list.pageIndex,
-    size: PAGE_SIZE,
-  });
-
-  // 마지막 지출을 지워 그 페이지가 사라지면 마지막 페이지로 당긴다
-  useClampPage(list.page, expenseData?.totalPages, list.setPage);
-
-  const expenses = expenseData?.expenses ?? [];
-  const totalPages = expenseData?.totalPages ?? 1;
-  const totalElements = expenseData?.totalElements ?? 0;
+  const { data: expenseData } = expensesQuery;
+  const expenses = expenseData.expenses;
+  const totalPages = expenseData.totalPages || 1;
+  const totalElements = expenseData.totalElements;
 
   const period = project
     ? {
@@ -143,16 +113,9 @@ export default function ProjectFinanceView({
   return (
     <div className={styles.container}>
       {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
-      <ProjectAiSummary projectId={projectId ?? ""} section="budget" />
+      <ProjectAiSummary projectId={projectId} section="budget" />
 
-      <StateView
-        loading={isBudgetLoading}
-        error={isBudgetError || !budget}
-        loadingText="예산 현황을 불러오는 중이에요…"
-        errorText="예산 현황을 불러오지 못했어요."
-      >
-        {budget && <BudgetSummaryCard budget={budget} />}
-      </StateView>
+      <BudgetSummaryCard budget={budget} />
 
       <section className={styles.panel}>
         <div className={styles.panelHead}>
@@ -187,26 +150,7 @@ export default function ProjectFinanceView({
           />
         </div>
 
-        {isExpensesLoading ? (
-          // 로딩 (스켈레톤)
-          <TableSkeleton rows={6} />
-        ) : isExpensesError ? (
-          // 조회 실패
-          <Result
-            figure={<Result.Figure tone="error">❗</Result.Figure>}
-            title="지출 내역을 불러오지 못했어요"
-            description="일시적인 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 문의해 주세요."
-            button={
-              <Result.Button
-                type="light"
-                buttonStyle="weak"
-                onClick={() => void retryExpenses()}
-              >
-                ↻ 다시 시도
-              </Result.Button>
-            }
-          />
-        ) : expenses.length === 0 && list.query ? (
+        {expenses.length === 0 && list.query ? (
           // 검색 결과 없음
           <Result
             figure={<Result.Figure>🔍</Result.Figure>}
@@ -247,16 +191,13 @@ export default function ProjectFinanceView({
           />
         )}
 
-        {!isExpensesLoading &&
-          !isExpensesError &&
-          expenses.length > 0 &&
-          totalPages > 1 && (
+        {expenses.length > 0 && totalPages > 1 && (
             <Pagination
               currentPage={list.page}
               totalPages={totalPages}
               onPageChange={list.setPage}
             />
-          )}
+        )}
       </section>
 
       {/* 열 때 마운트해 초기값을 한 번만 잡는다 */}

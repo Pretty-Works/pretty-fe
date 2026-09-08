@@ -9,29 +9,33 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
  * 던진 예외는 잡지 못하고 global-error 로 올라가 앱 전체가 흰 화면이 된다.
  * 화면 한 조각이 깨졌다고 나머지까지 잃지 않으려면 그 조각을 여기서 감싸야 한다.
  *
- * 조회 실패는 여기 오지 않는다 — 그건 화면이 StateView 로 제 자리에서 말한다.
- * 여기 닿는 것은 "그릴 수 없는 데이터가 왔다" 같은 예상 밖의 사고뿐이다.
+ * 일반 렌더 예외뿐 아니라 QueryBoundary 안에서는 Suspense 조회 실패도 여기서 받는다.
  */
 interface ErrorBoundaryProps {
   /** 로그에 남길 이름. 어디가 깨졌는지 콘솔에서 바로 가리려는 용도다 */
   name: string;
   /** 깨진 자리에 대신 그릴 것. reset 을 부르면 한 번 더 그려 본다 */
-  fallback: (reset: () => void) => ReactNode;
+  fallback: (reset: () => void, error: Error) => ReactNode;
+  /** 다시 그리기 전에 함께 초기화할 외부 상태 (React Query 오류 상태 등) */
+  onReset?: () => void;
+  /** 조회 조건이 바뀌면 이전 조건에서 난 오류를 자동으로 걷는다 */
+  resetKeys?: readonly unknown[];
   children: ReactNode;
 }
 
 interface ErrorBoundaryState {
   failed: boolean;
+  error: Error | null;
 }
 
 export default class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  state: ErrorBoundaryState = { failed: false };
+  state: ErrorBoundaryState = { failed: false, error: null };
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { failed: true };
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { failed: true, error };
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
@@ -39,10 +43,27 @@ export default class ErrorBoundary extends Component<
     console.error(`[${this.props.name}] 렌더 실패`, error, info.componentStack);
   }
 
-  private reset = () => this.setState({ failed: false });
+  componentDidUpdate(previousProps: ErrorBoundaryProps) {
+    if (!this.state.failed) return;
+
+    const previousKeys = previousProps.resetKeys ?? [];
+    const nextKeys = this.props.resetKeys ?? [];
+    const changed =
+      previousKeys.length !== nextKeys.length ||
+      previousKeys.some((key, index) => !Object.is(key, nextKeys[index]));
+
+    if (changed) this.reset();
+  }
+
+  private reset = () => {
+    this.props.onReset?.();
+    this.setState({ failed: false, error: null });
+  };
 
   render() {
-    if (this.state.failed) return this.props.fallback(this.reset);
+    if (this.state.failed && this.state.error) {
+      return this.props.fallback(this.reset, this.state.error);
+    }
 
     return this.props.children;
   }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 import { buildPageMetadata, projectPath } from "@/lib/metadata";
 
-import MeetingWriteView from "@/features/project/meetings/views/MeetingWriteView/MeetingWriteView";
+import MeetingWriteContainer from "@/features/project/meetings/containers/MeetingWriteContainer";
 
 interface PageProps {
   params: Promise<{ projectId: string }>;
@@ -23,5 +23,5 @@ export async function generateMetadata({
 export default async function Page({ params }: PageProps) {
   const { projectId } = await params;
 
-  return <MeetingWriteView projectId={projectId} />;
+  return <MeetingWriteContainer projectId={projectId} />;
 }

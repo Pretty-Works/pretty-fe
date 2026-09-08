@@ -7,17 +7,21 @@ import { cx } from "@/lib/cx";
 import ConfirmDialog from "@/components/ConfirmDialog/ConfirmDialog";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { PROJECT_STATUS_META } from "@/features/project/constants/projectStatus";
-import { useProjectHeaderController } from "@/features/project/hooks/useProjectHeaderController";
+import type { ProjectHeaderModel } from "@/features/project/hooks/useProjectHeaderController";
 
-import ProjectMemberMenu from "./ProjectMemberMenu/ProjectMemberMenu";
+import ProjectMemberMenuContainer from "./ProjectMemberMenu/ProjectMemberMenuContainer";
 import ProjectStatusMenu from "./ProjectStatusMenu/ProjectStatusMenu";
-import ProjectSwitchMenu from "./ProjectSwitchMenu/ProjectSwitchMenu";
+import ProjectSwitchMenuContainer from "./ProjectSwitchMenu/ProjectSwitchMenuContainer";
 
 import styles from "./ProjectHeader.module.css";
 
 type OpenMenu = "status" | "switch" | "members" | null;
 
-export default function ProjectHeader() {
+export default function ProjectHeaderView({
+  model,
+}: {
+  model: ProjectHeaderModel;
+}) {
   const [openMenu, setOpenMenu] = useState<OpenMenu>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const {
@@ -31,7 +35,7 @@ export default function ProjectHeader() {
     selectProject,
     closeConfirm,
     confirmStatus,
-  } = useProjectHeaderController();
+  } = model;
 
   useClickOutside(rootRef, () => setOpenMenu(null), openMenu !== null);
 
@@ -93,7 +97,7 @@ export default function ProjectHeader() {
 
         {openMenu === "switch" && (
           <div className={styles.popupRight}>
-            <ProjectSwitchMenu
+            <ProjectSwitchMenuContainer
               currentProjectId={projectId}
               onSelect={(nextId) => {
                 setOpenMenu(null);
@@ -128,7 +132,7 @@ export default function ProjectHeader() {
 
         {openMenu === "members" && (
           <div className={styles.popupMembers}>
-            <ProjectMemberMenu projectId={projectId} />
+            <ProjectMemberMenuContainer projectId={projectId} />
           </div>
         )}
       </div>

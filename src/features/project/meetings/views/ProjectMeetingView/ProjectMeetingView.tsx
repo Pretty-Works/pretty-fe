@@ -6,13 +6,12 @@ import Pagination from "@/components/Pagination/Pagination";
 import Result from "@/components/Result/Result";
 import SearchBar from "@/components/SearchBar/SearchBar";
 
-import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummary";
+import ProjectAiSummary from "@/features/project/components/ProjectAiSummary/ProjectAiSummaryContainer";
 import ProjectTable, {
   type ProjectTableColumn,
 } from "@/features/project/components/ProjectTable/ProjectTable";
-import TableSkeleton from "@/features/project/components/TableSkeleton/TableSkeleton";
 import type { Meeting } from "@/features/project/meetings/api/meetingApi/meetingApi";
-import { useMeetingListPage } from "@/features/project/meetings/hooks/useMeetingListPage";
+import type { MeetingListPageModel } from "@/features/project/meetings/hooks/useMeetingListPage";
 
 import styles from "./ProjectMeetingView.module.css";
 
@@ -48,18 +47,18 @@ const MEETING_COLUMNS: ProjectTableColumn<Meeting>[] = [
 ];
 
 interface ProjectMeetingViewProps {
-  projectId?: string;
+  projectId: string;
+  page: MeetingListPageModel;
 }
 
 export default function ProjectMeetingView({
   projectId,
+  page,
 }: ProjectMeetingViewProps) {
-  const page = useMeetingListPage(projectId ?? "");
-
   return (
     <>
       {/* AI 요약 — 로딩·실패·요약 없음까지 배너 자리에서 알린다 */}
-      <ProjectAiSummary projectId={projectId ?? ""} section="meeting" />
+      <ProjectAiSummary projectId={projectId} section="meeting" />
 
       {/* 회의록 */}
       <section className={styles.panel}>
@@ -88,26 +87,7 @@ export default function ProjectMeetingView({
           />
         </div>
 
-        {page.isLoading ? (
-          // 로딩 (스켈레톤)
-          <TableSkeleton rows={6} />
-        ) : page.isError ? (
-          // 조회 실패
-          <Result
-            figure={<Result.Figure tone="error">❗</Result.Figure>}
-            title="회의록을 불러오지 못했어요"
-            description="일시적인 네트워크 오류가 발생했어요. 잠시 후 다시 시도해 주세요. 문제가 계속되면 관리자에게 문의해 주세요."
-            button={
-              <Result.Button
-                type="light"
-                buttonStyle="weak"
-                onClick={() => void page.retry()}
-              >
-                ↻ 다시 시도
-              </Result.Button>
-            }
-          />
-        ) : page.meetings.length === 0 && page.query ? (
+        {page.meetings.length === 0 && page.query ? (
           // 검색 결과 없음
           <Result
             figure={<Result.Figure>🔍</Result.Figure>}
@@ -151,16 +131,13 @@ export default function ProjectMeetingView({
           />
         )}
 
-        {!page.isLoading &&
-          !page.isError &&
-          page.meetings.length > 0 &&
-          page.totalPages > 1 && (
+        {page.meetings.length > 0 && page.totalPages > 1 && (
             <Pagination
               currentPage={page.page}
               totalPages={page.totalPages}
               onPageChange={page.setPage}
             />
-          )}
+        )}
       </section>
     </>
   );

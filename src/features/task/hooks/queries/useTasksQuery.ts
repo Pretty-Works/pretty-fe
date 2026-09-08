@@ -24,11 +24,12 @@ const selectTaskGroups = (data: TasksResponse) =>
     }),
   );
 
-export const useTasksQuery = () => {
-  return useQuery({
-    queryKey: ["task", "list"],
-    queryFn: fetchTasks,
+export const tasksQueryOptions = () => ({
+  queryKey: ["task", "list"] as const,
+  queryFn: fetchTasks,
+  select: selectTaskGroups,
+});
 
-    select: selectTaskGroups,
-  });
+export const useTasksQuery = () => {
+  return useQuery(tasksQueryOptions());
 };
