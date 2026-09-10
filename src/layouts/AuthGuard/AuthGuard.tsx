@@ -18,7 +18,14 @@ function AuthLoadingScreen() {
   return (
     // 상태를 안내문이 말해주므로 로고는 장식으로 두고 alt를 비운다
     <div className={styles.loading} role="status">
-      <Image className={styles.logo} src={Logo} alt="" priority />
+      <Image
+        className={styles.logo}
+        src={Logo}
+        alt=""
+        width={210}
+        height={20}
+        priority
+      />
       <span className={styles.spinner} aria-hidden="true" />
       <p className={styles.message}>잠시만 기다려 주세요</p>
     </div>

@@ -84,6 +84,7 @@ export default function ProjectTable<T>({
             key={col.key}
             className={`${styles.col} ${foldClass(col.fold)}`}
             style={cellStyle(col)}
+            role="columnheader"
           >
             {col.header}
           </span>
@@ -100,12 +101,24 @@ export default function ProjectTable<T>({
             className={`${styles.row} ${clickable ? styles.rowClickable : ""}`}
             role="row"
             onClick={clickable ? () => onRowClick(row) : undefined}
+            tabIndex={clickable ? 0 : undefined}
+            onKeyDown={
+              clickable
+                ? (event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onRowClick(row);
+                    }
+                  }
+                : undefined
+            }
           >
             {columns.map((col) => (
               <div
                 key={col.key}
                 className={`${styles.cell} ${toneClass(col.tone)} ${foldClass(col.fold)}`}
                 style={cellStyle(col)}
+                role="cell"
               >
                 {col.render ? (
                   col.render(row)

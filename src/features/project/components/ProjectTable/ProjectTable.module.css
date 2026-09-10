@@ -42,6 +42,11 @@
   background: var(--surface);
 }
 
+.rowClickable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
 .col {
   display: flex;
   align-items: center;

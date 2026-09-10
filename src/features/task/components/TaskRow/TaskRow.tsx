@@ -44,19 +44,21 @@ export default function TaskRow({
         checked={done}
         disabled={!canToggle}
         onChange={() => onToggle?.()}
+        aria-label={`${title} ${done ? "완료 취소" : "완료"}`}
       />
 
       {/* 글자 폭만큼만 차지 — 옆 빈 공간은 클릭되지 않는다 */}
-      <span
-        className={cx(
-          styles.title,
-          done && styles.done,
-          onSelect && styles.titleClickable,
-        )}
-        onClick={onSelect}
-      >
-        {title}
-      </span>
+      {onSelect ? (
+        <button
+          type="button"
+          className={cx(styles.title, styles.titleClickable, done && styles.done)}
+          onClick={onSelect}
+        >
+          {title}
+        </button>
+      ) : (
+        <span className={cx(styles.title, done && styles.done)}>{title}</span>
+      )}
 
       <DdayBadge dday={dday} done={done} />
 

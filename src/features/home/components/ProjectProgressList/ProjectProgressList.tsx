@@ -17,21 +17,26 @@ export default function ProjectProgressList({
   return (
     <ul className={styles.list}>
       {projects.map((project) => (
-        <li
-          key={project.id}
-          className={styles.row}
-          onClick={() => onSelect?.(project)}
-        >
-          <span className={styles.name}>{project.name}</span>
+        <li key={project.id}>
+          <button
+            type="button"
+            className={styles.row}
+            onClick={() => onSelect?.(project)}
+            disabled={!onSelect}
+          >
+            <span className={styles.name}>{project.name}</span>
 
-          <div className={styles.barLine}>
-            {/* 바 색 = 상태 색 (드롭다운 점과 동일 토큰) */}
-            <ProgressBar
-              value={project.progress}
-              tone={statusTone(project.status)}
-            />
-            <span className={styles.percent}>{project.progress}%</span>
-          </div>
+            <span className={styles.barLine}>
+              <ProgressBar
+                value={project.progress}
+                tone={statusTone(project.status)}
+                label={`${project.name} 진행률`}
+              />
+              <span className={styles.percent} aria-hidden="true">
+                {project.progress}%
+              </span>
+            </span>
+          </button>
         </li>
       ))}
     </ul>

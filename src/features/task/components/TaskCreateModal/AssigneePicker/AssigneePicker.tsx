@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import { useClickOutside } from "@/hooks/useClickOutside";
 
@@ -31,6 +31,8 @@ export default function AssigneePicker({
   placeholder = "담당자를 선택하세요",
 }: AssigneePickerProps) {
   const [open, setOpen] = useState(false);
+  const labelId = useId();
+  const listboxId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
 
   // 바깥 클릭 시 닫기.
@@ -44,7 +46,9 @@ export default function AssigneePicker({
 
   return (
     <div className={styles.field}>
-      <span className={styles.label}>{label}</span>
+      <span id={labelId} className={styles.label}>
+        {label}
+      </span>
 
       <div className={styles.root} ref={rootRef}>
         <button
@@ -53,6 +57,8 @@ export default function AssigneePicker({
           onClick={() => setOpen((prev) => !prev)}
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-labelledby={labelId}
+          aria-controls={open ? listboxId : undefined}
         >
           {selected ? (
             <span className={styles.value}>
@@ -69,13 +75,18 @@ export default function AssigneePicker({
         </button>
 
         {open && (
-          <ul className={styles.popup} role="listbox">
+          <ul
+            id={listboxId}
+            className={styles.popup}
+            role="listbox"
+            aria-labelledby={labelId}
+          >
             {members.map((member) => {
               const id = String(member.userId);
               const isSelected = id === value;
 
               return (
-                <li key={id}>
+                <li key={id} role="presentation">
                   <button
                     type="button"
                     className={`${styles.option} ${isSelected ? styles.optionOn : ""}`}

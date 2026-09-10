@@ -28,7 +28,7 @@ export default function ProjectSwitchMenuView({
   onSelect,
 }: ProjectSwitchMenuViewProps) {
   return (
-    <div className={styles.menu}>
+    <div className={styles.menu} role="dialog" aria-label="프로젝트 전환">
       <div className={styles.searchArea}>
         <SearchBar
           placeholder="프로젝트명으로 검색"
@@ -55,6 +55,7 @@ export default function ProjectSwitchMenuView({
                 type="button"
                 className={`${styles.item} ${isCurrent ? styles.itemOn : ""}`}
                 onClick={() => onSelect(project.id)}
+                aria-current={isCurrent ? "page" : undefined}
               >
                 <span
                   className={`${styles.dot} ${
@@ -63,7 +64,11 @@ export default function ProjectSwitchMenuView({
                   aria-hidden="true"
                 />
                 <span className={styles.itemLabel}>{project.name}</span>
-                {isCurrent && <span className={styles.check}>✓</span>}
+                {isCurrent && (
+                  <span className={styles.check} aria-hidden="true">
+                    ✓
+                  </span>
+                )}
               </button>
             );
           })}

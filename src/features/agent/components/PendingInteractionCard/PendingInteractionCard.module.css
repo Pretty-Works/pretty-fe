@@ -11,13 +11,22 @@
 }
 
 /* 카드 몸통을 누르면 그 대화가 열린다 — 눌리는 것임을 테두리로 알린다 */
-.cardClickable {
+.open {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
   cursor: pointer;
-  transition: border-color 0.15s ease;
 }
 
-.cardClickable:hover {
-  border-color: var(--primary);
+.open:hover {
+  text-decoration: underline;
+}
+
+.open:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .head {

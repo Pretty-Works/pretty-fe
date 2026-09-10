@@ -38,7 +38,11 @@ export default function SelectField({
     <div className={styles.field}>
       <label className={styles.label} htmlFor={id}>
         {label}
-        {required && <span className={styles.required}> *</span>}
+        {required && (
+          <span className={styles.required} aria-hidden="true">
+            {" "}*
+          </span>
+        )}
       </label>
 
       <div className={styles.row}>
@@ -48,6 +52,7 @@ export default function SelectField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
+          required={required}
         >
           {placeholder && (
             <option value="" disabled hidden>

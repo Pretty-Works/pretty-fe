@@ -34,7 +34,7 @@ export default function MeetingDetailContent({
       <div className={styles.head}>
         <div className={styles.headText}>
           <div className={styles.titleRow}>
-            <h2 className={styles.title}>{meeting.title}</h2>
+            <h1 className={styles.title}>{meeting.title}</h1>
             <span className={styles.code}>{meeting.documentNumber}</span>
           </div>
           <p className={styles.sub}>
@@ -71,7 +71,7 @@ export default function MeetingDetailContent({
       </div>
 
       <section className={styles.card}>
-        <h3 className={styles.cardTitle}>기본 정보</h3>
+        <h2 className={styles.cardTitle}>기본 정보</h2>
 
         <div className={styles.infoRow}>
           <div className={styles.infoCol}>
@@ -110,15 +110,15 @@ export default function MeetingDetailContent({
 
       <section className={styles.card}>
         <div className={styles.field}>
-          <h4 className={styles.fieldLabel}>회의 목적</h4>
+          <h3 className={styles.fieldLabel}>회의 목적</h3>
           <p className={styles.fieldText}>{meeting.purpose || "-"}</p>
         </div>
         <div className={styles.field}>
-          <h4 className={styles.fieldLabel}>주요 내용</h4>
+          <h3 className={styles.fieldLabel}>주요 내용</h3>
           <p className={styles.fieldText}>{meeting.content || "-"}</p>
         </div>
         <div className={styles.field}>
-          <h4 className={styles.fieldLabel}>후속 조치</h4>
+          <h3 className={styles.fieldLabel}>후속 조치</h3>
           <p className={styles.fieldText}>{meeting.followUp || "-"}</p>
         </div>
       </section>

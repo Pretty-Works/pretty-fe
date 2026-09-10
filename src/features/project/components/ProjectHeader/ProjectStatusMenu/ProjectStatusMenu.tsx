@@ -36,24 +36,30 @@ export default function ProjectStatusMenu({
                 className={`${styles.item} ${isCurrent ? styles.itemOn : ""}`}
                 onClick={() => onChange(status)}
                 disabled={isCurrent}
+                role="menuitem"
               >
                 <span
                   className={`${styles.dot} ${styles[meta.tone]}`}
                   aria-hidden="true"
                 />
                 <span className={styles.itemLabel}>{meta.label}</span>
-                {isCurrent && <span className={styles.check}>✓</span>}
+                {isCurrent && (
+                  <span className={styles.check} aria-hidden="true">
+                    ✓
+                  </span>
+                )}
               </button>
             );
           })}
 
-          <span className={styles.divider} />
+          <span className={styles.divider} role="separator" />
 
           {/* 되돌릴 수 없는 종료 처리 */}
           <button
             type="button"
             className={`${styles.item} ${styles.complete}`}
             onClick={() => onChange("COMPLETED")}
+            role="menuitem"
           >
             <span className={styles.itemLabel}>프로젝트 완료</span>
           </button>
@@ -64,6 +70,7 @@ export default function ProjectStatusMenu({
         type="button"
         className={`${styles.item} ${styles.archive}`}
         onClick={() => onChange("ARCHIVED")}
+        role="menuitem"
       >
         <span className={styles.itemLabel}>프로젝트 삭제</span>
       </button>

@@ -33,6 +33,7 @@ export function useHomeViewModel() {
     "list",
   ]);
   const { mutate: cancelRun } = useCancelAgentRunMutation();
+  // 인사말과 같은 쿼리 키를 공유하므로 네트워크 요청은 중복되지 않는다.
   const { data: me } = useMyProfileQuery();
   const { data: interactions = [], isError: isRequestsError } =
     useAgentPendingInteractionsQuery();

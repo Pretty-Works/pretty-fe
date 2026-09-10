@@ -252,7 +252,11 @@ function WeeklyTaskBoardCard({
                 <span className={styles.teamName}>
                   {DEPARTMENT_LABEL[team.team]}
                 </span>
-                <ProgressBar value={team.rate} tone="purple" />
+                <ProgressBar
+                  value={team.rate}
+                  tone="purple"
+                  label={`${DEPARTMENT_LABEL[team.team]} 완료율`}
+                />
                 <span className={styles.teamCount}>
                   {team.done}/{team.total}
                 </span>

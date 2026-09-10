@@ -112,7 +112,7 @@ export default function MeetingActionItems({
   return (
     <section className={styles.card} aria-label="실행 항목">
       <div className={styles.cardHead}>
-        <h3 className={styles.cardTitle}>실행 항목</h3>
+        <h2 className={styles.cardTitle}>실행 항목</h2>
         {generated && items.length > 0 && (
           <Badge type="elephant" badgeStyle="weak">
             {items.length}

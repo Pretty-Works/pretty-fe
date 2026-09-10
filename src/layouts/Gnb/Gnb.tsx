@@ -118,7 +118,13 @@ export default function GnbView({
           </button>
 
           <Link href="/" onClick={guard("/")}>
-            <Image src={Logo} alt="Pretty Works 홈" priority />
+            <Image
+              src={Logo}
+              alt="Pretty Works 홈"
+              width={192}
+              height={18}
+              priority
+            />
           </Link>
         </div>
 
@@ -179,7 +185,11 @@ export default function GnbView({
             </button>
 
             {menuOpen && (
-              <div className={styles.dropdown}>
+              <div
+                className={styles.dropdown}
+                role="dialog"
+                aria-label="내 프로필"
+              >
                 <div className={styles.profileInfo}>
                   <p className={styles.profileName}>{profile?.name ?? "—"}</p>
                   <p className={styles.profileMeta}>

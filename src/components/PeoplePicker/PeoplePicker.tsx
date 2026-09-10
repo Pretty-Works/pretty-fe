@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useId, useMemo, useRef, useState } from "react";
 
 import Chip from "@/components/Chip/Chip";
 import FormField from "@/components/FormField/FormField";
@@ -88,6 +88,7 @@ export default function PeoplePicker({
   onQueryChange,
   searching = false,
 }: PeoplePickerProps) {
+  const suggestionsId = useId();
   const [query, setQuery] = useState("");
   // 포커스만으로도 후보를 다 볼 수 있어야 해서, 열림 여부를 검색어 유무와 분리해 둔다.
   const [isOpen, setIsOpen] = useState(false);
@@ -177,10 +178,15 @@ export default function PeoplePicker({
           onChange={(e) => changeQuery(e.target.value)}
           onFocus={() => setIsOpen(true)}
           right={hint}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={isOpen}
+          aria-controls={isOpen ? suggestionsId : undefined}
         />
 
         {isOpen && (
           <SuggestList
+            id={suggestionsId}
             items={suggestions.map((person) => ({
               id: person.id,
               label: person.name,

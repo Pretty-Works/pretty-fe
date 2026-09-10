@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { LuCrown } from "react-icons/lu";
 
 import { cx } from "@/lib/cx";
@@ -26,6 +28,7 @@ import styles from "./ProjectForm.module.css";
 type ProjectFormProps = ProjectFormControllerOptions;
 
 export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
+  const memberSuggestionsId = useId();
   const {
     limits,
     isEdit,
@@ -69,14 +72,16 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
     canSubmit,
   } = useProjectFormController({ projectId, detail });
 
+  // 생성 화면은 독립 페이지, 수정 화면은 이미 프로젝트의 main 안에 놓인다.
+  const Root = isEdit ? "div" : "main";
+
   return (
-    // 수정 화면은 프로젝트 레이아웃 안에 놓인다 — 폭과 여백을 바깥에서 정한다.
-    <main className={cx(styles.container, isEdit && styles.embedded)}>
+    <Root className={cx(styles.container, isEdit && styles.embedded)}>
       <div className={styles.pageHead}>
         <div className={styles.pageHeadText}>
-          <h2 className={styles.pageTitle}>
+          <h1 className={styles.pageTitle}>
             {isEdit ? "프로젝트 수정" : "프로젝트 생성"}
-          </h2>
+          </h1>
           <button type="button" className={styles.pageSub} onClick={openAgent}>
             AI와 함께 유사 프로젝트 이력을 기반으로 작성할 수 있어요 →
           </button>
@@ -102,7 +107,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
       </div>
 
       <section className={styles.card}>
-        <h3 className={styles.cardTitle}>기본 정보</h3>
+        <h2 className={styles.cardTitle}>기본 정보</h2>
 
         <FormField
           label="프로젝트명"
@@ -183,7 +188,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
       </section>
 
       <section className={styles.card}>
-        <h3 className={styles.cardTitle}>참여자</h3>
+        <h2 className={styles.cardTitle}>참여자</h2>
 
         <div className={styles.memberSearch}>
           <SearchBar
@@ -195,16 +200,28 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
             value={memberKeyword}
             onChange={(e) => setMemberKeyword(e.target.value)}
             disabled={members.length >= limits.members}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={!!memberKeyword.trim()}
+            aria-controls={
+              memberKeyword.trim() ? memberSuggestionsId : undefined
+            }
           />
           {memberKeyword.trim() && (
-            <ul className={styles.suggest}>
+            <ul
+              id={memberSuggestionsId}
+              className={styles.suggest}
+              role={selectableSuggestions.length > 0 ? "listbox" : undefined}
+            >
               {selectableSuggestions.length > 0 ? (
                 selectableSuggestions.map((user) => (
-                  <li key={user.userId}>
+                  <li key={user.userId} role="presentation">
                     <button
                       type="button"
                       className={styles.suggestItem}
                       onClick={() => addMember(user)}
+                      role="option"
+                      aria-selected="false"
                     >
                       <span className={styles.suggestName}>
                         {user.name} · {DEPARTMENT_LABEL[user.department]}
@@ -217,7 +234,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
                   </li>
                 ))
               ) : (
-                <li className={styles.suggestEmpty}>
+                <li className={styles.suggestEmpty} role="status">
                   {searching ? "찾는 중이에요…" : "검색 결과가 없어요"}
                 </li>
               )}
@@ -280,7 +297,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
 
       <section className={styles.card}>
         <div className={styles.cardHead}>
-          <h3 className={styles.cardTitle}>마일스톤</h3>
+          <h2 className={styles.cardTitle}>마일스톤</h2>
           <Button
             size="tiny"
             leftAccessory="+"
@@ -322,10 +339,9 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
                 onDrop={() => drag.drop(index)}
                 onDragEnd={drag.end}
               >
-                <span
+                <button
+                  type="button"
                   className={styles.msHandle}
-                  role="button"
-                  tabIndex={0}
                   aria-label={`마일스톤 ${index + 1}번 순서 변경 — 방향키로 이동`}
                   onMouseDown={() => drag.grab(ms.key)}
                   onKeyDown={(e) => {
@@ -353,6 +369,7 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
                 </div>
                 <input
                   className={styles.msGoal}
+                  placeholder="목표 입력"
                   maxLength={limits.milestoneGoal}
                   value={ms.goal}
                   onChange={(e) =>
@@ -384,6 +401,6 @@ export default function ProjectForm({ projectId, detail }: ProjectFormProps) {
         onStay={leaveGuard.stay}
         onLeave={leaveGuard.leave}
       />
-    </main>
+    </Root>
   );
 }

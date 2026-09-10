@@ -80,7 +80,7 @@ export default function AgentLayout({
       </div>
 
       {/* 서버가 보낸 말풍선·선택지를 그대로 그리는 자리라 예상 밖의 값이 닿을 여지가 가장 크다 */}
-      <aside className="agent">
+      <aside className="agent" aria-label="AI 에이전트">
         <RenderProfiler id="AgentPanel">
           <ErrorBoundary
             name="AgentView"

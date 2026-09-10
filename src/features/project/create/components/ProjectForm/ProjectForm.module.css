@@ -352,6 +352,8 @@
   flex-shrink: 0;
   width: 10px;
   height: 16px;
+  padding: 0;
+  border: 0;
   cursor: grab;
   background-image: radial-gradient(
     circle at 1.5px 1.5px,

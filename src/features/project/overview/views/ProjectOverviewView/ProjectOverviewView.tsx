@@ -53,9 +53,9 @@ export default function ProjectOverviewView({
       <section className={styles.panel}>
         <div className={styles.panelHead}>
           {/* 제목 자리에 프로젝트 설명을 노출한다 */}
-          <h2 className={styles.panelTitle}>
+          <h1 className={styles.panelTitle}>
             {project.description || "기본 정보"}
-          </h2>
+          </h1>
         </div>
 
         <dl className={styles.infoGrid}>

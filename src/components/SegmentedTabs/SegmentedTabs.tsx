@@ -1,5 +1,7 @@
 "use client";
 
+import { useId } from "react";
+
 import { cx } from "@/lib/cx";
 
 import styles from "./SegmentedTabs.module.css";
@@ -50,12 +52,18 @@ export default function SegmentedTabs<T extends string>({
   variant = "pill",
   className,
 }: SegmentedTabsProps<T>) {
+  const labelId = useId();
+
   return (
     <div className={cx(styles.field, className)}>
       {label && (
-        <span className={styles.fieldLabel}>
+        <span id={labelId} className={styles.fieldLabel}>
           {label}
-          {required && <span className={styles.required}> *</span>}
+          {required && (
+            <span className={styles.required} aria-hidden="true">
+              {" "}*
+            </span>
+          )}
         </span>
       )}
 
@@ -65,6 +73,10 @@ export default function SegmentedTabs<T extends string>({
           variant === "segment" && styles.trackSegment,
         )}
         role="tablist"
+        aria-labelledby={label && !required ? labelId : undefined}
+        aria-label={
+          label ? (required ? `${label} 필수` : undefined) : "보기 선택"
+        }
       >
         {options.map((option) => {
           const active = option.value === value;

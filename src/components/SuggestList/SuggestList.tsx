@@ -20,6 +20,7 @@ export interface SuggestItem {
 }
 
 interface SuggestListProps {
+  id?: string;
   items: SuggestItem[];
   onSelect: (id: string) => void;
   emptyText?: string;
@@ -34,26 +35,31 @@ const BADGE_CLASS: Record<NonNullable<SuggestBadge["tone"]>, string> = {
 // 입력창 바로 아래로 펼쳐지는 자동완성 목록.
 // 부모가 position: relative 컨테이너와 열림 여부를 맡는다.
 export default function SuggestList({
+  id,
   items,
   onSelect,
   emptyText = "검색 결과가 없어요",
 }: SuggestListProps) {
   if (items.length === 0) {
     return (
-      <ul className={styles.suggest}>
-        <li className={styles.empty}>{emptyText}</li>
+      <ul id={id} className={styles.suggest}>
+        <li className={styles.empty} role="status">
+          {emptyText}
+        </li>
       </ul>
     );
   }
 
   return (
-    <ul className={styles.suggest}>
+    <ul id={id} className={styles.suggest} role="listbox">
       {items.map((item) => (
-        <li key={item.id}>
+        <li key={item.id} role="presentation">
           <button
             type="button"
             className={styles.item}
             onClick={() => onSelect(item.id)}
+            role="option"
+            aria-selected="false"
           >
             <span className={styles.label}>{item.label}</span>
 

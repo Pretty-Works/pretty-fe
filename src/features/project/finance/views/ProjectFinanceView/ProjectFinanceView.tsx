@@ -120,7 +120,7 @@ export default function ProjectFinanceView({
       <section className={styles.panel}>
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
-            <h2 className={styles.panelTitle}>지출 내역</h2>
+            <h1 className={styles.panelTitle}>지출 내역</h1>
             <Badge type="elephant" badgeStyle="weak">
               {totalElements}
             </Badge>

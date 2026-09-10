@@ -13,7 +13,7 @@ const FREE_TEXT_MAX = 2000;
 
 interface PendingInteractionCardProps {
   interaction: PendingInteraction;
-  /** 카드 몸통 클릭 — 이 요청이 온 대화를 연다 */
+  /** 카드 제목 클릭 — 이 요청이 온 대화를 연다 */
   onOpen?: (interaction: PendingInteraction) => void;
   /** 고른 보기들과 직접 쓴 문장. 다중 선택이 아니면 보기는 언제나 한 개다 */
   onSelectOptions?: (
@@ -80,15 +80,20 @@ export default function PendingInteractionCard({
   };
 
   return (
-    // 카드 안의 버튼·입력칸은 제 일만 하도록 전파를 막는다 —
-    // 안 그러면 답을 고르는 클릭이 대화 열기로도 번진다.
-    <div
-      className={cx(styles.card, onOpen && styles.cardClickable)}
-      onClick={onOpen ? () => onOpen(interaction) : undefined}
-    >
+    <article className={styles.card}>
       <div className={styles.head}>
         {/* 무엇을 묻는지. 질문 본문은 대기 목록에 없어 머리말이 제목 자리를 대신한다 */}
-        <span className={styles.label}>{interaction.label}</span>
+        {onOpen ? (
+          <button
+            type="button"
+            className={cx(styles.label, styles.open)}
+            onClick={() => onOpen(interaction)}
+          >
+            {interaction.label}
+          </button>
+        ) : (
+          <span className={styles.label}>{interaction.label}</span>
+        )}
 
         {/* 중단 = 진행 중인 에이전트 작업 멈춤 */}
         <button
@@ -176,6 +181,6 @@ export default function PendingInteractionCard({
           </button>
         </form>
       )}
-    </div>
+    </article>
   );
 }

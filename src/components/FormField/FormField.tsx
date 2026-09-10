@@ -36,6 +36,7 @@ export default function FormField({
 }: FormFieldProps) {
   const autoId = useId();
   const inputId = id ?? autoId;
+  const helpId = `${inputId}-help`;
 
   const [revealed, setRevealed] = useState(false);
   const canReveal = revealable && type === "password";
@@ -51,7 +52,11 @@ export default function FormField({
     <div className={styles.field}>
       <label htmlFor={inputId} className={styles.label}>
         {label}
-        {required && <span className={styles.required}> *</span>}
+        {required && (
+          <span className={styles.required} aria-hidden="true">
+            {" "}*
+          </span>
+        )}
       </label>
 
       <div className={controlClass}>
@@ -62,7 +67,9 @@ export default function FormField({
           placeholder={placeholder}
           value={value}
           maxLength={maxLength}
+          required={required}
           aria-invalid={hasError || undefined}
+          aria-describedby={help || atMaxLength ? helpId : undefined}
           {...rest}
         />
 
@@ -84,12 +91,16 @@ export default function FormField({
       </div>
 
       {atMaxLength ? (
-        <span className={styles.warn} role="status">
+        <span id={helpId} className={styles.warn} role="status">
           {withJosa(label, "은", "는")} 최대 {maxLength}자까지 입력할 수 있어요.
         </span>
       ) : (
         help && (
-          <span className={hasError ? styles.helpError : styles.help}>
+          <span
+            id={helpId}
+            className={hasError ? styles.helpError : styles.help}
+            role={hasError ? "alert" : undefined}
+          >
             {help}
           </span>
         )

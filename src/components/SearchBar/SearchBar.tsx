@@ -13,6 +13,7 @@ interface SearchBarProps extends Omit<
 export default function SearchBar({
   placeholder = "검색",
   className,
+  "aria-label": ariaLabel,
   ...rest
 }: SearchBarProps) {
   return (
@@ -21,6 +22,7 @@ export default function SearchBar({
         className={styles.input}
         type="text"
         placeholder={placeholder}
+        aria-label={ariaLabel ?? placeholder}
         {...rest}
       />
 

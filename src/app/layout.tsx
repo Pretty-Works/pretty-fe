@@ -14,7 +14,10 @@ import "@/styles/globals.css";
 const pretendard = localFont({
   src: "../styles/fonts/PretendardVariable.woff2",
   weight: "45 920",
-  display: "swap",
+  // 느린 네트워크에서는 늦은 폰트 교체보다 시스템 폰트를 유지해 레이아웃 이동을 막는다.
+  display: "optional",
+  // 2MB 폰트가 첫 화면의 핵심 데이터·스타일보다 먼저 대역폭을 차지하지 않게 한다.
+  preload: false,
   variable: "--font-pretendard",
   fallback: ["system-ui", "sans-serif"],
 });
