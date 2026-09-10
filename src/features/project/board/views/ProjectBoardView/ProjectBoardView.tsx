@@ -49,7 +49,7 @@ export default function ProjectBoardView({
       <section className={styles.panel}>
         <div className={styles.panelHead}>
           <div className={styles.panelHeadLeft}>
-            <h2 className={styles.panelTitle}>게시판</h2>
+            <h1 className={styles.panelTitle}>게시판</h1>
             {typeof page.totalCount === "number" && (
               <Badge type="elephant" badgeStyle="weak">
                 {page.totalCount}

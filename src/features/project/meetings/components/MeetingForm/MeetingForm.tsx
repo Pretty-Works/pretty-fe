@@ -59,9 +59,9 @@ export default function MeetingForm(props: MeetingFormProps) {
       {/* 헤더 */}
       <div className={styles.head}>
         <div className={styles.headText}>
-          <h2 className={styles.pageTitle}>
+          <h1 className={styles.pageTitle}>
             {mode === "create" ? "회의록 작성" : "회의록 수정"}
-          </h2>
+          </h1>
           <div className={styles.pageSub}>
             <OpenAgentButton prompt="회의 내용을 정리해서 회의록을 작성해줘">
               AI로 빠르고 간편하게 회의 내용을 정리해 보세요 →
@@ -123,7 +123,7 @@ export default function MeetingForm(props: MeetingFormProps) {
 
       {/* 기본 정보 */}
       <section className={styles.card}>
-        <h3 className={styles.cardTitle}>기본 정보</h3>
+        <h2 className={styles.cardTitle}>기본 정보</h2>
 
         <FormField
           label="회의명"
@@ -178,7 +178,7 @@ export default function MeetingForm(props: MeetingFormProps) {
 
       {/* 회의 내용 */}
       <section className={styles.card}>
-        <h3 className={styles.cardTitle}>회의 내용</h3>
+        <h2 className={styles.cardTitle}>회의 내용</h2>
 
         <FormField
           label="회의 목적"

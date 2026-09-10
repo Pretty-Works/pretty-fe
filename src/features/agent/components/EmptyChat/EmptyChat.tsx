@@ -58,15 +58,21 @@ export default function EmptyChat({
 
   return (
     <div className={styles.empty}>
-      <Image className={styles.icon} src={AgentChatIcon} alt="" />
-      <div className={styles.title}>무엇을 도와드릴까요?</div>
-      <div className={styles.description}>
+      <Image
+        className={styles.icon}
+        src={AgentChatIcon}
+        alt=""
+        width={60}
+        height={60}
+      />
+      <h3 className={styles.title}>무엇을 도와드릴까요?</h3>
+      <p className={styles.description}>
         {loading
           ? "지금 챙길 것을 찾고 있어요"
           : hasSuggestions
             ? "아래 추천으로 빠르게 시작해 보세요"
             : "회의·업무·휴가·결재·예약을 도와드려요"}
-      </div>
+      </p>
 
       {/* 기다리는 자리. 문구는 위 description 이 이미 말하고 있어 읽어 줄 것이 없다 */}
       {loading && (

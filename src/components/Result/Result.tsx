@@ -19,18 +19,21 @@ function ResultRoot({
   button,
   size = "block",
 }: ResultProps) {
+  const Root = size === "page" ? "main" : "div";
+  const Title = size === "page" ? "h1" : "h3";
+
   return (
-    <div
+    <Root
       className={cx(styles.result, size === "page" && styles.page)}
-      role="status"
+      role={size === "block" ? "status" : undefined}
     >
       {figure}
 
-      <h3 className={styles.title}>{title}</h3>
+      <Title className={styles.title}>{title}</Title>
       {description && <p className={styles.description}>{description}</p>}
 
       {button && <div className={styles.buttons}>{button}</div>}
-    </div>
+    </Root>
   );
 }
 

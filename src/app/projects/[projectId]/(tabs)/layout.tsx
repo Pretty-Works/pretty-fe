@@ -13,10 +13,10 @@ export default function ProjectLayout({
       <div className={styles.container}>
         <ProjectLnb />
 
-        <div className={styles.content}>
+        <main className={styles.content}>
           <ProjectHeaderContainer />
           {children}
-        </div>
+        </main>
       </div>
     </div>
   );

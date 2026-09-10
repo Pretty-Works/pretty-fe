@@ -35,7 +35,7 @@ export default function PostDetailContent({
       <div className={styles.head}>
         <div className={styles.headText}>
           <div className={styles.titleRow}>
-            <h2 className={styles.title}>{post.title}</h2>
+            <h1 className={styles.title}>{post.title}</h1>
           </div>
           <p className={styles.sub}>
             <span className={styles.importance}>
@@ -76,9 +76,9 @@ export default function PostDetailContent({
         </div>
       </div>
 
-      <section className={styles.card}>
+      <div className={styles.card}>
         <p className={styles.content}>{post.content}</p>
-      </section>
+      </div>
     </>
   );
 }

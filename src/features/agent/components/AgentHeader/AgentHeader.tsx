@@ -64,8 +64,14 @@ export default function AgentHeader({
   return (
     <header className={styles.header}>
       <div className={styles.left}>
-        <Image className={styles.logo} src={AgentChatIcon} alt="" />
-        <div className={styles.title}>에이전트</div>
+        <Image
+          className={styles.logo}
+          src={AgentChatIcon}
+          alt=""
+          width={30}
+          height={30}
+        />
+        <h2 className={styles.title}>에이전트</h2>
       </div>
 
       <div className={styles.right}>

@@ -50,7 +50,7 @@ export default function ProjectHeaderView({
 
   // 바깥 클릭 감지는 헤더 전체를 기준으로 한다 — 멤버 버튼이 selector 밖으로 나가 있다
   return (
-    <div className={styles.header} ref={rootRef}>
+    <header className={styles.header} ref={rootRef}>
       <div className={styles.selector}>
         {/* 색 점 — 진행 상태 변경 */}
         <button
@@ -58,7 +58,7 @@ export default function ProjectHeaderView({
           className={styles.dotButton}
           onClick={() => toggle("status")}
           disabled={!canChangeStatus}
-          aria-haspopup="menu"
+          aria-haspopup="dialog"
           aria-expanded={openMenu === "status"}
           aria-label="프로젝트 상태 변경"
         >
@@ -72,7 +72,7 @@ export default function ProjectHeaderView({
           type="button"
           className={styles.switchButton}
           onClick={() => toggle("switch")}
-          aria-haspopup="menu"
+          aria-haspopup="dialog"
           aria-expanded={openMenu === "switch"}
         >
           {/* 열 수 없는 프로젝트면 이름 자리를 비워두지 않고 상태를 알린다 */}
@@ -148,6 +148,6 @@ export default function ProjectHeaderView({
         onClose={closeConfirm}
         onConfirm={confirmStatus}
       />
-    </div>
+    </header>
   );
 }

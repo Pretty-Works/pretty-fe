@@ -31,9 +31,17 @@ export default function NotificationDropdownView({
   return (
     <div className={styles.dropdown} role="dialog" aria-label="알림">
       <div className={styles.list} ref={listRef}>
-        {isLoading && <p className={styles.state}>불러오는 중…</p>}
+        {isLoading && (
+          <p className={styles.state} role="status">
+            불러오는 중…
+          </p>
+        )}
 
-        {isError && <p className={styles.state}>알림을 불러오지 못했습니다</p>}
+        {isError && (
+          <p className={styles.state} role="alert">
+            알림을 불러오지 못했습니다
+          </p>
+        )}
 
         {/* 결과가 없는 건 에러가 아니다 */}
         {notifications?.length === 0 && (
@@ -53,7 +61,11 @@ export default function NotificationDropdownView({
 
         {hasNextPage && <div ref={sentinelRef} className={styles.sentinel} />}
 
-        {isLoadingMore && <p className={styles.state}>불러오는 중…</p>}
+        {isLoadingMore && (
+          <p className={styles.state} role="status">
+            불러오는 중…
+          </p>
+        )}
       </div>
 
       {/* 90일이 지난 알림은 서버가 지운다. 목록 끝에서 사라진 이유를 알 수 있게 적어둔다 */}

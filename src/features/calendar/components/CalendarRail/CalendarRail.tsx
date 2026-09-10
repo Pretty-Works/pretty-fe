@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import SearchBar from "@/components/SearchBar/SearchBar";
 import SuggestList from "@/components/SuggestList/SuggestList";
@@ -47,6 +47,7 @@ export default function CalendarRail({
   onAddMember,
   onRemoveMember,
 }: CalendarRailProps) {
+  const suggestionsId = useId();
   const [query, setQuery] = useState("");
 
   const searchRef = useRef<HTMLDivElement>(null);
@@ -116,9 +117,14 @@ export default function CalendarRail({
           placeholder="이름으로 추가"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={!!query.trim()}
+          aria-controls={query.trim() ? suggestionsId : undefined}
         />
         {query.trim() && (
           <SuggestList
+            id={suggestionsId}
             items={suggestions.map((member) => ({
               id: member.id,
               label: member.name,

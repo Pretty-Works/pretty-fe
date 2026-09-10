@@ -176,6 +176,7 @@ export default function TranscriptUploadModal({
             type="file"
             accept=".txt,text/plain"
             hidden
+            aria-label="회의 내용 텍스트 파일"
             onChange={(e) => {
               takeFirst(e.target.files);
               e.target.value = "";
@@ -203,15 +204,10 @@ export default function TranscriptUploadModal({
               </button>
             </div>
           ) : (
-            <div
+            <button
+              type="button"
               className={styles.dropzone}
-              role="button"
-              tabIndex={0}
               onClick={() => inputRef.current?.click()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ")
-                  inputRef.current?.click();
-              }}
               onDragOver={(e) => e.preventDefault()}
               onDrop={(e) => {
                 e.preventDefault();
@@ -226,7 +222,7 @@ export default function TranscriptUploadModal({
               </span>
               <span className={styles.dzHint}>txt 파일만 지원 · 최대 10MB</span>
               <span className={styles.dzBtn}>파일 선택</span>
-            </div>
+            </button>
           )}
 
           {(fileError ?? uploadError) && (

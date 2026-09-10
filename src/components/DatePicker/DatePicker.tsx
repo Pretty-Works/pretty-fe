@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 
 import { FiCalendar } from "react-icons/fi";
 
@@ -48,6 +48,7 @@ const addDays = (date: Date, diff: number) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate() + diff);
 
 export default function DatePicker(props: DatePickerProps) {
+  const id = useId();
   const {
     allowFuture = true,
     minDate,
@@ -260,14 +261,19 @@ export default function DatePicker(props: DatePickerProps) {
     : (singleValue ?? "");
 
   const monthLabel = `${view.year}년 ${view.month + 1}월`;
+  const labelId = `${id}-label`;
 
   return (
     <div className={styles.field}>
       {label && (
         <span className={styles.fieldLabelRow}>
-          <span className={styles.fieldLabel}>
+          <span id={labelId} className={styles.fieldLabel}>
             {label}
-            {required && <span className={styles.required}> *</span>}
+            {required && (
+              <span className={styles.required} aria-hidden="true">
+                {" "}*
+              </span>
+            )}
           </span>
           {labelSlot && <span className={styles.labelSlot}>{labelSlot}</span>}
         </span>
@@ -282,6 +288,10 @@ export default function DatePicker(props: DatePickerProps) {
           disabled={disabled}
           aria-haspopup="dialog"
           aria-expanded={open}
+          aria-labelledby={label && !required ? labelId : undefined}
+          aria-label={
+            label ? (required ? `${label} 필수` : undefined) : placeholder
+          }
         >
           <span className={displayValue ? styles.value : styles.placeholder}>
             {displayValue || placeholder}

@@ -55,7 +55,11 @@ export default function FormTextArea({
     <label className={styles.field}>
       <span className={styles.label}>
         {label}
-        {required && <span className={styles.required}> *</span>}
+        {required && (
+          <span className={styles.required} aria-hidden="true">
+            {" "}*
+          </span>
+        )}
       </span>
 
       <textarea
@@ -66,6 +70,7 @@ export default function FormTextArea({
         defaultValue={defaultValue}
         onChange={handleChange}
         maxLength={maxLength}
+        required={required}
         style={{
           minHeight: `calc(${minRows} * 1.5em + 24px)`,
           maxHeight: `calc(${maxRows} * 1.5em + 24px)`,

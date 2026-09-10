@@ -215,6 +215,7 @@ export default function AgentComposer({
           accept={ACCEPT}
           multiple
           hidden
+          aria-label="텍스트 파일 첨부"
           onChange={(e) => {
             addFiles(e.target.files);
             // 같은 파일을 지웠다가 다시 고를 수 있게 비워 둔다
@@ -263,6 +264,7 @@ export default function AgentComposer({
           onKeyDown={handleKeyDown}
           rows={1}
           disabled={blocked}
+          aria-label="에이전트 메시지"
         />
 
         <div className={styles.bar}>

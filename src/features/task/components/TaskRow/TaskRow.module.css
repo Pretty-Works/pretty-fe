@@ -32,11 +32,21 @@
 }
 
 .titleClickable {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
   cursor: pointer;
 }
 
 .titleClickable:hover {
   text-decoration: underline;
+}
+
+.titleClickable:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
 .rowDisabled .title {

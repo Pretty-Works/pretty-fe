@@ -146,11 +146,7 @@ export default function HomeView({ model }: { model: HomeViewModel }) {
   };
 
   return (
-    <main className={styles.container}>
-      {/* 인사말 */}
-      {/* 이름을 불러오기 전에는 인사말 뒷부분만 비워 둔다 — 줄 자체가 없어지면 아래가 밀린다 */}
-      <h1 className={styles.greeting}>안녕하세요. {me?.name ?? ""}님</h1>
-
+    <>
       {/* 확인이 필요한 요청 — 없으면 박스째 나오지 않는다 */}
       {showRequests && (
         <section className={styles.panel}>
@@ -288,6 +284,6 @@ export default function HomeView({ model }: { model: HomeViewModel }) {
           task={editingTask}
         />
       )}
-    </main>
+    </>
   );
 }

@@ -178,6 +178,7 @@ export default function ChoicePrompt({
             <input
               className={styles.directInput}
               placeholder={placeholder ?? "직접 입력"}
+              aria-label={title ? `${title} 직접 입력` : "직접 입력"}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />

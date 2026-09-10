@@ -28,11 +28,19 @@ export default function ProjectMemberMenuView({
 }: ProjectMemberMenuViewProps) {
 
   return (
-    <div className={styles.menu}>
+    <div className={styles.menu} role="dialog" aria-label="프로젝트 참여자">
       <div className={styles.list}>
-        {isLoading && <p className={styles.state}>불러오는 중…</p>}
+        {isLoading && (
+          <p className={styles.state} role="status">
+            불러오는 중…
+          </p>
+        )}
 
-        {isError && <p className={styles.state}>참여자를 불러오지 못했어요</p>}
+        {isError && (
+          <p className={styles.state} role="alert">
+            참여자를 불러오지 못했어요
+          </p>
+        )}
 
         {memberCount === 0 && (
           <p className={styles.state}>참여자가 없어요</p>

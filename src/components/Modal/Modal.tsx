@@ -43,6 +43,7 @@ export default function Modal({
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
+  const subtitleId = useId();
 
   useEffect(() => {
     if (!open) return;
@@ -131,6 +132,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         aria-label={!title ? label : undefined}
+        aria-describedby={subtitle ? subtitleId : undefined}
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
       >
@@ -142,7 +144,11 @@ export default function Modal({
                   {title}
                 </h2>
               )}
-              {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
+              {subtitle && (
+                <p id={subtitleId} className={styles.subtitle}>
+                  {subtitle}
+                </p>
+              )}
             </div>
             {closable && (
               <button

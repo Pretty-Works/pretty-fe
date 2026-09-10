@@ -52,6 +52,7 @@ export default function LoginView({ model }: { model: LoginViewModel }) {
             label="사번 (ID)"
             placeholder="사번을 입력하세요"
             value={employeeNo}
+            autoComplete="username"
             help={errors.employeeNo}
             hasError={!!errors.employeeNo || errors.credential}
             onChange={(e) => {
@@ -65,6 +66,7 @@ export default function LoginView({ model }: { model: LoginViewModel }) {
             revealable
             placeholder="비밀번호를 입력하세요"
             value={password}
+            autoComplete="current-password"
             help={errors.password}
             hasError={!!errors.password || errors.credential}
             onChange={(e) => {
