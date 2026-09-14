@@ -24,6 +24,29 @@ jobs:
 
       - run: npm test
 
+      - run: npm run test:unit
+
       - run: npm run build
         env:
           NEXT_PUBLIC_API_BASE_URL: http://localhost:8080
+  
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+      - uses: actions/upload-artifact@v5
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
