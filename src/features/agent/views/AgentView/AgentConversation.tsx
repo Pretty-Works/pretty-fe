@@ -3,13 +3,16 @@
 import {
   Fragment,
   memo,
+  useCallback,
   useEffect,
   useRef,
+  useState,
 } from "react";
 
 import { usePathname } from "next/navigation";
 
 import { useShallow } from "zustand/shallow";
+import { LuArrowDown } from "react-icons/lu";
 
 import { formatDayLabel, formatTimeOfDay, isSameDay } from "@/lib/date";
 
@@ -28,6 +31,8 @@ import {
 import { useChatStore } from "@/features/agent/stores/useChatStore/useChatStore";
 
 import styles from "./AgentView.module.css";
+
+const NEAR_BOTTOM_PX = 48;
 
 type AgentConversationProps = Pick<
   ChatController,
@@ -54,6 +59,7 @@ function AgentConversation({
 }: AgentConversationProps) {
   const pathname = usePathname();
   const {
+    conversationId,
     autoApprove,
     messages,
     running,
@@ -66,6 +72,7 @@ function AgentConversation({
     dismissAction,
   } = useChatStore(
     useShallow((state) => ({
+      conversationId: state.conversationId,
       autoApprove: state.autoApprove,
       messages: state.messages,
       running: state.running,
@@ -79,13 +86,62 @@ function AgentConversation({
     })),
   );
   const bottomRef = useRef<HTMLDivElement>(null);
+  const followLatestRef = useRef(true);
+  const lastScrollTopRef = useRef(0);
+  const [hasNewResponse, setHasNewResponse] = useState(false);
 
   const isEmpty =
     messages.length === 0 && !running && !historyLoading && !historyLoadError;
 
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = "smooth") => {
+    followLatestRef.current = true;
+    setHasNewResponse(false);
+    bottomRef.current?.scrollIntoView({ behavior, block: "end" });
+  }, []);
+
+  const handleNewContent = useCallback(() => {
+    if (!followLatestRef.current) {
+      setHasNewResponse(true);
+      return;
+    }
+
+    requestAnimationFrame(() => scrollToLatest());
+  }, [scrollToLatest]);
+
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const { scrollTop, scrollHeight, clientHeight } = event.currentTarget;
+    const nearBottom = scrollHeight - scrollTop - clientHeight <= NEAR_BOTTOM_PX;
+
+    if (nearBottom) {
+      followLatestRef.current = true;
+      setHasNewResponse(false);
+    } else if (scrollTop < lastScrollTopRef.current) {
+      // 위로 이동한 순간부터는 새 이벤트가 와도 읽던 위치를 지킨다.
+      followLatestRef.current = false;
+    }
+
+    lastScrollTopRef.current = scrollTop;
+  };
+
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, runError, pendingChoice, pendingApproval, pendingAction]);
+    handleNewContent();
+  }, [
+    messages,
+    runError,
+    pendingChoice,
+    pendingApproval,
+    pendingAction,
+    handleNewContent,
+  ]);
+
+  // 대화를 바꾸면 새 대화의 최신 메시지에서 시작한다.
+  useEffect(() => {
+    followLatestRef.current = true;
+    lastScrollTopRef.current = 0;
+
+    const frame = requestAnimationFrame(() => scrollToLatest("auto"));
+    return () => cancelAnimationFrame(frame);
+  }, [conversationId, scrollToLatest]);
 
   useEffect(() => {
     if (autoApprove && pendingApproval) approve();
@@ -153,11 +209,12 @@ function AgentConversation({
       : null;
 
   return (
-    <div className={styles.chat}>
-      {isEmpty ? (
-        <EmptyChatContainer sendMessage={sendMessage} />
-      ) : (
-        <div className={styles.chatContent}>
+    <div className={styles.chatShell}>
+      <div className={styles.chat} onScroll={handleScroll}>
+        {isEmpty ? (
+          <EmptyChatContainer sendMessage={sendMessage} />
+        ) : (
+          <div className={styles.chatContent}>
           {historyLoading && (
             <div className={styles.historyStatus} role="status">
               대화를 불러오는 중...
@@ -190,7 +247,9 @@ function AgentConversation({
             );
           })}
 
-          {running && <AgentRunIndicator />}
+          {running && (
+            <AgentRunIndicator onContentChange={handleNewContent} />
+          )}
 
           {runError && !running && (
             <RunErrorNotice message={runError} onRetry={retry} />
@@ -232,8 +291,21 @@ function AgentConversation({
             </div>
           )}
 
-          <div ref={bottomRef} />
-        </div>
+            <div ref={bottomRef} />
+          </div>
+        )}
+      </div>
+
+      {hasNewResponse && !isEmpty && (
+        <button
+          type="button"
+          className={styles.jumpToLatest}
+          onClick={() => scrollToLatest()}
+          aria-label="새 응답으로 이동"
+        >
+          <LuArrowDown size={14} aria-hidden="true" />
+          새 응답 보기
+        </button>
       )}
     </div>
   );

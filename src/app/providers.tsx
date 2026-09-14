@@ -18,12 +18,13 @@ import { useToastStore } from "@/stores/useToastStore";
 const toastError = (message: string) =>
   useToastStore.getState().showToast(message, "danger");
 
+const isAbortError = (error: unknown) =>
+  error instanceof Error && error.name === "AbortError";
+
 const createQueryClient = () =>
   new QueryClient({
     queryCache: new QueryCache({
       onError: (error, query) => {
-        // 없어도 화면이 멀쩡한 부가 조회(meta.silentError)는 실패를 알리지 않는다 —
-        // 에이전트 추천 문구처럼 자리를 접으면 끝나는 것들이다. 토스트가 오히려 사고처럼 보인다.
         if (query.meta?.silentError) return;
 
         if (query.state.data !== undefined) {
@@ -39,6 +40,9 @@ const createQueryClient = () =>
 
     mutationCache: new MutationCache({
       onError: (error) => {
+        // 화면 이동처럼 사용자가 의도적으로 요청을 끊은 경우는 실패로 알리지 않는다.
+        if (isAbortError(error)) return;
+
         toastError(
           getApiErrorMessage(
             error,
